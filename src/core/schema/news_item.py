@@ -40,7 +40,7 @@ class NewsItemDataBaseSchema(Schema):
     osint_source_id = fields.Str(missing=None)
     tags = fields.List(fields.String(), required=False)
 
-
+# TODO: Add NewsItemTopicSchema & NewsItemTagsSchema
 
 class NewsItemDataSchema(NewsItemDataBaseSchema):
     content = fields.Str()

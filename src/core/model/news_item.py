@@ -19,6 +19,7 @@ from schema.news_item import (
     NewsItemRemoteSchema,
 )
 
+# TODO: Add NewsItemTopicSchema & NewsItemTagsSchema
 
 class NewNewsItemAttributeSchema(NewsItemAttributeSchema):
     @post_load
