@@ -16,6 +16,7 @@
         </v-row>
         <v-divider></v-divider>
         <v-row v-bind="UI.TOOLBAR.ROW">
+            <!-- TODO: Add Topic header https://xd.adobe.com/view/9f722581-52f1-4746-9069-2a125002c69a-ca21/screen/8329cdde-5fef-4e32-b6ca-d5d952d212eb?fullscreen -->
             <v-col class="py-0">
                 <!-- DAY-S -->
                 <v-chip-group v-bind="UI.TOOLBAR.GROUP.DAYS">
