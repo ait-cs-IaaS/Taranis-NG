@@ -65,6 +65,7 @@ const getters = {
 
     hasExternalLoginUrl() {
         if (typeof (process.env) == "undefined")
+			   // TODO: Add support for OpenID login
             return (("$VUE_APP_TARANIS_NG_LOGIN_URL" != "") && ("$VUE_APP_TARANIS_NG_LOGIN_URL"[0] != "$"));
 
         return process.env.VUE_APP_TARANIS_NG_LOGIN_URL != null;
