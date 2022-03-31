@@ -562,7 +562,7 @@ def run(db):
               'sample data has already been imported. If not, please report '
               'this as bug.', file=sys.stderr)
 
-
+# TODO: Add sampledata import function for arbritary sample data
 if __name__ == '__main__':
     run(db_manager.db)
     sys.exit()
