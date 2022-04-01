@@ -6,6 +6,7 @@ import AuthService from "@/services/auth/auth_service";
 import Permissions from "@/services/auth/permissions";
 
 Vue.use(Router);
+// TODO: Add view for userfeedback to NLP generated tags and topics
 
 export const router = new Router({
 
