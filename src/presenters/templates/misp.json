@@ -1,4 +1,5 @@
 {
+{# TODO: UPDATE TO INCLUDE TAGS AND TOPICS }
 {% for report_item in data.report_items %}
     "threat_level_id": {% if report_item.attrs.event_threat_level == 'High' %}"1"{% endif %}{% if report_item.attrs.event_threat_level == 'Medium' %}"2"{% endif %}{% if report_item.attrs.event_threat_level == 'Low' %}"3"{% endif %}{% if report_item.attrs.event_threat_level == 'Undefined' %}"4"{% endif %},
     "info": {% if report_item.attrs.event_info %}"{{ report_item.attrs.event_info }}"{% endif %},
