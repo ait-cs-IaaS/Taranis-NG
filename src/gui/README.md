@@ -6,6 +6,10 @@ Currently, the best way to build and deploy is via Docker. For more information,
 
 If you wish to develop and build the GUI separately, read on.
 
+### Mockups AWAKE
+
+Mockups for AWAKE https://xd.adobe.com/view/9f722581-52f1-4746-9069-2a125002c69a-ca21/?fullscreen
+
 ### Project setup
 
 Install the dependencies
