@@ -424,6 +424,7 @@ export default {
       })
     },
     removeHtml (html) {
+		// TODO FIX this to actually prevent XSS
       const div = document.createElement('div')
       div.innerHTML = html
       return div.textContent || div.innerText || ''
