@@ -1,136 +1,106 @@
 <template>
-    <div>
-        <ViewLayout>
-            <template v-slot:panel>
-                <ToolbarFilterAssess title='nav_menu.newsitems' total_count_title="assess.total_count"
-                                     @update-news-items-filter="updateFilter"
-                                     ref="toolbarFilter">
-                    <template v-slot:addbutton>
+  <div>
+    <ViewLayout>
+      <template v-slot:panel>
+        <!-- Display Topic Header -->
+        <v-expand-transition style="width: 100%">
+          <topic-header-assess
+            v-if="topicView"
+            :topic="getTopicById()(scope.topics[0].id)"
+          />
+        </v-expand-transition>
 
-                    </template>
-                </ToolbarFilterAssess>
-            </template>
-            <template v-slot:content>
-                <ContentDataAssess
-                        card-item="CardAssess"
-                        selfID="selector_assess"
-                        data_set="assess"
-                        ref="contentData"
-                        :filter="filter"
-                        @new-data-loaded="newDataLoaded"
-                        @card-items-reindex="cardReindex"
-                        @update-news-items-filter="updateFilter"
-                />
-                <NewReportItem class="nri"/>
-            </template>
-
-        </ViewLayout>
-    </div>
-
+        <!-- Display Sharing Set Header Header -->
+        <v-expand-transition style="width: 100%">
+          <sharing-set-header-assess
+            v-if="sharingSetView"
+            :topic="getTopicById()(scope.sharingSets[0].id)"
+          />
+        </v-expand-transition>
+      </template>
+      <template v-slot:content>
+        <!-- Load News Items -->
+        <AssessContent
+          :topicView="topicView"
+          :sharingSetView="sharingSetView"
+          :itemsToLoad="itemsToLoad"
+          ref="contentData"
+        />
+      </template>
+    </ViewLayout>
+  </div>
 </template>
 
 <script>
-    import ViewLayout from "@/components/layouts/ViewLayout";
-    import NewReportItem from "@/components/analyze/NewReportItem";
-    import ToolbarFilterAssess from "@/components/assess/ToolbarFilterAssess";
-    import ContentDataAssess from "@/components/assess/ContentDataAssess";
+import ViewLayout from '@/components/layouts/ViewLayout'
+import AssessContent from '@/components/assess/AssessContent'
+import TopicHeaderAssess from '@/components/assess/TopicHeaderAssess'
+import SharingSetHeaderAssess from '@/components/assess/SharingSetHeaderAssess'
 
-    import KeyboardMixin from "../../assets/keyboard_mixin";
+import KeyboardMixin from '../../assets/keyboard_mixin'
 
-    export default {
-        name: "Assess",
-        components: {
-            ViewLayout,
-            ToolbarFilterAssess,
-            ContentDataAssess,
-            NewReportItem
-        },
-        props: {
-            analyze_selector: Boolean
-        },
-        data: () => ({
-            dialog_stack: 0,
-            filter: {search: "", tag: ""}
-        }),
-        mixins: [KeyboardMixin('assess')],
-        computed: {
-            multiSelectActive() {
-                return this.$store.getters.getMultiSelect;
-            }
-        },
-        methods: {
-            newDataLoaded(count) {
-                this.$refs.toolbarFilter.updateDataCount(count)
-            },
+import { mapState, mapGetters, mapActions } from 'vuex'
 
-            updateFilter(filter) {
-                this.$refs.contentData.updateFilter(filter)
-                this.$store.dispatch("filter", filter)
-                this.filter = filter
-            },
+export default {
+  name: 'Assess',
+  components: {
+    ViewLayout,
+    AssessContent,
+    TopicHeaderAssess,
+    SharingSetHeaderAssess
+  },
+  mixins: [KeyboardMixin('assess')],
+  data: () => ({
+    itemsToLoad: 0
+  }),
+  computed: {
+    ...mapState('filter', {
+      scope: (state) => state.newsItemsFilter.scope,
+      filter: (state) => state.newsItemsFilter.filter,
+      order: (state) => state.newsItemsFilter.order
+    }),
 
-            cardReindex() {
-                this.keyRemaper();
+    topicView () {
+      return this.scope.topics.length === 1
+    },
 
-                // this scrolls the page all the way up... it should only scroll to the top of the newly-loaded items
-                // setTimeout( ()=>{
-                //     this.scrollPos();
-                // },1 )
+    sharingSetView () {
+      return (
+        this.scope.topics.length === 0 && this.scope.sharingSets.length === 1
+      )
+    }
+  },
+  methods: {
+    ...mapActions('filter', ['resetNewsItemsFilter']),
+    ...mapGetters('dashboard', ['getTopicById']),
+    ...mapActions('assess', ['updateNewsItems',
+      'updateOSINTSourceGroupsList',
+      'updateOSINTSources'
+    ])
+  },
+  created () {
+    console.log('update SourceLise')
+    this.updateOSINTSourceGroupsList()
+    this.updateOSINTSources()
 
-                if(this.focus) {
-                    this.$refs.contentData.checkFocus(this.pos);
-                }
-            },
+    // Clear all news items filter
+    this.resetNewsItemsFilter()
 
-            firstDialog(action) {
-                if(action == 'push') {
-                    this.dialog_stack++;
-                } else {
-                    this.dialog_stack--;
-                }
-                if(this.dialog_stack <= 0) {
-                    this.isItemOpen = false;
-                    this.dialog_stack = 0;
-                } else {
-                    this.isItemOpen = true;
-                }
-            }
-        },
-        watch: {
-            $route() {
-                this.$refs.contentData.updateData(false, false);
-            }
-        },
-        mounted() {
-            if (window.location.pathname.includes("/group/")) {
-                this.$refs.contentData.updateData(false, false);
-            }
-
-            this.$root.$on('first-dialog', (action) => {
-                this.firstDialog(action);
-            });
-
-            this.$root.$on('clear-cards', () => {
-                const cards = document.querySelectorAll('.card-item');
-                cards.forEach(card => card.remove());
-            });
-
-        },
-        created() {
-            document.addEventListener("keydown", this.keyAction, false);
-            const element = document.querySelector("card-item");
-            if (element != null) {
-              element.addEventListener('click', this.targetClick, false);
-            }
-        },
-        beforeDestroy() {
-            document.removeEventListener("keydown", this.keyAction);
-            const element = document.querySelector("card-item");
-            if (element != null) {
-              element.removeEventListener('click');
-            }
-            this.$root.$off('first-dialog');
-            this.$root.$off('clear-cards');
+    // If topic is given in query set it as filter
+    const topicId = parseInt(this.$route.query.topic)
+    if (topicId) {
+      const topic = this.getTopicById()(topicId)
+      this.itemsToLoad = topic.items.total
+      if (topic) {
+        if (topic.isSharingSet) {
+          this.scope.sharingSets = [{ id: topicId, title: topic.title }]
+          this.scope.topics = []
+        } else {
+          this.scope.sharingSets = []
+          this.scope.topics = [{ id: topicId, title: topic.title }]
         }
-    };
+      }
+    }
+  }
+}
 </script>

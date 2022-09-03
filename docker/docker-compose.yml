@@ -3,7 +3,10 @@ version: "3.9"
 services:
   redis:
     image: "redis:${REDIS_TAG}"
-    restart: unless-stopped
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
     volumes:
       - "redis_conf:/usr/local/etc/redis"
     logging:
@@ -14,10 +17,15 @@ services:
 
   database:
     image: "postgres:${POSTGRES_TAG}"
-    restart: unless-stopped
+    #ports:
+    # - 6543:5432
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
     environment:
-      POSTGRES_DB: "taranis-ng"
-      POSTGRES_USER: "taranis-ng"
+      POSTGRES_DB: "${DB_DATABASE}"
+      POSTGRES_USER: "${DB_USER}"
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
     command: ["postgres", "-c", "shared_buffers=${DB_SHARED_BUFFERS}", "-c", "max_connections=${DB_MAX_CONNECTIONS}"]
     volumes:
@@ -29,21 +37,21 @@ services:
         max-file: "10"
 
   core:
-    depends_on: 
+    depends_on:
       - "redis"
       - "database"
-    restart: unless-stopped
-    image: "skcert/taranis-ng-core:${TARANIS_NG_TAG}"
-    build:
-      context: ..
-      dockerfile: ./docker/Dockerfile.core
-#   ports: 
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+    image: "${DOCKER_IMAGE_NAMESPACE}/taranis-ng-core:${TARANIS_NG_TAG}"
+#   ports:
 #     - "5000:80"
-    environment: 
+    environment:
       REDIS_URL: "redis://redis"
-      DB_URL: "database"
-      DB_DATABASE: "taranis-ng"
-      DB_USER: "taranis-ng"
+      DB_URL: "${DB_URL}"
+      DB_DATABASE: "${DB_DATABASE}"
+      DB_USER: "${DB_USER}"
       DB_PASSWORD: "${POSTGRES_PASSWORD}"
       DB_POOL_SIZE: 100
       DB_POOL_RECYCLE: 300
@@ -57,7 +65,7 @@ services:
       CVE_UPDATE_FILE: "${CVE_UPDATE_FILE}"
       CPE_UPDATE_FILE: "${CPE_UPDATE_FILE}"
 
-      DEBUG: "true"
+      DEBUG: "${DEBUG}"
     labels:
       traefik.enable: "true"
       traefik.http.services.taranis-api.loadbalancer.server.port: "80"
@@ -86,10 +94,11 @@ services:
     depends_on:
       core:
         condition: service_healthy
-    image: "skcert/taranis-ng-bots:${TARANIS_NG_TAG}"
-    build:
-      context: ..
-      dockerfile: ./docker/Dockerfile.bots
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+    image: "${DOCKER_IMAGE_NAMESPACE}/taranis-ng-bots:${TARANIS_NG_TAG}"
     environment:
       API_KEY: "${COLLECTOR_PRESENTER_PUBLISHER_API_KEY}"
       TARANIS_NG_CORE_URL: "http://core/api/v1"
@@ -100,23 +109,23 @@ services:
       options:
         max-size: "200k"
         max-file: "10"
-    
+
   collectors:
     depends_on:
       core:
         condition: service_healthy
-    restart: unless-stopped
-    image: "skcert/taranis-ng-collectors:${TARANIS_NG_TAG}"
-    build:
-      context: ..
-      dockerfile: ./docker/Dockerfile.collectors
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+    image: "${DOCKER_IMAGE_NAMESPACE}/taranis-ng-collectors:${TARANIS_NG_TAG}"
     environment:
       TARANIS_NG_CORE_URL: "http://core"
       API_KEY: "${COLLECTOR_PRESENTER_PUBLISHER_API_KEY}"
       WORKERS_PER_CORE: "1"
-      DEBUG: "true"
-    ports:
-      - "5001:80"
+      DEBUG: "${DEBUG}"
+        # ports:
+        #      - "5001:80"
     volumes:
       - "collector_storage:/app/storage"
     logging:
@@ -124,22 +133,22 @@ services:
       options:
         max-size: "200k"
         max-file: "10"
-    
+
   presenters:
     depends_on:
       core:
         condition: service_healthy
-    restart: unless-stopped
-    image: "skcert/taranis-ng-presenters:${TARANIS_NG_TAG}"
-    build:
-      context: ..
-      dockerfile: ./docker/Dockerfile.presenters
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+    image: "${DOCKER_IMAGE_NAMESPACE}/taranis-ng-presenters:${TARANIS_NG_TAG}"
     environment:
       TARANIS_NG_CORE_URL: "http://core"
       API_KEY: "${COLLECTOR_PRESENTER_PUBLISHER_API_KEY}"
       WORKERS_PER_CORE: "1"
-    ports:
-      - "5002:80"
+        # ports:
+        # - "5002:80"
     volumes:
       - "presenters_templates:/app/templates"
     logging:
@@ -147,22 +156,22 @@ services:
       options:
         max-size: "200k"
         max-file: "10"
-    
+
   publishers:
     depends_on:
       core:
         condition: service_healthy
-    restart: unless-stopped
-    image: "skcert/taranis-ng-publishers:${TARANIS_NG_TAG}"
-    build:
-      context: ..
-      dockerfile: ./docker/Dockerfile.publishers
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+    image: "${DOCKER_IMAGE_NAMESPACE}/taranis-ng-publishers:${TARANIS_NG_TAG}"
     environment:
       TARANIS_NG_CORE_URL: "http://core"
       API_KEY: "${COLLECTOR_PRESENTER_PUBLISHER_API_KEY}"
       WORKERS_PER_CORE: "1"
-    ports:
-      - "5003:80"
+        #    ports:
+        # - "5003:80"
     logging:
       driver: "json-file"
       options:
@@ -172,12 +181,12 @@ services:
   gui:
     depends_on:
       - "core"
-    restart: unless-stopped
-    image: "skcert/taranis-ng-gui:${TARANIS_NG_TAG}"
-    build:
-      context: ..
-      dockerfile: ./docker/Dockerfile.gui
-#    ports: 
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+    image: "${DOCKER_IMAGE_NAMESPACE}/taranis-ng-gui:${TARANIS_NG_TAG}"
+#    ports:
 #      - "8080:80"
     environment:
       NGINX_WORKERS: "4"
@@ -213,9 +222,12 @@ services:
     depends_on:
       - "gui"
       - "core"
-    restart: unless-stopped
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
     image: "traefik:latest"
-    ports: 
+    ports:
       - "${TARANIS_NG_HTTP_PORT}:80"
       - "${TARANIS_NG_HTTPS_PORT}:443"
       - "${TRAEFIK_MANAGEMENT_PORT}:9090"

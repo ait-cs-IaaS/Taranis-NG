@@ -1,120 +1,268 @@
-import {getManualOSINTSources, getNewsItemsByGroup} from "@/api/assess";
+import { getNewsItemsByGroup, getOSINTSourceGroupsList, getNewsItemAggregate, getOSINTSourcesList } from '@/api/assess'
+import { getField, updateField } from 'vuex-map-fields'
+import { xor } from 'lodash'
 
 const state = {
-    newsitems: {total_count: 0, items: []},
-    multi_select: false,
-    selection: [],
-    current_group_id: "",
-    manual_osint_sources: [],
-    filter: {},
-};
+  multi_select: false,
+  selection: [],
+  osint_sources: [],
+  osint_source_groups: [],
+  default_source_group_id: '',
+  filter: {},
+  newsItems: { total_count: 0, items: [] },
+  newsItemsSelection: []
+}
 
 const actions = {
 
-    getNewsItemsByGroup(context, data) {
+  updateAggregateByID(context, id) {
+    return getNewsItemAggregate(id)
+      .then(response => {
+        context.commit('', response.data)
+      })
+  },
 
-        return getNewsItemsByGroup(data.group_id, data.data)
-            .then(response => {
-                context.commit('setNewsItems', response.data);
-            })
-    },
+  updateNewsItemsByGroup(context, data) {
+    if (data.group_id) {
+      return getNewsItemsByGroup(data.group_id, data.data)
+        .then(response => {
+          context.commit('UPDATE_NEWSITEMS', response.data)
+        })
+    }
+  },
 
-    multiSelect(context, data) {
-        context.commit('setMultiSelect', data);
-    },
+  updateOSINTSources(context) {
+    return getOSINTSourcesList()
+      .then(response => {
+        context.commit('UPDATE_OSINTSOURCES', response.data)
+      })
+  },
 
-    select(context, data) {
-        context.commit('addSelection', data);
-    },
+  updateOSINTSourceGroupsList(context) {
+    return getOSINTSourceGroupsList()
+      .then(response => {
+        context.commit('setOSINTSourceGroups', response.data)
+        context.commit('setDefaultOSINTSourceGroup', response.data)
+      })
+  },
 
-    deselect(context, data) {
-        context.commit('removeSelection', data);
-    },
+  updateNewsItems(context, newsItems) {
+    context.commit('UPDATE_NEWSITEMS', newsItems)
+  },
 
-    changeCurrentGroup(context, data) {
-        context.commit('setCurrentGroup', data);
-    },
+  upvoteNewsItem(context, id) {
+    context.commit('UPVOTE_NEWSITEM', id)
+  },
 
-    getManualOSINTSources(context) {
+  downvoteNewsItem(context, id) {
+    context.commit('DOWNVOTE_NEWSITEM', id)
+  },
 
-        return getManualOSINTSources()
-            .then(response => {
-                context.commit('setManualOSINTSources', response.data);
-            })
-    },
+  selectNewsItem(context, id) {
+    context.commit('SELECT_NEWSITEM', id)
+  },
 
-    filter(context, data) {
-        context.commit('setFilter', data);
-    },
-};
+  deleteNewsItem(context, id) {
+    context.commit('DELETE_NEWSITEM', id)
+  },
+
+  deselectNewsItem(context, id) {
+    context.commit('DESELECT_NEWSITEM', id)
+  },
+
+  deselectAllNewsItems(context) {
+    context.commit('DESELECT_ALL_NEWSITEMS')
+  },
+
+  multiSelect(context, data) {
+    context.commit('setMultiSelect', data)
+  },
+
+  select(context, data) {
+    context.commit('addSelection', data)
+  },
+
+  deselect(context, data) {
+    context.commit('removeSelection', data)
+  },
+
+  changeCurrentGroup(context, data) {
+    context.commit('setCurrentGroup', data)
+  },
+
+  changeMergeAttr(context, { src, dest }) {
+    context.commit('CHANGE_MERGE_ATTR', { src, dest })
+  },
+
+  assignSharingSet(context, { items, sharingSet }) {
+    context.commit('ASSIGN_SHARINGSET', { items, sharingSet })
+  },
+
+  removeTopicFromNewsItem(context, { newsItemId, topicId }) {
+    context.commit('REMOVE_TOPIC_FROM_NEWSITEM', { newsItemId, topicId })
+  },
+
+  filter(context, data) {
+    context.commit('setFilter', data)
+  }
+}
 
 const mutations = {
 
-    setNewsItems(state, news_items) {
-        state.newsitems = news_items
-    },
+  updateField,
 
-    setMultiSelect(state, enable) {
-        state.multi_select = enable
-        state.selection = []
-    },
+  UPDATE_NEWSITEMS(state, newsItems) {
+    state.newsItems = newsItems
+  },
 
-    addSelection(state, selected_item) {
-        state.selection.push(selected_item)
-    },
+  UPDATE_OSINTSOURCES(state, osint_sources) {
+    state.osint_sources = osint_sources
+  },
 
-    removeSelection(state, selectedItem) {
-        for (let i = 0; i < state.selection.length; i++) {
-            if (state.selection[i].type === selectedItem.type && state.selection[i].id === selectedItem.id) {
-                state.selection.splice(i, 1);
-                break
-            }
-        }
-    },
+  SELECT_NEWSITEM(state, id) {
+    state.newsItemsSelection = xor(state.newsItemsSelection, [id])
+  },
 
-    setCurrentGroup(state, group_id) {
-        state.current_group_id = group_id
-    },
+  UPVOTE_NEWSITEM(state, id) {
+    const index = state.newsItems.findIndex((x) => x.id === id)
+    state.newsItems[index].votes.up += 1
+  },
 
-    setManualOSINTSources(state, new_manual_osint_sources) {
-        state.manual_osint_sources = new_manual_osint_sources
-    },
+  DOWNVOTE_NEWSITEM(state, id) {
+    const index = state.newsItems.findIndex((x) => x.id === id)
+    state.newsItems[index].votes.down += 1
+  },
 
-    setFilter(state, data) {
-        state.filter = data
-    },
-};
+  DELETE_NEWSITEM(state, id) {
+    state.newsItems = state.newsItems.filter((x) => x.id !== id)
+    state.newsItemsSelection = state.newsItemsSelection.filter((x) => x !== id)
+  },
+
+  DESELECT_NEWSITEM(state, id) {
+    const index = state.newsItems.findIndex((x) => x.id === id)
+    state.newsItems[index].selected = false
+    state.newsItemsSelection = state.newsItemsSelection.filter((x) => x !== id)
+  },
+
+  DESELECT_ALL_NEWSITEMS(state) {
+    state.newsItems.items.forEach((newsItem) => { newsItem.selected = false })
+    state.newsItemsSelection = []
+  },
+
+  REMOVE_TOPIC_FROM_NEWSITEM(state, data) {
+    const newsItem = state.newsItems.find(({ id }) => id === data.newsItemId)
+    newsItem.topics = newsItem.topics.filter(
+      (topic) => topic !== data.topicId
+    )
+  },
+
+  ASSIGN_SHARINGSET(state, data) {
+    data.items.forEach((item) => {
+      const index = state.newsItems.findIndex((x) => x.id === item)
+      state.newsItems[index].shared = true
+      state.newsItems[index].topics.push(data.sharingSet)
+      state.newsItems[index].sharingSets.push(data.sharingSet)
+    })
+  },
+
+  CHANGE_MERGE_ATTR(state, replacement) {
+    replacement.src.forEach(topicToReplace => {
+      state.newsItems = [...state.newsItems].map(({ topics, sharingSets, shared, ...rest }) => ({
+        topics: topics.map(element => {
+          if (topicToReplace === element) {
+            return replacement.dest
+          }
+          return element
+        }),
+        sharingSets: sharingSets.filter(element => topicToReplace !== element),
+        shared: Boolean(sharingSets.length),
+        ...rest
+      }))
+    })
+  },
+
+  setMultiSelect(state, enable) {
+    state.multi_select = enable
+    state.selection = []
+  },
+
+  addSelection(state, selected_item) {
+    state.selection.push(selected_item)
+  },
+
+  removeSelection(state, selectedItem) {
+    for (let i = 0; i < state.selection.length; i++) {
+      if (state.selection[i].type === selectedItem.type && state.selection[i].id === selectedItem.id) {
+        state.selection.splice(i, 1)
+        break
+      }
+    }
+  },
+
+  setOSINTSourceGroups(state, osint_source_groups) {
+    state.osint_source_groups = osint_source_groups
+  },
+
+  setDefaultOSINTSourceGroup(state, osint_source_groups) {
+    state.default_source_group_id = osint_source_groups.items.filter(value => value.default)[0].id
+  },
+
+  setFilter(state, data) {
+    state.filter = data
+  }
+}
 
 const getters = {
 
-    getNewsItems(state) {
-        return state.newsitems
-    },
+  getField,
 
-    getMultiSelect(state) {
-        return state.multi_select
-    },
+  getNewsItems(state) {
+    return state.newsItems
+  },
 
-    getSelection(state) {
-        return state.selection
-    },
+  getOSINTSourceGroupList(state) {
+    return state.osint_source_groups
+  },
 
-    getCurrentGroup(state) {
-        return state.current_group_id
-    },
+  getNewsItemsByTopicId: (state) => (id) => {
+    return state.newsItems.filter(newsItem => newsItem.topics.includes(id))
+  },
 
-    getManualOSINTSources(state) {
-        return state.manual_osint_sources
-    },
+  getNewsItemsByTopicList: (state) => (topicsList) => {
+    return state.newsItems.filter(newsItem => {
+      return newsItem.topics.some((itemTopics) => topicsList.map((topic) => topic.id).indexOf(itemTopics) >= 0)
+    })
+  },
 
-    getFilter(state) {
-        return state.filter
-    },
-};
+  getNewsItemById: (state) => (id) => {
+    return state.newsItems.find(newsItem => newsItem.id === id)
+  },
+
+  getNewsItemsSelection(state) {
+    return state.newsItemsSelection
+  },
+
+  getMultiSelect(state) {
+    return state.multi_select
+  },
+
+  getSelection(state) {
+    return state.selection
+  },
+
+  getOSINTSources(state) {
+    return state.osint_sources
+  },
+
+  getFilter(state) {
+    return state.filter
+  }
+}
 
 export const assess = {
-    state,
-    actions,
-    mutations,
-    getters
-};
+  namespaced: true,
+  state,
+  actions,
+  mutations,
+  getters
+}

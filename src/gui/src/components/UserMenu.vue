@@ -4,16 +4,16 @@
         <!--USERMENU-->
         <v-menu close-on-click close-on-content-click offset-y st>
             <template v-slot:activator="{ on }">
-                <div class="user-menu-button pl-0 pr-2">
-                    <v-btn icon v-on="on">
-                        <v-icon color="white" medium>mdi-shield-account</v-icon>
+                <div class="user-menu-button pl-0 mr-0">
+                    <v-btn depressed icon tile v-on="on">
+                        <v-icon color="dark-grey" medium>mdi-account</v-icon>
                     </v-btn>
                 </div>
             </template>
             <v-list>
                 <v-list-item>
                     <v-list-item-avatar class="">
-                        <v-icon>mdi-shield-account</v-icon>
+                        <v-icon>mdi-account</v-icon>
                     </v-list-item-avatar>
                     <v-list-item-content>
                         <v-list-item-title>{{ username }}</v-list-item-title>
@@ -48,37 +48,37 @@
 </template>
 
 <script>
-import UserSettings from "./UserSettings";
+import UserSettings from './UserSettings'
 
 export default {
-    name: "UserMenu",
-    components: {
-        UserSettings
+  name: 'UserMenu',
+  components: {
+    UserSettings
+  },
+  data: () => ({
+    darkTheme: false
+  }),
+  computed: {
+    username () {
+      return this.$store.getters.getUserName
     },
-    data: () => ({
-        darkTheme: false
-    }),
-    computed: {
-        username() {
-            return this.$store.getters.getUserName
-        },
-        organizationName() {
-            return this.$store.getters.getOrganizationName
-        }
-    },
-    methods: {
-        logout() {
-            this.$store.dispatch('logout')
-                .then(() => {
-                    window.location.reload()
-                })
-        },
-        settings() {
-            this.$root.$emit('show-user-settings');
-        },
-        darkToggle() {
-            this.$vuetify.theme.dark = this.darkTheme
-        }
+    organizationName () {
+      return this.$store.getters.getOrganizationName
     }
+  },
+  methods: {
+    logout () {
+      this.$store.dispatch('logout')
+        .then(() => {
+          window.location.reload()
+        })
+    },
+    settings () {
+      this.$root.$emit('show-user-settings')
+    },
+    darkToggle () {
+      this.$vuetify.theme.dark = this.darkTheme
+    }
+  }
 }
 </script>
