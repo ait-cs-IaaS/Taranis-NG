@@ -6,6 +6,7 @@ db = SQLAlchemy()
 
 def pre_seed(app):
     try:
+        # from sqlalchemy import event
         pre_seed_permissions()
         logger.log_debug("Permissions seeded")
 
