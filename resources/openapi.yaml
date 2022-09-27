@@ -1,35 +1,156 @@
 openapi: 3.0.3
 info:
-  title: TaranisNG
+  title: Taranis NG
   description: |-
-    The TaranisNG Core server offers API Endpoints for TaranisNG GUI, Publishers, Presenters, Collectors and Bots.
-    TaranisNG Publishers offers...
-    This document is based on the OpenAPI 3.0 specification.
+    The Taranis NG API provides endpoints for TODO.
   license:
     name: GPL-3.0
   version: 1.0.11
 externalDocs:
-  description: Taranis-NG GitHub
+  description: GitHub
   url: https://github.com/ait-cs-IaaS/Taranis-NG/
 servers:
-  - url: https://dev.taranis.cyberrange.rocks/api
+  - url: https://dev.taranis.cyberrange.rocks/api/v1
+    description: AWAKE branch
+  - url: https://taranis.cyberrange.rocks/api/v1
+    description: main branch
 tags:
-  - name: Core
-    description: Core is core
-    externalDocs:
-      description: Find out more
-      url: http://swagger.io
+  - name: auth
+    description: session-related functionality
+  - name: isalive
+    description: see whether the Taranis instance is alive
+  - name: users
+    description: read/update the profile, get wordlists, product types and publisher presets
+  - name: analyze
+    description: TODO
+  - name: assess
+    description: TODO
+  - name: my-assets
+    description: TODO
+  - name: bots
+    description: TODO
+  - name: collectors
+    description: TODO
+  - name: config
+    description: TODO
+  - name: dashboard-data
+    description: TODO
+  - name: tagcloud
+    description: TODO
+  - name: presenters
+    description: TODO
+  - name: publish
+    description: TODO
+  - name: publishers
+    description: TODO
+  - name: remote
+    description: TODO
+security:
+  - API_key: []
 paths:
-  /api/isalive:
-    get:
+  /auth/login:
+    post:
       tags:
-        - Core
-      summary: Returns Core status
-      description: Returns Core status
-      operationId: IsAlive
+        - auth
+      summary: >-
+        authenticate with either 
+        username and password, 
+        via Keycloak or 
+        OpenID Connect
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/req.auth.username_password'
+                - $ref: '#/components/schemas/req.auth.keycloak'
+                - $ref: '#/components/schemas/req.auth.oidc'
       responses:
         '200':
-          description: successful operation
+          description: successful authentication
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.JWT'
+        '400':
+          description: authentication error (Keycloak)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error.keycloak.missing_param'
+        '401':
+          description: authentication error (username + password)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+        '500':
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error.keycloak'
+    get:
+      tags:
+        - auth
+      summary: get redirected to the URL requested before authentication
+      parameters:
+        - name: gotoUrl
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '302':
+          description: redirection to the URL requested before authentication
+  /auth/refresh:
+    get:
+      tags:
+        - auth
+      summary: refresh an API token
+      responses:
+        '200':
+          description: refreshed API token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.JWT'
+        '401':
+          description: authentication error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /auth/logout:
+    get:
+      tags:
+        - auth
+      summary: invalidate API token (i.e. logout)
+      parameters:
+        - name: jwt
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: gotoUrl
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '302':
+          description: redirection to the specified URL
+  /isalive:
+    get:
+      tags:
+        - isalive
+      summary: see whether the Taranis instance is alive
+      security: []
+      responses:
+        '200':
+          description: server is alive
           content:
             application/json:
               schema:
@@ -37,65 +158,274 @@ paths:
                 properties:
                   isalive:
                     type: boolean
-        '400':
-          description: Invalid status value
-  /user/login:
+                    example: True
+  /users/my-profile:
     get:
-      tags:
-        - user
-      summary: Logs user into the system
-      description: ''
-      operationId: loginUser
-      parameters:
-        - name: username
-          in: query
-          description: The user name for login
-          required: false
-          schema:
-            type: string
-        - name: password
-          in: query
-          description: The password for login in clear text
-          required: false
-          schema:
-            type: string
-      responses:
+      tags: [users]
+      summary: get the user's profile
+      responses: 
         '200':
-          description: successful operation
-          headers:
-            X-Rate-Limit:
-              description: calls per hour allowed by the user
-              schema:
-                type: integer
-                format: int32
-            X-Expires-After:
-              description: date in UTC when token expires
-              schema:
-                type: string
-                format: date-time
+          description: the user profile
           content:
             application/json:
               schema:
-                type: string
-        '400':
-          description: Invalid username/password supplied
+                $ref: '#/components/schemas/user'
+        '401':
+          description: authentication error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    put:
+      tags: [users]
+      summary: update the user's profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+                $ref: '#/components/schemas/user'
+      responses: 
+        '200':
+          description: the updated user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        '401':
+          description: authentication error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /users/my-word-lists:
+    get:
+      tags: [users]
+      summary: get the user's wordlists
+      responses:
+        '200':
+          description: the user's wordlists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/wordlist'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /users/my-product-types:
+    get:
+      tags: [users]
+      responses:
+        '200':
+          description: the user's product types
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/product_type'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /users/my-publisher-presets:
+    get:
+      tags: [users]
+      responses:
+        '200':
+          description: the user's publisher presets
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/publisher_preset'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+
 components:
+
   schemas:
-    User:
+    
+    #requests
+    
+    req.auth.username_password:
+      type: object
+      properties:
+        username:
+          type: string
+          example: 936@xkcd.com
+        password:
+          type: string
+          example: correct horse battery staple
+      required:
+        - username
+        - password
+    req.auth.keycloak:
+      type: object
+      properties:
+        code:
+          type: string
+        session_state:
+          type: string
+      required:
+        - code
+        - session_state
+    req.auth.oidc:
+      type: object
+      properties:
+        access_token:
+          type: string
+      required: 
+        - access_token
+
+    #responses
+    
+    resp.auth.JWT:
+      type: object
+      properties:
+        access_token:
+          type: string
+    resp.auth.error:
+      type: object
+      properties:
+        error:
+          type: string
+    resp.auth.error.keycloak.missing_param:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Missing `code` and/or `session_state` parameter
+    resp.auth.error.keycloak:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Internal server error
+          
+    #general
+    
+    user:
       type: object
       properties:
         id:
           type: integer
-          format: int64
-          example: 10
+          example: 42
+        username:
+          type: string
+          example: alice@example.com
         name:
           type: string
-          example: theUser
-        password:
+          example: Alice
+        spellcheck:
+          type: boolean
+          example: True
+        dark_theme:
+          type: boolean
+          example: False
+        hotkeys:
+          type: array
+          items: 
+            $ref: '#/components/schemas/hotkey'
+        word_lists:
+          type: array
+          items: 
+            $ref: '#/components/schemas/wordlist'
+    wordlist:
+      type: object
+      properties:
+        name:
           type: string
-          example: '12345'
+        description:
+          type: string
+        use_for_stop_words:
+          type: boolean
+        categories:
+          type: array
+          items:
+            type: string
+    hotkey:
+      type: object
+      properties:
+        key_code:
+          type: integer
+        key:
+          type: string
+        alias:
+          type: string
+    product_type:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        presenter_id:
+          type: string
+        parameter_values:
+          type: array
+          items:
+            $ref: '#/components/schemas/parameter_value'
+    parameter_value:
+      type: object
+      properties:
+        value:
+          type: string
+        parameter:
+          type: array
+          items:
+            properties:
+              key:
+                type: string
+    publisher_preset:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        use_for_notifications:
+          type: boolean
+        publisher_id:
+          type: string
+        parameter_values:
+          type: array
+          items:
+            $ref: '#/components/schemas/parameter_value'
+    
   securitySchemes:
-    api_key:
-      type: apiKey
-      name: api_key
-      in: header
+    API_key:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
