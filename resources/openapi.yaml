@@ -22,7 +22,7 @@ tags:
   - name: users
     description: read/update the profile, get wordlists, product types and publisher presets
   - name: analyze
-    description: TODO
+    description: read/update report items, their types, groups and attributes
   - name: assess
     description: TODO
   - name: my-assets
@@ -142,6 +142,7 @@ paths:
       responses:
         '302':
           description: redirection to the specified URL
+          
   /isalive:
     get:
       tags:
@@ -159,6 +160,7 @@ paths:
                   isalive:
                     type: boolean
                     example: True
+                    
   /users/my-profile:
     get:
       tags: [users]
@@ -169,7 +171,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/user'
+                $ref: '#/components/schemas/user_profile'
         '401':
           description: authentication error
           content:
@@ -184,14 +186,14 @@ paths:
         content:
           application/json:
             schema:
-                $ref: '#/components/schemas/user'
+              $ref: '#/components/schemas/user.new'
       responses: 
         '200':
           description: the updated user profile
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/user'
+                $ref: '#/components/schemas/user_profile'
         '401':
           description: authentication error
           content:
@@ -225,6 +227,7 @@ paths:
   /users/my-product-types:
     get:
       tags: [users]
+      summary: get the user's product types
       responses:
         '200':
           description: the user's product types
@@ -248,6 +251,7 @@ paths:
   /users/my-publisher-presets:
     get:
       tags: [users]
+      summary: get the user's publisher presets
       responses:
         '200':
           description: the user's publisher presets
@@ -262,6 +266,361 @@ paths:
                     type: array
                     items: 
                       $ref: '#/components/schemas/publisher_preset'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+                
+  /analyze/report-item-types:
+    get:
+      tags: [analyze]
+      summary: get the types of report items
+      responses:
+        '200':
+          description: the types of report items
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/report_item_type'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /analyze/report-item-groups:
+    get:
+      tags: [analyze]
+      summary: get the report item groups
+      responses:
+        '200':
+          description: the report item groups
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/report_item'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /analyze/report-items:
+    get:
+      tags: [analyze]
+      summary: get the report items
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: completed
+          in: query
+          schema:
+            type: string
+        - name: incompleted
+          in: query
+          schema:
+            type: string
+        - name: range
+          in: query
+          schema:
+            type: string
+        - name: sort
+          in: query
+          schema:
+            type: string
+        - name: group
+          in: query
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: the report items
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/report_item.presentation'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    post:
+      tags: [analyze]
+      summary: add report item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/report_item.new'
+      responses:
+        '200':
+          description: the ID of the newly created report item
+          content:
+            application/text:
+              schema:
+                type: integer
+                example: 42
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /analyze/report-items/{report_item_id}:
+    parameters:
+      - name: report_item_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags: [analyze]
+      summary: get a specific report item
+      responses:
+        '200':
+          description: the report item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/report_item'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    put:
+      tags: [analyze]
+      summary: modify a specific report item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/modify_report_item'
+      responses:
+        '200':
+          description: the updated report item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/modify_report_item'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    delete:
+      tags: [analyze]
+      summary: delete a specific report item
+      responses:
+        '200':
+          description: the report item was deleted
+          content:
+            application/text:
+              schema:
+                type: string
+                example: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /analyze/report-items/{report_item_id}/data:
+    parameters:
+      - name: report_item_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags: [analyze]
+      responses:
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /analyze/report-items/{report_item_id}/field-locks:
+    parameters:
+      - name: report_item_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags: [analyze]
+      responses:
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /analyze/report-items/{report_item_id}/field-locks/{field_id}/lock:
+    parameters:
+      - name: report_item_id
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: field_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags: [analyze]
+      responses:
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /analyze/report-items/{report_item_id}/field-locks/{field_id}/unlock:
+    parameters:
+      - name: report_item_id
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: field_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags: [analyze]
+      responses:
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /analyze/report-items/{report_item_id}/field-locks/{field_id}/hold:
+    parameters:
+      - name: report_item_id
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: field_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags: [analyze]
+      responses:
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /analyze/report-item-attributes/{attribute_id}/enums:
+    parameters:
+      - name: attribute_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags: [analyze]
+      responses:
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /analyze/report-items/{report_item_id}/file-attributes:
+    parameters:
+      - name: report_item_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags: [analyze]
+      responses:
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /analyze/report-items/{report_item_id}/file-attributes/{attribute_id}:
+    parameters:
+      - name: report_item_id
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: attribute_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags: [analyze]
+      responses:
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /analyze/report-items/{report_item_id}/file-attributes/{attribute_id}/file:
+    parameters:
+      - name: report_item_id
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: attribute_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags: [analyze]
+      responses:
         '401':
           description: authorization error
           content:
@@ -304,7 +663,7 @@ components:
           type: string
       required: 
         - access_token
-
+            
     #responses
     
     resp.auth.JWT:
@@ -332,7 +691,16 @@ components:
           
     #general
     
-    user:
+    presentation:
+      type: object
+      properties:
+        title:
+          type: string
+        subtitle:
+          type: string
+        tag:
+          type: string
+    user.base:
       type: object
       properties:
         id:
@@ -344,33 +712,27 @@ components:
         name:
           type: string
           example: Alice
-        spellcheck:
-          type: boolean
-          example: True
-        dark_theme:
-          type: boolean
-          example: False
-        hotkeys:
-          type: array
-          items: 
-            $ref: '#/components/schemas/hotkey'
-        word_lists:
-          type: array
-          items: 
-            $ref: '#/components/schemas/wordlist'
-    wordlist:
-      type: object
-      properties:
-        name:
-          type: string
-        description:
-          type: string
-        use_for_stop_words:
-          type: boolean
-        categories:
-          type: array
-          items:
-            type: string
+    user:
+      allOf:
+        - $ref: '#/components/schemas/user.base'
+        - type: object
+          properties:
+            roles:
+              type: array
+              items:
+                $ref: '#/components/schemas/role'
+            permissions:
+              type: array
+              items:
+                $ref: '#/components/schemas/permission'
+            organisations:
+              type: array
+              items:
+                $ref: '#/components/schemas/organization'
+    user.presentation:
+      allOf:
+        - $ref: '#/components/schemas/user'
+        - $ref: '#/components/schemas/presentation'
     hotkey:
       type: object
       properties:
@@ -380,6 +742,323 @@ components:
           type: string
         alias:
           type: string
+    user_profile:
+      type: object
+      properties:
+        spellcheck:
+          type: boolean
+          example: True
+        dark_theme:
+          type: boolean
+          example: False
+        word_lists:
+          type: array
+          items: 
+            $ref: '#/components/schemas/wordlist'
+        hotkeys:
+          type: array
+          items: 
+            $ref: '#/components/schemas/hotkey'
+    user.new:
+      allOf:
+        - $ref: '#/components/schemas/user_profile'
+        - type: object
+          properties:
+            word_lists:
+              type: array
+              items:
+                $ref: '#/components/schemas/wordlist'
+            hotkeys:
+              type: array
+              items:
+                $ref: '#/components/schemas/hotkey'
+    permission:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+    role.base:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+    role:
+      allOf:
+        - $ref: '#/components/schemas/role.base'
+        - type: object
+          properties:
+            permissions:
+              type: array
+              items:
+                $ref: '#/components/schemas/permission'
+    role.presentation:
+      allOf:
+        - $ref: '#/components/schemas/role'
+    organization:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        address:
+          $ref: '#/components/schemas/address'
+    organization.presentation:
+      allOf:
+        - $ref: '#/components/schemas/organization'
+        - $ref: '#/components/schemas/presentation'
+    address:
+      type: object
+      properties:
+        street:
+          type: string
+        city:
+          type: string
+        zip:
+          type: string
+        country:
+          type: string
+    wordlist_entry:
+      type: object
+      properties:
+        value:
+          type: string
+        description:
+          type: string
+    wordlist_category:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        link:
+          type: string
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/wordlist_entry'
+    wordlist:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        use_for_stop_words:
+          type: boolean
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/wordlist_category'
+    wordlist.presentation:
+      allOf:
+        - $ref: '#/components/schemas/wordlist'
+        - $ref: '#/components/schemas/presentation'
+    attribute_group_item:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        index:
+          type: integer
+        min_occurrence:
+          type: integer
+        max_occurrence:
+          type: integer
+        attribute:
+          $ref: '#/components/schemas/attribute'
+    attribute_group.base:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        section:
+          type: integer
+        section_title:
+          type: string
+        index:
+          type: integer
+    attribute_group:
+      allOf:
+        - $ref: '#/components/schemas/attribute_group.base'
+        - type: object
+          properties:
+            attribute_group_items:
+              type: array
+              items:
+                $ref: '#/components/schemas/attribute_group_item'
+    report_item_type.base:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+    report_item_type:
+      allOf:
+        - $ref: '#/components/schemas/report_item_type.base'
+        - type: object
+          properties:
+            attribute_groups:
+              type: array
+              items:
+                $ref: '#/components/schemas/attribute_group'
+    report_item_type.presentation:
+      allOf:
+        - $ref: '#/components/schemas/report_item_type'
+        - $ref: '#/components/schemas/presentation'
+    report_item_attribute.base:
+      type: object
+      properties:
+        id:
+          type: integer
+        value:
+          type: string
+        binary_mime_type:
+          type: string
+        binary_size:
+          type: integer
+        binary_description:
+          type: string
+        attribute_group_item_title:
+          type: string
+        attribute_group_item_id:
+          type: integer
+    report_item_attribute:
+      allOf:
+        - $ref: '#/components/schemas/report_item_attribute.base'
+        - type: object
+          properties:
+            created:
+              $ref: '#/components/schemas/date'
+            last_updated:
+              $ref: '#/components/schemas/date'
+            version:
+              type: integer
+            current:
+              type: boolean
+            user:
+              $ref: '#/components/schemas/user.base'
+    report_item.base:
+      type: object
+      properties:
+        id:
+          type: integer
+        uuid:
+          type: string
+        title:
+          type: string
+        title_prefix:
+          type: string
+        created:
+          $ref: '#/components/schemas/date'
+        last_updated:
+          $ref: '#/components/schemas/date'
+        completed:
+          type: boolean
+        report_item_type_id:
+          type: integer
+    remote_report_item:
+      allOf:
+        - $ref: '#/components/schemas/report_item.base'
+        - $ref: '#/components/schemas/presentation'
+        - type: object
+          properties:
+            remote_user:
+              type: string
+            attributes:
+              type: array
+              items:
+                $ref: '#/components/schemas/report_item_attribute'
+    report_item.new:
+      allOf:
+        - $ref: '#/components/schemas/report_item.base'
+        - type: object
+          properties:
+            news_item_aggregates:
+              type: array
+              items:
+                type: integer
+            remote_report_items:
+              type: array
+              items:
+                type: integer
+            attributes:
+              type: array
+              items:
+                $ref: '#/components/schemas/report_item_attribute'
+    report_item:
+      allOf:
+        - $ref: '#/components/schemas/report_item.base'
+        - type: object
+          properties:
+            news_item_aggregates:
+              type: array
+              items:
+                $ref: '#/components/schemas/news_item_aggregate'
+            remote_report_items:
+              type: array
+              items:
+                $ref: '#/components/schemas/remote_report_item'
+            attributes:
+              type: array
+              items:
+                $ref: '#/components/schemas/report_item_attribute'
+            remote_user:
+              type: string
+    report_item_attribute_remote:
+      type: object
+      properties:
+        attribute_group_item_title:
+          type: string
+        value:
+          type: string
+    report_item_remote:
+      type: object
+      properties:
+        uuid:
+          type: string
+        title:
+          type: string
+        title_prefix:
+          type: string
+        completed:
+          type: boolean
+        attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/report_item_attribute_remote'
+    report_item.presentation:
+      allOf:
+        - $ref: '#/components/schemas/report_item.base'
+        - $ref: '#/components/schemas/presentation'
+        - type: object
+          properties:
+            remote_user:
+              type: string
     product_type:
       type: object
       properties:
@@ -395,18 +1074,65 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/parameter_value'
+    product_type.presentation:
+      allOf:
+        - $ref: '#/components/schemas/product_type'
+        - $ref: '#/components/schemas/presentation'
     parameter_value:
       type: object
       properties:
         value:
           type: string
         parameter:
-          type: array
-          items:
-            properties:
-              key:
-                type: string
-    publisher_preset:
+          $ref: '#/components/schemas/parameter'
+    parameter_value.export:
+      allOf:
+        - $ref: '#/components/schemas/parameter_value'
+        - type: object
+          properties:
+            value:
+              type: string
+            parameter:
+              $ref: '#/components/schemas/parameter.export'
+    parameter_type:
+      type: string
+      enum: [STRING, NUMBER, BOOLEAN]
+    parameter:
+      type: object
+      properties:
+        id:
+          type: integer
+        key:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          $ref: '#/components/schemas/parameter_type'
+    parameter.export:
+      type: object
+      properties:
+        key:
+          type: string
+    attribute_type:
+      type: string
+      enum: [STRING, NUMBER, BOOLEAN, RADIO, ENUM, TEXT, RICH_TEXT, DATE, TIME, DATE_TIME, LINK, ATTACHMENT, TLP, CPE, CVE, CVSS]
+    attribute_validator:
+      type: string
+      enum: [NONE, EMAIL, NUMBER, RANGE, REGEXP]
+    attribute_enum:
+      type: object
+      properties:
+        id:
+          type: integer
+        index:
+          type: integer
+        value:
+          type: string
+        description:
+          type: string
+    attribute.base:
       type: object
       properties:
         id:
@@ -415,15 +1141,266 @@ components:
           type: string
         description:
           type: string
-        use_for_notifications:
-          type: boolean
-        publisher_id:
+        type:
+          $ref: '#/components/schemas/attribute_type'
+        default_value:
+          type: string
+        validator:
+          $ref: '#/components/schemas/attribute_validator'
+        validator_parameter:
+          type: string
+    attribute:
+      allOf:
+        - $ref: '#/components/schemas/attribute.base'
+        - type: object
+          properties:
+            attribute_enums:
+              type: array
+              items:
+                $ref: '#/components/schemas/attribute_enum'
+    attribute.presentation:
+      allOf:
+        - $ref: '#/components/schemas/attribute'
+        - $ref: '#/components/schemas/presentation'
+        - type: object
+          properties:
+            attribute_enums_total_count:
+              type: integer
+    publisher_preset.base:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
           type: string
         parameter_values:
           type: array
           items:
             $ref: '#/components/schemas/parameter_value'
-    
+    publisher_preset:
+      allOf:
+        - $ref: '#/components/schemas/publisher_preset.base'
+        - type: object
+          properties:
+            description:
+              type: string
+            use_for_notifications:
+              type: boolean
+            publisher_id:
+              type: string
+    publisher_preset.presentation:
+      allOf:
+        - $ref: '#/components/schemas/publisher_preset'
+        - $ref: '#/components/schemas/presentation'
+    news_item_attribute.base:
+      type: object
+      properties:
+        id:
+          type: integer
+        key:
+          type: string
+        value:
+          type: string
+        binary_mime_type:
+          type: string
+    news_item_attribute:
+      allOf:
+        - $ref: '#/components/schemas/news_item_attribute.base'
+        - type: object
+          properties:
+            binary_value:
+              type: string
+    news_item_data.base:
+      type: object
+      properties:
+        id:
+          type: string
+        hash:
+          type: string
+        title:
+          type: string
+        review:
+          type: string
+        source:
+          type: string
+        link:
+          type: string
+        published:
+          type: string
+        author:
+          type: string
+        collected:
+          $ref: '#/components/schemas/date'
+        osint_source_id:
+          type: string
+    news_item_data:
+      allOf:
+        - $ref: '#/components/schemas/news_item_data.base'
+        - type: object
+          properties:
+            content:
+              type: string
+            attributes:
+              type: array
+              items:
+                $ref: '#/components/schemas/news_item_attribute'
+    news_item_remote:
+      type: object
+      properties:
+        hash:
+          type: string
+        title:
+          type: string
+        review:
+          type: string
+        source:
+          type: string
+        link:
+          type: string
+        published:
+          type: string
+        author:
+          type: string
+        collected:
+          $ref: '#/components/schemas/date'
+        content:
+          type: string
+        attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/news_item_attribute'
+        relevance:
+          type: integer
+    news_item_data.presentation:
+      allOf:
+        - $ref: '#/components/schemas/news_item_data'
+        - type: object
+          properties:
+            remote_source:
+              type: string
+            attributes:
+              $ref: '#/components/schemas/news_item_attribute.base'
+    news_item.base:
+      type: object
+      properties:
+        id:
+          type: integer
+        likes:
+          type: integer
+        dislikes:
+          type: integer
+        read:
+          type: boolean
+        important:
+          type: boolean
+        me_like:
+          type: boolean
+        me_dislike:
+          type: boolean
+        news_items_data:
+          $ref: '#/components/schemas/news_item_data'
+    news_item.presentation:
+      allOf:
+        - $ref: '#/components/schemas/news_item.base'
+    news_item:
+      allOf:
+        - $ref: '#/components/schemas/news_item.base'
+        - type: object
+          properties:
+            news_item_data:
+              $ref: '#/components/schemas/news_item_data.presentation'
+    news_item_aggregate:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        created:
+          $ref: '#/components/schemas/date'
+        comments:
+          type: string
+        likes:
+          type: integer
+        dislikes:
+          type: integer
+        read:
+          type: boolean
+        important:
+          type: boolean
+        me_like:
+          type: boolean
+        me_dislike:
+          type: boolean
+        in_reports_count:
+          type: integer
+        news_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/news_item.presentation'
+    modify_report_item:
+      oneOf:
+        - type: object
+          properties:
+            update:
+              type: string
+            title:
+              type: string
+            title_prefix:
+              type: string
+            completed:
+              type: boolean
+            attribute_id:
+              type: integer
+            attribute_value:
+              type: string
+            user_id:
+              type: integer
+            report_item_id:
+              type: integer
+          required: [user_id, report_item_id]
+        - type: object
+          properties:
+            add:
+              type: string
+            attribute_id:
+              type: integer
+            attribute_group_item_id:
+              type: integer
+            aggregate_ids:
+              type: array
+              items:
+                type: integer
+            remote_report_ids:
+              type: array
+              items:
+                type: integer
+            user_id:
+              type: integer
+            report_item_id:
+              type: integer
+          required: [user_id, report_item_id]
+        - type: object
+          properties:
+            delete:
+              type: string
+            attribute_id:
+              type: integer
+            aggregate_id:
+              type: integer
+            remote_report_item_id:
+              type: integer
+            user_id:
+              type: integer
+            report_item_id:
+              type: integer
+          required: [user_id, report_item_id]
+    date:
+      type: string
+      example: '%d.%m.%Y - %H:%M'
+      
   securitySchemes:
     API_key:
       type: http
