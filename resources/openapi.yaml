@@ -24,7 +24,7 @@ tags:
   - name: analyze
     description: read/update report items, their types, groups and attributes
   - name: assess
-    description: TODO
+    description: read/update/delete OSINT sources and news items
   - name: my-assets
     description: TODO
   - name: bots
@@ -420,6 +420,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/resp.auth.error'
     put:
+      # TODO: this is a very confusing endpoint
       tags: [analyze]
       summary: modify a specific report item
       requestBody:
@@ -434,7 +435,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/modify_report_item'
+                $ref: '#/components/schemas/modify_report_item.response'
         '401':
           description: authorization error
           content:
@@ -467,7 +468,47 @@ paths:
           type: integer
     get:
       tags: [analyze]
+      summary: get suitable the report item data
+      parameters:
+        - name: update
+          in: query
+          schema:
+            type: string
+        - name: add
+          in: query
+          schema:
+            type: string
+        - name: title
+          in: query
+          schema:
+            type: string
+        - name: title_prefix
+          in: query
+          schema:
+            type: string
+        - name: completed
+          in: query
+          schema:
+            type: string
+        - name: attribute_id
+          in: query
+          schema:
+            type: integer
+        - name: aggregate_ids
+          in: query
+          schema:
+            type: string
+        - name: remote_report_item_ids
+          in: query
+          schema:
+            type: string
       responses:
+        '200':
+          description: the suitable report item data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/report_item_data.response'
         '401':
           description: authorization error
           content:
@@ -483,7 +524,14 @@ paths:
           type: integer
     get:
       tags: [analyze]
+      summary: get a report item's field locks
       responses:
+        '200':
+          description: the report item's field locks
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/report_item_lock'
         '401':
           description: authorization error
           content:
@@ -502,9 +550,16 @@ paths:
         required: true
         schema:
           type: integer
-    get:
+    put:
       tags: [analyze]
+      summary: lock the specified field
       responses:
+        '200':
+          description: the locked field as a SSE
+          content:
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/report_item_lock'
         '401':
           description: authorization error
           content:
@@ -523,9 +578,16 @@ paths:
         required: true
         schema:
           type: integer
-    get:
+    put:
       tags: [analyze]
+      summary: unlock the specified field
       responses:
+        '200':
+          description: the locked field as a SSE
+          content:
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/report_item_lock'
         '401':
           description: authorization error
           content:
@@ -544,9 +606,16 @@ paths:
         required: true
         schema:
           type: integer
-    get:
+    put:
       tags: [analyze]
+      summary: hold a lock on the specified field
       responses:
+        '200':
+          description: the locked field as a SSE
+          content:
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/report_item_lock'
         '401':
           description: authorization error
           content:
@@ -562,7 +631,34 @@ paths:
           type: integer
     get:
       tags: [analyze]
+      summary: get the report item attribute's enums 
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: offset
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
       responses:
+        '200':
+          description: the attribute's enums
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/attribute_enum'
         '401':
           description: authorization error
           content:
@@ -576,9 +672,39 @@ paths:
         required: true
         schema:
           type: integer
-    get:
+    post:
       tags: [analyze]
+      summary: attach a file to the report item
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                attribute_group_item_id:
+                  type: integer
+                description:
+                  type: string
       responses:
+        '200':
+          description: the file has been attached
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  add:
+                    type: boolean
+                    example: true
+                  user_id:
+                    type: integer
+                  report_item_id:
+                    type: integer
+                  attribute_id:
+                    type: integer
         '401':
           description: authorization error
           content:
@@ -597,9 +723,26 @@ paths:
         required: true
         schema:
           type: integer
-    get:
+    delete:
       tags: [analyze]
+      summary: remove an attachment from the report item
       responses:
+        '200':
+          description: the attachment has been removed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  delete:
+                    type: boolean
+                    example: true
+                  user_id:
+                    type: integer
+                  report_item_id:
+                    type: integer
+                  attribute_id:
+                    type: integer
         '401':
           description: authorization error
           content:
@@ -620,13 +763,457 @@ paths:
           type: integer
     get:
       tags: [analyze]
+      summary: download a report item's specified attachment
       responses:
+        '200':
+          description: the report item's attachment
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
         '401':
           description: authorization error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/resp.auth.error'
+  /assess/osint-source-groups:
+    get:
+      tags: [assess]
+      summary: get all OSINT source groups
+      responses:
+        '200':
+          description: all OSINT source groups
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/osint_source_group.presentation'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /assess/osint-source-group-list:
+    get:
+      tags: [assess]
+      summary: get all the user's OSINT source groups
+      responses:
+        '200':
+          description: all the user's OSINT source groups
+          content:
+            application/json:
+              schema:
+                type: object
+                # TODO: i could not find the implementation of `osint_source.OSINTSourceGroup.get_list_json()`
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /assess/osint-sources-list:
+    get:
+      tags: [assess]
+      summary: get manual OSINT sources
+      responses:
+        '200':
+          description: all manual OSINT sources
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/osint_source.presentation'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /assess/news-items:
+    post:
+      tags: [assess]
+      summary: add news item
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/news_item_data.new'
+      responses:
+        '200':
+          description: the OSINT source ID of the created news item as SSEs
+          content:
+            text/event-stream:
+              schema:
+                type: object
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /assess/news-item-aggregates-by-group/{group_id}:
+    parameters:
+      - name: group_id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags: [assess]
+      summary: get news items of a specific group
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: read
+          in: query
+          schema:
+            type: string
+        - name: important
+          in: query
+          schema:
+            type: string
+        - name: relevant
+          in: query
+          schema:
+            type: string
+        - name: in_analyze
+          in: query
+          schema:
+            type: string
+        - name: range
+          in: query
+          schema:
+            type: integer
+        - name: sort
+          in: query
+          schema:
+            type: string
+        - name: offset
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: the news items of the specified group
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/news_item_aggregate'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /assess/news-item-aggregates:
+    get:
+      tags: [assess]
+      summary: get news items of the default group
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: read
+          in: query
+          schema:
+            type: string
+        - name: important
+          in: query
+          schema:
+            type: string
+        - name: relevant
+          in: query
+          schema:
+            type: string
+        - name: in_analyze
+          in: query
+          schema:
+            type: string
+        - name: range
+          in: query
+          schema:
+            type: integer
+        - name: sort
+          in: query
+          schema:
+            type: string
+        - name: offset
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: the news items of the specified group
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/news_item_aggregate'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /assess/news-items/{item_id}:
+    parameters:
+      - name: item_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags: [assess]
+      summary: get the specified news item
+      responses:
+        '200':
+          description: the news item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/news_item'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    put:
+      tags: [assess]
+      summary: modify the specified news item
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                read:
+                  type: boolean
+                important:
+                  type: boolean
+                vote:
+                  type: boolean
+      responses:
+        '200':
+          description: the news item was modified
+          content:
+            application/json:
+              schema:
+                type: string
+                example: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    delete:
+      tags: [assess]
+      summary: delete the specified news item
+      responses:
+        '200':
+          description: the news item was deleted
+          content:
+            application/json:
+              schema:
+                type: string
+                example: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+        '500':
+          description: aggregate in use
+          content:
+            application/json:
+              schema:
+                type: string
+                example: aggregate_in_use
+  /assess/news-item-aggregates/{aggregate_id}:
+    parameters:
+      - name: aggregate_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags: [assess]
+      summary: get the specified news item aggregate
+      responses:
+        '200':
+          description: the news item aggregate
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/news_item_aggregate'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    put:
+      tags: [assess]
+      summary: modify the specified news item aggregate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                read:
+                  type: boolean
+                important:
+                  type: boolean
+                vote:
+                  type: boolean
+                title:
+                  type: string
+                description:
+                  type: string
+                comments:
+                  type: string
+      responses:
+        '200':
+          description: the OSINT source IDs of the modified news aggregate
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    delete:
+      tags: [assess]
+      summary: delete the specified news item aggregate
+      responses:
+        '200':
+          description: the news item aggregate was deleted
+          content:
+            application/json:
+              schema:
+                type: string
+                example: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+        '500':
+          description: aggregate in use
+          content:
+            application/json:
+              schema:
+                type: string
+                example: aggregate_in_use
+  /assess/news-item-aggregates-group-action:
+    put:
+      tags: [assess]
+      summary: modify a user's group action
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                  enum: [DELETE, GROUP, UNGROUP, LIKE, DISLIKE, IMPORTANT, READ]
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      enum: [AGGREGATE]
+                    id:
+                      type: string
+      responses:
+        '200':
+          description: the OSINT source IDs of the modified group action
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /assess/news-item-data/{item_data_id}/attributes/{attribute_id}/file:
+    parameters:
+      - name: item_data_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: attribute_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags: [assess]
+      summary: download attachment
+      responses:
+        '200':
+          description: the specified attachment
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+
 
 components:
 
@@ -953,9 +1540,9 @@ components:
         - type: object
           properties:
             created:
-              $ref: '#/components/schemas/date'
+              $ref: '#/components/schemas/date_time'
             last_updated:
-              $ref: '#/components/schemas/date'
+              $ref: '#/components/schemas/date_time'
             version:
               type: integer
             current:
@@ -974,9 +1561,9 @@ components:
         title_prefix:
           type: string
         created:
-          $ref: '#/components/schemas/date'
+          $ref: '#/components/schemas/date_time'
         last_updated:
-          $ref: '#/components/schemas/date'
+          $ref: '#/components/schemas/date_time'
         completed:
           type: boolean
         report_item_type_id:
@@ -1230,7 +1817,7 @@ components:
         author:
           type: string
         collected:
-          $ref: '#/components/schemas/date'
+          $ref: '#/components/schemas/date_time'
         osint_source_id:
           type: string
     news_item_data:
@@ -1262,7 +1849,7 @@ components:
         author:
           type: string
         collected:
-          $ref: '#/components/schemas/date'
+          $ref: '#/components/schemas/date_time'
         content:
           type: string
         attributes:
@@ -1319,7 +1906,7 @@ components:
         description:
           type: string
         created:
-          $ref: '#/components/schemas/date'
+          $ref: '#/components/schemas/date_time'
         comments:
           type: string
         likes:
@@ -1356,11 +1943,6 @@ components:
               type: integer
             attribute_value:
               type: string
-            user_id:
-              type: integer
-            report_item_id:
-              type: integer
-          required: [user_id, report_item_id]
         - type: object
           properties:
             add:
@@ -1377,11 +1959,6 @@ components:
               type: array
               items:
                 type: integer
-            user_id:
-              type: integer
-            report_item_id:
-              type: integer
-          required: [user_id, report_item_id]
         - type: object
           properties:
             delete:
@@ -1392,15 +1969,232 @@ components:
               type: integer
             remote_report_item_id:
               type: integer
+    modify_report_item.response:
+      allOf:
+        - $ref: '#/components/schemas/modify_report_item'
+        - type: object
+          properties:
             user_id:
               type: integer
             report_item_id:
               type: integer
-          required: [user_id, report_item_id]
-    date:
+    report_item_data.response:
+      oneOf:
+        - type: object
+          properties:
+            update:
+              type: string
+            title:
+              type: string
+            title_prefix:
+              type: string
+            completed:
+              type: boolean
+            attribute_id:
+              type: integer
+            attribute_value:
+              type: string
+            attribute_last_updated:
+              $ref: '#/components/schemas/date_time'
+            attribute_user:
+              type: string
+        - type: object
+          properties:
+            add:
+              type: string
+            news_item_aggregates:
+              type: array
+              items:
+                $ref: '#/components/schemas/news_item_aggregate'
+            remote_report_items:
+              type: array
+              items:
+                $ref: '#/components/schemas/report_item'
+            attribute_value:
+              type: string
+            binary_mime_type:
+              type: string
+            binary_size:
+              type: integer
+            binary_description:
+              type: string
+            attribute_last_updated:
+              $ref: '#/components/schemas/date_time'
+            attribute_user:
+              type: string
+    osint_source.new:
+      allOf:
+        - $ref: '#/components/schemas/osint_source'
+        - type: object
+          properties:
+            parameter_values:
+              type: array
+              items:
+                $ref: '#/components/schemas/parameter_value.new'
+            word_lists:
+              type: array
+              items:
+                type: integer
+            osint_source_groups:
+              type: array
+              items:
+                type: string
+    osint_source_group.new:
+      allOf:
+        - $ref: '#/components/schemas/osint_source_group'
+        - type: object
+          properties:
+            osint_sources:
+              type: array
+              items:
+                type: string
+    osint_source_group.base:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        default:
+          type: boolean
+    osint_source.base:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        parameter_values:
+          type: array
+          items:
+            $ref: '#/components/schemas/parameter_value'
+        word_lists:
+          type: array
+          items:
+            $ref: '#/components/schemas/wordlist'
+    osint_source_update_status:
+      type: object
+      properties:
+        last_collected:
+          $ref: '#/components/schemas/date_time_seconds'
+        last_attempted:
+          $ref: '#/components/schemas/date_time_seconds'
+        last_error_message:
+          type: string
+        last_data:
+          type: string
+    osint_source:
+      allOf:
+        - $ref: '#/components/schemas/osint_source.base'
+        - type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            description:
+              type: string
+            collector_id:
+              type: string
+    osint_source.presentation:
+      allOf:
+        - $ref: '#/components/schemas/osint_source'
+        - $ref: '#/components/schemas/presentation'
+        - type: object
+          properties:
+            collector:
+              $ref: '#/components/schemas/collector'
+            osint_source_groups:
+              type: array
+              items:
+                $ref: '#/components/schemas/osint_source.base'
+    osint_source_group:
+      allOf:
+        - $ref: '#/components/schemas/osint_source_group.base'
+        - type: object
+          properties:
+            osint_sources:
+              type: array
+              items:
+                $ref: '#/components/schemas/osint_source'
+    osint_source_group.presentation:
+      allOf:
+        - $ref: '#/components/schemas/osint_source_group'
+        - $ref: '#/components/schemas/presentation'
+    osint_source.export:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        collector:
+          $ref: '#/components/schemas/collector.export'
+        parameter_values:
+          type: array
+          items:
+            $ref: '#/components/schemas/parameter_value.export'
+    osint_source.export.root:
+      type: object
+      properties:
+        version:
+          type: integer
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/osint_source.export'
+    collector:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        parameters:
+          type: array
+          items:
+            $ref: '#/components/schemas/parameter'
+    collector.export:
+      type: object
+      properties:
+        type:
+          type: string
+    parameter_value.new:
+      allOf:
+        - $ref: '#/components/schemas/parameter_value'
+    news_item_data.new:
+      allOf:
+        - $ref: '#/components/schemas/news_item_data'
+        - type: object
+          properties:
+            attributes:
+              type: array
+              items:
+                $ref: '#/components/schemas/news_item_attribute'
+                
+                
+    date_time:
       type: string
       example: '%d.%m.%Y - %H:%M'
-      
+    date_time_seconds:
+      type: string
+      example: '%d.%m.%Y - %H:%M:%s'
+    report_item_lock:
+      type: object
+      properties:
+        report_item_id:
+          type: integer
+        field_id:
+          type: integer
+        user_id:
+          type: integer
+
   securitySchemes:
     API_key:
       type: http
