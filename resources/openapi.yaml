@@ -1213,6 +1213,409 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/resp.auth.error'
+  /my-assets/asset-groups:
+    get:
+      tags: [my-assets]
+      summary: get and add to the user's asset groups
+      responses:
+        '200':
+          description: the user's asset group
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/asset_group.presentation'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    post:
+      tags: [my-assets]
+      summary: add new asset to the user's asset groups
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/asset_group.group.new'
+      responses:
+        '200':
+          description: the group has been added
+          content:
+            application/json:
+              schema:
+                type: string
+                example: 
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /my-assets/asset-groups/{group_id}:
+    parameters:
+      - name: group_id
+        in: path
+        required: true
+        schema:
+          type: string
+    put:
+      tags: [my-assets]
+      summary: update an asset group
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/asset_group.group.new'
+      responses:
+        '200':
+          description: the group has been updated
+          content:
+            application/json:
+              schema:
+                type: string
+                example: 
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    delete:
+      tags: [my-assets]
+      summary: delete an asset group
+      responses:
+        '200':
+          description: the group has been deleted
+          content:
+            application/json:
+              schema:
+                type: string
+                example: 
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /my-assets/asset-notification-templates:
+    get:
+      tags: [my-assets]
+      summary: get asset notification templates
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: DESCRIPTION
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/notification_template.presentation'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    post:
+      tags: [my-assets]
+      summary: add asset notification template
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/notification_template.new'
+      responses:
+        '200':
+          description: the template has been added
+          content:
+            application/json:
+              schema:
+                type: string
+                example: 
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /my-assets/asset-notification-templates/{template_id}:
+    parameters:
+      - name: template_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      tags: [my-assets]
+      summary: update notification template
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/notification_template.new'
+      responses:
+        '200':
+          description: the template has been updated
+          content:
+            application/json:
+              schema:
+                type: string
+                example: 
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    delete:
+      tags: [my-assets]
+      summary: delete the notification template
+      responses:
+        '200':
+          description: the template has been deleted
+          content:
+            application/json:
+              schema:
+                type: string
+                example: 
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /my-assets/asset-groups/{group_id}/assets:
+    parameters:
+      - name: group_id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags: [my-assets]
+      summary: get all the group's assets
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: sort
+          in: query
+          schema:
+            type: string
+        - name: vulnerable
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: DESCRIPTION
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/asset.presentation'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    post:
+      tags: [my-assets]
+      summary: add an assets to the group
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/asset.new'
+      responses:
+        '200':
+          description: the asset has been added
+          content:
+            application/json:
+              schema:
+                type: string
+                example: 
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /my-assets/asset-groups/{group_id}/assets/{asset_id}:
+    parameters:
+      - name: group_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: asset_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      tags: [my-assets]
+      summary: update asset
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/asset.new'
+      responses:
+        '200':
+          description: the asset has been updated
+          content:
+            application/json:
+              schema:
+                type: string
+                example: 
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    delete:
+      tags: [my-assets]
+      summary: delete the asset
+      responses:
+        '200':
+          description: the asset has been deleted
+          content:
+            application/json:
+              schema:
+                type: string
+                example: 
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /my-assets/asset-groups/{group_id}/assets/{asset_id}/vulnerabilities/{vulnerability_id}:
+    parameters:
+      - name: group_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: asset_id
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: vulnerability_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      tags: [my-assets]
+      summary: update the status of the vulnerability
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                solved:
+                  type: boolean
+      responses:
+        '200':
+          description: the status of the vulnerability has been updated
+          content:
+            application/json:
+              schema:
+                type: string
+                example: 
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /my-assets/attributes/cpe:
+    get:
+      tags: [my-assets]
+      summary: get CPE attribute
+      responses:
+        '200':
+          description: the attribute ID
+          content:
+            application/json:
+              schema:
+                type: string
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /my-assets/attributes/cpe/enums:
+    get:
+      tags: [my-assets]
+      summary: get CPE attribute enums
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: offset
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: the attribute enums
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/attribute_enum'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+
+
 
 
 components:
@@ -2177,6 +2580,147 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/news_item_attribute'
+    asset_cpe.new:
+      allOf:
+        - $ref: '#/components/schemas/asset_cpe'
+    asset.new:
+      allOf:
+        - $ref: '#/components/schemas/asset'
+        - type: object
+          properties:
+            asset_cpes:
+              type: array
+              items:
+                $ref: '#/components/schemas/asset_cpe.new'
+    asset_group.group.new:
+      allOf:
+        - $ref: '#/components/schemas/asset_group'
+        - type: object
+          properties:
+            users:
+              type: string
+            templates:
+              type: array
+              items:
+                type: string
+    asset_cpe:
+      type: object
+      properties:
+        value:
+          type: string
+    asset:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        serial:
+          type: string
+        description:
+          type: string
+        asset_group_id:
+          type: string
+        asset_cpes:
+          type: array
+          items:
+            $ref: '#/components/schemas/asset_cpe'
+    report_item_vulnerability:
+      allOf:
+        - $ref: '#/components/schemas/report_item.base'
+        - $ref: '#/components/schemas/presentation'
+        - type: object
+          properties:
+            report_item_type:
+              $ref: '#/components/schemas/report_item_type'
+            attributes:
+              type: array
+              items:
+                $ref: '#/components/schemas/report_item_attribute'
+    asset_vulnerability:
+      type: object
+      properties:
+        report_item:
+          $ref: '#/components/schemas/report_item_vulnerability'
+        solved:
+          type: boolean
+    asset.presentation:
+      allOf:
+        - $ref: '#/components/schemas/asset'
+        - $ref: '#/components/schemas/presentation'
+        - type: object
+          properties:
+            vulnerabilities_count:
+              type: integer
+            vulnerabilities:
+              type: array
+              items:
+                $ref: '#/components/schemas/asset_vulnerability'
+    asset_group:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+    asset_group.presentation:
+      allOf:
+        - $ref: '#/components/schemas/asset_group'
+        - $ref: '#/components/schemas/presentation'
+        - type: object
+          properties:
+            users:
+              type: array
+              items:
+                $ref: '#/components/schemas/user.base'
+            templates:
+              type: array
+              items:
+                $ref: '#/components/schemas/notification_template'
+    email_recipient:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        name:
+          type: string
+    notification_template:
+      type: object
+      properties:
+        id: 
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        message_title:
+          type: string
+        message_body:
+          type: string
+    notification_template.presentation:
+      allOf:
+        - $ref: '#/components/schemas/notification_template'
+        - $ref: '#/components/schemas/presentation'
+        - type: object
+          properties:
+            recipients:
+              type: array
+              items:
+                $ref: '#/components/schemas/email_recipient'
+    notification_template.new:
+      allOf:
+        - $ref: '#/components/schemas/notification_template'
+        - type: object
+          properties:
+            recipients:
+              type: array
+              items:
+                $ref: '#/components/schemas/email_recipient'
+   
                 
                 
     date_time:
