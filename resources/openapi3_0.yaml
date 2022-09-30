@@ -26,9 +26,9 @@ tags:
   - name: assess
     description: read/update/delete OSINT sources and news items
   - name: my-assets
-    description: TODO
+    description: read/update/delete asset groups, notification templates and attributes
   - name: bots
-    description: TODO
+    description: read/update/delete bots-related information
   - name: collectors
     description: TODO
   - name: config
@@ -1614,6 +1614,294 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/resp.auth.error'
+  /bots/bots-presets:
+    post:
+      tags: [bots]
+      summary: get a specific bot preset
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                api_key:
+                  type: string
+                bot_type:
+                  type: string
+      responses:
+        '200':
+          description: the specific bot preset
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/bot_preset'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /bots/news-item-data:
+    get:
+      tags: [bots]
+      summary: get all news items
+      parameters:
+        - name: limit
+          in: query
+          type: string
+      responses:
+        '200':
+          description: the news items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/news_item_data'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /bots/news-item-data/{news_item_data_id}/tags:
+    parameters:
+      - name: news_item_data_id
+        in: path
+        required: true
+        schema:
+          type: string
+    put:
+      tags: [bots]
+      summary: update news item tags
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              # TODO: implementation of `news_item.NewsItemData.update_news_item_tags()` not found
+      responses:
+        '200':
+          description: tag has been updated
+          content:
+            application/json:
+              schema:
+                # TODO: implementation of `news_item.NewsItemData.update_news_item_tags()` not found
+                type: string
+                example:
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /bots/news-item-data/{news_item_data_id}/attributes:
+    parameters:
+      - name: news_item_data_id
+        in: path
+        required: true
+        schema:
+          type: string
+    put:
+      tags: [bots]
+      summary: update news item attributes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/news_item_attribute.new'
+      responses:
+        '200':
+          description: attribute has been updated
+          content:
+            application/json:
+              schema:
+                type: string
+                example:
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /bots/news-item-aggregates-group-action:
+    put:
+      tags: [bots]
+      summary: modify group action
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/modify_group_action'
+      responses:
+        '200':
+          description: the IDs of the OSINT sources
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /bots/news-item-aggregates-by-group/{group_id}:
+    parameters:
+      - name: group_id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags: [bots]
+      summary: get news items aggregate
+      requestBody:
+        # TODO: the `limit` parameter in the request's body should be moved to the query
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                limit:
+                  $ref: '#/components/schemas/date_time'
+      responses:
+        '200':
+          description: the IDs of the OSINT sources
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/news_item_aggregate'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /bots/news-item-aggregates:
+    get:
+      tags: [bots]
+      summary: get default news item aggregate
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: TODO
+          content:
+            application/json:
+              schema:
+                type: object
+                # TODO: couldn't find implementation of `news_item.NewsItemAggregate.get_default_news_items_aggregate()`
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /bots/word-list-categories/{category_id}:
+    parameters:
+      - name: category_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags: [bots]
+      summary: get categories
+      responses:
+        '200':
+          description: DESCRIPTION
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/wordlist_category.new'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    put:
+      tags: [bots]
+      summary: add wordlist category
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/wordlist_category.new'
+      responses:
+        '200':
+          description: successfully added category
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /bots/word-list-categories/{category_id}/entries/{entry_name}:
+    parameters:
+      - name: category_id
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: entry_name
+        in: path
+        required: true
+        schema:
+          type: string
+    delete:
+      tags: [bots]
+      summary: delete an entry
+      responses:
+        '200':
+          description: successfully deleted entry
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    put:
+      tags: [bots]
+      summary: update wordlist entries
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/wordlist_entry.new'
+      responses:
+        '200':
+          description: successfully updated entries
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
 
 
 
@@ -1818,6 +2106,27 @@ components:
           type: string
         country:
           type: string
+    wordlist_entry.new:
+      allOf:
+        - $ref: '#/components/schemas/wordlist_entry'
+    wordlist_category.new:
+      allOf:
+        - $ref: '#/components/schemas/wordlist_category'
+        - type: object
+          properties:
+            entries:
+              type: array
+              items:
+                $ref: '#/components/schemas/wordlist_entry.new'
+    wordlist.new:
+      allOf:
+        - $ref: '#/components/schemas/wordlist'
+        - type: object
+          properties:
+            categories:
+              type: array
+              items:
+                $ref: '#/components/schemas/wordlist_category.new'
     wordlist_entry:
       type: object
       properties:
@@ -2223,6 +2532,9 @@ components:
           $ref: '#/components/schemas/date_time'
         osint_source_id:
           type: string
+    news_item_attribute.new:
+      allOf:
+        - $ref: '#/components/schemas/news_item_attribute'
     news_item_data:
       allOf:
         - $ref: '#/components/schemas/news_item_data.base'
@@ -2720,7 +3032,64 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/email_recipient'
-   
+    bot_preset.new:
+      allOf:
+        - $ref: '#/components/schemas/bot_preset'
+        - type: object
+          properties:
+            parameter_values:
+              type: array
+              items:
+                $ref: '#/components/schemas/parameter_value.new'
+    bot_preset.base:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        parameter_values:
+          type: array
+          items:
+            $ref: '#/components/schemas/parameter_value'
+    bot_preset:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        bot_id:
+          type: string
+        parameter_values:
+          type: array
+          items:
+            $ref: '#/components/schemas/parameter_value'
+    bot_preset.presentation:
+      allOf:
+        - $ref: '#/components/schemas/bot_preset.base'
+        - $ref: '#/components/schemas/presentation'
+    modify_group_action:
+      type: object
+      properties:
+        action:
+          type: string
+          enum: [GROUP, UNGROUP, LIKE, DISLIKE, IMPORTANT, READ]
+        items:
+          type: object
+          properties:
+            type:
+              type: string
+              enum: [AGGREGATE]
+            id:
+              type: string
+            
+
+
+
+
                 
                 
     date_time:
