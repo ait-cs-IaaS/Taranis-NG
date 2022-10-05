@@ -30,7 +30,7 @@ tags:
   - name: bots
     description: read/update/delete bots-related information
   - name: collectors
-    description: TODO
+    description: read/update/delete collectors (OSINT sources)
   - name: config
     description: TODO
   - name: dashboard-data
@@ -813,7 +813,13 @@ paths:
             application/json:
               schema:
                 type: object
-                # TODO: i could not find the implementation of `osint_source.OSINTSourceGroup.get_list_json()`
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/osint_source_group.base'
         '401':
           description: authorization error
           content:
@@ -1678,15 +1684,16 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              # TODO: implementation of `news_item.NewsItemData.update_news_item_tags()` not found
+              type: array
+              # TODO: `NewsItemData` does not have a `tags` property: https://github.com/ait-cs-IaaS/Taranis-NG/blob/awake/src/core/core/model/news_item.py#L191
+              items:
+                type: string
       responses:
         '200':
           description: tag has been updated
           content:
             application/json:
               schema:
-                # TODO: implementation of `news_item.NewsItemData.update_news_item_tags()` not found
                 type: string
                 example:
         '401':
@@ -1793,12 +1800,13 @@ paths:
             type: string
       responses:
         '200':
-          description: TODO
+          description: the default news item aggregate
           content:
             application/json:
               schema:
-                type: object
-                # TODO: couldn't find implementation of `news_item.NewsItemAggregate.get_default_news_items_aggregate()`
+                type: array
+                items:
+                  $ref: '#/components/schemas/news_item_aggregate'
         '401':
           description: authorization error
           content:
@@ -1902,6 +1910,220 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/resp.auth.error'
+  /collectors/{collector_id}/osint-sources:
+    parameters:
+      - name: collector_id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags: [collectors]
+      summary: get all OSINT sources of a specific collector
+      parameters:
+        - name: collector_type
+          in: query
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: OSINT sources of a specific collector
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/osint_source'
+
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+        '404':
+          description: resource not found
+          content:
+            application/json:
+              schema:
+                type: string
+                example:
+  /collectors/osint-sources/{osint_source_id}:
+    parameters:
+      - name: osint_source_id
+        in: path
+        required: true
+        schema:
+          type: string
+    put:
+      tags: [collectors]
+      summary: update source status
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/osint_source_update_status'
+      responses:
+        '200':
+          description: successfully updated
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+        '404':
+          description: resource not found
+          content:
+            application/json:
+              schema:
+                type: string
+                example:
+  /collectors/{collector_id}:
+    parameters:
+      - name: collector_id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags: [collectors]
+      summary: update the last-seen date/time of a specific collector
+      # TODO: this should be an HTTP POST/PUT request
+      responses:
+        '200':
+          description: successfully updated
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+        '404':
+          description: resource not found
+          content:
+            application/json:
+              schema:
+                type: string
+                example:
+  /collectors/news-items:
+    post:
+      tags: [collectors]
+      summary: add news items
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/news_item_data'
+      responses:
+        '200':
+          description: news items updated (as an SSE)
+          content:
+            text/event-stream:
+              schema:
+                type: object
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /collectors/node:
+    post:
+      tags: [collectors]
+      summary: add collector node
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/collector_node'
+      responses:
+        '200':
+          description: ID of the added collector node
+          content:
+            application/json:
+              schema:
+                type: integer
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /collectors/node/{collector_id}:
+    parameters:
+      - name: collector_id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags: [collectors]
+      summary: get specific collectors node
+      responses:
+        '200':
+          description: specific collectors node
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/collector_node'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    put:
+      tags: [collectors]
+      summary: update the collector node
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/collector_node'
+      responses:
+        '200':
+          description: ID of the updated collector node
+          content:
+            application/json:
+              schema:
+                type: string
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    delete:
+      tags: [collectors]
+      summary: delete the collector node
+      responses:
+        '200':
+          description: DESCRIPTION
+          content:
+            application/json:
+              schema:
+                type: string
+                example:
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+
+
 
 
 
@@ -3085,13 +3307,37 @@ components:
               enum: [AGGREGATE]
             id:
               type: string
-            
+    collector_node.new:
+      allOf:
+        - $ref: '#/components/schemas/collector_node'
+    collector_node:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        api_url:
+          type: string
+        api_key:
+          type: string
+        collectors:
+          type: array
+          items:
+            $ref: '#/components/schemas/collector'
+        status:
+          type: string
+        created:
+          $ref: '#/components/schemas/date_time'
+        last_seen:
+          $ref: '#/components/schemas/date_time'
 
 
 
 
-                
-                
+
     date_time:
       type: string
       example: '%d.%m.%Y - %H:%M'
