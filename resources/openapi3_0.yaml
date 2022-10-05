@@ -186,7 +186,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/user.new'
+              $ref: '#/components/schemas/user_profile.new'
       responses: 
         '200':
           description: the updated user profile
@@ -1685,7 +1685,6 @@ paths:
           application/json:
             schema:
               type: array
-              # TODO: `NewsItemData` does not have a `tags` property: https://github.com/ait-cs-IaaS/Taranis-NG/blob/awake/src/core/core/model/news_item.py#L191
               items:
                 type: string
       responses:
@@ -2047,7 +2046,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/collector_node'
+              $ref: '#/components/schemas/collectors_node'
       responses:
         '200':
           description: ID of the added collector node
@@ -2077,7 +2076,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/collector_node'
+                $ref: '#/components/schemas/collectors_node'
         '401':
           description: authorization error
           content:
@@ -2091,7 +2090,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/collector_node'
+              $ref: '#/components/schemas/collectors_node'
       responses:
         '200':
           description: ID of the updated collector node
@@ -2200,6 +2199,37 @@ components:
           type: string
         tag:
           type: string
+
+    user.new:
+      allOf:
+        - $ref: '#/components/schemas/user.base'
+        - type: object
+          properties:
+            roles:
+              type: array
+              items:
+                $ref: '#/components/schemas/role.id'
+            permissions:
+              type: array
+              items:
+                $ref: '#/components/schemas/permission.id'
+            organizations:
+              type: array
+              items:
+                $ref: '#/components/schemas/organization.id'
+    hotkey.new:
+      allOf:
+        - $ref: '#/components/schemas/hotkey'
+    user_profile.new:
+      allOf:
+        - $ref: '#/components/schemas/user_profile'
+        - type: object
+          properties:
+            hotkeys:
+              type: array
+              items:
+                $ref: '#/components/schemas/hotkey'
+
     user.base:
       type: object
       properties:
@@ -2212,6 +2242,8 @@ components:
         name:
           type: string
           example: Alice
+        password:
+          type: string
     user:
       allOf:
         - $ref: '#/components/schemas/user.base'
@@ -2233,6 +2265,11 @@ components:
       allOf:
         - $ref: '#/components/schemas/user'
         - $ref: '#/components/schemas/presentation'
+    user.id:
+      type: object
+      properties:
+        id:
+          type: integer
     hotkey:
       type: object
       properties:
@@ -2259,19 +2296,7 @@ components:
           type: array
           items: 
             $ref: '#/components/schemas/hotkey'
-    user.new:
-      allOf:
-        - $ref: '#/components/schemas/user_profile'
-        - type: object
-          properties:
-            word_lists:
-              type: array
-              items:
-                $ref: '#/components/schemas/wordlist'
-            hotkeys:
-              type: array
-              items:
-                $ref: '#/components/schemas/hotkey'
+
     permission:
       type: object
       properties:
@@ -2280,6 +2305,11 @@ components:
         name:
           type: string
         description:
+          type: string
+    permission.id:
+      type: object
+      properties:
+        id:
           type: string
     role.base:
       type: object
@@ -2302,6 +2332,21 @@ components:
     role.presentation:
       allOf:
         - $ref: '#/components/schemas/role'
+        - $ref: '#/components/schemas/presentation'
+    role.id:
+      type: object
+      properties:
+        id:
+          type: string
+    
+    organization.new:
+      allOf:
+        - $ref: '#/components/schemas/organization'
+        - type: object
+          properties:
+            address:
+              $ref: '#/components/schemas/address.new'
+
     organization:
       type: object
       properties:
@@ -2317,6 +2362,16 @@ components:
       allOf:
         - $ref: '#/components/schemas/organization'
         - $ref: '#/components/schemas/presentation'
+    organization.id:
+      type: object
+      properties:
+        id:
+          type: integer
+
+    address.new:
+      allOf:
+        - $ref: '#/components/schemas/address'
+
     address:
       type: object
       properties:
@@ -2328,6 +2383,7 @@ components:
           type: string
         country:
           type: string
+
     wordlist_entry.new:
       allOf:
         - $ref: '#/components/schemas/wordlist_entry'
@@ -2349,6 +2405,7 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/wordlist_category.new'
+
     wordlist_entry:
       type: object
       properties:
@@ -2388,6 +2445,103 @@ components:
       allOf:
         - $ref: '#/components/schemas/wordlist'
         - $ref: '#/components/schemas/presentation'
+    wordlist.id:
+      type: object
+      properties:
+        id:
+          type: integer
+
+    product_type.new:
+      allOf:
+        - $ref: '#/components/schemas/product_type'
+        - type: object
+          properties:
+            parameter_values:
+              $ref: '#/components/schemas/parameter_value.new'
+
+    product_type:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        presenter_id:
+          type: string
+        parameter_values:
+          type: array
+          items:
+            $ref: '#/components/schemas/parameter_value'
+    product_type.presentation:
+      allOf:
+        - $ref: '#/components/schemas/product_type'
+        - $ref: '#/components/schemas/presentation'
+
+    publisher_preset.new:
+      allOf:
+        - $ref: '#/components/schemas/publisher_preset'
+        - type: object
+          properties:
+            parameter_values:
+              type: array
+              items:
+                $ref: '#/components/schemas/parameter_value.new'
+
+    publisher_preset.base:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        parameter_values:
+          type: array
+          items:
+            $ref: '#/components/schemas/parameter_value'
+    publisher_preset:
+      allOf:
+        - $ref: '#/components/schemas/publisher_preset.base'
+        - type: object
+          properties:
+            description:
+              type: string
+            use_for_notifications:
+              type: boolean
+            publisher_id:
+              type: string
+    publisher_preset.presentation:
+      allOf:
+        - $ref: '#/components/schemas/publisher_preset'
+        - $ref: '#/components/schemas/presentation'
+
+    attribute_group_item.new:
+      allOf:
+        - $ref: '#/components/schemas/attribute_group_item'
+        - type: object
+          properties:
+            attribute_id:
+              type: integer
+    attribute_group.new:
+      allOf:
+        - $ref: '#/components/schemas/attribute_group.base'
+        - type: object
+          properties:
+            attribute_group_items:
+              type: array
+              items:
+                $ref: '#/components/schemas/attribute_group_item.new'
+    report_item_type.new:
+      allOf:
+        - $ref: '#/components/schemas/report_item_type.base'
+        - type: object
+          properties:
+            attribute_groups:
+              type: array
+              items:
+                $ref: '#/components/schemas/attribute_group.new'
+
     attribute_group_item:
       type: object
       properties:
@@ -2451,6 +2605,33 @@ components:
       allOf:
         - $ref: '#/components/schemas/report_item_type'
         - $ref: '#/components/schemas/presentation'
+    report_item_type.id:
+      type: object
+      properties:
+        id:
+          type: integer
+
+    report_item_attribute.new:
+      allOf:
+        - $ref: '#/components/schemas/report_item_attribute.base'
+    report_item.new:
+      allOf:
+        - $ref: '#/components/schemas/report_item.base'
+        - type: object
+          properties:
+            news_item_aggregates:
+              type: array
+              items:
+                type: integer
+            remote_report_items:
+              type: array
+              items:
+                type: integer
+            attributes:
+              type: array
+              items:
+                $ref: '#/components/schemas/report_item_attribute'
+
     report_item_attribute.base:
       type: object
       properties:
@@ -2514,23 +2695,6 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/report_item_attribute'
-    report_item.new:
-      allOf:
-        - $ref: '#/components/schemas/report_item.base'
-        - type: object
-          properties:
-            news_item_aggregates:
-              type: array
-              items:
-                type: integer
-            remote_report_items:
-              type: array
-              items:
-                type: integer
-            attributes:
-              type: array
-              items:
-                $ref: '#/components/schemas/report_item_attribute'
     report_item:
       allOf:
         - $ref: '#/components/schemas/report_item.base'
@@ -2575,30 +2739,22 @@ components:
     report_item.presentation:
       allOf:
         - $ref: '#/components/schemas/report_item.base'
+        - $ref: '#/components/schemas/acl_entry_status'
         - $ref: '#/components/schemas/presentation'
         - type: object
           properties:
             remote_user:
               type: string
-    product_type:
+    report_item.id:
       type: object
       properties:
         id:
           type: integer
-        title:
-          type: string
-        description:
-          type: string
-        presenter_id:
-          type: string
-        parameter_values:
-          type: array
-          items:
-            $ref: '#/components/schemas/parameter_value'
-    product_type.presentation:
+
+    parameter_value.new:
       allOf:
-        - $ref: '#/components/schemas/product_type'
-        - $ref: '#/components/schemas/presentation'
+        - $ref: '#/components/schemas/parameter_value'
+
     parameter_value:
       type: object
       properties:
@@ -2607,14 +2763,17 @@ components:
         parameter:
           $ref: '#/components/schemas/parameter'
     parameter_value.export:
+      type: object
+      properties:
+        value:
+          type: string
+        parameter:
+          $ref: '#/components/schemas/parameter.export'
+
+    parameter.new:
       allOf:
-        - $ref: '#/components/schemas/parameter_value'
-        - type: object
-          properties:
-            value:
-              type: string
-            parameter:
-              $ref: '#/components/schemas/parameter.export'
+        - $ref: '#/components/schemas/parameter'
+
     parameter_type:
       type: string
       enum: [STRING, NUMBER, BOOLEAN]
@@ -2636,6 +2795,20 @@ components:
       properties:
         key:
           type: string
+
+    attribute_enum.new:
+      allOf:
+        - $ref: '#/components/schemas/attribute_enum'
+    attribute.new:
+      allOf:
+        - $ref: '#/components/schemas/attribute.base'
+        - type: object
+          properties:
+            attribute_enums:
+              type: array
+              items:
+                $ref: '#/components/schemas/attribute_enum.new'
+
     attribute_type:
       type: string
       enum: [STRING, NUMBER, BOOLEAN, RADIO, ENUM, TEXT, RICH_TEXT, DATE, TIME, DATE_TIME, LINK, ATTACHMENT, TLP, CPE, CVE, CVSS]
@@ -2687,32 +2860,20 @@ components:
           properties:
             attribute_enums_total_count:
               type: integer
-    publisher_preset.base:
-      type: object
-      properties:
-        id:
-          type: integer
-        name:
-          type: string
-        parameter_values:
-          type: array
-          items:
-            $ref: '#/components/schemas/parameter_value'
-    publisher_preset:
+
+    news_item_attribute.new:
       allOf:
-        - $ref: '#/components/schemas/publisher_preset.base'
+        - $ref: '#/components/schemas/news_item_attribute'
+    news_item_data.new:
+      allOf:
+        - $ref: '#/components/schemas/news_item_data'
         - type: object
           properties:
-            description:
-              type: string
-            use_for_notifications:
-              type: boolean
-            publisher_id:
-              type: string
-    publisher_preset.presentation:
-      allOf:
-        - $ref: '#/components/schemas/publisher_preset'
-        - $ref: '#/components/schemas/presentation'
+            attributes:
+              type: array
+              items:
+                $ref: '#/components/schemas/news_item_attribute'
+
     news_item_attribute.base:
       type: object
       properties:
@@ -2754,9 +2915,10 @@ components:
           $ref: '#/components/schemas/date_time'
         osint_source_id:
           type: string
-    news_item_attribute.new:
-      allOf:
-        - $ref: '#/components/schemas/news_item_attribute'
+        tags:
+          type: array
+          items:
+            type: string
     news_item_data:
       allOf:
         - $ref: '#/components/schemas/news_item_data.base'
@@ -2797,7 +2959,7 @@ components:
           type: integer
     news_item_data.presentation:
       allOf:
-        - $ref: '#/components/schemas/news_item_data'
+        - $ref: '#/components/schemas/news_item_data.base'
         - type: object
           properties:
             remote_source:
@@ -2823,9 +2985,23 @@ components:
           type: boolean
         news_items_data:
           $ref: '#/components/schemas/news_item_data'
+    news_item_tag:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        tag_type:
+          type: string
+        n_i_d:
+          type: array
+          items:
+            $ref: '#/components/schemas/news_item_data'
     news_item.presentation:
       allOf:
         - $ref: '#/components/schemas/news_item.base'
+        - $ref: '#/components/schemas/acl_entry_status'
     news_item:
       allOf:
         - $ref: '#/components/schemas/news_item.base'
@@ -2860,10 +3036,20 @@ components:
           type: boolean
         in_reports_count:
           type: integer
+        tags:
+          type: array
+          items:
+            type: string
         news_items:
           type: array
           items:
             $ref: '#/components/schemas/news_item.presentation'
+    news_item_aggregate.id:
+      type: object
+      properties:
+        id:
+          type: integer
+
     modify_report_item:
       oneOf:
         - type: object
@@ -2959,6 +3145,7 @@ components:
               $ref: '#/components/schemas/date_time'
             attribute_user:
               type: string
+
     osint_source.new:
       allOf:
         - $ref: '#/components/schemas/osint_source'
@@ -2971,11 +3158,11 @@ components:
             word_lists:
               type: array
               items:
-                type: integer
+                $ref: '#/components/schemas/wordlist.id'
             osint_source_groups:
               type: array
               items:
-                type: string
+                $ref: '#/components/schemas/osint_source_group.id'
     osint_source_group.new:
       allOf:
         - $ref: '#/components/schemas/osint_source_group'
@@ -2984,7 +3171,8 @@ components:
             osint_sources:
               type: array
               items:
-                type: string
+                $ref: '#/components/schemas/osint_source.id'
+
     osint_source_group.base:
       type: object
       properties:
@@ -2996,6 +3184,11 @@ components:
           type: string
         default:
           type: boolean
+    osint_source_group.id:
+      type: object
+      properties:
+        id:
+          type: string
     osint_source.base:
       type: object
       properties:
@@ -3035,6 +3228,17 @@ components:
               type: string
             collector_id:
               type: string
+    osint_source_collector:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        collector_type:
+          type: string
     osint_source.presentation:
       allOf:
         - $ref: '#/components/schemas/osint_source'
@@ -3047,6 +3251,11 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/osint_source.base'
+    osint_source.id:
+      type: object
+      properties:
+        id:
+          type: string
     osint_source_group:
       allOf:
         - $ref: '#/components/schemas/osint_source_group.base'
@@ -3082,6 +3291,17 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/osint_source.export'
+
+    collector.new:
+      allOf:
+        - $ref: '#/components/schemas/collector'
+        - type: object
+          properties:
+            parameters:
+              type: array
+              items:
+                $ref: '#/components/schemas/parameter.new'
+
     collector:
       type: object
       properties:
@@ -3097,23 +3317,23 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/parameter'
+    collector.without_parameters:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
     collector.export:
       type: object
       properties:
         type:
           type: string
-    parameter_value.new:
-      allOf:
-        - $ref: '#/components/schemas/parameter_value'
-    news_item_data.new:
-      allOf:
-        - $ref: '#/components/schemas/news_item_data'
-        - type: object
-          properties:
-            attributes:
-              type: array
-              items:
-                $ref: '#/components/schemas/news_item_attribute'
+
     asset_cpe.new:
       allOf:
         - $ref: '#/components/schemas/asset_cpe'
@@ -3132,11 +3352,12 @@ components:
         - type: object
           properties:
             users:
-              type: string
+              $ref: '#/components/schemas/user.id'
             templates:
               type: array
               items:
-                type: string
+                $ref: '#/components/schemas/notification_template.id'
+
     asset_cpe:
       type: object
       properties:
@@ -3213,6 +3434,20 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/notification_template'
+
+    email_recipient.new:
+      allOf:
+        - $ref: '#/components/schemas/email_recipient'
+    notification_template.new:
+      allOf:
+        - $ref: '#/components/schemas/notification_template'
+        - type: object
+          properties:
+            recipients:
+              type: array
+              items:
+                $ref: '#/components/schemas/email_recipient.new'
+
     email_recipient:
       type: object
       properties:
@@ -3245,15 +3480,12 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/email_recipient'
-    notification_template.new:
-      allOf:
-        - $ref: '#/components/schemas/notification_template'
-        - type: object
-          properties:
-            recipients:
-              type: array
-              items:
-                $ref: '#/components/schemas/email_recipient'
+    notification_template.id:
+      type: object
+      properties:
+        id:
+          type: integer
+
     bot_preset.new:
       allOf:
         - $ref: '#/components/schemas/bot_preset'
@@ -3263,6 +3495,7 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/parameter_value.new'
+
     bot_preset.base:
       type: object
       properties:
@@ -3275,24 +3508,27 @@ components:
           items:
             $ref: '#/components/schemas/parameter_value'
     bot_preset:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        description:
-          type: string
-        bot_id:
-          type: string
-        parameter_values:
-          type: array
-          items:
-            $ref: '#/components/schemas/parameter_value'
-    bot_preset.presentation:
       allOf:
         - $ref: '#/components/schemas/bot_preset.base'
+        - type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            description:
+              type: string
+            bot_id:
+              type: string
+            parameter_values:
+              type: array
+              items:
+                $ref: '#/components/schemas/parameter_value'
+    bot_preset.presentation:
+      allOf:
+        - $ref: '#/components/schemas/bot_preset'
         - $ref: '#/components/schemas/presentation'
+
     modify_group_action:
       type: object
       properties:
@@ -3307,10 +3543,11 @@ components:
               enum: [AGGREGATE]
             id:
               type: string
-    collector_node.new:
+              
+    collectors_node.new:
       allOf:
-        - $ref: '#/components/schemas/collector_node'
-    collector_node:
+        - $ref: '#/components/schemas/collectors_node'
+    collectors_node:
       type: object
       properties:
         id:
@@ -3334,9 +3571,217 @@ components:
         last_seen:
           $ref: '#/components/schemas/date_time'
 
+    acl_entry.new:
+      allOf:
+        - $ref: '#/components/schemas/acl_entry'
+        - type: object
+          properties:
+            users:
+              type: array
+              items:
+                $ref: '#/components/schemas/user.id'
+            roles:
+              type: array
+              items:
+                $ref: '#/components/schemas/role.id'
 
+    item_type:
+      type: string
+      enum: [COLLECTOR, OSINT_SOURCE, OSINT_SOURCE_GROUP, WORD_LIST, REPORT_ITEM, REPORT_ITEM_TYPE, PRODUCT_TYPE, DELEGATION]
+    acl_entry_status:
+      type: object
+      properties:
+        see:
+          type: boolean
+        access:
+          type: boolean
+        modify:
+          type: boolean
+    acl_entry:
+      allOf:
+        - $ref: '#/components/schemas/acl_entry_status'
+        - type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+            description:
+              type: string
+            item_type:
+              $ref: '#/components/schemas/item_type'
+            item_id:
+              type: string
+            everyone:
+              type: boolean
+    acl_entry.presentation:
+      allOf:
+        - $ref: '#/components/schemas/acl_entry'
+        - $ref: '#/components/schemas/presentation'
+        - type: object
+          properties:
+            roles:
+              type: array
+              items:
+                $ref: '#/components/schemas/role'
+            users:
+              type: array
+              items:
+                $ref: '#/components/schemas/user.base'
 
+    remote_access.new:
+      allOf:
+        - $ref: '#/components/schemas/remote_access'
+        - type: object
+          properties:
+            osint_sources:
+              type: array
+              items:
+                $ref: '#/components/schemas/osint_source.id'
+            report_item_types:
+              type: array
+              items:
+                $ref: '#/components/schemas/report_item_type.id'
+    remote_node.new:
+      allOf:
+        - $ref: '#/components/schemas/remote_node'
 
+    remote_access:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        access_key:
+          type: string
+        enabled:
+          type: boolean
+        osint_sources:
+          type: array
+          items:
+            $ref: '#/components/schemas/osint_source.presentation'
+        report_item_types:
+          type: array
+          items:
+            $ref: '#/components/schemas/report_item_type.presentation'
+    remote_access.presentation:
+      allOf:
+        - $ref: '#/components/schemas/remote_access'
+        - $ref: '#/components/schemas/presentation'
+        - type: object
+          properties:
+            last_synced:
+              $ref: '#/components/schemas/date_time_seconds'
+    remote_node:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        remote_url:
+          type: string
+        events_url:
+          type: string
+        access_key:
+          type: string
+        enabled:
+          type: boolean
+        sync_news_items:
+          type: boolean
+        sync_report_items:
+          type: boolean
+        osint_source_group_id:
+          type: string
+    remote_node.presentation:
+      allOf:
+        - $ref: '#/components/schemas/remote_node'
+        - $ref: '#/components/schemas/presentation'
+        - type: object
+          properties:
+            last_synced:
+              $ref: '#/components/schemas/date_time_seconds'
+            event_id:
+              type: string
+
+    presenters_node.new:
+      allOf:
+        - $ref: '#/components/schemas/presenters_node'
+
+    presenters:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        api_url:
+          type: string
+        api_key:
+          type: string
+        presenters:
+          type: array
+          items:
+            $ref: '#/components/schemas/presenter'
+    presenters_node.presentation:
+      allOf:
+       - $ref: '#/components/schemas/presenters_node'
+       - $ref: '#/components/schemas/presentation'
+
+    publishers_node.new:
+      allOf:
+        - $ref: '#/components/schemas/publishers_node'
+
+    publishers_node:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        api_url:
+          type: string
+        api_key:
+          type: string
+        publishers:
+          type: array
+          items:
+            $ref: '#/components/schemas/publisher'
+    publishers_node.presentation:
+      allOf:
+        - $ref: '#/components/schemas/publishers_node'
+        - $ref: '#/components/schemas/presentation'
+
+    bots_node.new:
+      allOf:
+        - $ref: '#/components/schemas/bots_node'
+
+    bots_node:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        api_url:
+          type: string
+        api_key:
+          type: string
+        bots:
+          type: array
+          items:
+            $ref: '#/components/schemas/bot'
 
     date_time:
       type: string
