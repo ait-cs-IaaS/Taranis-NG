@@ -2409,6 +2409,931 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/resp.auth.error'
+  /config/product-types:
+    get:
+      tags: [config]
+      summary: get all product types
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/product_type.presentation'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    post:
+      tags: [config]
+      summary: add product type
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/product_type.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/product-types/{type_id}:
+    parameters:
+      - name: type_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      tags: [config]
+      summary: update product type
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/product_type.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    delete:
+      tags: [config]
+      summary: delete product type
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/permissions:
+    get:
+      tags: [config]
+      summary: get all permissions
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/permission'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/external-permissions:
+    get:
+      tags: [config]
+      summary: get all external permissions
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/permission'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/roles:
+    get:
+      tags: [config]
+      summary: get all roles
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/role.presentation'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    post:
+      tags: [config]
+      summary: add role
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/role.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/roles/{role_id}:
+    parameters:
+      - name: role_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      tags: [config]
+      summary: update role
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/role.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    delete:
+      tags: [config]
+      summary: delete role
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/acls:
+    get:
+      tags: [config]
+      summary: get all ACL entries
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/acl_entry.presentation'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    post:
+      tags: [config]
+      summary: add ACL entry
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/acl_entry.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/acls/{acl_id}:
+    parameters:
+      - name: acl_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      tags: [config]
+      summary: update ACL entry
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/acl_entry.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    delete:
+      tags: [config]
+      summary: delete ACL entry
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/organizations:
+    get:
+      tags: [config]
+      summary: get all organizations
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/organization.presentation'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    post:
+      tags: [config]
+      summary: add organization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/organization.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/organizations/{organization_id}:
+    parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      tags: [config]
+      summary: update organization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/organization.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    delete:
+      tags: [config]
+      summary: delete organization
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+
+  /config/users:
+    get:
+      tags: [config]
+      summary: get all users
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/user.presentation'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    post:
+      tags: [config]
+      summary: add user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user.new'
+      responses:
+        '200':
+          description: success
+        '400':
+          description: could not create user in external auth system
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/users/{user_id}:
+    parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      tags: [config]
+      summary: update user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user.new'
+      responses:
+        '200':
+          description: success
+        '400':
+          description: could not update user in external auth system
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    delete:
+      tags: [config]
+      summary: delete user
+      responses:
+        '200':
+          description: success
+        '400':
+          description: could not delete user in external auth system
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/external-users:
+    get:
+      tags: [config]
+      summary: get all external users
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/user.presentation'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    post:
+      tags: [config]
+      summary: add external user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/external-users/{user_id}:
+    parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      tags: [config]
+      summary: update external user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    delete:
+      tags: [config]
+      summary: delete external user
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/word-lists:
+    get:
+      tags: [config]
+      summary: get all wordlists
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/wordlist.presentation'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    post:
+      tags: [config]
+      summary: add wordlist
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/wordlist.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/word-lists/{word_list_id}:
+    parameters:
+      - name: word_list_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      tags: [config]
+      summary: update wordlist
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/wordlist.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    delete:
+      tags: [config]
+      summary: delete wordlist
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/collectors-nodes:
+    get:
+      tags: [config]
+      summary: get all collectors nodes
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/collectors_node'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    post:
+      tags: [config]
+      summary: add collectors node
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/collectors_node.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/collectors-nodes/{node_id}:
+    parameters:
+      - name: node_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      tags: [config]
+      summary: update collectors node
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/collectors_node.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    delete:
+      tags: [config]
+      summary: delete collectors node
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/osint-sources:
+    get:
+      tags: [config]
+      summary: get all OSINT sources
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/osint_source.presentation'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    post:
+      tags: [config]
+      summary: add OSINT source
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/osint_source.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/osint-sources/{osint_source_id}:
+    parameters:
+      - name: osint_source_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      tags: [config]
+      summary: update OSINT source
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/osint_source.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    delete:
+      tags: [config]
+      summary: delete OSINT source
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/export-osint-sources:
+    post:
+      tags: [config]
+      summary: export OSINT sources
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                selection:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/osint_source.export.root'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/import-osint-sources:
+    post:
+      tags: [config]
+      summary: import OSINT sources
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: json
+                collectors_node_id:
+                  type: integer
+  /config/osint-source-groups:
+    get:
+      tags: [config]
+      summary: get all OSINT source groups
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/osint_source_group.presentation'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    post:
+      tags: [config]
+      summary: add OSINT source group
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/osint_source_group.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/osint-source-groups/{group_id}:
+    parameters:
+      - name: group_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      tags: [config]
+      summary: update OSINT source group
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/osint_source_group.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    delete:
+      tags: [config]
+      summary: delete OSINT source group
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+
+
+
 
 
 
