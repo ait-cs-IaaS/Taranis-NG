@@ -2121,6 +2121,297 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/resp.auth.error'
+  /config/reload-enum-dictionaries/{dictionary_type}:
+    parameters:
+      - name: dictionary_type
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags: [config]
+      summary: reload dictionaries
+      # TODO: this should be an HTTP POST/PUT request
+      responses:
+        '200':
+          description: successfully reloaded dictionaries
+          content:
+            application/json:
+              schema:
+                type: string
+                example: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/attributes:
+    get:
+      tags: [config]
+      summary: get attributes
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: attributes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/attribute.presentation'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    post:
+      tags: [config]
+      summary: add attribute
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/attribute.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/attributes/{attribute_id}:
+    parameters:
+      - name: attribute_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      tags: [config]
+      summary: update attribute
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/attribute.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    delete:
+      tags: [config]
+      summary: delete attribute
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/attributes/{attribute_id}/enums:
+    parameters:
+      - name: attribute_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags: [config]
+      summary: get attribute enum
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: offset
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    post:
+      tags: [config]
+      summary: add attribute enums
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                delete_existing:
+                  type: boolean
+                items:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/attribute_enum.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/attributes/{attribute_id}/enums/{enum_id}:
+    parameters:
+      - name: attribute_id
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: enum_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      tags: [config]
+      summary: update attribute enum
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/attribute_enum.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    delete:
+      tags: [config]
+      summary: delete attribute enum
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/report-item-types:
+    get:
+      tags: [config]
+      summary: get report item types
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/report_item_type.presentation'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    post:
+      tags: [config]
+      summary: add report item type
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/report_item_type.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/report-item-types/{type_id}:
+    parameters:
+      - name: type_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      tags: [config]
+      summary: update report item type
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/report_item_type.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    delete:
+      tags: [config]
+      summary: delete report item type
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+
+
+
 
 
 
