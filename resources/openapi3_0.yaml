@@ -34,9 +34,9 @@ tags:
   - name: config
     description: read/update/delete everything config-related
   - name: dashboard-data
-    description: TODO
+    description: get dashboard data
   - name: tagcloud
-    description: TODO
+    description: get the tagcloud (grouped words)
   - name: presenters
     description: TODO
   - name: publish
@@ -3918,7 +3918,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/resp.auth.error'
-
   /config/nodes:
     get:
       tags: [config]
@@ -3952,8 +3951,58 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/resp.auth.error'
-
-
+  /dashboard-data:
+    get:
+      tags: [dashboard-data]
+      summary: get dashboard data
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_news_items:
+                    type: integer
+                  total_products:
+                    type: integer
+                  report_items_completed:
+                    type: integer
+                  report_items_in_progress:
+                    type: integer
+                  total_database_items:
+                    type: integer
+                  latest_collected:
+                    $ref: '#/components/schemas/date_time'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /tagcloud:
+    get:
+      tags: [tagcloud]
+      summary: get tagcloud
+      parameters:
+        - name: tag_cloud_days
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/grouped_words'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
 
 
 
@@ -5665,6 +5714,29 @@ components:
           items:
             type: string
 
+    tag_cloud.new:
+      allOf:
+        - $ref: '#/components/schemas/tag_cloud'
+
+    tag_cloud.base:
+      type: object
+      properties:
+        word:
+          type: string
+        word_quantity:
+          type: integer
+        collected:
+          $ref: '#/components/schemas/date'
+    tag_cloud:
+      allOf:
+        - $ref: '#/components/schemas/tag_cloud.base'
+    grouped_words:
+      allOf:
+        - $ref: '#/components/schemas/tag_cloud.base'
+
+    date:
+      type: string
+      example: '%d.%m.%Y'
     date_time:
       type: string
       example: '%d.%m.%Y - %H:%M'
