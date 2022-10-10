@@ -32,7 +32,7 @@ tags:
   - name: collectors
     description: read/update/delete collectors (OSINT sources)
   - name: config
-    description: TODO
+    description: read/update/delete everything config-related
   - name: dashboard-data
     description: TODO
   - name: tagcloud
@@ -3919,6 +3919,39 @@ paths:
               schema:
                 $ref: '#/components/schemas/resp.auth.error'
 
+  /config/nodes:
+    get:
+      tags: [config]
+      summary: get all nodes
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      anyOf:
+                        - $ref: '#/components/schemas/publishers_nodes.presentation'
+                        - $ref: '#/components/schemas/bots_node.presentation'
+                        - $ref: '#/components/schemas/collectors_node.presentation'
+                        - $ref: '#/components/schemas/presenters_node.presentation'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
 
 
 
