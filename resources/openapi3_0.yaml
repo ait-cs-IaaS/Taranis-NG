@@ -38,13 +38,13 @@ tags:
   - name: tagcloud
     description: get the tagcloud (grouped words)
   - name: presenters
-    description: TODO
+    description: get all presenters nodes
   - name: publish
-    description: TODO
+    description: read/update/delete/publish products
   - name: publishers
-    description: TODO
+    description: read/update/delete publisher nodes/presets
   - name: remote
-    description: TODO
+    description: connect/disconnect and sync news/report items
 security:
   - API_key: []
 paths:
@@ -3645,7 +3645,7 @@ paths:
           type: integer
     put:
       tags: [config]
-      summary: update presenters node
+      summary: update publishers node
       requestBody:
         content:
           application/json:
@@ -3941,7 +3941,7 @@ paths:
                     type: array
                     items: 
                       anyOf:
-                        - $ref: '#/components/schemas/publishers_nodes.presentation'
+                        - $ref: '#/components/schemas/publishers_node.presentation'
                         - $ref: '#/components/schemas/bots_node.presentation'
                         - $ref: '#/components/schemas/collectors_node.presentation'
                         - $ref: '#/components/schemas/presenters_node.presentation'
@@ -4003,18 +4003,525 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/resp.auth.error'
-
-
-
-
-
-
-
-
-
-
-
-
+  /presenters/nodes:
+    get:
+      tags: [presenters]
+      summary: get all presenters nodes
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/presenters_node.presentation'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    post:
+      tags: [presenters]
+      summary: add presenters node
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/presenters_node.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /presenters/node/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      tags: [presenters]
+      summary: update presenters node
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/presenters_node.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    delete:
+      tags: [presenters]
+      summary: delete presenters node
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /publish/products:
+    get:
+      tags: [publish]
+      summary: get products
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: range
+          in: query
+          schema:
+            type: string
+        - name: sort
+          in: query
+          schema:
+            type: string
+        - name: offset
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/product.presentation'
+        '400':
+          description: resource not found
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    post:
+      tags: [publish]
+      summary: add product
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/product.new'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: string
+                example: ID of newly created product
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /publish/products/{product_id}:
+    parameters:
+      - name: product_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags: [publish]
+      summary: get product details
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/product.presentation'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    put:
+      tags: [publish]
+      summary: update product details
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/product.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    delete:
+      tags: [publish]
+      summary: delete product
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /publish/products/{product_id}/overview:
+    parameters:
+      - name: product_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags: [publish]
+      summary: download an overview of the specific product
+      responses:
+        '200':
+          description: the product data as a download
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /publish/products/{product_id}/publishers/{publisher_id}:
+    parameters:
+      - name: product_id
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: publisher_id
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      tags: [publish]
+      summary: generate a specific product at a specific publisher
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /publishers/nodes:
+    get:
+      tags: [publishers]
+      summary: get all publishers nodes
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/publishers_node.presentation'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    post:
+      tags: [publishers]
+      summary: add publishers node
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/publishers_node.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /publishers/node/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      tags: [publishers]
+      summary: update publisher node
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/publishers_node.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    delete:
+      tags: [publishers]
+      summary: delete publishers node
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /publishers/presets:
+    get:
+      tags: [publishers]
+      summary: get all publisher preset
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/publisher_preset.presentation'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    post:
+      tags: [publishers]
+      summary: add publisher preset
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/publisher_preset.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /publishers/preset/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      tags: [publishers]
+      summary: update publisher preset
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/publisher_preset.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    delete:
+      tags: [publishers]
+      summary: delete publisher preset
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /remote/connect:
+    get:
+      tags: [remote]
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  event_id:
+                    type: string
+                  last_synced_news_items:
+                    type: string
+                  last_synced_report_items:
+                    type: string
+                  news_items_provided:
+                    type: boolean
+                  report_items_provided:
+                    type: boolean
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /remote/disconnect:
+    get:
+      tags: [remote]
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /remote/sync-news-items:
+    get:
+      tags: [remote]
+      summary: get sync-news items
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  last_sync_time:
+                    type: string
+                  news_items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/news_item_remote'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    put:
+      tags: [remote]
+      summary: update news items sync
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                last_sync_time:
+                  $ref: '#/components/schemas/date_time_full'
+  /remote/sync-report-items:
+    get:
+      tags: [remote]
+      summary: get sync-report items
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  last_sync_time:
+                    type: string
+                  report_items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/report_item_remote'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    put:
+      tags: [remote]
+      summary: update report items sync
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                last_sync_time:
+                  $ref: '#/components/schemas/date_time_full'
 
 
 components:
@@ -5603,7 +6110,7 @@ components:
       allOf:
         - $ref: '#/components/schemas/presenters_node'
 
-    presenters:
+    presenters_node:
       type: object
       properties:
         id:
@@ -5734,6 +6241,84 @@ components:
       allOf:
         - $ref: '#/components/schemas/tag_cloud.base'
 
+    presenter.new:
+      allOf:
+        - $ref: '#/components/schemas/presenter'
+
+    presenter:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        parameters:
+          type: array
+          items:
+            $ref: '#/components/schemas/parameter'
+    presenter_input:
+      type: object
+      properties:
+        type:
+          type: string
+        parameter_values:
+          type: array
+          items:
+            $ref: '#/components/schemas/parameter_value'
+        reports:
+          type: array
+          items:
+            $ref: '#/components/schemas/report_item'
+        report_type:
+          $ref: '#/components/schemas/report_item_type'
+    presenter_output:
+      type: object
+      properties:
+        mime_type:
+          type: string
+        data:
+          type: string
+
+    product.new:
+      allOf:
+        - $ref: '#/components/schemas/product.base'
+        - type: object
+          properties:
+            report_items:
+              type: array
+              items:
+                $ref: '#/components/schemas/report_item.id'
+
+    product.base:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        product_type_id:
+          type: integer
+    product:
+      allOf:
+        - $ref: '#/components/schemas/product.base'
+        - type: object
+          properties:
+            report_items:
+              type: array
+              items:
+                $ref: '#/components/schemas/report_item.presentation'
+    product.presentation:
+      allOf:
+        - $ref: '#/components/schemas/product'
+        - $ref: '#/components/schemas/acl_entry_status'
+        - $ref: '#/components/schemas/presentation'
+
     date:
       type: string
       example: '%d.%m.%Y'
@@ -5743,6 +6328,9 @@ components:
     date_time_seconds:
       type: string
       example: '%d.%m.%Y - %H:%M:%s'
+    date_time_full:
+      type: string
+      example: '%Y-%m-%d %H:%M:%S.%f'
     report_item_lock:
       type: object
       properties:
