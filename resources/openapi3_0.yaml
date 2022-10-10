@@ -3331,6 +3331,598 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/resp.auth.error'
+  /config/remote-access:
+    get:
+      tags: [config]
+      summary: get all remote access resources
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/remote_access.presentation'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    post:
+      tags: [config]
+      summary: add remote access resource
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/remote_access.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/remote-access/{remote_access_id}:
+    parameters:
+      - name: remote_access_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      tags: [config]
+      summary: update remote access resource
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/remote_access.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    delete:
+      tags: [config]
+      summary: delete remote access resource
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/remote-nodes:
+    get:
+      tags: [config]
+      summary: get all remote nodes
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/remote_node.presentation'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    post:
+      tags: [config]
+      summary: add remote node
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/remote_node.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/remote-nodes/{remote_node_id}:
+    parameters:
+      - name: remote_node_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      tags: [config]
+      summary: update remote node
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/remote_node.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    delete:
+      tags: [config]
+      summary: delete remote node
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/remote-nodes/{remote_node_id}/connect:
+    get:
+      tags: [config]
+      summary: connect to a remote node
+      responses:
+        '200':
+          description: response from connecting to the remote node's URL
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/presenters-nodes:
+    get:
+      tags: [config]
+      summary: get all presenters nodes
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/presenters_node.presentation'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    post:
+      tags: [config]
+      summary: add presenters node
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/presenters_node.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/presenters-nodes/{node_id}:
+    parameters:
+      - name: node_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      tags: [config]
+      summary: update presenters node
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/presenters_node.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    delete:
+      tags: [config]
+      summary: delete presenters node
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/publishers-nodes:
+    get:
+      tags: [config]
+      summary: get all publishers nodes
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/publishers_node.presentation'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    post:
+      tags: [config]
+      summary: add publishers node
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/publishers_node.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/publishers-nodes/{node_id}:
+    parameters:
+      - name: node_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      tags: [config]
+      summary: update presenters node
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/publishers_node.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    delete:
+      tags: [config]
+      summary: delete publishers node
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/publisher-preset:
+    get:
+      tags: [config]
+      summary: get all publisher preset
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/publisher_preset.presentation'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    post:
+      tags: [config]
+      summary: add publisher preset
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/publisher_preset.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/publisher-preset/{preset_id}:
+    parameters:
+      - name: preset_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      tags: [config]
+      summary: update publisher preset
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/publisher_preset.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    delete:
+      tags: [config]
+      summary: delete publisher preset
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/bots-nodes:
+    get:
+      tags: [config]
+      summary: get all bots nodes
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/bots_node.presentation'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    post:
+      tags: [config]
+      summary: add bots node
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/bots_node.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/bots-nodes/{node_id}:
+    parameters:
+      - name: node_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      tags: [config]
+      summary: update bots node
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/bots_node.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    delete:
+      tags: [config]
+      summary: delete bots node
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/bots-presets:
+    get:
+      tags: [config]
+      summary: get all bot presets
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/bot_preset.presentation'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    post:
+      tags: [config]
+      summary: add bot preset
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/bot_preset.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+  /config/bots-presets/{preset_id}:
+    parameters:
+      - name: preset_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      tags: [config]
+      summary: update bot preset
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/bot_preset.new'
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+    delete:
+      tags: [config]
+      summary: delete bot preset
+      responses:
+        '200':
+          description: success
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+
+
+
+
+
 
 
 
@@ -4998,6 +5590,47 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/bot'
+
+    publisher.new:
+      allOf:
+        - $ref: '#/components/schemas/publisher'
+
+    publisher:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        parameters:
+          type: array
+          items:
+            $ref: '#/components/schemas/parameter'
+    publisher_input:
+      type: object
+      properties:
+        type:
+          type: string
+        parameter_values:
+          type: array
+          items:
+            $ref: '#/components/schemas/parameter_value'
+        mime_type:
+          type: string
+        data:
+          type: string
+        message_title:
+          type: string
+        message_body:
+          type: string
+        recipients:
+          type: array
+          items:
+            type: string
 
     date_time:
       type: string
