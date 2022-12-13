@@ -121,7 +121,7 @@ class BaseCollector:
             item.attributes = item.attributes or []
             item.title = BaseCollector.presanitize_html(item.title)
             item.review = BaseCollector.presanitize_html(item.review)
-            item.content = BaseCollector.presanitize_html(item.content)
+            item.content = BaseCollector.presanitize_html(item.content)  # TODO: replace with better solution - prevent XSS?
             item.author = BaseCollector.presanitize_html(item.author)
             item.source = item.source  # TODO: replace with link sanitizer
             item.link = item.link  # TODO: replace with link sanitizer
