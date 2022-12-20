@@ -111,9 +111,6 @@ class BaseCollector:
             item.content = item.content or ""
             item.published = item.published or datetime.datetime.now()
             item.collected = item.collected or datetime.datetime.now()
-            if item.hash is None:
-                for_hash = item.author + item.title + item.link
-                item.hash = hashlib.sha256(for_hash.encode()).hexdigest()
             item.osint_source_id = item.osint_source_id or source.id
             item.attributes = item.attributes or []
             item.title = BaseCollector.presanitize_html(item.title)
@@ -122,6 +119,10 @@ class BaseCollector:
             item.author = BaseCollector.presanitize_html(item.author)
             item.source = BaseCollector.presanitize_url(item.source)
             item.link = BaseCollector.presanitize_url(item.link)
+            if item.hash is None:
+                for_hash = item.author + item.title + item.link
+                item.hash = hashlib.sha256(for_hash.encode()).hexdigest()
+
 
     def publish(self, news_items, source):
         BaseCollector.sanitize_news_items(news_items, source)
