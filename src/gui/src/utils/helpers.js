@@ -1,4 +1,5 @@
 import { xor } from 'lodash'
+import { vm } from '../main.js'
 
 export function xorConcat (arrayOne, arrayTwo) {
   return xor(arrayOne, arrayTwo)
@@ -24,7 +25,7 @@ export function stripHtml(html) {
 }
 
 export function notifySuccess(text) {
-  this.$root.$emit('notification',
+  vm.$emit('notification',
     {
       type: 'success',
       loc: text
@@ -32,7 +33,7 @@ export function notifySuccess(text) {
 }
 
 export function notifyFailure(text) {
-  this.$root.$emit('notification',
+  vm.$emit('notification',
     {
       type: 'red',
       loc: text

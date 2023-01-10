@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="mt-15">
+  <v-container fluid class="ma-5 mt-5 pa-5 pt-0">
     <v-form
       @submit.prevent="handleSubmit"
       id="edit_config_form"

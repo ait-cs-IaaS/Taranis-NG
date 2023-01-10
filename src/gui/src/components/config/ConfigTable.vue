@@ -1,26 +1,25 @@
 <template>
   <v-container fluid class="ma-5 mt-5 pa-5 pt-0">
-    <v-col cols="12">
-      <v-card>
-        <v-card-title>
-          <v-text-field
-            v-model="search"
-            append-icon="mdi-magnify"
-            label="Search"
-            single-line
-            class="mr-8"
-            hide-details
-          ></v-text-field>
-          <v-btn
-            color="primary"
-            dark
-            class="ml-8"
-            @click="addItem"
-            v-if="addButton"
-          >
-            New Item
-          </v-btn>
-        </v-card-title>
+    <v-card>
+      <v-card-title>
+        <v-text-field
+          v-model="search"
+          append-icon="mdi-magnify"
+          label="Search"
+          single-line
+          class="mr-8"
+          hide-details
+        ></v-text-field>
+        <v-btn
+          color="primary"
+          dark
+          class="ml-8"
+          @click="addItem"
+          v-if="addButton"
+        >
+          New Item
+        </v-btn>
+      </v-card-title>
       <v-data-table
         ref="configTable"
         :headers="headers"
@@ -62,34 +61,14 @@
           <v-btn color="primary">Reset</v-btn>
         </template>
       </v-data-table>
-      </v-card>
-    </v-col>
-      <v-col cols="12">
-        <EditConfig
-          v-if="formData && Object.keys(formData).length > 0"
-          :configData="formData"
-          @submit="handleSubmit"
-        ></EditConfig>
-      </v-col>
-      <v-col cols="12">
-        <UserForm
-          :user_id=1
-        ></UserForm>
-      </v-col>
+    </v-card>
   </v-container>
 </template>
 
 <script>
-import { emptyValues } from '@/utils/helpers'
-import EditConfig from '../../components/config/EditConfig'
-import UserForm from '../../components/config/user/UserForm'
-
 export default {
   name: 'ConfigTable',
-  components: {
-    EditConfig,
-    UserForm
-  },
+  components: {},
   emits: ['delete-item', 'edit-item', 'add-item'],
   props: {
     items: {
@@ -118,8 +97,6 @@ export default {
     }
   },
   data: () => ({
-    edit: false,
-    formData: {},
     search: ''
   }),
   computed: {
@@ -134,7 +111,9 @@ export default {
       if (this.headerFilter.length > 0) {
         headers = this.headerFilter.map((key) => this.headerTransform(key))
       } else if (this.items.length > 0) {
-        headers = Object.keys(this.items[0]).map((key) => this.headerTransform(key))
+        headers = Object.keys(this.items[0]).map((key) =>
+          this.headerTransform(key)
+        )
       }
       if (this.actionColumn) {
         headers.push(actionHeader)
@@ -154,27 +133,17 @@ export default {
       }
       return { text: key, value: key }
     },
-    handleSubmit(submittedData) {
-      if (this.edit) {
-        this.$emit('edit-item', submittedData)
-      } else {
-        this.$emit('add-item', submittedData)
-      }
+    rowClick(item) {
+      this.$emit('edit-item', item)
+    },
+    addItem() {
+      this.$emit('add-item')
     },
     getDefaultColor(defaultgroup) {
       return defaultgroup ? 'green' : ''
     },
     deleteItem(item) {
       this.$emit('delete-item', item)
-    },
-    addItem() {
-      this.edit = false
-      var onlyKeys = emptyValues(this.items[0])
-      this.formData = onlyKeys
-    },
-    rowClick(item, event) {
-      this.formData = item
-      this.edit = true
     }
   }
 }

@@ -146,7 +146,7 @@
 
 <script>
 import AuthMixin from '../../../services/auth/auth_mixin'
-import { createNewACLEntry, updateACLEntry } from '@/api/config'
+import { createACLEntry, updateACLEntry } from '@/api/config'
 
 import Permissions from '@/services/auth/permissions'
 import { mapActions, mapGetters } from 'vuex'
@@ -282,7 +282,7 @@ export default {
               this.show_error = true
             })
           } else {
-            createNewACLEntry(this.acl).then(() => {
+            createACLEntry(this.acl).then(() => {
               this.$validator.reset()
               this.visible = false
 
@@ -304,15 +304,13 @@ export default {
   },
   mixins: [AuthMixin],
   mounted () {
-    this.loadUsers({ search: '' })
-      .then(() => {
-        this.users = this.getUsers().items
-      })
+    this.loadUsers().then(() => {
+      this.users = this.getUsers().items
+    })
 
-    this.loadRoles({ search: '' })
-      .then(() => {
-        this.roles = this.getRoles().items
-      })
+    this.loadRoles().then(() => {
+      this.roles = this.getRoles().items
+    })
 
     this.$root.$on('show-edit', (data) => {
       this.visible = true
