@@ -16,12 +16,13 @@
 import ConfigTable from '../../components/config/ConfigTable'
 import {
   deleteOSINTSource,
-  createNewOSINTSource,
+  createOSINTSource,
   updateOSINTSource,
   exportOSINTSources,
   importOSINTSources
 } from '@/api/config'
 import { mapActions, mapGetters } from 'vuex'
+import { notifySuccess, emptyValues, notifyFailure } from '@/utils/helpers'
 
 export default {
   name: 'OSINTSources',
@@ -57,35 +58,48 @@ export default {
     exportSources() {
       exportOSINTSources(this.selected)
     },
+    addItem() {
+      this.formData = emptyValues(this.organizations[0])
+      this.showForm = true
+      this.edit = false
+    },
+    editItem(item) {
+      this.formData = item
+      this.showForm = true
+      this.edit = true
+    },
+    handleSubmit(submittedData) {
+      console.log(submittedData)
+      if (this.edit) {
+        this.updateItem(submittedData)
+      } else {
+        this.createItem(submittedData)
+      }
+    },
     deleteItem(item) {
       if (!item.default) {
         deleteOSINTSource(item).then(() => {
-          this.message = `Successfully deleted ${item.name}`
-          this.dialog = true
-          this.$root.$emit('notification', {
-            type: 'success',
-            loc: `Successfully deleted ${item.name}`
-          })
+          notifySuccess(`Successfully deleted ${item.name}`)
           this.updateData()
+        }).catch(() => {
+          notifyFailure(`Failed to delete ${item.name}`)
         })
       }
     },
-    addItem(item) {
-      createNewOSINTSource(item).then(() => {
-        this.$root.$emit('notification', {
-          type: 'success',
-          loc: `Successfully created ${item.name}`
-        })
+    createItem(item) {
+      createOSINTSource(item).then(() => {
+        notifySuccess(`Successfully created ${item.name}`)
         this.updateData()
+      }).catch(() => {
+        notifyFailure(`Failed to create ${item.name}`)
       })
     },
-    editItem(item) {
+    updateItem(item) {
       updateOSINTSource(item).then(() => {
-        this.$root.$emit('notification', {
-          type: 'success',
-          loc: `Successfully updated ${item.name}`
-        })
+        notifySuccess(`Successfully updated ${item.name}`)
         this.updateData()
+      }).catch(() => {
+        notifyFailure(`Failed to update ${item.name}`)
       })
     }
   },

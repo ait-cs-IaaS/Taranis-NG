@@ -87,7 +87,7 @@
 
 <script>
 import AuthMixin from '../../../services/auth/auth_mixin'
-import { createNewOSINTSourceGroup, updateOSINTSourceGroup } from '@/api/config'
+import { createOSINTSourceGroup, updateOSINTSourceGroup } from '@/api/config'
 import Permissions from '@/services/auth/permissions'
 
 import { mapGetters, mapActions } from 'vuex'
@@ -178,7 +178,7 @@ export default {
               this.show_error = true
             })
           } else {
-            createNewOSINTSourceGroup(this.group).then(() => {
+            createOSINTSourceGroup(this.group).then(() => {
               this.$validator.reset()
               this.visible = false
 

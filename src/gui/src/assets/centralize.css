@@ -899,8 +899,6 @@ button.ql-publish:hover {
     border-radius: 4px;
 }
 
-/* --- CardGroup.vue --- */
-
 /* --- NewRole.vue --- */
 .div-wrapper .theme--light.v-card {
     border-left: 5px solid rgb(255, 172, 33);

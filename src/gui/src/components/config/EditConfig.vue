@@ -11,8 +11,22 @@
           v-model="formData[i]"
           :label="i"
           required
-          v-if="typeof item === 'string'"
+          :disabled="i === 'id'"
+          :type="typeof item === 'number' ? 'number' : 'text'"
+          v-if="typeof item === 'number' || typeof item === 'string'"
         ></v-text-field>
+        <div v-if="typeof item === 'object'">
+          <div v-for="(subitem, j) in item" :key="j">
+            <v-text-field
+              v-model="item[j]"
+              :label="j"
+              required
+              :disabled="j === 'id'"
+              :type="typeof subitem === 'number' ? 'number' : 'text'"
+              v-if="typeof subitem === 'number' || typeof subitem === 'string'"
+            ></v-text-field>
+          </div>
+        </div>
       </v-row>
       <v-row no-gutters>
         <v-btn type="submit" color="success" class="mr-4"> Submit </v-btn>

@@ -138,7 +138,7 @@
 </template>
 
 <script>
-import { createNewOSINTSource, updateOSINTSource } from '@/api/config'
+import { createOSINTSource, updateOSINTSource } from '@/api/config'
 import FormParameters from '../../common/FormParameters'
 import AuthMixin from '@/services/auth/auth_mixin'
 import Permissions from '@/services/auth/permissions'
@@ -308,7 +308,7 @@ export default {
               this.show_error = true
             })
           } else {
-            createNewOSINTSource(this.source).then(() => {
+            createOSINTSource(this.source).then(() => {
               this.$validator.reset()
               this.visible = false
               this.$root.$emit('notification',

@@ -14,10 +14,7 @@ import CardCompact from '../card/CardCompact'
 import CardAnalyze from '@/components/analyze/CardAnalyze'
 import CardProduct from '@/components/publish/CardProduct'
 import CardPreset from '@/components/common/card/CardPreset'
-import CardProductType from '@/components/config/product_types/CardProductType'
 import CardUser from '@/components/config/user/CardUser'
-import CardSource from '@/components/config/osint_sources/CardSource'
-import CardGroup from '@/components/config/osint_sources/CardGroup'
 
 export default {
   name: 'ContentData',
@@ -28,10 +25,7 @@ export default {
     CardAnalyze,
     CardProduct,
     CardPreset,
-    CardProductType,
-    CardUser,
-    CardSource,
-    CardGroup
+    CardUser
   },
   props: {
     name: String,

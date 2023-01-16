@@ -59,7 +59,7 @@ export function getAllProductTypes (filter_data) {
   return ApiService.get(`/config/product-types?${filter}`)
 }
 
-export function createNewProductType (product_type) {
+export function createProductType (product_type) {
   return ApiService.post('/config/product-types', product_type)
 }
 
@@ -276,7 +276,7 @@ export function getAllOSINTSources (filter_data) {
   return ApiService.get(`/config/osint-sources?${filter}`)
 }
 
-export function createNewOSINTSource (source) {
+export function createOSINTSource (source) {
   return ApiService.post('/config/osint-sources', source)
 }
 
@@ -301,7 +301,7 @@ export function getAllOSINTSourceGroups (filter_data) {
   return ApiService.get(`/config/osint-source-groups?${filter}`)
 }
 
-export function createNewOSINTSourceGroup (group) {
+export function createOSINTSourceGroup (group) {
   return ApiService.post('/config/osint-source-groups', group)
 }
 
