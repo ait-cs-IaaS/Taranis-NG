@@ -2,24 +2,29 @@
   <div>
     <ConfigTable
       :addButton="true"
-      :items="osint_sources"
-      :headerFilter="['name', 'description', 'id']"
-      groupByItem="collector_type"
+      :items.sync="osint_sources"
+      :headerFilter="['tag', 'id', 'name', 'description']"
+      sortByItem="id"
+      :actionColumn="true"
       @delete-item="deleteItem"
       @edit-item="editItem"
       @add-item="addItem"
     />
+    <EditConfig
+      v-if="formData && Object.keys(formData).length > 0"
+      :configData="formData"
+      @submit="handleSubmit"
+    ></EditConfig>
   </div>
 </template>
 
 <script>
 import ConfigTable from '../../components/config/ConfigTable'
+import EditConfig from '../../components/config/EditConfig'
 import {
-  deleteOSINTSource,
-  createOSINTSource,
-  updateOSINTSource,
-  exportOSINTSources,
-  importOSINTSources
+  deleteOrganization,
+  createOrganization,
+  updateOrganization
 } from '@/api/config'
 import { mapActions, mapGetters } from 'vuex'
 import { notifySuccess, emptyValues, notifyFailure } from '@/utils/helpers'
@@ -27,16 +32,18 @@ import { notifySuccess, emptyValues, notifyFailure } from '@/utils/helpers'
 export default {
   name: 'OSINTSources',
   components: {
-    ConfigTable
+    ConfigTable,
+    EditConfig
   },
   data: () => ({
     osint_sources: [],
-    selected: []
+    formData: {},
+    showForm: false,
+    edit: false
   }),
   methods: {
     ...mapActions('config', ['loadOSINTSources']),
     ...mapGetters('config', ['getOSINTSources']),
-    // ...mapGetters('assess', ['getOSINTSources']),
     ...mapActions(['updateItemCount']),
     updateData() {
       this.loadOSINTSources().then(() => {
@@ -48,18 +55,8 @@ export default {
         })
       })
     },
-    importSources() {
-      importOSINTSources(this.selected).then(() => {
-        this.message = `Successfully imported ${this.selected.length} sources`
-        this.dialog = true
-        this.updateData()
-      })
-    },
-    exportSources() {
-      exportOSINTSources(this.selected)
-    },
     addItem() {
-      this.formData = emptyValues(this.organizations[0])
+      this.formData = emptyValues(this.osint_sources[0])
       this.showForm = true
       this.edit = false
     },
@@ -78,7 +75,7 @@ export default {
     },
     deleteItem(item) {
       if (!item.default) {
-        deleteOSINTSource(item).then(() => {
+        deleteOrganization(item).then(() => {
           notifySuccess(`Successfully deleted ${item.name}`)
           this.updateData()
         }).catch(() => {
@@ -87,7 +84,7 @@ export default {
       }
     },
     createItem(item) {
-      createOSINTSource(item).then(() => {
+      createOrganization(item).then(() => {
         notifySuccess(`Successfully created ${item.name}`)
         this.updateData()
       }).catch(() => {
@@ -95,7 +92,7 @@ export default {
       })
     },
     updateItem(item) {
-      updateOSINTSource(item).then(() => {
+      updateOrganization(item).then(() => {
         notifySuccess(`Successfully updated ${item.name}`)
         this.updateData()
       }).catch(() => {
@@ -106,7 +103,6 @@ export default {
   mounted() {
     this.updateData()
   },
-  beforeDestroy() {
-  }
+  beforeDestroy() {}
 }
 </script>
