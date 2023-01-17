@@ -85,42 +85,30 @@ def refresh_collector(collector):
         logger.critical(f"Connection error: Could not reach {collector.node.api_url}")
 
 
-def export_osint_sources(input_data):
-    osint_sources = OSINTSource.get_all()
-    if input_data is not None and "selection" in input_data:
-        data = [
-            osint_source
-            for osint_source in osint_sources[:]
-            if osint_source.id in input_data["selection"]
-        ]
-    else:
-        data = osint_sources
+def export_osint_sources(ids: list[str]):
+    data = OSINTSource.get_all_by_id(ids) if ids else OSINTSource.get_all()
 
     schema = OSINTSourceExportRootSchema()
     export_data = schema.dump(OSINTSourceExportRoot(1, data))
-
-    for osint_source in export_data["data"]:
-        for parameter_value in osint_source["parameter_values"]:
-            if parameter_value["parameter"]["key"] == "PROXY_SERVER":
-                parameter_value["value"] = ""
-
+    if "data" not in export_data:
+        return None
+    export_data = export_data["data"]
+    export_data = cleanup_paramaters(export_data)
     return json.dumps(export_data).encode("utf-8")
 
 
-def import_osint_sources(collectors_node_id, file):
-    collectors_node = CollectorsNode.get_by_id(collectors_node_id)
+def cleanup_paramaters(osint_sources: list) -> list:
+    for osint_source in osint_sources:
+        for parameter_value in osint_source["parameter_values"]:
+            if parameter_value["parameter"]["key"] == "PROXY_SERVER":
+                parameter_value["value"] = ""
+    return osint_sources
 
+
+def import_osint_sources(file):
     file_data = file.read()
     json_data = json.loads(file_data.decode("utf8"))
-    schema = OSINTSourceExportRootSchema()
-    import_data = schema.load(json_data)
+    import_data = OSINTSourceExportRootSchema().load(json_data).data
 
-    collectors = set()
-    for osint_source in import_data.data:
-        collector = collectors_node.find_collector_by_type(osint_source.collector.type)
-        if collector is not None:
-            collectors.add(collector)
-            OSINTSource.import_new(osint_source, collector)
-
-    for collector in collectors:
-        refresh_collector(collector)
+    for osint_source in import_data:
+        OSINTSource.import_new(osint_source)

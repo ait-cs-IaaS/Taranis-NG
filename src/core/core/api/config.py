@@ -349,8 +349,9 @@ class OSINTSource(Resource):
 
 class OSINTSourcesExport(Resource):
     @auth_required("CONFIG_OSINT_SOURCE_ACCESS")
-    def post(self):
-        data = collectors_manager.export_osint_sources(request.json)
+    def get(self):
+        ids = request.args.getlist(key="ids")
+        data = collectors_manager.export_osint_sources(ids)
         return send_file(
             io.BytesIO(data),
             download_name="osint_sources_export.json",
@@ -363,8 +364,7 @@ class OSINTSourcesImport(Resource):
     @auth_required("CONFIG_OSINT_SOURCE_CREATE")
     def post(self):
         if file := request.files.get("file"):
-            collectors_node_id = request.form["collectors_node_id"]
-            collectors_manager.import_osint_sources(collectors_node_id, file)
+            collectors_manager.import_osint_sources(file)
 
 
 class OSINTSourceGroups(Resource):

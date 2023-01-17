@@ -50,7 +50,7 @@ export default {
       })
     },
     addItem() {
-      this.formData = emptyValues(this.organizations[0])
+      this.formData = emptyValues(this.nodes[0])
       this.showForm = true
       this.edit = false
     },
@@ -68,14 +68,13 @@ export default {
       }
     },
     deleteItem(item) {
-      if (!item.default) {
-        deleteNode(item).then(() => {
-          notifySuccess(`Successfully deleted ${item.name}`)
-          this.updateData()
-        }).catch(() => {
-          notifyFailure(`Failed to delete ${item.name}`)
-        })
-      }
+      console.log(item)
+      deleteNode(item).then(() => {
+        notifySuccess(`Successfully deleted ${item.name}`)
+        this.updateData()
+      }).catch(() => {
+        notifyFailure(`Failed to delete ${item.name}`)
+      })
     },
     createItem(item) {
       createNode(item).then(() => {

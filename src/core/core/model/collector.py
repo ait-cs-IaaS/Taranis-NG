@@ -40,6 +40,14 @@ class Collector(db.Model):
         new_collector_schema = NewCollectorSchema(many=True)
         return new_collector_schema.load(collectors_data)
 
+    @classmethod
+    def get_first(cls):
+        return cls.query.first()
+
+    @classmethod
+    def find_by_type(cls, type):
+        return cls.query.filter_by(type=type).first()
+
 
 class CollectorParameter(db.Model):
     collector_id = db.Column(db.String, db.ForeignKey("collector.id", ondelete="CASCADE"), primary_key=True)

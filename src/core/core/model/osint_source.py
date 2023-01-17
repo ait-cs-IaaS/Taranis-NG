@@ -132,8 +132,12 @@ class OSINTSource(db.Model):
         return query.order_by(db.asc(OSINTSource.name)).all(), query.count()
 
     @classmethod
-    def get_by_id(cls, id):
+    def get_by_id(cls, id: str):
         return cls.query.filter_by(id=id).first()
+
+    @classmethod
+    def get_all_by_id(cls, ids: list):
+        return cls.query.filter(cls.id.in_(ids)).all()
 
     @classmethod
     def get_all_json(cls, search):
@@ -195,7 +199,8 @@ class OSINTSource(db.Model):
         return osint_source
 
     @classmethod
-    def import_new(cls, osint_source, collector):
+    def import_new(cls, osint_source):
+        collector = Collector.find_by_type(osint_source.collector.type)
         parameter_values = []
         for parameter_value in osint_source.parameter_values:
             for parameter in collector.parameters:

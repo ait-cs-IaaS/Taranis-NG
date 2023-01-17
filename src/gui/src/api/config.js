@@ -292,8 +292,8 @@ export function importOSINTSources (form_data) {
   return ApiService.upload('/config/import-osint-sources', form_data)
 }
 
-export function exportOSINTSources (data) {
-  return ApiService.download('/config/export-osint-sources', data, 'osint_sources_export.json')
+export function exportOSINTSources (filter_data) {
+  return ApiService.download('/config/export-osint-sources', 'osint_sources_export.json')
 }
 
 export function getAllOSINTSourceGroups (filter_data) {

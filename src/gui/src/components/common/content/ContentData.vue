@@ -14,7 +14,6 @@ import CardCompact from '../card/CardCompact'
 import CardAnalyze from '@/components/analyze/CardAnalyze'
 import CardProduct from '@/components/publish/CardProduct'
 import CardPreset from '@/components/common/card/CardPreset'
-import CardUser from '@/components/config/user/CardUser'
 
 export default {
   name: 'ContentData',
@@ -24,8 +23,7 @@ export default {
     CardCompact,
     CardAnalyze,
     CardProduct,
-    CardPreset,
-    CardUser
+    CardPreset
   },
   props: {
     name: String,

@@ -1,5 +1,6 @@
 <template>
   <div>
+
     <ConfigTable
       :addButton="true"
       :items.sync="osint_sources"
@@ -9,7 +10,14 @@
       @delete-item="deleteItem"
       @edit-item="editItem"
       @add-item="addItem"
-    />
+    >
+    <template v-slot:titlebar>
+      <ImportExport
+        @import="importData"
+        @export="exportData"
+      ></ImportExport>
+    </template>
+    </ConfigTable>
     <EditConfig
       v-if="formData && Object.keys(formData).length > 0"
       :configData="formData"
@@ -21,10 +29,13 @@
 <script>
 import ConfigTable from '../../components/config/ConfigTable'
 import EditConfig from '../../components/config/EditConfig'
+import ImportExport from '../../components/config/ImportExport'
 import {
-  deleteOrganization,
-  createOrganization,
-  updateOrganization
+  deleteOSINTSource,
+  createOSINTSource,
+  updateOSINTSource,
+  exportOSINTSources,
+  importOSINTSources
 } from '@/api/config'
 import { mapActions, mapGetters } from 'vuex'
 import { notifySuccess, emptyValues, notifyFailure } from '@/utils/helpers'
@@ -33,10 +44,12 @@ export default {
   name: 'OSINTSources',
   components: {
     ConfigTable,
-    EditConfig
+    EditConfig,
+    ImportExport
   },
   data: () => ({
     osint_sources: [],
+    selected: [],
     formData: {},
     showForm: false,
     edit: false
@@ -74,17 +87,15 @@ export default {
       }
     },
     deleteItem(item) {
-      if (!item.default) {
-        deleteOrganization(item).then(() => {
-          notifySuccess(`Successfully deleted ${item.name}`)
-          this.updateData()
-        }).catch(() => {
-          notifyFailure(`Failed to delete ${item.name}`)
-        })
-      }
+      deleteOSINTSource(item).then(() => {
+        notifySuccess(`Successfully deleted ${item.name}`)
+        this.updateData()
+      }).catch(() => {
+        notifyFailure(`Failed to delete ${item.name}`)
+      })
     },
     createItem(item) {
-      createOrganization(item).then(() => {
+      createOSINTSource(item).then(() => {
         notifySuccess(`Successfully created ${item.name}`)
         this.updateData()
       }).catch(() => {
@@ -92,12 +103,19 @@ export default {
       })
     },
     updateItem(item) {
-      updateOrganization(item).then(() => {
+      updateOSINTSource(item).then(() => {
         notifySuccess(`Successfully updated ${item.name}`)
         this.updateData()
       }).catch(() => {
         notifyFailure(`Failed to update ${item.name}`)
       })
+    },
+    importData(data) {
+      importOSINTSources(data)
+    },
+    exportData() {
+      console.debug('export OSINT sources')
+      exportOSINTSources(this.selected)
     }
   },
   mounted() {

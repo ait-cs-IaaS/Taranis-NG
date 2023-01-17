@@ -80,6 +80,10 @@ class CollectorsNode(db.Model):
         return cls.query.filter_by(id=id).first()
 
     @classmethod
+    def get_first(cls):
+        return cls.query.first()
+
+    @classmethod
     def get_json_by_id(cls, id):
         return CollectorsNodeSchema().dump(cls.get_by_id(id))
 
@@ -95,19 +99,6 @@ class CollectorsNode(db.Model):
         nodes, count = cls.get(search)
         node_schema = CollectorsNodeSchema(many=True)
         items = node_schema.dump(nodes)
-
-        for i in range(len(items)):
-            # calculate collector status
-            #   green (last ping in time) < 60s
-            #   orange (last ping late) < 300s
-            #   red (no ping in a long time) > 300s
-            try:
-                time_inactive = datetime.now() - max(nodes[i].created, nodes[i].last_seen)
-                items[i]["status"] = "green" if time_inactive.seconds < 60 else "orange" if time_inactive.seconds < 300 else "red"
-            except Exception:
-                logger.log_debug_trace("Cannot update collector status.")
-                # if never collected before
-                items[i]["status"] = "red"
 
         return {"total_count": count, "items": items}
 

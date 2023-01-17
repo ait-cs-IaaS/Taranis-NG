@@ -19,6 +19,7 @@
         >
           New Item
         </v-btn>
+        <slot name="titlebar"></slot>
       </v-card-title>
       <v-data-table
         ref="configTable"
@@ -28,7 +29,8 @@
         :group-by="groupByItem"
         :sort-by="sortByItem"
         class="elevation-1"
-        hide-default-footer
+        :hide-default-footer="items.length < 10"
+        show-select
         @click:row="rowClick"
       >
         <template v-slot:[`group.header`]="{ items }">
@@ -47,15 +49,15 @@
         </template>
 
         <template v-slot:[`item.tag`]="{ item }">
-          <v-icon small class="mr-2">
+          <v-icon small class="mr-1">
             {{ item.tag }}
           </v-icon>
         </template>
         <template v-slot:[`item.actions`]="{ item }">
-          <v-icon small class="mr-2" @click.stop="rowClick(item)">
-            mdi-pencil
-          </v-icon>
-          <v-icon small @click.stop="deleteItem(item)"> mdi-delete </v-icon>
+          <div class="d-inline-flex">
+            <v-icon small class="mr-1" @click.stop="rowClick(item)"> mdi-pencil </v-icon>
+            <v-icon small @click.stop="deleteItem(item)"> mdi-delete </v-icon>
+          </div>
         </template>
         <template v-slot:no-data>
           <v-btn color="primary">Reset</v-btn>
@@ -97,7 +99,8 @@ export default {
     }
   },
   data: () => ({
-    search: ''
+    search: '',
+    openImportDialog: false
   }),
   computed: {
     headers() {
@@ -105,7 +108,7 @@ export default {
         text: 'Actions',
         value: 'actions',
         sortable: false,
-        width: '15px'
+        width: '30px'
       }
       var headers = []
       if (this.headerFilter.length > 0) {

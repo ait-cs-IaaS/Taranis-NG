@@ -22,9 +22,9 @@
 import ConfigTable from '../../components/config/ConfigTable'
 import EditConfig from '../../components/config/EditConfig'
 import {
-  deleteOrganization,
-  createOrganization,
-  updateOrganization
+  deleteRoles,
+  createRoles,
+  updateRoles
 } from '@/api/config'
 import { mapActions, mapGetters } from 'vuex'
 import { notifySuccess, emptyValues, notifyFailure } from '@/utils/helpers'
@@ -75,7 +75,7 @@ export default {
     },
     deleteItem(item) {
       if (!item.default) {
-        deleteOrganization(item).then(() => {
+        deleteRoles(item).then(() => {
           notifySuccess(`Successfully deleted ${item.name}`)
           this.updateData()
         }).catch(() => {
@@ -84,7 +84,7 @@ export default {
       }
     },
     createItem(item) {
-      createOrganization(item).then(() => {
+      createRoles(item).then(() => {
         notifySuccess(`Successfully created ${item.name}`)
         this.updateData()
       }).catch(() => {
@@ -92,7 +92,7 @@ export default {
       })
     },
     updateItem(item) {
-      updateOrganization(item).then(() => {
+      updateRoles(item).then(() => {
         notifySuccess(`Successfully updated ${item.name}`)
         this.updateData()
       }).catch(() => {
