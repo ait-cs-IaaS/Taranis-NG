@@ -16,6 +16,8 @@ export default {
   },
   data: () => ({
     links: [
+      { icon: 'mdi-monitor-dashboard', title: 'nav_menu.dashboard', route: '/config' },
+      { separator: '1' },
       { icon: 'mdi-account-group', title: 'nav_menu.users', route: '/config/users', permission: 'CONFIG_USER_ACCESS' },
       { icon: 'mdi-office-building', title: 'nav_menu.organizations', route: '/config/organizations', permission: 'CONFIG_ORGANIZATION_ACCESS' },
       { icon: 'mdi-account-arrow-right', title: 'nav_menu.roles', route: '/config/roles', permission: 'CONFIG_ROLE_ACCESS' },

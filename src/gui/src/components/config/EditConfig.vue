@@ -47,13 +47,12 @@
           v-if="item.type === 'combobox' && item.options"
         ></v-combobox>
         <v-col cols="12" v-if="item.type === 'table'">
-          {{ item.items }}
           <v-data-table
             :label="item.label"
             :headers="item.headers"
-            show-select
-            :disabled="item['disabled'] !== undefined"
+            :show-select="item['disabled'] === undefined"
             :items="item.items"
+            :hide-default-footer="item.items.length < 10"
             v-model="formData[item.name]"
           ></v-data-table>
         </v-col>

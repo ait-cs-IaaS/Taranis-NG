@@ -4,7 +4,6 @@
       :addButton="true"
       :items.sync="nodes"
       :headerFilter="['tag', 'name', 'title', 'description']"
-      sortByItem="id"
       :actionColumn=true
       @delete-item="deleteItem"
       @edit-item="editItem"
@@ -13,6 +12,7 @@
     <EditConfig
       v-if="formData && Object.keys(formData).length > 0"
       :configData="formData"
+      :formFormat="formFormat"
       @submit="handleSubmit"
     ></EditConfig>
   </div>
@@ -34,11 +34,57 @@ export default {
   data: () => ({
     nodes: [],
     formData: {},
-    edit: false
+    edit: false,
+    worker_type: []
   }),
+  computed: {
+    formFormat() {
+      return [
+        {
+          name: 'id',
+          label: 'ID',
+          type: 'text',
+          disabled: true
+        },
+        {
+          name: 'name',
+          label: 'Name',
+          type: 'text',
+          required: true
+        },
+        {
+          name: 'description',
+          label: 'Description',
+          type: 'textarea',
+          required: true
+        },
+        {
+          name: 'api_url',
+          label: 'Node URL',
+          type: 'text'
+        },
+        {
+          name: 'api_key',
+          label: 'API Key',
+          type: 'text'
+        },
+        {
+          name: this.worker_type,
+          label: 'Workers',
+          type: 'table',
+          disabled: true,
+          headers: [
+            { text: 'Name', value: 'name' },
+            { text: 'Description', value: 'description' },
+            { text: 'Type', value: 'type' }
+          ],
+          items: this.formData[this.worker_type] || []
+        }
+      ]
+    }
+  },
   methods: {
     ...mapActions('config', ['loadNodes']),
-    ...mapActions(['updateItemCount']),
     ...mapGetters('config', ['getNodes']),
     ...mapActions(['updateItemCount']),
     updateData() {
@@ -53,6 +99,13 @@ export default {
       this.edit = false
     },
     editItem(item) {
+      if (item.bots) {
+        this.worker_type = 'bots'
+      } else if (item.collectors) {
+        this.worker_type = 'collectors'
+      } else {
+        console.log('No workers found')
+      }
       this.formData = item
       this.edit = true
     },

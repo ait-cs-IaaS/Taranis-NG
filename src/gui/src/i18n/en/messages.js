@@ -90,7 +90,8 @@ const messages_en = {
     notification_templates: "Notification Templates",
     remote_access: "Remote Access",
     remote_nodes: "Remote Nodes",
-    local: "Local"
+    local: "Local",
+    dashboard: "Dashboard"
   },
 
   nodes: {
