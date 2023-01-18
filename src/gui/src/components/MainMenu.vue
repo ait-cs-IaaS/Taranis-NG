@@ -33,12 +33,6 @@
           version="1.1"
           height="30"
           viewBox="0 0 435 84"
-          style="
-            fill-rule: evenodd;
-            clip-rule: evenodd;
-            stroke-linejoin: round;
-            stroke-miterlimit: 2;
-          "
         >
           <g id="taranis-logo">
             <path
@@ -59,9 +53,13 @@
     </v-toolbar-title>
 
     <div class="item-count">
-      <span>total items: <strong>{{ itemCount().total }}</strong></span>
+      <span
+        >total items: <strong>{{ getItemCount.total }}</strong></span
+      >
 
-      <span v-if="isFiltered()"> / displayed items: <strong>{{ itemCount().filtered }}</strong></span>
+      <span v-if="isFiltered">
+        / displayed items: <strong>{{ getItemCount.filtered }}</strong></span
+      >
     </div>
 
     <v-spacer></v-spacer>
@@ -203,26 +201,17 @@ export default {
   mixins: [AuthMixin],
   methods: {
     ...mapActions(['toggleDrawer']),
-    ...mapGetters(['getItemCount']),
 
-    navClicked () {
+    navClicked() {
       this.opened = !this.opened
       this.toggleDrawer()
     },
 
-    darkToggle () {
+    darkToggle() {
       this.$vuetify.theme.dark = this.darkTheme
     },
 
-    isFiltered () {
-      return this.getItemCount().filtered === undefined ? false : this.getItemCount().filtered !== this.getItemCount().total
-    },
-
-    itemCount () {
-      return this.getItemCount()
-    },
-
-    getButtonList (permissions) {
+    getButtonList(permissions) {
       return this.buttons.filter(
         (button) =>
           this.checkPermission(permissions[button.permission]) && button.show
@@ -230,9 +219,13 @@ export default {
     }
   },
   computed: {
+    ...mapGetters(['getItemCount']),
+    isFiltered() {
+      return this.getItemCount.filtered === undefined
+        ? false
+        : this.getItemCount.filtered !== this.getItemCount.total
+    }
   },
-  mounted () {
-
-  }
+  mounted() {}
 }
 </script>

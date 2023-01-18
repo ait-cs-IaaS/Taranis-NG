@@ -23,6 +23,10 @@
       </v-card-title>
       <v-data-table
         ref="configTable"
+        v-model="selected"
+        @change="emitSelectionChange"
+        @update:search="emitSearchChange"
+        @current-items="emitFilterChange"
         :headers="headers"
         :items="items"
         :search="search"
@@ -68,10 +72,11 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex'
 export default {
   name: 'ConfigTable',
   components: {},
-  emits: ['delete-item', 'edit-item', 'add-item'],
+  emits: ['delete-item', 'edit-item', 'add-item', 'selection-change', 'search-change'],
   props: {
     items: {
       type: Array,
@@ -100,7 +105,7 @@ export default {
   },
   data: () => ({
     search: '',
-    openImportDialog: false
+    selected: []
   }),
   computed: {
     headers() {
@@ -125,6 +130,8 @@ export default {
     }
   },
   methods: {
+    ...mapActions(['updateItemCountFiltered']),
+
     headerTransform(key) {
       if (key === 'tag') {
         return {
@@ -135,6 +142,15 @@ export default {
         }
       }
       return { text: key, value: key }
+    },
+    emitFilterChange(e) {
+      this.updateItemCountFiltered(e.length)
+    },
+    emitSearchChange() {
+      this.$emit('search-change', this.search)
+    },
+    emitSelectionChange() {
+      this.$emit('selection-change', this.selected)
     },
     rowClick(item) {
       this.$emit('edit-item', item)

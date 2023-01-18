@@ -13,6 +13,7 @@
     <EditConfig
       v-if="formData && Object.keys(formData).length > 0"
       :configData="formData"
+      :formFormat="formFormat"
       @submit="handleSubmit"
     ></EditConfig>
   </div>
@@ -38,12 +39,56 @@ export default {
   data: () => ({
     roles: [],
     formData: {},
-    showForm: false,
-    edit: false
+    edit: false,
+    permissions: []
   }),
+  computed: {
+    formFormat() {
+      return [
+        {
+          name: 'id',
+          label: 'ID',
+          type: 'text',
+          disabled: true
+        },
+        {
+          name: 'name',
+          label: 'Name',
+          type: 'text',
+          required: true
+        },
+        {
+          name: 'description',
+          label: 'Description',
+          type: 'textarea',
+          required: true
+        },
+        {
+          name: 'title',
+          label: 'Title',
+          type: 'text'
+        },
+        {
+          name: 'subtitle',
+          label: 'SubTitle',
+          type: 'text'
+        },
+        {
+          name: 'permissions',
+          label: 'Permissions',
+          type: 'table',
+          headers: [
+            { text: 'Name', value: 'name' },
+            { text: 'Description', value: 'description' }
+          ],
+          items: this.permissions
+        }
+      ]
+    }
+  },
   methods: {
-    ...mapActions('config', ['loadRoles']),
-    ...mapGetters('config', ['getRoles']),
+    ...mapActions('config', ['loadRoles', 'loadPermissions']),
+    ...mapGetters('config', ['getRoles', 'getPermissions']),
     ...mapActions(['updateItemCount']),
     updateData() {
       this.loadRoles().then(() => {
@@ -54,15 +99,16 @@ export default {
           filtered: sources.length
         })
       })
+      this.loadPermissions().then(() => {
+        this.permissions = this.getPermissions().items
+      })
     },
     addItem() {
       this.formData = emptyValues(this.roles[0])
-      this.showForm = true
       this.edit = false
     },
     editItem(item) {
       this.formData = item
-      this.showForm = true
       this.edit = true
     },
     handleSubmit(submittedData) {

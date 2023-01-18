@@ -22,12 +22,12 @@ from shared.schema.osint_source import (
     OSINTSourceGroupSchemaBase,
     OSINTSourceCollectorSchema,
 )
-from shared.schema.word_list import WordListIdSchema
+from shared.schema.word_list import WordListSchema
 
 
 class NewOSINTSourceSchema(OSINTSourceSchema):
     parameter_values = fields.List(fields.Nested(NewParameterValueSchema), load_default=[])
-    word_lists = fields.List(fields.Nested(WordListIdSchema), load_default=[])
+    word_lists = fields.List(fields.Nested(WordListSchema), load_default=[])
     osint_source_groups = fields.List(fields.Nested(OSINTSourceGroupIdSchema), load_default=[])
 
     @post_load

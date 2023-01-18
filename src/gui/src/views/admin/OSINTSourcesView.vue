@@ -1,15 +1,15 @@
 <template>
   <div>
-
     <ConfigTable
       :addButton="true"
       :items.sync="osint_sources"
-      :headerFilter="['tag', 'id', 'name', 'description']"
+      :headerFilter="['tag', 'name', 'description', 'FEED_URL']"
       sortByItem="id"
       :actionColumn="true"
       @delete-item="deleteItem"
       @edit-item="editItem"
       @add-item="addItem"
+      @selection-change="selectionChange"
     >
     <template v-slot:titlebar>
       <ImportExport
@@ -48,10 +48,10 @@ export default {
     ImportExport
   },
   data: () => ({
+    unparsed_sources: [],
     osint_sources: [],
     selected: [],
     formData: {},
-    showForm: false,
     edit: false
   }),
   methods: {
@@ -61,29 +61,58 @@ export default {
     updateData() {
       this.loadOSINTSources().then(() => {
         const sources = this.getOSINTSources()
-        this.osint_sources = sources.items
+        this.unparsed_sources = sources.items
+        const psources = this.parseSource(sources.items)
+        this.osint_sources = psources
         this.updateItemCount({
           total: sources.total_count,
           filtered: sources.length
         })
       })
     },
+    parseSource(data) {
+      const sources = []
+
+      data.forEach(source => {
+        const rootLevel = {
+          name: source.name,
+          id: source.id,
+          description: source.description,
+          collector_id: source.collector_id
+        }
+
+        source.parameter_values.forEach(parameter => {
+          rootLevel[parameter.parameter.key] = parameter.value
+        })
+        sources.push(rootLevel)
+      })
+
+      return sources
+    },
+    parseSubmittedData(data) {
+      const result = this.unparsed_sources.find(item => item.id === data.id)
+
+      result.parameter_values.forEach(parameter => {
+        parameter.value = data[parameter.parameter.key]
+      })
+
+      return result
+    },
     addItem() {
       this.formData = emptyValues(this.osint_sources[0])
-      this.showForm = true
       this.edit = false
     },
     editItem(item) {
       this.formData = item
-      this.showForm = true
       this.edit = true
     },
     handleSubmit(submittedData) {
-      console.log(submittedData)
+      const updateItem = this.parseSubmittedData(submittedData)
+      console.log(updateItem)
       if (this.edit) {
-        this.updateItem(submittedData)
+        this.updateItem(updateItem)
       } else {
-        this.createItem(submittedData)
+        this.createItem(updateItem)
       }
     },
     deleteItem(item) {
@@ -116,6 +145,9 @@ export default {
     exportData() {
       console.debug('export OSINT sources')
       exportOSINTSources(this.selected)
+    },
+    selectionChange(selected) {
+      this.selected = selected.map(item => item.id)
     }
   },
   mounted() {

@@ -129,7 +129,7 @@
 </template>
 
 <script>
-import { createNewReportItemType, updateReportItemType } from '@/api/config'
+import { createReportItemType, updateReportItemType } from '@/api/config'
 
 import AttributeTable from '@/components/config/report_types/AttributeTable'
 import AuthMixin from '@/services/auth/auth_mixin'
@@ -240,7 +240,7 @@ export default {
               this.show_error = true
             })
           } else {
-            createNewReportItemType(this.report_type).then(() => {
+            createReportItemType(this.report_type).then(() => {
               this.$validator.reset()
               this.visible = false
               this.$root.$emit('notification',

@@ -127,7 +127,7 @@
 </template>
 
 <script>
-import { createNewWordList, updateWordList } from '@/api/config'
+import { createWordList, updateWordList } from '@/api/config'
 import WordTable from '@/components/config/word_lists/WordTable'
 import AuthMixin from '@/services/auth/auth_mixin'
 import Permissions from '@/services/auth/permissions'
@@ -210,7 +210,7 @@ export default {
               this.show_error = true
             })
           } else {
-            createNewWordList(this.word_list).then(() => {
+            createWordList(this.word_list).then(() => {
               this.$validator.reset()
               this.visible = false
               this.$root.$emit('notification',

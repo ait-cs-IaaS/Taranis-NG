@@ -35,9 +35,7 @@ export default {
       { icon: 'mdi-format-list-text', title: 'nav_menu.word_lists', route: '/config/wordlists', permission: 'CONFIG_WORD_LIST_ACCESS' },
       { separator: '1' },
       { icon: 'mdi-remote-desktop', title: 'nav_menu.remote_access', route: '/config/remote/access', permission: 'CONFIG_REMOTE_ACCESS_ACCESS' },
-      { icon: 'mdi-share-variant', title: 'nav_menu.remote_nodes', route: '/config/remote/nodes', permission: 'CONFIG_REMOTE_NODE_ACCESS' },
-      { separator: '1' },
-      { icon: 'mdi-robot', title: 'nav_menu.bot_presets', route: '/config/bots/presets', permission: 'CONFIG_BOT_PRESET_ACCESS' }
+      { icon: 'mdi-share-variant', title: 'nav_menu.remote_nodes', route: '/config/remote/nodes', permission: 'CONFIG_REMOTE_NODE_ACCESS' }
     ]
   })
 }

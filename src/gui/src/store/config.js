@@ -1,7 +1,6 @@
 import {
   getAllACLEntries,
   getAllAttributes,
-  getAllBotPresets,
   getAllExternalPermissions,
   getAllExternalUsers,
   getAllOrganizations,
@@ -38,8 +37,7 @@ const state = {
   presenters_nodes: { total_count: 0, items: [] },
   publishers_nodes: { total_count: 0, items: [] },
   publisher_presets: { total_count: 0, items: [] },
-  bots_nodes: { total_count: 0, items: [] },
-  bot_presets: { total_count: 0, items: [] }
+  bots_nodes: { total_count: 0, items: [] }
 }
 
 const actions = {
@@ -175,13 +173,6 @@ const actions = {
       .then(response => {
         context.commit('setPublisherPresets', response.data)
       })
-  },
-
-  loadBotPresets (context, data) {
-    return getAllBotPresets(data)
-      .then(response => {
-        context.commit('setBotPresets', response.data)
-      })
   }
 }
 
@@ -244,10 +235,6 @@ const mutations = {
 
   setPublisherPresets (state, publisher_presets) {
     state.publisher_presets = publisher_presets
-  },
-
-  setBotPresets (state, bot_presets) {
-    state.bot_presets = bot_presets
   }
 }
 
@@ -351,10 +338,6 @@ const getters = {
       return item
     })
     return state.bots_nodes
-  },
-
-  getBotPresets (state) {
-    return state.bot_presets
   }
 }
 

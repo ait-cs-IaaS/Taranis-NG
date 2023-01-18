@@ -91,7 +91,7 @@
 </template>
 
 <script>
-import { createNewBotPreset, updateBotPreset } from '@/api/config'
+import { createBotPreset, updateBotPreset } from '@/api/config'
 
 import FormParameters from '../../common/FormParameters'
 import AuthMixin from '@/services/auth/auth_mixin'
@@ -178,7 +178,7 @@ export default {
               this.show_error = true
             })
           } else {
-            createNewBotPreset(this.preset).then(() => {
+            createBotPreset(this.preset).then(() => {
               this.$validator.reset()
               this.visible = false
               this.$root.$emit('notification',

@@ -289,7 +289,7 @@
 </template>
 
 <script>
-import { createNewAttribute, updateAttribute, getAttributeEnums, deleteAttributeEnum, addAttributeEnum, updateAttributeEnum, reloadDictionaries } from '@/api/config'
+import { createAttribute, updateAttribute, getAttributeEnums, deleteAttributeEnum, addAttributeEnum, updateAttributeEnum, reloadDictionaries } from '@/api/config'
 
 import AuthMixin from '@/services/auth/auth_mixin'
 import Permissions from '@/services/auth/permissions'
@@ -551,7 +551,7 @@ export default {
               this.show_error = true
             })
           } else {
-            createNewAttribute(this.attribute).then(() => {
+            createAttribute(this.attribute).then(() => {
               this.$validator.reset()
               this.visible = false
               this.$root.$emit('notification',

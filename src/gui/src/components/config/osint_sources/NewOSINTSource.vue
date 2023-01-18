@@ -341,7 +341,7 @@ export default {
   mounted () {
     this.loadCollectorsNodes({ search: '' })
       .then(() => {
-        this.nodes = this.getCollectorsNodes().items
+        this.nodes = this.getCollectorsNodes()
         for (let i = 0; i < this.nodes.length; i++) {
           for (let j = 0; j < this.nodes[i].collectors.length; j++) {
             this.nodes[i].collectors[j].name_with_id = this.nodes[i].collectors[j].name + ' (ID: ' + this.nodes[i].collectors[j].id + ')'

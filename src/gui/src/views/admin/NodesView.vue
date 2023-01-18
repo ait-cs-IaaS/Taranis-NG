@@ -34,7 +34,6 @@ export default {
   data: () => ({
     nodes: [],
     formData: {},
-    showForm: false,
     edit: false
   }),
   methods: {
@@ -51,12 +50,10 @@ export default {
     },
     addItem() {
       this.formData = emptyValues(this.nodes[0])
-      this.showForm = true
       this.edit = false
     },
     editItem(item) {
       this.formData = item
-      this.showForm = true
       this.edit = true
     },
     handleSubmit(submittedData) {

@@ -9,7 +9,7 @@ export function getAllAttributes (filter_data) {
   return ApiService.get(`/config/attributes?${filter}`)
 }
 
-export function createNewAttribute (attribute) {
+export function createAttribute (attribute) {
   return ApiService.post('/config/attributes', attribute)
 }
 
@@ -42,7 +42,7 @@ export function getAllReportItemTypes (filter_data) {
   return ApiService.get(`/config/report-item-types?${filter}`)
 }
 
-export function createNewReportItemType (report_item_type) {
+export function createReportItemType (report_item_type) {
   return ApiService.post('/config/report-item-types', report_item_type)
 }
 
@@ -86,7 +86,7 @@ export function getAllRoles (filter_data) {
   return ApiService.get(`/config/roles?${filter}`)
 }
 
-export function createNewRole (role) {
+export function createRole (role) {
   return ApiService.post('/config/roles', role)
 }
 
@@ -155,7 +155,7 @@ export function getAllExternalUsers (filter) {
   return ApiService.get(`/config/external-users?search=${filter.search}`)
 }
 
-export function createNewExternalUser (user) {
+export function createExternalUser (user) {
   return ApiService.post('/config/external-users', user)
 }
 
@@ -172,7 +172,7 @@ export function getAllWordLists (filter_data) {
   return ApiService.get(`/config/word-lists?${filter}`)
 }
 
-export function createNewWordList (word_list) {
+export function createWordList (word_list) {
   return ApiService.post('/config/word-lists', word_list)
 }
 
@@ -184,12 +184,21 @@ export function deleteWordList (word_list) {
   return ApiService.delete(`/config/word-lists/${word_list.id}`)
 }
 
+export function importWordList (form_data) {
+  return ApiService.upload('/config/import-word-lists', form_data)
+}
+
+export function exportWordList (filter_data) {
+  const filter = ApiService.getQueryStringFromNestedObject(filter_data)
+  return ApiService.download(`/config/export-word-lists?${filter}`, 'word_lists_export.json')
+}
+
 export function getAllRemoteAccesses (filter_data) {
   const filter = ApiService.getQueryStringFromNestedObject(filter_data)
   return ApiService.get(`/config/remote-accesses?${filter}`)
 }
 
-export function createNewRemoteAccess (remote_access) {
+export function createRemoteAccess (remote_access) {
   return ApiService.post('/config/remote-accesses', remote_access)
 }
 
@@ -201,11 +210,12 @@ export function deleteRemoteAccess (remote_access) {
   return ApiService.delete(`/config/remote-accesses/${remote_access.id}`)
 }
 
-export function getAllRemoteNodes (filter) {
-  return ApiService.get(`/config/remote-nodes?search=${filter.search}`)
+export function getAllRemoteNodes (filter_data) {
+  const filter = ApiService.getQueryStringFromNestedObject(filter_data)
+  return ApiService.get(`/config/remote-nodes?${filter}`)
 }
 
-export function createNewRemoteNode (remote_node) {
+export function createRemoteNode (remote_node) {
   return ApiService.post('/config/remote-nodes', remote_node)
 }
 
@@ -313,11 +323,12 @@ export function deleteOSINTSourceGroup (group) {
   return ApiService.delete(`/config/osint-source-groups/${group.id}`)
 }
 
-export function getAllPublisherPresets (filter) {
-  return ApiService.get(`/config/publishers-presets?search=${filter.search}`)
+export function getAllPublisherPresets (filter_data) {
+  const filter = ApiService.getQueryStringFromNestedObject(filter_data)
+  return ApiService.get(`/config/publishers-presets?${filter}`)
 }
 
-export function createNewPublisherPreset (preset) {
+export function createPublisherPreset (preset) {
   return ApiService.post('/config/publishers-presets', preset)
 }
 
@@ -327,20 +338,4 @@ export function updatePublisherPreset (node) {
 
 export function deletePublisherPreset (node) {
   return ApiService.delete(`/config/publishers-presets/${node.id}`)
-}
-
-export function getAllBotPresets (filter) {
-  return ApiService.get(`/config/bots-presets?search=${filter.search}`)
-}
-
-export function createNewBotPreset (preset) {
-  return ApiService.post('/config/bots-presets', preset)
-}
-
-export function updateBotPreset (node) {
-  return ApiService.put(`/config/bots-presets/${node.id}`, node)
-}
-
-export function deleteBotPreset (node) {
-  return ApiService.delete(`/config/bots-presets/${node.id}`)
 }

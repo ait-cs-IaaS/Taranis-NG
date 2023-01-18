@@ -23,7 +23,6 @@ from core.model import (
     publisher_preset,
     publishers_node,
     bots_node,
-    bot_preset,
     attribute,
     collectors_node,
     organization,
@@ -352,6 +351,8 @@ class OSINTSourcesExport(Resource):
     def get(self):
         ids = request.args.getlist(key="ids")
         data = collectors_manager.export_osint_sources(ids)
+        if data is None:
+            return "", 400
         return send_file(
             io.BytesIO(data),
             download_name="osint_sources_export.json",
@@ -544,27 +545,6 @@ class BotNodes(Resource):
         return bots_node.BotsNode.delete(node_id)
 
 
-class BotPresets(Resource):
-    @auth_required("CONFIG_BOT_PRESET_ACCESS")
-    def get(self):
-        search = request.args.get(key="search", default=None)
-        return bot_preset.BotPreset.get_all_json(search)
-
-    @auth_required("CONFIG_BOT_PRESET_CREATE")
-    def post(self):
-        bots_manager.add_bot_preset(request.json)
-
-
-class BotPreset(Resource):
-    @auth_required("CONFIG_BOT_PRESET_UPDATE")
-    def put(self, preset_id):
-        bot_preset.BotPreset.update(preset_id, request.json)
-
-    @auth_required("CONFIG_BOT_PRESET_DELETE")
-    def delete(self, preset_id):
-        return bot_preset.BotPreset.delete(preset_id)
-
-
 def initialize(api):
     api.add_resource(
         DictionariesReload,
@@ -625,7 +605,5 @@ def initialize(api):
     api.add_resource(PublisherPreset, "/api/v1/config/publishers-presets/<string:preset_id>")
 
     api.add_resource(BotNodes, "/api/v1/config/bots-nodes", "/api/v1/config/bots-nodes/<string:node_id>")
-    api.add_resource(BotPresets, "/api/v1/config/bots-presets")
-    api.add_resource(BotPreset, "/api/v1/config/bots-presets/<string:preset_id>")
 
     api.add_resource(Nodes, "/api/v1/config/nodes", "/api/v1/config/nodes/<string:node_id>")

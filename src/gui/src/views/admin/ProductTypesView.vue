@@ -36,7 +36,6 @@ export default {
   data: () => ({
     productTypes: [],
     formData: {},
-    showForm: false,
     edit: false,
     product: {
       id: -1,
@@ -62,12 +61,10 @@ export default {
     },
     addItem() {
       this.formData = this.product
-      this.showForm = true
       this.edit = false
     },
     editItem(item) {
       this.formData = item
-      this.showForm = true
       this.edit = true
     },
     handleSubmit(submittedData) {
