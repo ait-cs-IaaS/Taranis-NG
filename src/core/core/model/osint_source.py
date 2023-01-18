@@ -40,9 +40,6 @@ class OSINTSource(db.Model):
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())
 
-    collector_id = db.Column(db.String, db.ForeignKey("collector.id"))
-    collector = db.relationship("Collector", back_populates="sources")
-
     parameter_values = db.relationship("ParameterValue", secondary="osint_source_parameter_value", cascade="all")
 
     word_lists = db.relationship("WordList", secondary="osint_source_word_list")
@@ -175,11 +172,13 @@ class OSINTSource(db.Model):
         return sources_schema.dump(sources)
 
     @classmethod
-    def get_all_for_collector_json(cls, collector_node, collector_type):
-        for collector in collector_node.collectors:
-            if collector.type == collector_type:
-                sources_schema = OSINTSourceSchema(many=True)
-                return sources_schema.dump(collector.sources)
+    def get_all_for_collector_json(cls, collector):
+        if hasattr(collector, "sources"):
+            logger.debug(f"Dumping: {collector.sources}")
+            sources_schema = OSINTSourceSchema(many=True)
+            return sources_schema.dump(collector.sources)
+        else:
+            logger.debug(f"Collector has no sources: {collector}")
 
     @classmethod
     def add_new(cls, data):

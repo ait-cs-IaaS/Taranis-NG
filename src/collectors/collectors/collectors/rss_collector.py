@@ -32,11 +32,10 @@ class RSSCollector(BaseCollector):
     news_items = []
 
     def get_proxy_handler(self, proxy_server: str):
-        proxy = re.search(
+        if proxy := re.search(
             r"^(http|https|socks4|socks5)://([a-zA-Z0-9\-\.\_]+):(\d+)/?$",
             proxy_server,
-        )
-        if proxy:
+        ):
             from urllib.request import ProxyHandler
 
             scheme, host, port = proxy.groups()
@@ -58,7 +57,7 @@ class RSSCollector(BaseCollector):
         except Exception:
             return ""
 
-        return "" if status != 200 else html_content
+        return "" if status != 200 else html_content.decode("utf-8")
 
     def parse_article_content(self, html_content: str, feed_entry: list, content_location: str = "p") -> str:
         if "_" in content_location:
@@ -131,6 +130,7 @@ class RSSCollector(BaseCollector):
                     datetime.datetime.now(),
                     content,
                     source.id,
+                    [],
                     [],
                 )
 

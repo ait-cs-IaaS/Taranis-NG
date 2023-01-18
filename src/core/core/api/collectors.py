@@ -4,7 +4,7 @@ from flask_restful import Resource, reqparse
 from core.managers import sse_manager, collectors_manager
 from core.managers.auth_manager import api_key_required
 from core.managers.log_manager import logger
-from core.model import osint_source, collectors_node, news_item
+from core.model import osint_source, collector, news_item
 from shared.schema.osint_source import OSINTSourceUpdateStatusSchema
 
 
@@ -16,17 +16,13 @@ class OSINTSourcesForCollectors(Resource):
             parser.add_argument("collector_type", location="args", required=True)
             parameters = parser.parse_args()
 
-            logger.log_debug(f"Searching node: {parameters}")
-            node = collectors_node.CollectorsNode.get_by_id(collector_id)
-            logger.log_debug(f"Node found: {node}")
-            if not node:
+            col = collector.Collector.find_by_type(parameters["collector_type"])
+            if not col:
                 return "", 404
-
-            node.updateLastSeen()
+            logger.log_debug(f"Collector found: {col}")
+            return osint_source.OSINTSource.get_all_for_collector_json(col)
         except Exception:
             logger.log_debug_trace()
-
-        return osint_source.OSINTSource.get_all_for_collector_json(node, parameters.collector_type)
 
 
 class AddNewsItems(Resource):

@@ -1,4 +1,5 @@
 <template>
+  <v-container fluid class="ma-5 mt-5 pa-5 pt-0">
   <v-form @submit.prevent="add" id="form" ref="form" class="px-4">
     <v-row no-gutters>
       <v-col
@@ -69,6 +70,7 @@
 
     <ProductTypeHelp></ProductTypeHelp>
   </v-form>
+  </v-container>
 </template>
 
 <script>

@@ -27,7 +27,6 @@ def get_collectors_info(node: CollectorNodeSchema):
 
 def add_collectors_node(data):
     try:
-        collectors_info = data.pop("collectors_info")
         logger.log_debug(f"ADD COLLECTOR: {data}")
         node = CollectorNodeSchema.create(data)
 
@@ -36,8 +35,7 @@ def add_collectors_node(data):
         return str(e), 500
 
     try:
-        collectors = Collector.create_all(collectors_info)
-        CollectorsNode.add_new(data, collectors)
+        CollectorsNode.add_new(data)
     except Exception:
         logger.log_debug_trace(f"Couldn't add Collector Node: {node.name}")
         return f"Couldn't add Collector node: {node.name}", 500

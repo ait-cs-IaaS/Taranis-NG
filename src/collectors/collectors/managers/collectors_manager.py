@@ -55,5 +55,13 @@ def refresh_collector(collector_type):
     return 200
 
 
+def refresh():
+    for collector_type in collectors:
+        if refresh_collector(collector_type) != 200:
+            return 500
+
+    return 200
+
+
 def get_registered_collectors_info():
     return [collectors[key].get_info() for key in collectors]

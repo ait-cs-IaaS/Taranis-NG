@@ -27,6 +27,9 @@ def pre_seed(app):
         pre_seed_wordlists()
         logger.log_debug("Wordlists seeded")
 
+        pre_seed_collectors()
+        logger.log_debug("Collectors seeded")
+
     except Exception:
         logger.log_debug_trace("Pre Seed failed")
 
@@ -35,6 +38,14 @@ def pre_seed_source_groups():
     from core.model.osint_source import OSINTSourceGroup
 
     OSINTSourceGroup.create(group_id="default", name="Default", description="Default group for uncategorized sources", default=True)
+
+
+def pre_seed_collectors():
+    from core.model.collector import Collector
+    from core.managers.collectors_pre_seed import collectors
+
+    for c in collectors:
+        Collector.add(c)
 
 
 def pre_seed_permissions():

@@ -18,15 +18,8 @@ class Collector(db.Model):
     id = db.Column(db.String(64), primary_key=True)
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())
-
     type = db.Column(db.String(), nullable=False)
-
     parameters = db.relationship("Parameter", secondary="collector_parameter", cascade="all")
-
-    node_id = db.Column(db.String, db.ForeignKey("collectors_node.id", ondelete="CASCADE"))
-    node = db.relationship("CollectorsNode", back_populates="collectors")
-
-    sources = db.relationship("OSINTSource", back_populates="collector")
 
     def __init__(self, name, description, type, parameters):
         self.id = str(uuid.uuid4())
@@ -39,6 +32,15 @@ class Collector(db.Model):
     def create_all(cls, collectors_data):
         new_collector_schema = NewCollectorSchema(many=True)
         return new_collector_schema.load(collectors_data)
+
+    @classmethod
+    def add(cls, collectors_data):
+        if cls.find_by_type(collectors_data["type"]):
+            return None
+        schema = NewCollectorSchema()
+        collector = schema.load(collectors_data)
+        db.session.add(collector)
+        db.session.commit()
 
     @classmethod
     def get_first(cls):
