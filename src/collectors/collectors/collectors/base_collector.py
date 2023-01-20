@@ -148,7 +148,6 @@ class BaseCollector:
 
         try:
             source_schema = osint_source.OSINTSourceSchemaBase(many=True)
-            logger.debug(response)
             self.osint_sources = source_schema.load(response)
 
             logger.log_debug(f"{len(self.osint_sources)} data loaded")

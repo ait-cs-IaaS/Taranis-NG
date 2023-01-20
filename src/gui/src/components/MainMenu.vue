@@ -20,8 +20,7 @@
           'menu-icon',
           { closed: !drawerVisible || this.$vuetify.breakpoint.mdAndDown }
         ]"
-        >mdi-menu-open</v-icon
-      >
+        >mdi-menu-open</v-icon>
     </v-btn>
 
     <v-toolbar-title class="headline" style="width: 300px">
@@ -54,12 +53,11 @@
 
     <div class="item-count">
       <span
-        >total items: <strong>{{ getItemCount.total }}</strong></span
-      >
-
+        >total items: <strong>{{ getItemCount.total }}</strong>
+      </span>
       <span v-if="isFiltered">
-        / displayed items: <strong>{{ getItemCount.filtered }}</strong></span
-      >
+        / displayed items: <strong>{{ getItemCount.filtered }}</strong>
+      </span>
     </div>
 
     <v-spacer></v-spacer>
