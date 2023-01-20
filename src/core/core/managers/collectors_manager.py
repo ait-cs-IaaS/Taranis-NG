@@ -76,6 +76,11 @@ def delete_osint_source(osint_source_id):
     refresh_collector(collector)
 
 
+def refresh_osint_source(osint_source_id):
+    osint_source = OSINTSource.find(osint_source_id)
+    refresh_collector(osint_source.collector)
+
+
 def refresh_collector(collector):
     try:
         node = CollectorsNode.get_first()

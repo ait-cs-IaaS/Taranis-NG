@@ -18,7 +18,7 @@
       <v-icon
         :class="[
           'menu-icon',
-          { closed: !opened || this.$vuetify.breakpoint.mdAndDown }
+          { closed: !drawerVisible || this.$vuetify.breakpoint.mdAndDown }
         ]"
         >mdi-menu-open</v-icon
       >
@@ -138,13 +138,12 @@
 import UserMenu from '../components/UserMenu'
 import AuthMixin from '../services/auth/auth_mixin'
 
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 export default {
   components: { UserMenu },
   name: 'MainMenu',
   data: () => ({
-    opened: true,
     buttons: [
       {
         title: 'main_menu.administration',
@@ -203,7 +202,6 @@ export default {
     ...mapActions(['toggleDrawer']),
 
     navClicked() {
-      this.opened = !this.opened
       this.toggleDrawer()
     },
 
@@ -219,6 +217,7 @@ export default {
     }
   },
   computed: {
+    ...mapState(['drawerVisible']),
     ...mapGetters(['getItemCount']),
     isFiltered() {
       return this.getItemCount.filtered === undefined

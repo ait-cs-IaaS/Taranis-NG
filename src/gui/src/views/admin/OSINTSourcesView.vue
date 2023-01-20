@@ -161,7 +161,6 @@ export default {
     },
     handleSubmit(submittedData) {
       const updateItem = this.parseSubmittedData(submittedData)
-      console.log(updateItem)
       if (this.edit) {
         this.updateItem(updateItem)
       } else {
@@ -202,6 +201,7 @@ export default {
     selectionChange(selected) {
       this.selected = selected.map(item => item.id)
     }
+
   },
   mounted() {
     this.updateData()

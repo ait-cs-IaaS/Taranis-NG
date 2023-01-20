@@ -349,6 +349,10 @@ class OSINTSources(Resource):
 
 
 class OSINTSource(Resource):
+    @auth_required("CONFIG_OSINT_SOURCE_ACCESS")
+    def get(self, source_id):
+        return osint_source.OSINTSource.get_by_id(source_id)
+
     @auth_required("CONFIG_OSINT_SOURCE_UPDATE")
     def put(self, source_id):
         updated_osint_source, default_group = collectors_manager.update_osint_source(source_id, request.json)
@@ -358,6 +362,13 @@ class OSINTSource(Resource):
     @auth_required("CONFIG_OSINT_SOURCE_DELETE")
     def delete(self, source_id):
         collectors_manager.delete_osint_source(source_id)
+
+
+class OSINTSourceRefresh(Resource):
+    @auth_required("CONFIG_OSINT_SOURCE_ACCESS")
+    def put(self, source_id):
+        result = collectors_manager.refresh_osint_source(source_id)
+        return result
 
 
 class OSINTSourcesExport(Resource):
@@ -603,6 +614,7 @@ def initialize(api):
 
     api.add_resource(OSINTSources, "/api/v1/config/osint-sources")
     api.add_resource(OSINTSource, "/api/v1/config/osint-sources/<string:source_id>")
+    api.add_resource(OSINTSourceRefresh, "/api/v1/config/osint-sources/<string:source_id>/refresh")
     api.add_resource(OSINTSourcesExport, "/api/v1/config/export-osint-sources")
     api.add_resource(OSINTSourcesImport, "/api/v1/config/import-osint-sources")
     api.add_resource(OSINTSourceGroups, "/api/v1/config/osint-source-groups")
