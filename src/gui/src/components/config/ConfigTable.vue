@@ -11,6 +11,15 @@
           hide-details
         ></v-text-field>
         <v-btn
+          color="error"
+          dark
+          class="ml-8"
+          @click="deleteItems(selected)"
+          v-if="selected.length > 0"
+        >
+          Delete {{ selected.length }}
+        </v-btn>
+        <v-btn
           color="primary"
           dark
           class="ml-8"
@@ -163,6 +172,9 @@ export default {
     },
     deleteItem(item) {
       this.$emit('delete-item', item)
+    },
+    deleteItems(items) {
+      items.forEach((item) => this.deleteItem(item))
     }
   }
 }

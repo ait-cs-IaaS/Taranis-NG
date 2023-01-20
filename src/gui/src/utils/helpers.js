@@ -56,3 +56,22 @@ export function emptyValues(obj) {
   }
   return result
 }
+
+export function objectFromFormat(format) {
+  var newObject = {}
+  format.map(function(item) {
+    if (item === undefined) {
+      return
+    }
+    if (item.type === 'checkbox') {
+      newObject[item.name] = false
+    } else if (item.type === 'text' || item.type === 'textarea' || item.type === 'select') {
+      newObject[item.name] = ''
+    } else if (item.type === 'number') {
+      newObject[item.name] = 0
+    } else if (item.type === 'table') {
+      newObject[item.name] = []
+    }
+  })
+  return newObject
+}

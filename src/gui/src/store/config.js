@@ -1,6 +1,8 @@
 import {
   getAllACLEntries,
   getAllAttributes,
+  getAllBots,
+  getAllCollectors,
   getAllExternalPermissions,
   getAllExternalUsers,
   getAllOrganizations,
@@ -32,12 +34,11 @@ const state = {
   remote_access: { total_count: 0, items: [] },
   remote_nodes: { total_count: 0, items: [] },
   nodes: { total_count: 0, items: [] },
+  collectors: { total_count: 0, items: [] },
+  bots: { total_count: 0, items: [] },
   osint_sources: { total_count: 0, items: [] },
   osint_source_groups: { total_count: 0, items: [] },
-  presenters_nodes: { total_count: 0, items: [] },
-  publishers_nodes: { total_count: 0, items: [] },
-  publisher_presets: { total_count: 0, items: [] },
-  bots_nodes: { total_count: 0, items: [] }
+  publisher_presets: { total_count: 0, items: [] }
 }
 
 const actions = {
@@ -161,6 +162,20 @@ const actions = {
       })
   },
 
+  loadCollectors (context, data) {
+    return getAllCollectors(data)
+      .then(response => {
+        context.commit('setCollectors', response.data)
+      })
+  },
+
+  loadBots (context, data) {
+    return getAllBots(data)
+      .then(response => {
+        context.commit('setBots', response.data)
+      })
+  },
+
   loadOSINTSourceGroups (context, filter) {
     return getAllOSINTSourceGroups(filter)
       .then(response => {
@@ -223,6 +238,14 @@ const mutations = {
 
   setNodes (state, nodes) {
     state.nodes = nodes
+  },
+
+  setCollectors (state, collectors) {
+    state.collectors = collectors
+  },
+
+  setBots (state, bots) {
+    state.bots = bots
   },
 
   setOSINTSources (state, osint_sources) {
@@ -293,15 +316,23 @@ const getters = {
   },
 
   getCollectorsNodes (state) {
-    state.collectors_nodes.items.map(function (item) {
-      item.type = 'Collector'
-      return item
+    return state.nodes.items.map(function (item) {
+      if (item.type === 'Collector') {
+        return item
+      }
     })
-    return state.collectors_nodes
   },
 
   getNodes (state) {
     return state.nodes
+  },
+
+  getCollectors (state) {
+    return state.collectors
+  },
+
+  getBots (state) {
+    return state.bots
   },
 
   getOSINTSources (state) {
@@ -313,32 +344,33 @@ const getters = {
   },
 
   getPresentersNodes (state) {
-    state.presenters_nodes.items.map(function (item) {
-      item.type = 'Presenter'
-      return item
+    return state.nodes.items.map(function (item) {
+      if (item.type === 'Presenter') {
+        return item
+      }
     })
-    return state.presenters_nodes
   },
 
   getPublishersNodes (state) {
-    state.publishers_nodes.items.map(function (item) {
-      item.type = 'Publisher'
-      return item
+    return state.nodes.items.map(function (item) {
+      if (item.type === 'Publisher') {
+        return item
+      }
     })
-    return state.publishers_nodes
+  },
+
+  getBotsNodes (state) {
+    return state.nodes.items.map(function (item) {
+      if (item.type === 'Bot') {
+        return item
+      }
+    })
   },
 
   getPublisherPresets (state) {
     return state.publisher_presets
-  },
-
-  getBotsNodes (state) {
-    state.bots_nodes.items.map(function (item) {
-      item.type = 'Bot'
-      return item
-    })
-    return state.bots_nodes
   }
+
 }
 
 export const config = {

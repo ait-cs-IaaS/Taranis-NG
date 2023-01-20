@@ -67,7 +67,7 @@ export default {
       {
         name: 'type',
         label: 'Type',
-        type: 'combobox',
+        type: 'select',
         options: [
           'STRING',
           'NUMBER',
@@ -90,7 +90,7 @@ export default {
       {
         name: 'validator',
         label: 'Validator',
-        type: 'combobox',
+        type: 'select',
         options: [
           'NONE',
           'EMAIL',

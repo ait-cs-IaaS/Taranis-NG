@@ -98,6 +98,16 @@ export function deleteRole (role) {
   return ApiService.delete(`/config/roles/${role.id}`)
 }
 
+export function getAllCollectors (filter_data) {
+  const filter = ApiService.getQueryStringFromNestedObject(filter_data)
+  return ApiService.get(`/config/collectors?${filter}`)
+}
+
+export function getAllBots (filter_data) {
+  const filter = ApiService.getQueryStringFromNestedObject(filter_data)
+  return ApiService.get(`/config/bots?${filter}`)
+}
+
 export function getAllACLEntries (filter_data) {
   const filter = ApiService.getQueryStringFromNestedObject(filter_data)
   return ApiService.get(`/config/acls?${filter}`)

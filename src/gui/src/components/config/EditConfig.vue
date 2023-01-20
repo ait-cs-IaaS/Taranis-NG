@@ -38,14 +38,14 @@
           :type="item.type"
           v-if="item.type === 'textarea'"
         ></v-textarea>
-        <v-combobox
+        <v-select
           v-model="formData[item.name]"
           :label="item.label"
           :required="item.required"
           :disabled="item['disabled'] !== undefined"
           :items="item.options"
-          v-if="item.type === 'combobox' && item.options"
-        ></v-combobox>
+          v-if="item.type === 'select' && item.options"
+        ></v-select>
         <v-col cols="12" v-if="item.type === 'table'">
           <v-data-table
             :label="item.label"

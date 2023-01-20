@@ -40,6 +40,7 @@ class OSINTSource(db.Model):
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())
 
+    collector_id = db.Column(db.String, db.ForeignKey("collector.id"))
     parameter_values = db.relationship("ParameterValue", secondary="osint_source_parameter_value", cascade="all")
 
     word_lists = db.relationship("WordList", secondary="osint_source_word_list")
@@ -164,6 +165,14 @@ class OSINTSource(db.Model):
         return {"total_count": count, "items": sources_schema.dump(sources)}
 
     @classmethod
+    def get_all_by_type(cls, collector_type: str):
+        query = cls.query.join(Collector, OSINTSource.collector_id == Collector.id).filter(Collector.type == collector_type)
+        # query = query.options(db.joinedload(OSINTSource.parameter_values), db.joinedload(OSINTSource.word_lists))
+        sources = query.order_by(db.asc(OSINTSource.name)).all()
+        sources_schema = OSINTSourceSchema(many=True)
+        return sources_schema.dump(sources)
+
+    @classmethod
     def get_all_manual_json(cls, user):
         sources = cls.get_all_manual(user)
         for source in sources:
@@ -172,13 +181,10 @@ class OSINTSource(db.Model):
         return sources_schema.dump(sources)
 
     @classmethod
-    def get_all_for_collector_json(cls, collector):
-        if hasattr(collector, "sources"):
-            logger.debug(f"Dumping: {collector.sources}")
-            sources_schema = OSINTSourceSchema(many=True)
-            return sources_schema.dump(collector.sources)
-        else:
-            logger.debug(f"Collector has no sources: {collector}")
+    def get_all_for_collector(cls, collector):
+        sources = cls.query.filter_by(collector_type=collector).all()
+        sources_schema = OSINTSourceSchema(many=True)
+        return sources_schema.dump(sources)
 
     @classmethod
     def add_new(cls, data):

@@ -7,7 +7,6 @@ from sqlalchemy import or_, func
 from core.managers.db_manager import db
 from core.managers.log_manager import logger
 from shared.schema.collectors_node import CollectorsNodeSchema
-from shared.schema.collector import CollectorType
 
 
 class NewCollectorsNodeSchema(CollectorsNodeSchema):
@@ -32,7 +31,6 @@ class CollectorsNode(db.Model):
 
     created = db.Column(db.DateTime, default=datetime.now)
     last_seen = db.Column(db.DateTime, default=datetime.now)
-    collectors = db.Column(db.Enum(CollectorType), nullable=True)
 
     def __init__(self, id, name, description, api_url, api_key):
         self.id = id if id != "" else str(uuid.uuid4())
@@ -80,12 +78,6 @@ class CollectorsNode(db.Model):
     @classmethod
     def get_json_by_id(cls, id):
         return CollectorsNodeSchema().dump(cls.get_by_id(id))
-
-    def find_collector_by_type(self, collector_type):
-        return next(
-            (collector for collector in self.collectors if collector == collector_type),
-            None,
-        )
 
     @classmethod
     def get_all_json(cls, search):

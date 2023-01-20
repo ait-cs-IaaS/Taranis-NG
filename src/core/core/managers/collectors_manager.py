@@ -78,7 +78,8 @@ def delete_osint_source(osint_source_id):
 
 def refresh_collector(collector):
     try:
-        CollectorsApi(collector.node.api_url, collector.node.api_key).refresh_collector(collector.type)
+        node = CollectorsNode.get_first()
+        CollectorsApi(node.api_url, node.api_key).refresh_collector(collector.type)
     except ConnectionError:
         logger.critical(f"Connection error: Could not reach {collector.node.api_url}")
 

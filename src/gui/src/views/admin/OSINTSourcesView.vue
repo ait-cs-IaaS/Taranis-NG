@@ -20,7 +20,8 @@
     </ConfigTable>
     <EditConfig
       v-if="formData && Object.keys(formData).length > 0"
-      :configData="formData"
+      :configData.sync="formData"
+      :formFormat.sync="formFormat"
       @submit="handleSubmit"
     ></EditConfig>
   </div>
@@ -38,7 +39,7 @@ import {
   importOSINTSources
 } from '@/api/config'
 import { mapActions, mapGetters } from 'vuex'
-import { notifySuccess, emptyValues, notifyFailure } from '@/utils/helpers'
+import { notifySuccess, objectFromFormat, notifyFailure } from '@/utils/helpers'
 
 export default {
   name: 'OSINTSources',
@@ -50,23 +51,74 @@ export default {
   data: () => ({
     unparsed_sources: [],
     osint_sources: [],
+    parameters: {},
     selected: [],
     formData: {},
+    collectors: [],
     edit: false
   }),
+  computed: {
+    formFormat() {
+      const base = [
+        {
+          name: 'id',
+          label: 'ID',
+          type: 'text',
+          disabled: true
+        },
+        {
+          name: 'name',
+          label: 'Name',
+          type: 'text',
+          required: true
+        },
+        {
+          name: 'description',
+          label: 'Description',
+          type: 'textarea',
+          required: true
+        },
+        {
+          name: 'collector_id',
+          label: 'Collector',
+          type: 'select',
+          options: this.collectors
+        }
+      ]
+      if (this.parameters[this.formData.collector_id]) {
+        return base.concat(this.parameters[this.formData.collector_id])
+      }
+      return base
+    }
+  },
   methods: {
-    ...mapActions('config', ['loadOSINTSources']),
-    ...mapGetters('config', ['getOSINTSources']),
+    ...mapActions('config', ['loadOSINTSources', 'loadCollectors']),
+    ...mapGetters('config', ['getOSINTSources', 'getCollectors']),
     ...mapActions(['updateItemCount']),
     updateData() {
       this.loadOSINTSources().then(() => {
         const sources = this.getOSINTSources()
         this.unparsed_sources = sources.items
-        const psources = this.parseSource(sources.items)
-        this.osint_sources = psources
+        this.osint_sources = this.parseSource(sources.items)
         this.updateItemCount({
           total: sources.total_count,
           filtered: sources.length
+        })
+      })
+      this.loadCollectors().then(() => {
+        const collectors = this.getCollectors()
+        this.collectors = collectors.items.map(collector => {
+          this.parameters[collector.id] = collector.parameters.map(parameter => {
+            return {
+              name: parameter.key,
+              label: parameter.name,
+              type: 'text'
+            }
+          })
+          return {
+            value: collector.id,
+            text: collector.name
+          }
         })
       })
     },
@@ -99,7 +151,8 @@ export default {
       return result
     },
     addItem() {
-      this.formData = emptyValues(this.osint_sources[0])
+      console.log(this.formFormat)
+      this.formData = objectFromFormat(this.formFormat)
       this.edit = false
     },
     editItem(item) {

@@ -23,12 +23,12 @@
 import ConfigTable from '../../components/config/ConfigTable'
 import EditConfig from '../../components/config/EditConfig'
 import {
-  deleteRoles,
-  createRoles,
-  updateRoles
+  deleteRole,
+  createRole,
+  updateRole
 } from '@/api/config'
 import { mapActions, mapGetters } from 'vuex'
-import { notifySuccess, emptyValues, notifyFailure } from '@/utils/helpers'
+import { notifySuccess, objectFromFormat, notifyFailure } from '@/utils/helpers'
 
 export default {
   name: 'Roles',
@@ -104,7 +104,7 @@ export default {
       })
     },
     addItem() {
-      this.formData = emptyValues(this.roles[0])
+      this.formData = objectFromFormat(this.formFormat)
       this.edit = false
     },
     editItem(item) {
@@ -121,7 +121,7 @@ export default {
     },
     deleteItem(item) {
       if (!item.default) {
-        deleteRoles(item).then(() => {
+        deleteRole(item).then(() => {
           notifySuccess(`Successfully deleted ${item.name}`)
           this.updateData()
         }).catch(() => {
@@ -130,7 +130,7 @@ export default {
       }
     },
     createItem(item) {
-      createRoles(item).then(() => {
+      createRole(item).then(() => {
         notifySuccess(`Successfully created ${item.name}`)
         this.updateData()
       }).catch(() => {
@@ -138,7 +138,7 @@ export default {
       })
     },
     updateItem(item) {
-      updateRoles(item).then(() => {
+      updateRole(item).then(() => {
         notifySuccess(`Successfully updated ${item.name}`)
         this.updateData()
       }).catch(() => {
