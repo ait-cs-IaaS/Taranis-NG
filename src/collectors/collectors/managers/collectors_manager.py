@@ -45,13 +45,7 @@ def refresh_collector(collector_type):
     if collector_type not in collectors:
         return 403
 
-    class RefreshThread(threading.Thread):
-        @classmethod
-        def run(cls):
-            collectors[collector_type].refresh()
-
-    refresh_thread = RefreshThread()
-    refresh_thread.start()
+    collectors[collector_type].refresh()
     return 200
 
 

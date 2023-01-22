@@ -1,6 +1,5 @@
 import datetime
 
-from bots.managers import time_manager
 from bots.managers.log_manager import logger
 from shared.schema import bot, bot_preset
 from shared.schema.parameter import Parameter, ParameterType
@@ -32,8 +31,6 @@ class BaseBot:
         self.bot_presets = preset_schema.load(response)
         for preset in self.bot_presets:
             self.execute(preset)
-            if interval := preset.parameter_values["REFRESH_INTERVAL"]:
-                self.set_time_manager_interval(interval, preset)
 
     def get_info(self):
         info_schema = bot.BotSchema()
@@ -70,28 +67,3 @@ class BaseBot:
 
         limit = limit.strftime("%d.%m.%Y - %H:%M")
         return limit
-
-    def set_time_manager_interval(self, interval, preset):
-        if interval[0].isdigit() and ":" in interval:
-            time_manager.schedule_job_every_day(interval, self.execute, preset)
-        elif interval[0].isalpha():
-            interval = interval.split(",")
-            day = interval[0].strip()
-            at = interval[1].strip()
-            if day == "Monday":
-                time_manager.schedule_job_on_monday(at, self.execute, preset)
-            elif day == "Tuesday":
-                time_manager.schedule_job_on_tuesday(at, self.execute, preset)
-            elif day == "Wednesday":
-                time_manager.schedule_job_on_wednesday(at, self.execute, preset)
-            elif day == "Thursday":
-                time_manager.schedule_job_on_thursday(at, self.execute, preset)
-            elif day == "Friday":
-                time_manager.schedule_job_on_friday(at, self.execute, preset)
-            elif day == "Saturday":
-                time_manager.schedule_job_on_saturday(at, self.execute, preset)
-            else:
-                time_manager.schedule_job_on_sunday(at, self.execute, preset)
-        else:
-            logger.log_debug(f"SETTING INTERVAL: {interval} FOR: {self.name}")
-            time_manager.schedule_job_minutes(int(interval), self.execute, preset)

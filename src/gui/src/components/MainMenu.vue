@@ -147,7 +147,7 @@ export default {
         title: 'main_menu.administration',
         icon: 'mdi-cog-outline',
         permission: 'CONFIG_ACCESS',
-        route: '/config',
+        route: '/config/dashboard',
         show: true
       },
       {

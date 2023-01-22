@@ -8,7 +8,6 @@ import Permissions from '@/services/auth/permissions'
 Vue.use(Router)
 
 export const router = new Router({
-
   mode: 'history',
   base: process.env.BASE_URL,
   routes: [
@@ -100,7 +99,6 @@ export const router = new Router({
       components: {
         default: () => import('./views/users/NotificationTemplatesView.vue'),
         nav: () => import('./views/nav/UserNav.vue')
-
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.MY_ASSETS_CONFIG] }
     },
@@ -110,17 +108,20 @@ export const router = new Router({
       components: {
         default: () => import('./views/users/AssetGroupsView.vue'),
         nav: () => import('./views/nav/UserNav.vue')
-
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.MY_ASSETS_CONFIG] }
     },
     {
       path: '/config',
       name: 'config',
+      redirect: '/config/dashboard'
+    },
+    {
+      path: '/config/dashboard',
+      name: 'configDashboard',
       components: {
         default: () => import('./views/admin/ConfigView.vue'),
         nav: () => import('./views/nav/ConfigNav.vue')
-
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.CONFIG_ACCESS] }
     },
@@ -130,7 +131,6 @@ export const router = new Router({
       components: {
         default: () => import('./views/admin/OrganizationsView.vue'),
         nav: () => import('./views/nav/ConfigNav.vue')
-
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.CONFIG_ORGANIZATION_ACCESS] }
     },
@@ -140,7 +140,6 @@ export const router = new Router({
       components: {
         default: () => import('./views/admin/RolesView.vue'),
         nav: () => import('./views/nav/ConfigNav.vue')
-
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.CONFIG_ROLE_ACCESS] }
     },
@@ -150,7 +149,6 @@ export const router = new Router({
       components: {
         default: () => import('./views/admin/ACLEntriesView.vue'),
         nav: () => import('./views/nav/ConfigNav.vue')
-
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.CONFIG_ACL_ACCESS] }
     },
@@ -160,7 +158,6 @@ export const router = new Router({
       components: {
         default: () => import('./views/admin/UsersView.vue'),
         nav: () => import('./views/nav/ConfigNav.vue')
-
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.CONFIG_USER_ACCESS] }
     },
@@ -170,7 +167,6 @@ export const router = new Router({
       components: {
         default: () => import('./views/admin/NodesView.vue'),
         nav: () => import('./views/nav/ConfigNav.vue')
-
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.CONFIG_NODE_ACCESS] }
     },
@@ -180,7 +176,6 @@ export const router = new Router({
       components: {
         default: () => import('./views/admin/OSINTSourcesView.vue'),
         nav: () => import('./views/nav/ConfigNav.vue')
-
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.CONFIG_OSINT_SOURCE_ACCESS] }
     },
@@ -190,7 +185,6 @@ export const router = new Router({
       components: {
         default: () => import('./views/admin/OSINTSourceGroupsView.vue'),
         nav: () => import('./views/nav/ConfigNav.vue')
-
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.CONFIG_OSINT_SOURCE_GROUP_ACCESS] }
     },
@@ -200,7 +194,6 @@ export const router = new Router({
       components: {
         default: () => import('./views/admin/PublisherPresetsView.vue'),
         nav: () => import('./views/nav/ConfigNav.vue')
-
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.CONFIG_PUBLISHER_PRESET_ACCESS] }
     },
@@ -210,7 +203,6 @@ export const router = new Router({
       components: {
         default: () => import('./views/admin/RemoteAccessesView.vue'),
         nav: () => import('./views/nav/ConfigNav.vue')
-
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.CONFIG_REMOTE_ACCESS_ACCESS] }
     },
@@ -220,7 +212,6 @@ export const router = new Router({
       components: {
         default: () => import('./views/admin/RemoteNodesView.vue'),
         nav: () => import('./views/nav/ConfigNav.vue')
-
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.CONFIG_REMOTE_NODE_ACCESS] }
     },
@@ -250,7 +241,6 @@ export const router = new Router({
       components: {
         default: () => import('./views/admin/ReportTypesView.vue'),
         nav: () => import('./views/nav/ConfigNav.vue')
-
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.CONFIG_REPORT_TYPE_ACCESS] }
     },
@@ -260,7 +250,6 @@ export const router = new Router({
       components: {
         default: () => import('./views/admin/WordListsView.vue'),
         nav: () => import('./views/nav/ConfigNav.vue')
-
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.CONFIG_WORD_LIST_ACCESS] }
     },

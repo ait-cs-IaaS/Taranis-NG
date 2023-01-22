@@ -1,4 +1,3 @@
-import threading
 import importlib
 
 from bots.managers.log_manager import logger
@@ -39,13 +38,7 @@ def refresh_bot(bot_type):
     if bot_type not in bots:
         return 403
 
-    class RefreshThread(threading.Thread):
-        @classmethod
-        def run(cls):
-            bots[bot_type].refresh()
-
-    refresh_thread = RefreshThread()
-    refresh_thread.start()
+    bots[bot_type].refresh()
     return 200
 
 
