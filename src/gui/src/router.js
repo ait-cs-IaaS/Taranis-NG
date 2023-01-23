@@ -70,10 +70,11 @@ export const router = new Router({
     {
       path: '/dashboard',
       name: 'dashboard',
-      components: {
-        default: () => import('./views/users/DashboardView.vue')
-      },
-      meta: { requiresAuth: true, requiresPerm: [Permissions.ASSESS_ACCESS] }
+      redirect: '/assess'
+      // components: {
+      //   default: () => import('./views/users/DashboardView.vue')
+      // },
+      // meta: { requiresAuth: true, requiresPerm: [Permissions.ASSESS_ACCESS] }
     },
     {
       path: '/user',

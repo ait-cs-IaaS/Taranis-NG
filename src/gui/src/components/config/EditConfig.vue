@@ -79,6 +79,7 @@
                 <template v-slot:input>
                   <v-text-field
                     v-model="props.item[h.value]"
+                    :disabled="item['disabled'] !== undefined"
                     label="Edit"
                     single-line
                   ></v-text-field>

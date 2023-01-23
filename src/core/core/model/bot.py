@@ -19,13 +19,8 @@ class Bot(db.Model):
     id = db.Column(db.String(64), primary_key=True)
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())
-
     type = db.Column(db.String(64), nullable=False)
-
     parameters = db.relationship("Parameter", secondary="bot_parameter")
-
-    node_id = db.Column(db.String, db.ForeignKey("bots_node.id"))
-    node = db.relationship("BotsNode", back_populates="bots")
 
     def __init__(self, name, description, type, parameters):
         self.id = str(uuid.uuid4())
@@ -38,6 +33,23 @@ class Bot(db.Model):
     def create_all(cls, bots_data):
         new_bot_schema = NewBotSchema(many=True)
         return new_bot_schema.load(bots_data)
+
+    @classmethod
+    def add(cls, data):
+        if cls.find_by_type(data["type"]):
+            return None
+        schema = NewBotSchema()
+        collector = schema.load(data)
+        db.session.add(collector)
+        db.session.commit()
+
+    @classmethod
+    def get_first(cls):
+        return cls.query.first()
+
+    @classmethod
+    def find_by_type(cls, type):
+        return cls.query.filter_by(type=type).first()
 
     @classmethod
     def get(cls, search):

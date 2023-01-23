@@ -22,19 +22,15 @@ class Organization(db.Model):
     address_id = db.Column(db.Integer, db.ForeignKey("address.id"))
     address = db.relationship("Address", cascade="all")
 
-    def __init__(self, name, description, address):
-        self.id = None
+    def __init__(self, id, name, description, address):
+        self.id = id
         self.name = name
         self.description = description
         self.address = address
-        self.title = ""
-        self.subtitle = ""
-        self.tag = ""
+        self.tag = "mdi-office-building"
 
     @orm.reconstructor
     def reconstruct(self):
-        self.title = self.name
-        self.subtitle = self.description
         self.tag = "mdi-office-building"
 
     @classmethod

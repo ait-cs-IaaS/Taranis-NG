@@ -30,6 +30,9 @@ def pre_seed(app):
         pre_seed_collectors()
         logger.log_debug("Collectors seeded")
 
+        pre_seed_bots()
+        logger.log_debug("Bots seeded")
+
     except Exception:
         logger.log_debug_trace("Pre Seed failed")
 
@@ -42,10 +45,18 @@ def pre_seed_source_groups():
 
 def pre_seed_collectors():
     from core.model.collector import Collector
-    from core.managers.collectors_pre_seed import collectors
+    from core.managers.workers_pre_seed import collectors
 
     for c in collectors:
         Collector.add(c)
+
+
+def pre_seed_bots():
+    from core.model.bot import Bot
+    from core.managers.workers_pre_seed import bots
+
+    for b in bots:
+        Bot.add(b)
 
 
 def pre_seed_permissions():
