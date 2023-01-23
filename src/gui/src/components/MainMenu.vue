@@ -81,9 +81,9 @@
           :ripple="false"
           :to="button.route"
         >
-          <span class="main-menu-item text-lowercase">{{
-            $t(button.title)
-          }}</span>
+          <span class="main-menu-item text-lowercase">
+            {{ $t(button.title) }}
+          </span>
         </v-btn>
       </div>
     </v-toolbar>
@@ -120,9 +120,9 @@
             :ripple="false"
             :to="button.route"
           >
-            <span class="main-menu-item text-lowercase">{{
-              $t(button.title)
-            }}</span>
+            <span class="main-menu-item text-lowercase">
+              {{ $t(button.title) }}
+            </span>
           </v-btn>
         </v-list-item>
       </v-list>
