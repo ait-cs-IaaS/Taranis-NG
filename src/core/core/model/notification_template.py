@@ -54,20 +54,15 @@ class NotificationTemplate(db.Model):
         self.message_title = message_title
         self.message_body = message_body
         self.recipients = recipients
-        self.title = ""
-        self.subtitle = ""
-        self.tag = ""
+        self.tag = "mdi-email-outline"
 
     @orm.reconstructor
     def reconstruct(self):
-        self.title = self.name
-        self.subtitle = self.description
         self.tag = "mdi-email-outline"
 
     @classmethod
     def find(cls, id):
-        group = cls.query.get(id)
-        return group
+        return cls.query.get(id)
 
     @classmethod
     def get(cls, search, organization):
@@ -80,7 +75,7 @@ class NotificationTemplate(db.Model):
             )
 
         if search is not None:
-            search_string = "%" + search.lower() + "%"
+            search_string = f"%{search.lower()}%"
             query = query.filter(
                 or_(
                     func.lower(NotificationTemplate.name).like(search_string),
@@ -114,6 +109,8 @@ class NotificationTemplate(db.Model):
     @classmethod
     def update(cls, user, template_id, data):
         new_template_schema = NewNotificationTemplateSchema()
+        for r in data["recipients"]:
+            r.pop("id")
         updated_template = new_template_schema.load(data)
         template = cls.query.get(template_id)
         if any(org in user.organizations for org in template.organizations):

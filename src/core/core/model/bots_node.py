@@ -23,20 +23,18 @@ class BotsNode(db.Model):
     bots = db.relationship("Bot", back_populates="node", cascade="all")
 
     def __init__(self, id, name, description, api_url, api_key):
-        self.id = str(uuid.uuid4())
+        self.id = id if id != "" else str(uuid.uuid4())
         self.name = name
         self.description = description
         self.api_url = api_url
         self.api_key = api_key
-        self.title = ""
-        self.subtitle = ""
-        self.tag = ""
+        self.tag = "mdi-robot"
+        self.type = "bot"
 
     @orm.reconstructor
     def reconstruct(self):
-        self.title = self.name
-        self.subtitle = self.description
         self.tag = "mdi-robot"
+        self.type = "bot"
 
     @classmethod
     def exists_by_api_key(cls, api_key):

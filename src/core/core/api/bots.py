@@ -88,22 +88,6 @@ class WordListEntries(Resource):
         return word_list.WordListEntry.update_word_list_entries(word_list_id, entry_name, request.json)
 
 
-class BotsStatusUpdate(Resource):
-    @api_key_required
-    def get(self, node_id):
-        collector = bots_node.BotsNode.get_by_id(node_id)
-        if not collector:
-            return "", 404
-
-        try:
-            collector.updateLastSeen()
-        except Exception as ex:
-            logger.log_debug(ex)
-            return {}, 400
-
-        return {}, 200
-
-
 def initialize(api):
     api.add_resource(NewsItemData, "/api/v1/bots/news-item-data")
     api.add_resource(
@@ -125,4 +109,3 @@ def initialize(api):
         "/api/v1/bots/word-list/<int:word_list_id>/entries/<string:entry_name>",
     )
     api.add_resource(BotsNode, "/api/v1/bots/node/<string:node_id>", "/api/v1/bots/node")
-    api.add_resource(BotsStatusUpdate, "/api/v1/bots/<string:node_id>")

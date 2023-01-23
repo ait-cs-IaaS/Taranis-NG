@@ -20,8 +20,9 @@ class BotsNodeSchema(Schema):
         return BotsNode(**data)
 
 
-class BotsNodePresentationSchema(BotsNodeSchema, PresentationSchema):
-    pass
+class BotsNodePresentationSchema(BotsNodeSchema):
+    type = fields.Str()
+    tag = fields.Str()
 
 
 class BotsNode:
