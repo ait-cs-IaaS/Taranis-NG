@@ -11,7 +11,7 @@ bots = {}
 def register_bot_node():
     try:
         logger.log_debug(f"Registering bot Node at {Config.TARANIS_NG_CORE_URL}")
-        response, code = CoreApi().register_node(get_registered_bots_info())
+        response, code = CoreApi().register_node()
         if code == 200:
             logger.log_info(f"Successfully registered: {response}")
         return response, code

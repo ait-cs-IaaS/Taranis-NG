@@ -88,14 +88,14 @@ class WordListEntries(Resource):
         return word_list.WordListEntry.update_word_list_entries(word_list_id, request.json)
 
 
-class Bots(Resource):
-    def get(self):
+class BotsInfo(Resource):
+    def get(self, bot_type):
         search = request.args.get(key="search", default=None)
         return bot.Bot.get_all_json(search)
 
 
 def initialize(api):
-    api.add_resource(NewsItemData, "/api/v1/bots")
+    api.add_resource(BotsInfo, "/api/v1/bots/bots")
     api.add_resource(NewsItemData, "/api/v1/bots/news-item-data")
     api.add_resource(
         UpdateNewsItemTags,

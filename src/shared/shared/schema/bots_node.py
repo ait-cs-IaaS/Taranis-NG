@@ -13,7 +13,6 @@ class BotsNodeSchema(Schema):
     description = fields.Str()
     api_url = fields.Str()
     api_key = fields.Str()
-    bots = fields.List(fields.Nested(BotSchema))
 
     @post_load
     def make(self, data, **kwargs):

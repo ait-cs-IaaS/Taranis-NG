@@ -19,7 +19,7 @@ class CoreApi:
         uid = self.api_url + self.api_key
         return base64.urlsafe_b64encode(uid.encode("utf-8")).decode("utf-8")
 
-    def register_node(self, bots_info):
+    def register_node(self):
         try:
             response, status = self.get_bot_node_status()
             if status == 200:
@@ -30,7 +30,6 @@ class CoreApi:
                 "description": Config.NODE_DESCRIPTION,
                 "api_url": Config.NODE_URL,
                 "api_key": Config.API_KEY,
-                "bots_info": bots_info,
             }
             response = requests.post(
                 f"{self.api_url}/api/v1/bots/node",
