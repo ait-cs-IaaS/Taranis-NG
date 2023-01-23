@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from core.managers import sse_manager, bots_manager
 from core.managers.log_manager import logger
 from core.managers.auth_manager import api_key_required
-from core.model import news_item, word_list, bots_node
+from core.model import news_item, word_list, bots_node, bot
 
 
 class BotGroupAction(Resource):
@@ -85,10 +85,17 @@ class WordListEntries(Resource):
 
     @api_key_required
     def put(self, word_list_id, entry_name):
-        return word_list.WordListEntry.update_word_list_entries(word_list_id, entry_name, request.json)
+        return word_list.WordListEntry.update_word_list_entries(word_list_id, request.json)
+
+
+class Bots(Resource):
+    def get(self):
+        search = request.args.get(key="search", default=None)
+        return bot.Bot.get_all_json(search)
 
 
 def initialize(api):
+    api.add_resource(NewsItemData, "/api/v1/bots")
     api.add_resource(NewsItemData, "/api/v1/bots/news-item-data")
     api.add_resource(
         UpdateNewsItemTags,

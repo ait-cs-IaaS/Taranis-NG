@@ -48,4 +48,4 @@ def get_registered_bots_info():
 
 def process_event(event_type, data):
     for key in bots:
-        bots[key].process_event(event_type, data)
+        bots[key].execute_on_event(key, event_type, data)

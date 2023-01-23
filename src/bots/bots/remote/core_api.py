@@ -43,9 +43,8 @@ class CoreApi:
                 return None, 400
 
             return response.json(), response.status_code
-        except Exception as e:
-            logger.log_debug("Can't register Bot node")
-            logger.log_debug(str(e))
+        except Exception:
+            logger.log_debug_trace("Can't register Bot node")
             return None, 400
 
     def get_bot_node_status(self):
@@ -60,16 +59,16 @@ class CoreApi:
             logger.log_debug_trace("Cannot update Bot status")
             return None, 400
 
-    def get_bots_presets(self, bot_type):
+    def get_bots(self):
         try:
-            response = requests.post(
-                f"{self.api_url}/api/v1/bots/bots-presets",
-                json={"api_key": self.api_key, "bot_type": bot_type},
+            response = requests.get(
+                f"{self.api_url}/api/v1/bots",
                 headers=self.headers,
             )
             return response.json(), response.status_code
-        except (requests.exceptions.ConnectionError, json.decoder.JSONDecodeError):
-            return {}, 503
+        except Exception:
+            logger.log_debug_trace("Can't get Bot infos")
+            return None, 400
 
     def get_news_items_data(self, limit):
         try:

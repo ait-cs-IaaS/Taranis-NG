@@ -36,6 +36,7 @@ class BaseCollector:
     def __init__(self):
         self.osint_sources = []
         self.core_api = CoreApi()
+        self.refresh()
 
     def get_info(self):
         info_schema = collector.CollectorSchema()

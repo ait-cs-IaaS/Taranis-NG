@@ -23,14 +23,7 @@ class BaseBot:
 
     def __init__(self):
         self.core_api = CoreApi()
-        response, code = self.core_api.get_bots_presets(self.type)
-        logger.log_debug(f"response: {response} type: {self.type}")
-        if code != 200 or response is None:
-            return
-        preset_schema = bot_preset.BotPresetSchemaBase(many=True)
-        self.bot_presets = preset_schema.load(response)
-        for preset in self.bot_presets:
-            self.execute(preset)
+        self.bots = []
 
     def get_info(self):
         info_schema = bot.BotSchema()
@@ -41,10 +34,6 @@ class BaseBot:
 
     def execute_on_event(self, preset, event_type, data):
         pass
-
-    def process_event(self, event_type, data):
-        for preset in self.bot_presets:
-            self.execute_on_event(preset, event_type, data)
 
     @staticmethod
     def print_exception(preset, error):
@@ -67,3 +56,21 @@ class BaseBot:
 
         limit = limit.strftime("%d.%m.%Y - %H:%M")
         return limit
+
+    def refresh(self):
+        logger.log_info(f"Core API requested a refresh Bot {self.type}...")
+        response, code = self.core_api.get_bots()
+
+        if code != 200 or response is None:
+            logger.log_debug(f"HTTP {code}: Got the following reply: {response}")
+            return
+
+        try:
+            bot_schema = bot.BotSchema(many=True)
+            self.bots = bot_schema.load(response)
+
+            for bot in self.bots:
+                self.execute(bot)
+
+        except Exception:
+            logger.log_debug_trace()
