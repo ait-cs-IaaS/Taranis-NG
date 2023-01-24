@@ -108,6 +108,10 @@ export function getAllBots (filter_data) {
   return ApiService.get(`/config/bots?${filter}`)
 }
 
+export function updateBot (bot) {
+  return ApiService.put(`/config/bots/${bot.id}`, bot)
+}
+
 export function getAllACLEntries (filter_data) {
   const filter = ApiService.getQueryStringFromNestedObject(filter_data)
   return ApiService.get(`/config/acls?${filter}`)

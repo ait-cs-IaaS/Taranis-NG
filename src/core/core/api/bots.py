@@ -89,13 +89,22 @@ class WordListEntries(Resource):
 
 
 class BotsInfo(Resource):
-    def get(self, bot_type):
+    def get(self):
         search = request.args.get(key="search", default=None)
         return bot.Bot.get_all_json(search)
 
 
+class BotInfo(Resource):
+    def get(self, bot_type):
+        return bot.Bot.get_all_by_type(bot_type)
+
+    def put(self, bot_type):
+        return bot.Bot.update_bot_parameters(bot_type, request.json)
+
+
 def initialize(api):
-    api.add_resource(BotsInfo, "/api/v1/bots/bots")
+    api.add_resource(BotsInfo, "/api/v1/bots")
+    api.add_resource(BotInfo, "/api/v1/bots/<string:bot_type>")
     api.add_resource(NewsItemData, "/api/v1/bots/news-item-data")
     api.add_resource(
         UpdateNewsItemTags,

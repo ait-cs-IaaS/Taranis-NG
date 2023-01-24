@@ -65,6 +65,10 @@ class BotsNode(db.Model):
         return query.order_by(db.asc(BotsNode.name)).all(), query.count()
 
     @classmethod
+    def get_json_by_id(cls, id):
+        return NewBotsNodeSchema().dump(cls.get_by_id(id))
+
+    @classmethod
     def get_all_json(cls, search):
         nodes, count = cls.get(search)
         node_schema = BotsNodePresentationSchema(many=True)

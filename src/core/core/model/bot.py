@@ -4,6 +4,7 @@ import uuid
 
 from core.managers.db_manager import db
 from core.model.parameter import NewParameterSchema
+from core.managers.log_manager import logger
 from shared.schema.bot import BotSchema
 
 
@@ -20,7 +21,7 @@ class Bot(db.Model):
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())
     type = db.Column(db.String(64), nullable=False)
-    parameters = db.relationship("Parameter", secondary="bot_parameter")
+    parameters = db.relationship("Parameter", secondary="bot_parameter", cascade="all")
 
     def __init__(self, name, description, type, parameters):
         self.id = str(uuid.uuid4())
@@ -35,12 +36,21 @@ class Bot(db.Model):
         return new_bot_schema.load(bots_data)
 
     @classmethod
+    def update_bot_parameters(cls, bot_type, parameters):
+        try:
+            bot = cls.find_by_type(bot_type)
+            bot.parameters = parameters
+            db.session.commit()
+        except Exception:
+            logger.log_debug_trace("Update Bot Parameters Failed")
+
+    @classmethod
     def add(cls, data):
         if cls.find_by_type(data["type"]):
             return None
         schema = NewBotSchema()
-        collector = schema.load(data)
-        db.session.add(collector)
+        bot = schema.load(data)
+        db.session.add(bot)
         db.session.commit()
 
     @classmethod
@@ -50,6 +60,10 @@ class Bot(db.Model):
     @classmethod
     def find_by_type(cls, type):
         return cls.query.filter_by(type=type).first()
+
+    @classmethod
+    def get_all_by_type(cls, type):
+        return cls.query.filter_by(type=type).all()
 
     @classmethod
     def get(cls, search):

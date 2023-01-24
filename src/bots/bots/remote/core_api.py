@@ -49,7 +49,7 @@ class CoreApi:
     def get_bot_node_status(self):
         try:
             response = requests.get(
-                f"{self.api_url}/api/v1/bots/{self.node_id}",
+                f"{self.api_url}/api/v1/bots/node/{self.node_id}",
                 headers=self.headers,
             )
 

@@ -208,7 +208,7 @@ export const router = new Router({
       meta: { requiresAuth: true, requiresPerm: [Permissions.CONFIG_REMOTE_ACCESS_ACCESS] }
     },
     {
-      path: '/config/remote/NODES',
+      path: '/config/remote/nodes',
       name: 'remote-nodes',
       components: {
         default: () => import('./views/admin/RemoteNodesView.vue'),
@@ -253,6 +253,15 @@ export const router = new Router({
         nav: () => import('./views/nav/ConfigNav.vue')
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.CONFIG_WORD_LIST_ACCESS] }
+    },
+    {
+      path: '/config/bots',
+      name: 'bots',
+      components: {
+        default: () => import('./views/admin/BotsView.vue'),
+        nav: () => import('./views/nav/ConfigNav.vue')
+      },
+      meta: { requiresAuth: true, requiresPerm: [Permissions.CONFIG_BOT_PRESET_ACCESS] }
     },
     {
       path: '/login',
