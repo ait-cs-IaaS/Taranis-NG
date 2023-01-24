@@ -116,6 +116,10 @@ class NLPBot(BaseBot):
         except Exception as error:
             BaseBot.print_exception(preset, error)
 
+    def generateSummary(self, text: str) -> str:
+        # TODO: Implement
+        return text
+
     def generateKeywords(self, language, kw_model, text):
         if language == "en":
             keywords = kw_model.extract_keywords(
