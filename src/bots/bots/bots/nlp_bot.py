@@ -12,9 +12,12 @@ from transformers import (
     TFMBartForConditionalGeneration,
     MBartConfig,
 )
+
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from bs4 import BeautifulSoup
 
-
+def clean_html(text):
+    return BeautifulSoup(markup=text, features="html.parser").get_text()
 
 class NLPBot(BaseBot):
     type = "NLP_BOT"
@@ -86,10 +89,16 @@ class NLPBot(BaseBot):
 
             for aggregate in data:
                 findings = {}
+                content_list = []
+
                 for news_item in aggregate["news_items"]:
                     content = news_item["news_item_data"]["content"]
+                    content_list.append(content)
 
                     findings[news_item["id"]] = self.generateKeywords(language, kw_model, content)
+
+                summary = self.predict_summary(content_list)
+                self.core_api.update_news_items_aggregate_summary(aggregate["id"],summary)
 
                 for news_id, keywords in findings.items():
                     keyword = [i[0] for i in keywords]
