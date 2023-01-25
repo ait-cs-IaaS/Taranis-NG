@@ -11,6 +11,7 @@
       </v-row>
       <v-row no-gutters v-for="item in format" :key="item.name">
         <v-col cols="12" v-if="item.parent">
+          {{ formData[item.parent][item.name] }}
           <v-text-field
             v-model="formData[item.parent][item.name]"
             :label="item.label"

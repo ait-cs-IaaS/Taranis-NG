@@ -67,7 +67,8 @@ export default {
           label: 'Type',
           type: 'select',
           required: true,
-          options: this.bot_types
+          options: this.bot_types,
+          disabled: this.edit
         }
       ]
       if (this.parameters[this.formData.type]) {
@@ -85,10 +86,11 @@ export default {
         const sources = this.getBots()
         this.bots = sources.items
         this.bot_types = sources.items.map(item => {
-          this.parameters[item.type] = item.parameters.map(param => {
+          this.parameters[item.type] = item.parameters.map((param, i) => {
             return {
-              name: param.name,
+              name: i,
               label: param.name,
+              parent: 'parameters',
               type: 'text'
             }
           })
@@ -110,10 +112,11 @@ export default {
     },
     handleSubmit(submittedData) {
       console.log(submittedData)
+      const params = { id: submittedData.id, parameters: submittedData.parameters }
       if (this.edit) {
-        this.updateItem(submittedData)
+        this.updateItem(params)
       } else {
-        this.createItem(submittedData)
+        this.createItem(params)
       }
     },
     deleteItem(item) {
@@ -124,10 +127,10 @@ export default {
     },
     updateItem(item) {
       updateBot(item).then(() => {
-        notifySuccess(`Successfully updated ${item.name}`)
+        notifySuccess(`Successfully updated ${item.id}`)
         this.updateData()
       }).catch(() => {
-        notifyFailure(`Failed to update ${item.name}`)
+        notifyFailure(`Failed to update ${item.id}`)
       })
     }
   },

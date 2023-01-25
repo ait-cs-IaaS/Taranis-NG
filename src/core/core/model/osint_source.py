@@ -70,9 +70,7 @@ class OSINTSource(db.Model):
         self.tag = ""
 
         self.word_lists = []
-        for word_list in word_lists:
-            self.word_lists.append(WordList.find(word_list.id))
-
+        self.word_lists.extend(WordList.find(word_list.id) for word_list in word_lists)
         self.osint_source_groups = []
         for osint_source_group in osint_source_groups:
             group = OSINTSourceGroup.find(osint_source_group.id)

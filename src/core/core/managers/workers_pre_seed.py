@@ -377,6 +377,7 @@ bots = [
                 "id": 0,
             },
         ],
+        "parameter_values": [],
         "description": "Bot for news items analysis",
     },
     {
@@ -399,6 +400,7 @@ bots = [
                 "id": 0,
             },
         ],
+        "parameter_values": [],
         "description": "Bot for grouping news items into aggregates",
     },
     {
@@ -415,6 +417,7 @@ bots = [
                 "id": 0,
             },
         ],
+        "parameter_values": [],
         "description": "Bot for naturale language processing of news items",
     },
     {
@@ -431,6 +434,7 @@ bots = [
                 "id": 0,
             },
         ],
+        "parameter_values": [],
         "description": "Bot for tagging news items",
     },
 ]

@@ -95,16 +95,16 @@ class BotsInfo(Resource):
 
 
 class BotInfo(Resource):
-    def get(self, bot_type):
-        return bot.Bot.get_all_by_type(bot_type)
+    def get(self, bot_id):
+        return bot.Bot.get_by_id(bot_id)
 
-    def put(self, bot_type):
-        return bot.Bot.update_bot_parameters(bot_type, request.json)
+    def put(self, bot_id):
+        return bot.Bot.update_bot_parameters(bot_id, request.json)
 
 
 def initialize(api):
     api.add_resource(BotsInfo, "/api/v1/bots")
-    api.add_resource(BotInfo, "/api/v1/bots/<string:bot_type>")
+    api.add_resource(BotInfo, "/api/v1/bots/<string:bot_id>")
     api.add_resource(NewsItemData, "/api/v1/bots/news-item-data")
     api.add_resource(
         UpdateNewsItemTags,

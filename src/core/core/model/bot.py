@@ -4,12 +4,15 @@ import uuid
 
 from core.managers.db_manager import db
 from core.model.parameter import NewParameterSchema
+from core.model.parameter_value import NewParameterValueSchema
+
 from core.managers.log_manager import logger
 from shared.schema.bot import BotSchema
 
 
 class NewBotSchema(BotSchema):
     parameters = fields.List(fields.Nested(NewParameterSchema))
+    parameter_values = fields.List(fields.Nested(NewParameterValueSchema), load_default=[])
 
     @post_load
     def make(self, data, **kwargs):
@@ -22,13 +25,15 @@ class Bot(db.Model):
     description = db.Column(db.String())
     type = db.Column(db.String(64), nullable=False)
     parameters = db.relationship("Parameter", secondary="bot_parameter", cascade="all")
+    parameter_values = db.relationship("ParameterValue", secondary="bot_parameter_value", cascade="all")
 
-    def __init__(self, name, description, type, parameters):
+    def __init__(self, name, description, type, parameters, parameter_values):
         self.id = str(uuid.uuid4())
         self.name = name
         self.description = description
         self.type = type
         self.parameters = parameters
+        self.parameter_values = parameter_values
 
     @classmethod
     def create_all(cls, bots_data):
@@ -36,9 +41,9 @@ class Bot(db.Model):
         return new_bot_schema.load(bots_data)
 
     @classmethod
-    def update_bot_parameters(cls, bot_type, parameters):
+    def update_bot_parameters(cls, bot_id, parameters):
         try:
-            bot = cls.find_by_type(bot_type)
+            bot = cls.find_by_id(bot_id)
             bot.parameters = parameters
             db.session.commit()
         except Exception:
@@ -56,6 +61,10 @@ class Bot(db.Model):
     @classmethod
     def get_first(cls):
         return cls.query.first()
+
+    @classmethod
+    def find_by_id(cls, id):
+        return cls.query.filter_by(id=id).first()
 
     @classmethod
     def find_by_type(cls, type):
@@ -92,3 +101,8 @@ class Bot(db.Model):
 class BotParameter(db.Model):
     bot_id = db.Column(db.String, db.ForeignKey("bot.id"), primary_key=True)
     parameter_id = db.Column(db.Integer, db.ForeignKey("parameter.id"), primary_key=True)
+
+
+class BotParameterValue(db.Model):
+    bot_id = db.Column(db.String, db.ForeignKey("bot.id"), primary_key=True)
+    parameter_value_id = db.Column(db.Integer, db.ForeignKey("parameter_value.id"), primary_key=True)
