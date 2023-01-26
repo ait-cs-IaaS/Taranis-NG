@@ -6,7 +6,6 @@ import re
 from collectors.managers.log_manager import logger
 from collectors.remote.core_api import CoreApi
 from shared.schema import collector, osint_source, news_item
-from shared.schema.parameter import Parameter, ParameterType
 from bs4 import BeautifulSoup
 from urllib.parse import quote
 
@@ -15,23 +14,6 @@ class BaseCollector:
     type = "BASE_COLLECTOR"
     name = "Base Collector"
     description = "Base abstract type for all collectors"
-
-    parameters = [
-        Parameter(
-            0,
-            "PROXY_SERVER",
-            "Proxy server",
-            "Type SOCKS5 proxy server as username:password@ip:port or ip:port",
-            ParameterType.STRING,
-        ),
-        Parameter(
-            0,
-            "REFRESH_INTERVAL",
-            "Refresh interval in minutes",
-            "How often is this collector queried for new data",
-            ParameterType.NUMBER,
-        ),
-    ]
 
     def __init__(self):
         self.osint_sources = []

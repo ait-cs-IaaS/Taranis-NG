@@ -13,5 +13,4 @@ def create_app():
 
         api_manager.initialize(app)
         bots_manager.initialize()
-        bots_manager.register_bot_node()
     return app

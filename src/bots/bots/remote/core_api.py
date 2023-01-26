@@ -21,9 +21,12 @@ class CoreApi:
 
     def register_node(self):
         try:
-            response, status = self.get_bot_node_status()
-            if status == 200:
-                return response, status
+            response = self.get_bot_node_status()
+            if response:
+                logger.log_info(f"Found registerd Bot {response}")
+                return
+            
+            logger.log_info(f"Registering bot Node at {Config.TARANIS_NG_CORE_URL}")
             node_info = {
                 "id": self.node_id,
                 "name": Config.NODE_NAME,
@@ -37,26 +40,26 @@ class CoreApi:
                 headers=self.headers,
             )
 
-            if response.status_code != 200:
-                logger.log_debug(f"Can't register Bot node: {response.text}")
-                return None, 400
+            if response.ok:
+                logger.log_info(f"Successfully registered: {response}")
+            else:
+                logger.critical(f"Can't register Bot node: {response.text}")
 
-            return response.json(), response.status_code
         except Exception:
             logger.log_debug_trace("Can't register Bot node")
-            return None, 400
+            return None
 
-    def get_bot_node_status(self):
+    def get_bot_node_status(self) -> dict|None:
         try:
             response = requests.get(
                 f"{self.api_url}/api/v1/bots/node/{self.node_id}",
                 headers=self.headers,
             )
 
-            return response.json(), response.status_code
+            return response.json() if response.ok else None
         except Exception:
             logger.log_debug_trace("Cannot update Bot status")
-            return None, 400
+            return None
 
     def get_bots(self):
         try:

@@ -8,22 +8,13 @@ from bots.config import Config
 bots = {}
 
 
-def register_bot_node():
-    try:
-        logger.log_debug(f"Registering bot Node at {Config.TARANIS_NG_CORE_URL}")
-        response, code = CoreApi().register_node()
-        if code == 200:
-            logger.log_info(f"Successfully registered: {response}")
-        return response, code
-    except Exception:
-        logger.log_critical("Registration failed")
-
-
 def register_bot(bot):
     bots[bot.type] = bot
 
 
 def initialize():
+    CoreApi().register_node()
+
     logger.log_info(f"Initializing bot node: {Config.NODE_NAME}...")
 
     for c in Config.BOTS_LOADABLE_BOTS:
