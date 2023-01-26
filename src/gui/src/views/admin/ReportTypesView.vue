@@ -10,18 +10,15 @@
       @edit-item="editItem"
       @add-item="addItem"
     />
-    <EditConfig
-      v-if="formData && Object.keys(formData).length > 0"
-      :configData="formData"
-      :formFormat="formFormat"
-      @submit="handleSubmit"
-    ></EditConfig>
+    <ReportTypeForm>
+    </ReportTypeForm>
   </div>
 </template>
 
 <script>
 import ConfigTable from '../../components/config/ConfigTable'
-import EditConfig from '../../components/config/EditConfig'
+// import EditConfig from '../../components/config/EditConfig'
+import ReportTypeForm from '../../components/config/ReportTypeForm'
 import {
   deleteReportItemType,
   createReportItemType,
@@ -34,7 +31,7 @@ export default {
   name: 'ReportTypes',
   components: {
     ConfigTable,
-    EditConfig
+    ReportTypeForm
   },
   data: () => ({
     report_types: [],

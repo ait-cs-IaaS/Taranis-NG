@@ -78,27 +78,19 @@
                 v-model="group.section_title"
                 :spellcheck="$store.state.settings.spellcheck"
               ></v-text-field>
-
-              <AttributeTable
-                :disabled="!canUpdate"
-                :attributes="
+              <ConfigTable
+                :addButton="true"
+                :showSearch="false"
+                :items.sync="
                   report_type.attribute_groups[index].attribute_group_items
                 "
-                :attribute_templates="attribute_templates"
-              ></AttributeTable>
+                :actionColumn="true"
+                @delete-item="(item) => deleteAttributeItem(index, item)"
+                @edit-item="(item) => editAttributeItem(index, item)"
+                @add-item="() => addAttributeItem(index)"
+              />
             </v-card-text>
           </v-card>
-        </v-col>
-      </v-row>
-
-      <v-row no-gutters class="pt-2">
-        <v-col cols="12">
-          <v-alert v-if="show_validation_error" dense type="error" text>
-            {{ $t('report_type.validation_error') }}
-          </v-alert>
-          <v-alert v-if="show_error" dense type="error" text>
-            {{ $t('report_type.error') }}
-          </v-alert>
         </v-col>
       </v-row>
     </v-form>
@@ -106,18 +98,20 @@
 </template>
 
 <script>
-import { createNewReportItemType, updateReportItemType } from '@/api/config'
+import { createReportItemType, updateReportItemType } from '@/api/config'
+import ConfigTable from '../../components/config/ConfigTable'
 import AuthMixin from '@/services/auth/auth_mixin'
 import Permissions from '@/services/auth/permissions'
 import { mapActions, mapGetters } from 'vuex'
+import { notifySuccess, notifyFailure } from '@/utils/helpers'
 
 export default {
   name: 'NewReportType',
-  components: {},
+  components: {
+    ConfigTable
+  },
   data: () => ({
     edit: false,
-    show_validation_error: false,
-    show_error: false,
     attribute_templates: [],
     report_type: {
       id: -1,
@@ -144,9 +138,28 @@ export default {
   methods: {
     ...mapGetters('config', ['getAttributes']),
     ...mapActions('config', ['loadAttributes']),
+    addAttributeItem(index) {
+      const default_attribute = {
+        index: 0,
+        id: -1,
+        attribute_id: -1,
+        attribute_name: '',
+        title: '',
+        description: '',
+        min_occurrence: 0,
+        max_occurrence: 1
+      }
+      this.report_type.attribute_groups[index].attribute_group_items = default_attribute
+      console.debug(`Add Attribute Item ${default_attribute}`)
+    },
+    editAttributeItem(index, item) {
+      console.debug(`Edit Attribute Item ${item}`)
+    },
+    deleteAttributeItem(index, item) {
+      console.debug(`Delete Attribute Item ${item}`)
+    },
     addReportType() {
       this.edit = false
-      this.show_error = false
       this.report_type.id = -1
       this.report_type.title = ''
       this.report_type.description = ''
@@ -194,9 +207,6 @@ export default {
     add() {
       this.$validator.validateAll().then(() => {
         if (!this.$validator.errors.any()) {
-          this.show_validation_error = false
-          this.show_error = false
-
           for (let x = 0; x < this.report_type.attribute_groups.length; x++) {
             this.report_type.attribute_groups[x].index = x
 
@@ -216,29 +226,23 @@ export default {
             updateReportItemType(this.report_type)
               .then(() => {
                 this.$validator.reset()
-                this.$root.$emit('notification', {
-                  type: 'success',
-                  loc: 'report_type.successful_edit'
-                })
+                notifySuccess('report_type.successful_edit')
               })
               .catch(() => {
-                this.show_error = true
+                notifyFailure('report_type.error')
               })
           } else {
-            createNewReportItemType(this.report_type)
+            createReportItemType(this.report_type)
               .then(() => {
                 this.$validator.reset()
-                this.$root.$emit('notification', {
-                  type: 'success',
-                  loc: 'report_type.successful'
-                })
+                notifySuccess('report_type.successful')
               })
               .catch(() => {
-                this.show_error = true
+                notifyFailure('report_type.error')
               })
           }
         } else {
-          this.show_validation_error = true
+          notifyFailure('report_type.validation_error')
         }
       })
     }
