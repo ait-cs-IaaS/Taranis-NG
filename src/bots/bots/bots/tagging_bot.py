@@ -1,5 +1,4 @@
 from .base_bot import BaseBot
-from shared.schema.parameter import Parameter, ParameterType
 from bots.managers.log_manager import logger
 import datetime
 
@@ -8,24 +7,6 @@ class TaggingBot(BaseBot):
     type = "TAGGING_BOT"
     name = "Tagging Bot"
     description = "Bot for tagging news items"
-
-    parameters = [
-        Parameter(
-            0,
-            "SOURCE_GROUP",
-            "Source Group",
-            "OSINT Source group to inspect",
-            ParameterType.STRING,
-        ),
-        Parameter(
-            0,
-            "KEYWORDS",
-            "Keywords",
-            "Keywords to Tag on seperated by ','",
-            ParameterType.STRING,
-        ),
-    ]
-    parameters.extend(BaseBot.parameters)
 
     def execute(self, preset):
         try:

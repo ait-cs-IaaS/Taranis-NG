@@ -38,12 +38,10 @@ class ProductType(db.Model):
         self.description = description
         self.presenter_id = presenter_id
         self.parameter_values = parameter_values
-        self.subtitle = ""
-        self.tag = ""
+        self.tag = "mdi-file-document-outline"
 
     @orm.reconstructor
     def reconstruct(self):
-        self.subtitle = self.description
         self.tag = "mdi-file-document-outline"
 
     @classmethod

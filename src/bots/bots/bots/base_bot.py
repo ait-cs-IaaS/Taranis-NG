@@ -2,7 +2,6 @@ import datetime
 
 from bots.managers.log_manager import logger
 from shared.schema import bot
-from shared.schema.parameter import Parameter, ParameterType
 from bots.remote.core_api import CoreApi
 
 
@@ -10,16 +9,6 @@ class BaseBot:
     type = "BASE_BOT"
     name = "Base Bot"
     description = "Base abstract type for all bots"
-
-    parameters = [
-        Parameter(
-            0,
-            "REFRESH_INTERVAL",
-            "Refresh Interval",
-            "How often is this bot doing its job",
-            ParameterType.NUMBER,
-        )
-    ]
 
     def __init__(self):
         self.core_api = CoreApi()

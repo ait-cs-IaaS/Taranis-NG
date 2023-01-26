@@ -26,7 +26,7 @@ import {
   updateBot
 } from '@/api/config'
 import { mapActions, mapGetters } from 'vuex'
-import { notifySuccess, objectFromFormat, notifyFailure } from '@/utils/helpers'
+import { notifySuccess, objectFromFormat, notifyFailure, parseParameterValues, parseSubmittedParameterValues } from '@/utils/helpers'
 
 export default {
   name: 'Bots',
@@ -36,6 +36,7 @@ export default {
   },
   data: () => ({
     bots: [],
+    unparsed_bots: [],
     formData: {},
     parameters: {},
     bot_types: [],
@@ -78,24 +79,28 @@ export default {
     }
   },
   methods: {
-    ...mapActions('config', ['loadBots']),
-    ...mapGetters('config', ['getBots']),
+    ...mapActions('config', ['loadBots', 'loadParameters']),
+    ...mapGetters('config', ['getBots', 'getParameters']),
     ...mapActions(['updateItemCount']),
     updateData() {
       this.loadBots().then(() => {
         const sources = this.getBots()
-        this.bots = sources.items
+        this.unparsed_sources = sources.items
+        this.bots = parseParameterValues(sources.items)
+
+        console.log(sources.items)
+        console.log(this.bots)
         this.bot_types = sources.items.map(item => {
-          this.parameters[item.type] = item.parameters.map((param, i) => {
+          this.parameters[item.type] = item.parameter_values.map(param => {
             return {
-              name: i,
-              label: param.name,
-              parent: 'parameters',
+              name: param.parameter.key,
+              label: param.parameter.key,
               type: 'text'
             }
           })
           return item.type
         })
+        console.log(this.parameters)
         this.updateItemCount({
           total: sources.total_count,
           filtered: sources.length
@@ -111,8 +116,8 @@ export default {
       this.edit = true
     },
     handleSubmit(submittedData) {
-      console.log(submittedData)
-      const params = { id: submittedData.id, parameters: submittedData.parameters }
+      const params = parseSubmittedParameterValues(this.unparsed_bots, submittedData)
+      console.log(params)
       if (this.edit) {
         this.updateItem(params)
       } else {

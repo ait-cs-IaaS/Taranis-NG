@@ -2,7 +2,6 @@ import re
 
 from .base_bot import BaseBot
 from shared.schema import news_item
-from shared.schema.parameter import Parameter, ParameterType
 from bots.managers.log_manager import logger
 
 
@@ -10,32 +9,6 @@ class AnalystBot(BaseBot):
     type = "ANALYST_BOT"
     name = "Analyst Bot"
     description = "Bot for news items analysis"
-
-    parameters = [
-        Parameter(
-            0,
-            "SOURCE_GROUP",
-            "Source Group",
-            "OSINT Source group to inspect",
-            ParameterType.STRING,
-        ),
-        Parameter(
-            0,
-            "REGULAR_EXPRESSION",
-            "Regular Expression",
-            "Regular expression for data analysis",
-            ParameterType.STRING,
-        ),
-        Parameter(
-            0,
-            "ATTRIBUTE_NAME",
-            "Attribute name",
-            "Name of attribute for extracted data",
-            ParameterType.STRING,
-        ),
-    ]
-
-    parameters.extend(BaseBot.parameters)
 
     regexp = []
     attr_name = []

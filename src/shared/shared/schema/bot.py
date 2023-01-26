@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields
 
-from shared.schema.parameter_value import ParameterValueSchema
+from shared.schema.parameter_value import ParameterValueExportSchema
 
 
 class BotSchema(Schema):
@@ -8,4 +8,4 @@ class BotSchema(Schema):
     type = fields.Str()
     name = fields.Str()
     description = fields.Str()
-    parameter_values = fields.List(fields.Nested(ParameterValueSchema))
+    parameter_values = fields.List(fields.Nested(ParameterValueExportSchema))

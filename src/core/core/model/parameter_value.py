@@ -1,10 +1,14 @@
 from marshmallow import post_load
 
 from core.managers.db_manager import db
+from marshmallow import fields
 from shared.schema.parameter_value import ParameterValueSchema
+from shared.schema.parameter import ParameterExportSchema
 
 
 class NewParameterValueSchema(ParameterValueSchema):
+    parameter = fields.Nested(ParameterExportSchema)
+
     @post_load
     def make_parameter_value(self, data, **kwargs):
         return ParameterValue(**data)

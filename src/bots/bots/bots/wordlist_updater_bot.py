@@ -2,7 +2,6 @@ import requests
 
 from .base_bot import BaseBot
 from shared.schema import word_list
-from shared.schema.parameter import Parameter, ParameterType
 from bots.managers.log_manager import logger
 
 
@@ -10,40 +9,6 @@ class WordlistUpdaterBot(BaseBot):
     type = "WORDLIST_UPDATER_BOT"
     name = "Wordlist Updater Bot"
     description = "Bot for updating word lists"
-
-    parameters = [
-        Parameter(
-            0,
-            "WORD_LIST_ID",
-            "Word list ID",
-            "ID of word list to update",
-            ParameterType.NUMBER,
-        ),
-        Parameter(
-            0,
-            "WORD_LIST_CATEGORY",
-            "Word list category name",
-            "Name of category of word entries",
-            ParameterType.STRING,
-        ),
-        Parameter(
-            0,
-            "DATA_URL",
-            "Data URL or file path",
-            "Source for words",
-            ParameterType.STRING,
-        ),
-        Parameter(0, "FORMAT", "Data format", "Format of words source", ParameterType.STRING),
-        Parameter(
-            0,
-            "DELETE",
-            "Delete before update (yes or no)",
-            "Delete word entries before update, default yes",
-            ParameterType.STRING,
-        ),
-    ]
-
-    parameters.extend(BaseBot.parameters)
 
     def execute(self, preset):
         def load_file(source, word_list_format):

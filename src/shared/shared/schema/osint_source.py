@@ -35,7 +35,7 @@ class OSINTSourceSchemaBase(Schema):
 
     id = fields.Str()
     name = fields.Str()
-    parameter_values = fields.List(fields.Nested(ParameterValueSchema))
+    parameter_values = fields.List(fields.Nested(ParameterValueExportSchema))
     word_lists = fields.List(fields.Nested(WordListSchema))
 
     @post_load
@@ -112,7 +112,7 @@ class OSINTSourceExportSchema(Schema):
     name = fields.Str()
     description = fields.Str()
     collector = fields.Nested(CollectorExportSchema)
-    parameter_values = fields.List(fields.Nested(ParameterValueExportSchema))
+    parameter_values = fields.List(fields.Nested(ParameterValueSchema))
 
     @post_load
     def make(self, data, **kwargs):

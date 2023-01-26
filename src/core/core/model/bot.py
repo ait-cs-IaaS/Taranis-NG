@@ -3,14 +3,10 @@ from sqlalchemy import or_, func
 import uuid
 
 from core.managers.db_manager import db
-from shared.schema.parameter import ParameterSchema
-from shared.schema.parameter_value import ParameterValueSchema
-
-from core.model.parameter_value import NewParameterValueSchema, ParameterValue
-from core.model.parameter import Parameter
-
+from core.model.parameter_value import NewParameterValueSchema
 from core.managers.log_manager import logger
 from shared.schema.bot import BotSchema
+from shared.schema.parameter_value import ParameterValueSchema
 
 
 class NewBotSchema(BotSchema):
@@ -41,10 +37,18 @@ class Bot(db.Model):
         return new_bot_schema.load(bots_data)
 
     @classmethod
-    def update_bot_parameters(cls, bot_id, parameter_values):
+    def update_bot_parameters(cls, bot_id, data):
         try:
             bot = cls.find_by_id(bot_id)
-            bot.parameter_values = parameter_values
+            #parameter_values = [NewParameterValueSchema().load(pv) for pv in data["parameter_values"]]
+            for pv in bot.parameter_values:
+              for updated_value in data["parameter_values"]:
+                if pv.parameter.key == updated_value["parameter"]:
+                    pv.value = updated_value["value"]
+
+            # bot_params = [{"id": pv.id, "key": pv.parameter.key, "value": pv.value} for pv in bot.parameter_values]
+            # print(f"bot_params = {bot_params}")
+            # bot.parameter_values = parameter_values
             db.session.commit()
         except Exception:
             logger.log_debug_trace("Update Bot Parameters Failed")

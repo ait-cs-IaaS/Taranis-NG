@@ -42,3 +42,11 @@ class Parameter(db.Model):
     def get_by_key(cls, key):
         param = cls.query.get(key)
         return ParameterSchema().dump(param) if param else None
+    
+    @classmethod
+    def get_all_json(cls):
+        param, count = cls.query.all(), cls.query.count()
+        schema = ParameterSchema(many=True)
+        items = schema.dump(param)
+
+        return {"total_count": count, "items": items}

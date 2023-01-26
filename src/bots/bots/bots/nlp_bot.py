@@ -1,5 +1,4 @@
 from .base_bot import BaseBot
-from shared.schema.parameter import Parameter, ParameterType
 from bots.managers.log_manager import logger
 import datetime
 from keybert import KeyBERT
@@ -10,24 +9,6 @@ class NLPBot(BaseBot):
     type = "NLP_BOT"
     name = "NLP Bot"
     description = "Bot for naturale language processing of news items"
-
-    parameters = [
-        Parameter(
-            0,
-            "SOURCE_GROUP",
-            "Source Group",
-            "OSINT Source group to inspect",
-            ParameterType.STRING,
-        ),
-        Parameter(
-            0,
-            "LANGUAGE",
-            "language",
-            "language','",
-            ParameterType.STRING,
-        ),
-    ]
-    parameters.extend(BaseBot.parameters)
 
     def execute(self, preset):
         try:
