@@ -66,11 +66,14 @@ export default {
           name: 'attribute_groups',
           label: 'Attribute Groups',
           type: 'table',
+          addButton: true,
           headers: [
             { text: 'Title', value: 'title' },
             { text: 'Description', value: 'description' },
-            { text: 'Section', value: 'section' },
-            { text: 'Attributes', value: 'attributes' }
+            { text: 'Section', value: 'section', type: 'number' },
+            { text: 'Section Title', value: 'section_title' },
+            { text: 'Index', value: 'index', type: 'number' },
+            { text: 'Attribute Group Items', value: 'attribute_group_items' }
           ],
           items: this.formData.attribute_groups
         }
@@ -100,7 +103,7 @@ export default {
       this.edit = true
     },
     handleSubmit(submittedData) {
-      console.log(submittedData)
+      console.debug(submittedData)
       if (this.edit) {
         this.updateItem(submittedData)
       } else {

@@ -80,6 +80,7 @@
                   <v-text-field
                     v-model="props.item[h.value]"
                     :disabled="item['disabled'] !== undefined"
+                    :type="item.type ? item.type : 'text'"
                     label="Edit"
                     single-line
                   ></v-text-field>
@@ -129,7 +130,7 @@ export default {
       const newRow = {}
       const headers = this.format.find((row) => row.name === name).headers
       headers.forEach((header) => {
-        newRow[header.value] = `new${header.value}`
+        newRow[header.value] = header.type === 'number' ? 0 : `new${header.value}`
       })
       this.formData[name].push(newRow)
     },

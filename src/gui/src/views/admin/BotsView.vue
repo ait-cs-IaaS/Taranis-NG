@@ -88,8 +88,6 @@ export default {
         this.unparsed_sources = sources.items
         this.bots = parseParameterValues(sources.items)
 
-        console.log(sources.items)
-        console.log(this.bots)
         this.bot_types = sources.items.map(item => {
           this.parameters[item.type] = item.parameter_values.map(param => {
             return {
@@ -100,7 +98,6 @@ export default {
           })
           return item.type
         })
-        console.log(this.parameters)
         this.updateItemCount({
           total: sources.total_count,
           filtered: sources.length
@@ -117,7 +114,6 @@ export default {
     },
     handleSubmit(submittedData) {
       const params = parseSubmittedParameterValues(this.unparsed_bots, submittedData)
-      console.log(params)
       if (this.edit) {
         this.updateItem(params)
       } else {
