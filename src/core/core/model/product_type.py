@@ -124,7 +124,7 @@ class ProductType(db.Model):
 
         for value in product_type.parameter_values:
             for updated_value in updated_product_type.parameter_values:
-                if value.parameter_id == updated_value.parameter_id:
+                if value.parameter_key == updated_value.parameter_key:
                     value.value = updated_value.value
 
         db.session.commit()

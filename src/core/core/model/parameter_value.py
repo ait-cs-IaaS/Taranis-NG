@@ -12,12 +12,12 @@ class NewParameterValueSchema(ParameterValueSchema):
 
 class ParameterValue(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    value = db.Column(db.String(), nullable=False)
+    value = db.Column(db.String(), nullable=False, default="")
 
-    parameter_id = db.Column(db.Integer, db.ForeignKey("parameter.id"))
+    parameter_key = db.Column(db.String(), db.ForeignKey("parameter.key"))
     parameter = db.relationship("Parameter")
 
     def __init__(self, value, parameter):
         self.id = None
         self.value = value
-        self.parameter_id = parameter.id
+        self.parameter_key = parameter

@@ -27,11 +27,8 @@ def pre_seed(app):
         pre_seed_wordlists()
         logger.log_debug("Wordlists seeded")
 
-        pre_seed_collectors()
-        logger.log_debug("Collectors seeded")
-
-        pre_seed_bots()
-        logger.log_debug("Bots seeded")
+        pre_seed_workers()
+        logger.log_debug("Workres seeded")
 
     except Exception:
         logger.log_debug_trace("Pre Seed failed")
@@ -43,17 +40,18 @@ def pre_seed_source_groups():
     OSINTSourceGroup.create(group_id="default", name="Default", description="Default group for uncategorized sources", default=True)
 
 
-def pre_seed_collectors():
+def pre_seed_workers():
     from core.model.collector import Collector
-    from core.managers.workers_pre_seed import collectors
+    from core.model.parameter import Parameter
+    from core.managers.workers_pre_seed import collectors, parameters
+    from core.model.bot import Bot
+    from core.managers.workers_pre_seed import bots
+
+    for p in parameters:
+        Parameter.add(p)
 
     for c in collectors:
         Collector.add(c)
-
-
-def pre_seed_bots():
-    from core.model.bot import Bot
-    from core.managers.workers_pre_seed import bots
 
     for b in bots:
         Bot.add(b)
