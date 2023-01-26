@@ -1,7 +1,7 @@
 import datetime
 
 from bots.managers.log_manager import logger
-from shared.schema import bot
+from shared.schema.bot import BotSchema
 from bots.remote.core_api import CoreApi
 
 
@@ -10,27 +10,26 @@ class BaseBot:
     name = "Base Bot"
     description = "Base abstract type for all bots"
 
-    def __init__(self):
+    def __init__(self, parameters: dict):
         self.core_api = CoreApi()
-        self.bots = []
+        self.parameters = parameters
+        self.refresh()
 
     def get_info(self):
-        info_schema = bot.BotSchema()
+        info_schema = BotSchema()
         return info_schema.dump(self)
 
-    def execute(self, source):
+    def execute(self):
         pass
 
-    def execute_on_event(self, preset, event_type, data):
+    def execute_on_event(self, event_type, data):
         pass
 
-    @staticmethod
-    def print_exception(preset, error):
-        logger.log_debug(f"Bot Preset ID: {preset.id}\tName: {preset.name}")
-        logger.log_debug_trace(error)
-
-    @staticmethod
-    def history(interval):
+    def history(self):
+        interval = self.parameters.get("REFRESH_INTERVAL")
+        if not interval:
+            limit = datetime.datetime.now() - datetime.timedelta(days=7)
+            return limit.strftime("%d.%m.%Y - %H:%M")
         if interval[0].isdigit() and ":" in interval:
             limit = datetime.datetime.now() - datetime.timedelta(days=1)
         elif interval[0].isalpha():
@@ -39,7 +38,6 @@ class BaseBot:
             hours = int(interval) // 60
             minutes = int(interval) - hours * 60
             limit = datetime.datetime.now() - datetime.timedelta(days=0, hours=hours, minutes=minutes)
-
         else:
             limit = datetime.datetime.now() - datetime.timedelta(days=0, hours=0, minutes=int(interval))
 
@@ -47,19 +45,9 @@ class BaseBot:
         return limit
 
     def refresh(self):
-        logger.log_info(f"Core API requested a refresh Bot {self.type}...")
-        response, code = self.core_api.get_bots()
-
-        if code != 200 or response is None:
-            logger.log_debug(f"HTTP {code}: Got the following reply: {response}")
-            return
+        logger.info(f"Refreshing Bot: {self.type} with {self.parameters} ...")
 
         try:
-            bot_schema = bot.BotSchema(many=True)
-            self.bots = bot_schema.load(response)
-
-            for bot in self.bots:
-                self.execute(bot)
-
+            self.execute()
         except Exception:
-            logger.log_debug_trace()
+            logger.log_debug_trace(f"Refresh Bots Failed: {self.type}")

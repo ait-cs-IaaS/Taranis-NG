@@ -61,16 +61,16 @@ class CoreApi:
             logger.log_debug_trace("Cannot update Bot status")
             return None
 
-    def get_bots(self):
+    def get_bots(self) -> dict|None:
         try:
             response = requests.get(
                 f"{self.api_url}/api/v1/bots",
                 headers=self.headers,
             )
-            return response.json(), response.status_code
+            return response.json()["items"] if response.ok else None
         except Exception:
             logger.log_debug_trace("Can't get Bot infos")
-            return None, 400
+            return None
 
     def get_news_items_data(self, limit):
         try:
@@ -147,16 +147,17 @@ class CoreApi:
         except Exception:
             return None, 400
 
-    def get_news_items_aggregate(self, source_group, limit):
+    def get_news_items_aggregate(self, source_group: str|None, limit: str|None) -> dict|None:
         try:
+            uri = f"{self.api_url}/api/v1/bots/news-item-aggregates-by-group/{source_group}" if source_group else f"{self.api_url}/api/v1/bots/news-item-aggregates"
             response = requests.get(
-                f"{self.api_url}/api/v1/bots/news-item-aggregates-by-group/{source_group}",
+                uri,
                 headers=self.headers,
             )
-            return response.json(), response.status_code
+            return response.json() if response.ok else None
         except Exception:
             logger.log_debug_trace("get_news_items_aggregate failed")
-            return None, 400
+            return None
 
     def news_items_grouping(self, data):
         try:

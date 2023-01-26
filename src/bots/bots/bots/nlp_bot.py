@@ -10,28 +10,22 @@ class NLPBot(BaseBot):
     name = "NLP Bot"
     description = "Bot for naturale language processing of news items"
 
-    def execute(self, preset):
+    def execute(self):
         try:
-            source_group = preset.parameter_values["SOURCE_GROUP"]
-            interval = preset.parameter_values["REFRESH_INTERVAL"]
-            language = preset.parameter_values["LANGUAGE"].lower()
+            source_group = self.parameters.get("SOURCE_GROUP", None)
+            language = self.parameters["LANGUAGE"].lower()
 
             if language == "en":
                 kw_model = KeyBERT("all-MiniLM-L6-v2")
             elif language == "de":
                 kw_model = KeyBERT("paraphrase-mpnet-base-v2")
 
-            limit = BaseBot.history(interval)
-            limit = datetime.datetime.now() - datetime.timedelta(weeks=12)
+            limit = self.history()
             logger.log_debug(f"LIMIT: {limit}")
 
-            data, status = self.core_api.get_news_items_aggregate(source_group, limit)
-            if status != 200:
-                logger.log_error(f"Error getting news items: {status}")
-                return
-
+            data = self.core_api.get_news_items_aggregate(source_group, limit)
             if not data:
-                logger.log_info("No news items returend")
+                logger.critical(f"Error getting news items")
                 return
 
             for aggregate in data:
@@ -47,15 +41,15 @@ class NLPBot(BaseBot):
                     self.core_api.update_news_item_tags(news_id, keyword)
 
         except Exception as error:
-            BaseBot.print_exception(preset, error)
+            logger.log_debug_trace(f"Error running Bot: {self.type}")
 
-    def execute_on_event(self, preset, event_type, data):
+    def execute_on_event(self, event_type, data):
         try:
             # source_group = preset.parameter_values["SOURCE_GROUP"]
             # keywords = preset.parameter_values["KEYWORDS"]
             pass
         except Exception as error:
-            BaseBot.print_exception(preset, error)
+            logger.log_debug_trace(f"Error running Bot: {self.type}")
 
     def generateKeywords(self, language, kw_model, text):
         if language == "en":

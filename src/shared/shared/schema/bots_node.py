@@ -1,8 +1,5 @@
 from marshmallow import Schema, fields, post_load, EXCLUDE
 
-from shared.schema.presentation import PresentationSchema
-from shared.schema.bot import BotSchema
-
 
 class BotsNodeSchema(Schema):
     class Meta:

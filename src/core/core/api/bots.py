@@ -74,7 +74,8 @@ class GetNewsItemsAggregate(Resource):
 class GetDefaultNewsItemsAggregate(Resource):
     @api_key_required
     def get(self):
-        resp_str = news_item.NewsItemAggregate.get_default_news_items_aggregate(request.args.get("limit"))
+        limit = request.args.get("limit", "")
+        resp_str = news_item.NewsItemAggregate.get_default_news_items_aggregate(limit)
         return json.loads(resp_str)
 
 
