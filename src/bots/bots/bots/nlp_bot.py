@@ -7,12 +7,10 @@ from nltk.corpus import stopwords
 from transformers import (
     BartTokenizer,
     BartForConditionalGeneration,
-    MBartTokenizer,
-    TFMBartForConditionalGeneration,
-    MBartConfig,
+    AutoTokenizer,
+    AutoModelForSeq2SeqLM,
 )
 
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 from bs4 import BeautifulSoup
 
 def clean_html(text):
@@ -45,12 +43,15 @@ class NLPBot(BaseBot):
                     self.sum_model_name, use_fast=False
             )
 
+    def bot_setup(self):
+        self.set_summarization_model()
+        self.language = self.parameters.get("LANGUAGE", "de").lower()
+        self.kw_model = KeyBERT("all-MiniLM-L6-v2") if self.language == "en" else KeyBERT("paraphrase-mpnet-base-v2")
+
+
     def execute(self):
         try:
             source_group = self.parameters.get("SOURCE_GROUP", None)
-            language = self.parameters["LANGUAGE"].lower()
-
-            kw_model = KeyBERT("all-MiniLM-L6-v2") if language == "en" else KeyBERT("paraphrase-mpnet-base-v2")
 
             limit = self.history()
             logger.log_debug(f"LIMIT: {limit}")
@@ -68,7 +69,7 @@ class NLPBot(BaseBot):
                     content = news_item["news_item_data"]["content"]
                     content_list.append(content)
 
-                    findings[news_item["id"]] = self.generateKeywords(language, kw_model, content)
+                    findings[news_item["id"]] = self.generateKeywords(content)
 
                 summary = self.predict_summary(content_list)
                 self.core_api.update_news_items_aggregate_summary(aggregate["id"],summary)
@@ -93,9 +94,9 @@ class NLPBot(BaseBot):
         # TODO: Implement
         return text
 
-    def generateKeywords(self, language, kw_model, text):
-        if language == "en":
-            keywords = kw_model.extract_keywords(
+    def generateKeywords(self, text):
+        if self.language == "en":
+            return self.kw_model.extract_keywords(
                 text,
                 keyphrase_ngram_range=(1, 2),
                 stop_words="english",
@@ -103,18 +104,15 @@ class NLPBot(BaseBot):
                 diversity=0.8,
                 top_n=15,
             )
-        elif language == "de":
-            german_stop_words = stopwords.words("german")
-            keywords = kw_model.extract_keywords(
-                text,
-                keyphrase_ngram_range=(1, 2),
-                stop_words=german_stop_words,
-                use_mmr=True,
-                diversity=0.8,
-                top_n=15,
-            )
-
-        return keywords
+        german_stop_words = stopwords.words("german")
+        return self.kw_model.extract_keywords(
+            text,
+            keyphrase_ngram_range=(1, 2),
+            stop_words=german_stop_words,
+            use_mmr=True,
+            diversity=0.8,
+            top_n=15,
+        )
 
     def predict_summary(self, texts, preprocess=[clean_html], pct_min_length=0.2):
         r"""

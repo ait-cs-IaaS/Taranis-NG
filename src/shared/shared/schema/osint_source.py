@@ -1,7 +1,7 @@
 from marshmallow import Schema, fields, post_load, EXCLUDE
 
 from shared.schema.collector import CollectorSchema, CollectorExportSchema
-from shared.schema.parameter_value import ParameterValueSchema, ParameterValueExportSchema
+from shared.schema.parameter_value import ParameterValueSchema, ParameterValueExportSchema, ParameterValueImportSchema
 from shared.schema.presentation import PresentationSchema
 from shared.schema.word_list import WordListSchema
 
@@ -112,7 +112,7 @@ class OSINTSourceExportSchema(Schema):
     name = fields.Str()
     description = fields.Str()
     collector = fields.Nested(CollectorExportSchema)
-    parameter_values = fields.List(fields.Nested(ParameterValueSchema))
+    parameter_values = fields.List(fields.Nested(ParameterValueImportSchema))
 
     @post_load
     def make(self, data, **kwargs):
@@ -125,6 +125,7 @@ class OSINTSourceExport:
         self.description = description
         self.collector = collector
         self.parameter_values = parameter_values
+
 
 
 class OSINTSourceExportRootSchema(Schema):

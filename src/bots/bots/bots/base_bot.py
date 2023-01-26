@@ -13,7 +13,11 @@ class BaseBot:
     def __init__(self, parameters: dict):
         self.core_api = CoreApi()
         self.parameters = parameters
+        self.bot_setup()
         self.refresh()
+
+    def bot_setup(self):
+        pass
 
     def get_info(self):
         info_schema = BotSchema()

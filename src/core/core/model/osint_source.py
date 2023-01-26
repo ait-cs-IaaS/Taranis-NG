@@ -205,8 +205,8 @@ class OSINTSource(db.Model):
         parameter_values = []
         for parameter_value in osint_source.parameter_values:
             for parameter in collector.parameters:
-                print(parameter_value)
-                if parameter.key == parameter_value["parameter"]:
+                pv_key = parameter_value["parameter"] if type(parameter_value["parameter"]) == str else parameter_value["parameter"].key
+                if parameter.key == pv_key:
                     new_parameter_value = ParameterValue(parameter_value["value"], parameter.key)
                     parameter_values.append(new_parameter_value)
                     break
