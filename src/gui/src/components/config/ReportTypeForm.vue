@@ -80,7 +80,6 @@
               ></v-text-field>
               <ConfigTable
                 :addButton="true"
-                :showSearch="false"
                 :items.sync="
                   report_type.attribute_groups[index].attribute_group_items
                 "
@@ -149,8 +148,11 @@ export default {
         min_occurrence: 0,
         max_occurrence: 1
       }
-      this.report_type.attribute_groups[index].attribute_group_items = default_attribute
-      console.debug(`Add Attribute Item ${default_attribute}`)
+      this.report_type.attribute_groups[index].attribute_group_items = [default_attribute]
+      console.debug('Add Attribute Item')
+      console.debug(default_attribute)
+      console.debug('report_type.attribute_groups[index]')
+      console.debug(this.report_type.attribute_groups[index])
     },
     editAttributeItem(index, item) {
       console.debug(`Edit Attribute Item ${item}`)

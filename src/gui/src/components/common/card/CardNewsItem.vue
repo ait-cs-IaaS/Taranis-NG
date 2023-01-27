@@ -12,10 +12,6 @@
         'dark-grey--text',
         {
           selected: selected,
-          //'corner-tag-shared': item.shared && !item.restricted,
-          //'corner-tag-restricted': item.restricted,
-          //'status-important': item.important,
-          //'status-unread': !item.read,
         },
       ]"
       @click="toggleSelection"
@@ -132,7 +128,7 @@
                     outlined
                     @click="viewSingleDetails($event)"
                   >
-                    <v-icon>$awakeEye</v-icon>
+                    <v-icon>mdi-unfold-more-horizontal</v-icon>
                     <span>Open</span>
                   </v-btn>
 
@@ -172,7 +168,10 @@
                   <strong>Published:</strong>
                 </v-col>
                 <v-col>
+                  <span class="red--text">
                   {{ getPublishedDate() }}
+                </span>
+                  <v-icon v-if="published_date_outdated" small color="red">mdi-alert</v-icon>
                 </v-col>
               </v-row>
               <v-row class="news-item-meta-infos">
@@ -285,14 +284,26 @@ export default {
     item_selected() {
       return this.has('selected') ? this.get('selected') : false
     },
-    item_read() {
-      return this.newsItem.has('read') ? this.newsItem.get('read') : false
-    },
     item_important() {
       return this.newsItem.has('important') ? this.newsItem.get('important') : false
     },
     item_decorateSource() {
       return this.newsItem.has('decorateSource') ? this.newsItem.get('decorateSource') : false
+    },
+    published_date() {
+      const published = this.newsItem.news_items[0].news_item_data.published
+      return published ? moment(published) : false
+    },
+    published_date_outdated() {
+      const pub_date = this.published_date
+      if (!pub_date) {
+        return false
+      }
+      const last_week = moment().subtract(1, 'week') // date one week ago
+      if (last_week.diff(pub_date, 'weeks') > 0) {
+        return true
+      }
+      return false
     }
   },
   methods: {
@@ -342,8 +353,10 @@ export default {
     },
 
     getPublishedDate() {
-      const published = this.newsItem.news_items[0].news_item_data.published
-      if (published) return moment(published).format('DD/MM/YYYY hh:mm:ss')
+      const published = this.published_date
+      if (published) {
+        return moment(published).format('DD/MM/YYYY hh:mm:ss')
+      }
       return '** no published date **'
     },
 
@@ -398,7 +411,6 @@ export default {
     // console.log('card rendered!')
   },
   mounted() {
-    this.$emit('init')
   }
 }
 </script>
