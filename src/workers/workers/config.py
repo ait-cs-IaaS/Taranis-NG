@@ -9,8 +9,8 @@ class Settings(BaseSettings):
         env_file_encoding = "utf-8"
 
     API_KEY: str = "supersecret"
-    SSL_VERIFICATION: bool = False
     TARANIS_NG_CORE_URL: str = "http://taranis"
+    REDIS_URL: str = "http://redis"
     MODULE_ID: str = "Workers"
     COLORED_LOGS: bool = True
     DEBUG: bool = False
