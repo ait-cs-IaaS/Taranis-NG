@@ -37,8 +37,14 @@ class NLPBot(BaseBot):
             self.sum_model = AutoModelForSeq2SeqLM.from_pretrained(self.sum_model_name)
             self.sum_tokenizer = AutoTokenizer.from_pretrained(self.sum_model_name, use_fast=False)
 
+    def download_stopwords(self):
+        import nltk
+
+        nltk.download("stopwords")
+
     def bot_setup(self):
         # self.set_summarization_model()
+        self.download_stopwords()
         self.language = self.parameters.get("LANGUAGE", "de").lower()
         self.kw_model = KeyBERT("all-MiniLM-L6-v2") if self.language == "en" else KeyBERT("paraphrase-mpnet-base-v2")
 
