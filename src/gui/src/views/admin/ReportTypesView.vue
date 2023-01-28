@@ -20,7 +20,6 @@
 
 <script>
 import ConfigTable from '../../components/config/ConfigTable'
-// import EditConfig from '../../components/config/EditConfig'
 import ReportTypeForm from '../../components/config/ReportTypeForm'
 import {
   deleteReportItemType,

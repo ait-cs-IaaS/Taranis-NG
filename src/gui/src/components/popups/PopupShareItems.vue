@@ -138,7 +138,7 @@
               "
               @click="createReport()"
             >
-              <v-icon left>$awakeShareOutline</v-icon>
+              <v-icon left>mdi-share-outline</v-icon>
               create report
             </v-btn>
           </v-col>
@@ -203,7 +203,7 @@
               @click="appendToReport()"
             >
               <!-- @click="mergeSelectedStories()" -->
-              <v-icon left>$awakeShareOutline</v-icon>
+              <v-icon left>mdi-share-outline</v-icon>
               append to report
             </v-btn>
           </v-col>
@@ -220,7 +220,7 @@
           @click="$emit('input', false)"
           class="text-lowercase pr-4"
         >
-          <v-icon left class="red-icon">$awakeClose</v-icon>
+          <v-icon left class="red-icon">mdi-close</v-icon>
           abort
         </v-btn>
       </v-card-actions>

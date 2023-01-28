@@ -337,6 +337,7 @@ class ReportItem(db.Model):
     @classmethod
     def add_report_item(cls, report_item_data, user):
         report_item_schema = NewReportItemSchema()
+        print(report_item_data)
         report_item = report_item_schema.load(report_item_data)
 
         if not ReportItemType.allowed_with_acl(report_item.report_item_type_id, user, False, False, True):

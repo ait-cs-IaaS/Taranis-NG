@@ -146,16 +146,16 @@ export default {
     awaitingSearch: false,
     filterAttributeSelections: {},
     filterAttributeOptions: [
-      { type: 'unread', label: 'unread', icon: '$awakeUnread' },
+      { type: 'unread', label: 'unread', icon: 'mdi-email-mark-as-unread' },
       {
         type: 'important',
         label: 'important',
-        icon: '$awakeImportant'
+        icon: 'mdi-exclamation'
       },
       {
         type: 'shared',
         label: 'items in reports',
-        icon: '$awakeShareOutline'
+        icon: 'mdi-share-outline'
       },
       {
         type: 'selected',
@@ -172,7 +172,7 @@ export default {
       },
       {
         label: 'relevance',
-        icon: '$awakeRelated',
+        icon: 'mdi-counter',
         type: 'relevanceScore',
         direction: ''
       }

@@ -24,7 +24,7 @@
           white--text
         "
       >
-        <v-icon x-small class="flipped-icon">$awakeShare</v-icon>
+        <v-icon x-small class="flipped-icon">mdi-share</v-icon>
       </div>
 
       <div
@@ -110,7 +110,7 @@
                     outlined
                     @click="createReport($event)"
                   >
-                    <v-icon>$awakeReport</v-icon>
+                    <v-icon>mdi-google-circles-communities</v-icon>
                     <span>create report</span>
                   </v-btn>
                   <v-btn
@@ -119,7 +119,7 @@
                     outlined
                     @click="viewDetails($event)"
                   >
-                    <v-icon>$awakeEye</v-icon>
+                    <v-icon>mdi-eye</v-icon>
                     <span>view Details</span>
                   </v-btn>
                   <v-btn
@@ -221,7 +221,7 @@
                       small
                       v-if="newsItem.decorateSource"
                       class="ml-0"
-                      >$awakeRibbon</v-icon
+                      >mdi-seal</v-icon
                     >
                   </span>
                 </v-col>
