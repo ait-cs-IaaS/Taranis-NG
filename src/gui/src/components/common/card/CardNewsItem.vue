@@ -42,7 +42,7 @@
 
       <div class="news-item-action-bar">
         <news-item-action-dialog
-          icon="$newsItemActionRemove"
+          icon="mdi-delete"
           tooltip="remove item"
           ref="deleteDialog"
         >
@@ -55,21 +55,21 @@
 
         <news-item-action
           :active="newsItem.read"
-          icon="$newsItemActionRead"
+          icon="mdi-email-mark-as-unread"
           @click="markAsRead()"
           tooltip="mark as read/unread"
         />
 
         <news-item-action
           :active="newsItem.important"
-          icon="$newsItemActionImportant"
+          icon="mdi-exclamation"
           @click="markAsImportant()"
           tooltip="mark as important"
         />
 
         <news-item-action
           :active="newsItem.decorateSource"
-          icon="$newsItemActionRibbon"
+          icon="mdi-seal"
           @click="decorateSource()"
           tooltip="emphasise originator"
         />
@@ -243,7 +243,7 @@
         </v-row>
       </v-container>
     </v-card>
-    <NewsItemDetail ref="newsItemDetail" />
+    <NewsItemDetail ref="newsItemDetail" :news_item_prop="newsItem.news_items[0]" />
     <NewsItemSingleDetail ref="newsItemSingleDetail" />
   </v-col>
 </template>

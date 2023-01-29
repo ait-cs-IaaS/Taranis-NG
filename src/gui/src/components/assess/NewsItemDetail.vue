@@ -75,7 +75,7 @@
                 <span class="display-1 font-weight-light py-4">{{news_item.news_item_data.title}}</span>
               </v-row>
               <v-row class="py-4">
-                <span class="body-2 grey--text text--darken-1">{{news_item.news_item_data.content}}</span>
+                <span>{{getDescription}}</span>
               </v-row>
 
               <!-- LINKS -->
@@ -102,23 +102,25 @@
 </template>
 
 <script>
-import { deleteNewsItem, groupAction, voteNewsItem, readNewsItem, importantNewsItem, getNewsItem } from '@/api/assess'
+import { deleteNewsItem, groupAction, voteNewsItem, readNewsItem, importantNewsItem } from '@/api/assess'
 
 import NewsItemAttribute from '@/components/assess/NewsItemAttribute'
 import AuthMixin from '@/services/auth/auth_mixin'
 import Permissions from '@/services/auth/permissions'
+import { stripHtml } from '@/utils/helpers'
 
 export default {
   name: 'NewsItemDetail',
   components: { NewsItemAttribute },
   mixins: [AuthMixin],
   props: {
+    news_item_prop: {},
     analyze_selector: Boolean,
     attach: undefined
   },
   data: () => ({
     visible: false,
-    news_item: { news_item_data: {} },
+    news_item: this.news_item_prop,
     toolbar: false
   }),
   computed: {
@@ -138,25 +140,19 @@ export default {
       return this.checkPermission(Permissions.ANALYZE_CREATE)
     },
 
-    multiSelectActive () {
-      return this.$store.getters.getMultiSelect
+    getDescription() {
+      return stripHtml(this.newsItem.description + this.newsItem.news_items[0].news_item_data.content)
     }
   },
+  mounted () {},
   methods: {
     open (news_item) {
-      getNewsItem(news_item.id).then((response) => {
-        this.news_item = response.data
-        this.news_item.access = news_item.access
-        this.news_item.modify = news_item.modify
-        this.visible = true
-      })
-
-      this.$root.$emit('first-dialog', 'push')
+      console.log(news_item)
+      this.visible = true
     },
     close () {
       this.visible = false
       this.$root.$emit('change-state', 'DEFAULT')
-      this.$root.$emit('first-dialog', '')
     },
     openUrlToNewTab: function (url) {
       window.open(url, '_blank')

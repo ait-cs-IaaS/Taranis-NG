@@ -66,7 +66,7 @@
                     class="news-item-sharing-set-action"
                     @click="deselectNewsItem(newsItemId)"
                   >
-                    <v-icon> $newsItemActionRemove </v-icon>
+                    <v-icon> mdi-delete </v-icon>
                   </v-btn>
                 </v-col>
               </v-row>
