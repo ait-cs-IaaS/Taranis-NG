@@ -93,7 +93,7 @@
 
               <v-row class="flex-grow-0 mt-0">
                 <v-col>
-                  <p class="news-item-summary">
+                  <p :class="news_item_summary_class">
                     {{ getDescription() }}
                   </p>
                 </v-col>
@@ -108,7 +108,7 @@
                     class="buttonOutlined mr-1 mt-1"
                     :style="{ borderColor: '#c8c8c8' }"
                     outlined
-                    @click="createReport($event)"
+                    @click.stop="createReport($event)"
                   >
                     <v-icon>mdi-google-circles-communities</v-icon>
                     <span>create report</span>
@@ -117,7 +117,7 @@
                     class="buttonOutlined mr-1 mt-1"
                     :style="{ borderColor: '#c8c8c8' }"
                     outlined
-                    @click="viewDetails($event)"
+                    @click.stop="viewDetails = true"
                   >
                     <v-icon>mdi-eye</v-icon>
                     <span>view Details</span>
@@ -126,10 +126,10 @@
                     class="buttonOutlined mr-1 mt-1"
                     :style="{ borderColor: '#c8c8c8' }"
                     outlined
-                    @click="viewSingleDetails($event)"
+                    @click.stop="openSummary = !openSummary"
                   >
-                    <v-icon>mdi-unfold-more-horizontal</v-icon>
-                    <span>Open</span>
+                    <v-icon>{{ news_item_summary_icon }}</v-icon>
+                    <span>{{ news_item_summary_text }}</span>
                   </v-btn>
 
                   <div class="d-flex align-start justify-center mr-3 ml-2 mt-1">
@@ -243,8 +243,7 @@
         </v-row>
       </v-container>
     </v-card>
-    <NewsItemDetail ref="newsItemDetail" :news_item_prop="newsItem.news_items[0]" />
-    <NewsItemSingleDetail ref="newsItemSingleDetail" />
+    <NewsItemDetail v-if="viewDetails" @view="updateDetailsView" :view_details_prop.sync="viewDetails" :news_item_prop="newsItem.news_items[0]" />
   </v-col>
 </template>
 
@@ -255,7 +254,6 @@ import newsItemAction from '@/components/_subcomponents/newsItemAction'
 import newsItemActionDialog from '@/components/_subcomponents/newsItemActionDialog'
 import PopupDeleteItem from '@/components/popups/PopupDeleteItem'
 import NewsItemDetail from '@/components/assess/NewsItemDetail'
-import NewsItemSingleDetail from '@/components/assess/NewsItemSingleDetail'
 
 import votes from '@/components/_subcomponents/votes'
 import { isValidUrl, stripHtml } from '@/utils/helpers'
@@ -270,7 +268,6 @@ export default {
     newsItemActionDialog,
     PopupDeleteItem,
     NewsItemDetail,
-    NewsItemSingleDetail,
     votes
   },
   props: {
@@ -279,6 +276,8 @@ export default {
     selected: Boolean
   },
   data: () => ({
+    viewDetails: false,
+    openSummary: false
   }),
   computed: {
     item_selected() {
@@ -293,6 +292,15 @@ export default {
     published_date() {
       const published = this.newsItem.news_items[0].news_item_data.published
       return published ? moment(published) : false
+    },
+    news_item_summary_class() {
+      return this.openSummary ? 'news-item-summary-no-clip' : 'news-item-summary'
+    },
+    news_item_summary_icon() {
+      return this.openSummary ? 'mdi-unfold-less-horizontal' : 'mdi-unfold-more-horizontal'
+    },
+    news_item_summary_text() {
+      return this.openSummary ? 'Close' : 'Open'
     },
     published_date_outdated() {
       const pub_date = this.published_date
@@ -330,10 +338,6 @@ export default {
     downvote(event) {
       this.$emit('downvoteItem', this.newsItem.id)
     },
-
-    viewDetails(event) {
-      this.$refs.newsItemDetail.open(this.newsItem)
-    },
     viewSingleDetails(event) {
       this.$refs.newsItemSingleDetail.open(this.newsItem)
     },
@@ -342,6 +346,10 @@ export default {
     },
     showRelated(event) {
       console.log('not yet implemented')
+    },
+
+    updateDetailsView(value) {
+      this.viewDetails = value
     },
 
     getDescription() {

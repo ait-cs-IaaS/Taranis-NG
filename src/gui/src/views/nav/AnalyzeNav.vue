@@ -9,6 +9,7 @@
 
 <script>
 import Navigation from '../../components/common/Navigation'
+import { mapActions, mapGetters } from 'vuex'
 
 export default {
   name: 'AnalyzeNav',
@@ -19,29 +20,27 @@ export default {
     groups: [],
     links: []
   }),
+  methods: {
+    ...mapGetters('analyze', ['getReportItemGroups']),
+    ...mapActions('analyze', ['loadReportItemGroups'])
+  },
   mounted () {
-    this.$store.dispatch('analyze/loadReportItemGroups')
-      .then(() => {
-        this.groups = this.$store.getters['analyze/getReportItemGroups']
+    this.links = [{
+      icon: 'mdi-home-circle-outline',
+      title: this.$t('nav_menu.local'),
+      route: '/analyze/local'
+    }]
 
-        this.links.push({
-          icon: 'mdi-home-circle-outline',
-          title: this.$t('nav_menu.local'),
-          route: '/analyze/local'
-        })
+    this.loadReportItemGroups().then(() => {
+      this.groups = this.getReportItemGroups()
 
-        for (let i = 0; i < this.groups.length; i++) {
-          this.links.push({
-            icon: 'mdi-arrow-down-bold-circle-outline',
-            title: this.groups[i],
-            route: '/analyze/group/' + this.groups[i].replaceAll(' ', '-')
-          })
-        }
-
-        if (!window.location.pathname.includes('/group/')) {
-          this.$router.push('/analyze/local').catch(() => {})
-        }
-      })
+      console.log(this.links)
+      this.links = [...this.links, ...this.groups.map(group => ({
+        icon: 'mdi-arrow-down-bold-circle-outline',
+        title: group,
+        route: `/analyze/group/${group.replace(/ /g, '-')}`
+      }))]
+    })
   }
 }
 </script>

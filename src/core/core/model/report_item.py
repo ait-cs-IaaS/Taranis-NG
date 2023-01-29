@@ -307,13 +307,16 @@ class ReportItem(db.Model):
 
         result = db.engine.execute(text(query_string.format(inner_query)), params)
 
-        return [row[0] for row in result]
+        return [row[0] for row in result if row[0] is not None]
 
     @classmethod
     def get_json(cls, group, filter, offset, limit, user):
         results, count = cls.get(group, filter, offset, limit, user, True)
         logger.log_debug(f"Found {count} report items with filter {filter}")
+        for result in results:
+            logger.log_debug(result.__dict__)
         report_items_schema = ReportItemPresentationSchema(many=True)
+        logger.log_debug(report_items_schema.dump(results))
         return {"total_count": count, "items": report_items_schema.dump(results)}
 
     @classmethod
@@ -331,7 +334,7 @@ class ReportItem(db.Model):
             .filter(ReportItem.remote_user is not None)
             .all()
         )
-        groups = {row[0] for row in result}
+        groups = {row[0] for row in result if row[0] is not None}
         return list(groups)
 
     @classmethod
