@@ -11,29 +11,21 @@
         'news-item',
         'dark-grey--text',
         {
-          selected: selected,
-        },
+          selected: selected
+        }
       ]"
       @click="toggleSelection"
     >
       <div
         v-if="newsItem.shared && !newsItem.restricted"
-        class="
-          news-item-corner-tag
-          text-caption text-weight-bold text-uppercase
-          white--text
-        "
+        class="news-item-corner-tag text-caption text-weight-bold text-uppercase white--text"
       >
         <v-icon x-small class="flipped-icon">mdi-share</v-icon>
       </div>
 
       <div
         v-if="newsItem.restricted"
-        class="
-          news-item-corner-tag
-          text-caption text-weight-bold text-uppercase
-          white--text
-        "
+        class="news-item-corner-tag text-caption text-weight-bold text-uppercase white--text"
       >
         <v-icon x-small>mdi-lock-outline</v-icon>
       </div>
@@ -73,6 +65,17 @@
           @click="decorateSource()"
           tooltip="emphasise originator"
         />
+
+        <news-item-action-dialog
+          icon="mdi-google-circles-communities"
+          tooltip="add to report"
+          :showDialog="sharingDialog"
+          @close="sharingDialog = false"
+        >
+        <popup-share-items
+          :newsItem="newsItem"
+        />
+        </news-item-action-dialog>
       </div>
 
       <v-container no-gutters class="ma-0 pa-0">
@@ -104,14 +107,15 @@
                   cols="12"
                   class="mx-0 d-flex justify-start flex-wrap pt-1 pb-8"
                 >
+
                   <v-btn
                     class="buttonOutlined mr-1 mt-1"
                     :style="{ borderColor: '#c8c8c8' }"
                     outlined
-                    @click.stop="createReport($event)"
+                    @click.stop="addToReport()"
                   >
                     <v-icon>mdi-google-circles-communities</v-icon>
-                    <span>create report</span>
+                    <span>add to report</span>
                   </v-btn>
                   <v-btn
                     class="buttonOutlined mr-1 mt-1"
@@ -169,9 +173,11 @@
                 </v-col>
                 <v-col>
                   <span class="red--text">
-                  {{ getPublishedDate() }}
-                </span>
-                  <v-icon v-if="published_date_outdated" small color="red">mdi-alert</v-icon>
+                    {{ getPublishedDate() }}
+                  </span>
+                  <v-icon v-if="published_date_outdated" small color="red"
+                    >mdi-alert</v-icon
+                  >
                 </v-col>
               </v-row>
               <v-row class="news-item-meta-infos">
@@ -231,11 +237,7 @@
                   <strong>Tags:</strong>
                 </v-col>
                 <v-col>
-                  <tag-list
-                    key="tags"
-                    limit=5
-                    :tags="getTags()"
-                  />
+                  <tag-list key="tags" limit="5" :tags="getTags()" />
                 </v-col>
               </v-row>
             </v-container>
@@ -243,7 +245,12 @@
         </v-row>
       </v-container>
     </v-card>
-    <NewsItemDetail v-if="viewDetails" @view="updateDetailsView" :view_details_prop.sync="viewDetails" :news_item_prop="newsItem.news_items[0]" />
+    <NewsItemDetail
+      v-if="viewDetails"
+      @view="updateDetailsView"
+      :view_details_prop.sync="viewDetails"
+      :news_item_prop="newsItem.news_items[0]"
+    />
   </v-col>
 </template>
 
@@ -253,6 +260,8 @@ import TagList from '@/components/common/tags/TagList'
 import newsItemAction from '@/components/_subcomponents/newsItemAction'
 import newsItemActionDialog from '@/components/_subcomponents/newsItemActionDialog'
 import PopupDeleteItem from '@/components/popups/PopupDeleteItem'
+import PopupShareItems from '@/components/popups/PopupShareItems'
+
 import NewsItemDetail from '@/components/assess/NewsItemDetail'
 
 import votes from '@/components/_subcomponents/votes'
@@ -267,6 +276,7 @@ export default {
     newsItemAction,
     newsItemActionDialog,
     PopupDeleteItem,
+    PopupShareItems,
     NewsItemDetail,
     votes
   },
@@ -277,27 +287,36 @@ export default {
   },
   data: () => ({
     viewDetails: false,
-    openSummary: false
+    openSummary: false,
+    sharingDialog: false
   }),
   computed: {
     item_selected() {
       return this.has('selected') ? this.get('selected') : false
     },
     item_important() {
-      return this.newsItem.has('important') ? this.newsItem.get('important') : false
+      return this.newsItem.has('important')
+        ? this.newsItem.get('important')
+        : false
     },
     item_decorateSource() {
-      return this.newsItem.has('decorateSource') ? this.newsItem.get('decorateSource') : false
+      return this.newsItem.has('decorateSource')
+        ? this.newsItem.get('decorateSource')
+        : false
     },
     published_date() {
       const published = this.newsItem.news_items[0].news_item_data.published
       return published ? moment(published) : false
     },
     news_item_summary_class() {
-      return this.openSummary ? 'news-item-summary-no-clip' : 'news-item-summary'
+      return this.openSummary
+        ? 'news-item-summary-no-clip'
+        : 'news-item-summary'
     },
     news_item_summary_icon() {
-      return this.openSummary ? 'mdi-unfold-less-horizontal' : 'mdi-unfold-more-horizontal'
+      return this.openSummary
+        ? 'mdi-unfold-less-horizontal'
+        : 'mdi-unfold-more-horizontal'
     },
     news_item_summary_text() {
       return this.openSummary ? 'Close' : 'Open'
@@ -341,8 +360,8 @@ export default {
     viewSingleDetails(event) {
       this.$refs.newsItemSingleDetail.open(this.newsItem)
     },
-    createReport(event) {
-      console.log('not yet implemented')
+    addToReport() {
+      this.sharingDialog = true
     },
     showRelated(event) {
       console.log('not yet implemented')
@@ -353,7 +372,10 @@ export default {
     },
 
     getDescription() {
-      return stripHtml(this.newsItem.description + this.newsItem.news_items[0].news_item_data.content)
+      return stripHtml(
+        this.newsItem.description +
+          this.newsItem.news_items[0].news_item_data.content
+      )
     },
 
     getTags() {
@@ -418,7 +440,6 @@ export default {
   updated() {
     // console.log('card rendered!')
   },
-  mounted() {
-  }
+  mounted() {}
 }
 </script>

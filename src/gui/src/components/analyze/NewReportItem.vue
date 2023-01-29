@@ -112,7 +112,9 @@
         <v-row>
           <v-col
             :cols="verticalView ? 6 : 12"
-            :style="verticalView ? 'height:calc(100vh - 3em); overflow-y: auto;' : ''"
+            :style="
+              verticalView ? 'height:calc(100vh - 3em); overflow-y: auto;' : ''
+            "
           >
             <v-form @submit.prevent="add" id="form" ref="form" class="px-4">
               <v-row no-gutters>
@@ -160,6 +162,31 @@
                     :error-messages="errors.collect('title')"
                     :spellcheck="$store.state.settings.spellcheck"
                   ></v-text-field>
+                </v-col>
+              </v-row>
+              <v-row no-gutters class="pb-4">
+                <v-col cols="12">
+                  <v-btn
+                    @click="$refs.new_item_selector.openSelector()"
+                  >
+                    <v-icon left>{{ UI.ICON.PLUS }}</v-icon>
+                    <span>{{ $t('assess.add_news_item') }}</span>
+                  </v-btn>
+                </v-col>
+              </v-row>
+              <v-row no-gutters>
+                <v-col cols="12">
+                  <NewsItemSelector
+                    v-if="!verticalView"
+                    ref="new_item_selector"
+                    analyze_selector
+                    :attach="false"
+                    :item_values="news_item_aggregates"
+                    :modify="modify"
+                    :collections="collections"
+                    :report_item_id="this.report_item.id"
+                    :edit="edit"
+                  />
                 </v-col>
               </v-row>
               <v-row no-gutters>
