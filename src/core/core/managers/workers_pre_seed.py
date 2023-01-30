@@ -375,19 +375,21 @@ bots = [
         "parameter_values": [
             {
                 "value": "",
-                "parameter": "REGULAR_EXPRESSION",
+                "parameter": {
+                    "key": "REGULAR_EXPRESSION",
+                },
             },
             {
                 "value": "",
-                "parameter": "ATTRIBUTE_NAME",
+                "parameter": {"key": "ATTRIBUTE_NAME"},
             },
             {
                 "value": "",
-                "parameter": "SOURCE_GROUP",
+                "parameter": {"key": "SOURCE_GROUP"},
             },
             {
                 "value": "",
-                "parameter": "REFRESH_INTERVAL",
+                "parameter": {"key": "REFRESH_INTERVAL"},
             },
         ],
         "description": "Bot for news items analysis",
@@ -396,18 +398,9 @@ bots = [
         "type": "GROUPING_BOT",
         "name": "Grouping Bot",
         "parameter_values": [
-            {
-                "value": "",
-                "parameter": "SOURCE_GROUP"
-            },
-            {
-                "value": "",
-                "parameter": "REGULAR_EXPRESSION"
-            },
-            {
-                "value": "",
-                "parameter": "REFRESH_INTERVAL"
-            },
+            {"value": "", "parameter": {"key": "SOURCE_GROUP"}},
+            {"value": "", "parameter": {"key": "REGULAR_EXPRESSION"}},
+            {"value": "", "parameter": {"key": "REFRESH_INTERVAL"}},
         ],
         "description": "Bot for grouping news items into aggregates",
     },
@@ -415,18 +408,9 @@ bots = [
         "type": "NLP_BOT",
         "name": "NLP Bot",
         "parameter_values": [
-            {
-                "value": "",
-                "parameter": "SOURCE_GROUP"
-            },
-            {
-                "value": "",
-                "parameter": "LANGUAGE"
-            },
-            {
-                "value": "",
-                "parameter": "REFRESH_INTERVAL"
-            },
+            {"value": "", "parameter": {"key": "SOURCE_GROUP"}},
+            {"value": "", "parameter": {"key": "LANGUAGE"}},
+            {"value": "", "parameter": {"key": "REFRESH_INTERVAL"}},
         ],
         "description": "Bot for naturale language processing of news items",
     },
@@ -434,18 +418,9 @@ bots = [
         "type": "TAGGING_BOT",
         "name": "Tagging Bot",
         "parameter_values": [
-            {
-                "value": "",
-                "parameter": "SOURCE_GROUP"
-            },
-            {
-                "value": "",
-                "parameter": "KEYWORDS"
-            },
-            {
-                "value": "",
-                "parameter": "REFRESH_INTERVAL"
-            },
+            {"value": "", "parameter": {"key": "SOURCE_GROUP"}},
+            {"value": "", "parameter": {"key": "KEYWORDS"}},
+            {"value": "", "parameter": {"key": "REFRESH_INTERVAL"}},
         ],
         "description": "Bot for tagging news items",
     },
