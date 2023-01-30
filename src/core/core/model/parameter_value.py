@@ -14,6 +14,14 @@ class NewParameterValueSchema(ParameterValueSchema):
         return ParameterValue(**data)
 
 
+class ParameterValueImportSchema(ParameterValueSchema):
+    parameter_key = fields.Str()
+
+    @post_load
+    def make_parameter_value(self, data, **kwargs):
+        return ParameterValue(**data)
+
+
 class ParameterValue(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     value = db.Column(db.String(), nullable=False, default="")
