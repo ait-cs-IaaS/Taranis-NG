@@ -90,7 +90,7 @@
             <v-container column style="height: 100%">
               <v-row class="flex-grow-0 mt-0">
                 <v-col class="pb-1">
-                  <h2>{{ newsItem.title }}</h2>
+                  <h2 class="news-item-title">{{ newsItem.title }}</h2>
                 </v-col>
               </v-row>
 
@@ -376,7 +376,7 @@ export default {
     },
 
     getTags() {
-      return this.newsItem.news_items[0].news_item_data.tags
+      return this.newsItem.tags.map(tag => tag.name)
     },
 
     getPublishedDate() {

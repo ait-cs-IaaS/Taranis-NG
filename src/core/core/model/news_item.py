@@ -189,8 +189,11 @@ class NewsItemData(db.Model):
         try:
             n_i_a = NewsItemAggregate.find(news_item_aggregate_id)
             print(tags)
-            for tag in tags:
-                n_i_a.tags.append(NewsItemTag(name=tag, tag_type="undef"))
+            if (type(tags) is list):
+                for tag in tags:
+                    n_i_a.tags.append(NewsItemTag(name=tag, tag_type="undef"))
+            else:
+                n_i_a.tags.append(NewsItemTag(name=tags, tag_type="undef"))
             db.session.commit()
         except Exception:
             logger.log_debug_trace("Update News Item Tags Failed")
