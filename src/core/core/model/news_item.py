@@ -1108,17 +1108,15 @@ class NewsItemAggregateSearchIndex(db.Model):
         data = aggregate.title
         data += f" {aggregate.description}"
         data += f" {aggregate.comments}"
+        data += f" {aggregate.summary}"
+        data += f" {aggregate.tags}"
 
         for news_item in aggregate.news_items:
-            data += " " + news_item.news_item_data.title
-            data += " " + news_item.news_item_data.review
-            data += " " + news_item.news_item_data.content
-            data += " " + news_item.news_item_data.author
-            data += " " + news_item.news_item_data.link
-
-            if news_item.news_item_data.tags is not None:
-                for tag in news_item.news_item_data.tags:
-                    data += f" {tag}"
+            data += f" {news_item.news_item_data.title}"
+            data += f" {news_item.news_item_data.review}"
+            data += f" {news_item.news_item_data.content}"
+            data += f" {news_item.news_item_data.author}"
+            data += f" {news_item.news_item_data.link}"
 
             for attribute in news_item.news_item_data.attributes:
                 data += f" {attribute.value}"
