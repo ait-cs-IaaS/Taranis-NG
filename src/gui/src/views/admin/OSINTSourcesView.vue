@@ -50,7 +50,6 @@ export default {
     ImportExport
   },
   data: () => ({
-    unparsed_sources: [],
     osint_sources: [],
     parameters: {},
     selected: [],
@@ -99,7 +98,6 @@ export default {
     updateData() {
       this.loadOSINTSources().then(() => {
         const sources = this.getOSINTSources()
-        this.unparsed_sources = sources.items
         this.osint_sources = parseParameterValues(sources.items)
         this.updateItemCount({
           total: sources.total_count,

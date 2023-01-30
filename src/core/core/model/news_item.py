@@ -188,7 +188,9 @@ class NewsItemData(db.Model):
     def update_news_item_tags(cls, news_item_aggregate_id, tags):
         try:
             n_i_a = NewsItemAggregate.find(news_item_aggregate_id)
-            n_i_a.tags = tags
+            print(tags)
+            for tag in tags:
+                n_i_a.tags.append(NewsItemTag(name=tag, tag_type="undef"))
             db.session.commit()
         except Exception:
             logger.log_debug_trace("Update News Item Tags Failed")
@@ -1185,3 +1187,12 @@ class NewsItemTag(db.Model):
     tag_type = db.Column(db.String(255))
     n_i_a_id = db.Column(db.ForeignKey(NewsItemAggregate.id), nullable=False)
     n_i_a = db.relationship(NewsItemAggregate, backref="tags")
+
+    def __init__(self, name, tag_type):
+        self.id = None
+        self.name = name
+        self.tag_type = tag_type
+
+    @classmethod
+    def find(cls, tag_id):
+        return cls.query.get(tag_id)
