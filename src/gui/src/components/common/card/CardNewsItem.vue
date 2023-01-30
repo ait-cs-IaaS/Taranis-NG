@@ -172,7 +172,7 @@
                   <strong>Published:</strong>
                 </v-col>
                 <v-col>
-                  <span class="red--text">
+                  <span :class="published_date_outdated ? 'red--text' : ''">
                     {{ getPublishedDate() }}
                   </span>
                   <v-icon v-if="published_date_outdated" small color="red"
