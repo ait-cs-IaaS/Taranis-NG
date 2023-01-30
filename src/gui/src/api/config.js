@@ -255,7 +255,7 @@ export function getAllNodes (filter_data) {
 }
 
 export function triggerNode () {
-  return ApiService.post('/config/collectors-nodes/refresh')
+  return ApiService.post('/config/workers/refresh')
 }
 
 export function updateNode (node) {
