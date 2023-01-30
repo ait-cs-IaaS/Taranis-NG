@@ -43,7 +43,7 @@ class NLPBot(BaseBot):
         nltk.download("stopwords")
 
     def bot_setup(self):
-        # self.set_summarization_model()
+        self.set_summarization_model()
         self.download_stopwords()
         self.language = self.parameters.get("LANGUAGE", "de").lower()
         self.kw_model = KeyBERT("all-MiniLM-L6-v2") if self.language == "en" else KeyBERT("paraphrase-mpnet-base-v2")
