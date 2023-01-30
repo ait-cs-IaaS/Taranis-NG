@@ -187,7 +187,7 @@ class NewsItemData(db.Model):
     @classmethod
     def update_news_item_tags(cls, news_item_aggregate_id, tags):
         try:
-            n_i_a = NewsItemAggregate.find(news_item_aggregate_id).first()
+            n_i_a = NewsItemAggregate.find(news_item_aggregate_id)
             n_i_a.tags = tags
             db.session.commit()
         except Exception:
