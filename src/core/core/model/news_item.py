@@ -185,14 +185,13 @@ class NewsItemData(db.Model):
         return query
 
     @classmethod
-    def update_news_item_tags(cls, news_item_id, tags):
+    def update_news_item_tags(cls, news_item_aggregate_id, tags):
         try:
-            n_i_d = NewsItemData.get_news_item_data(news_item_id).first()
-            n_i_d.tags = tags
+            n_i_a = NewsItemAggregate.find(news_item_aggregate_id).first()
+            n_i_a.tags = tags
             db.session.commit()
         except Exception:
             logger.log_debug_trace("Update News Item Tags Failed")
-
 
     @classmethod
     def get_for_sync(cls, last_synced, osint_sources):
@@ -222,14 +221,6 @@ class NewsItemData(db.Model):
         items = news_item_remote_schema.dump(news_items)
 
         return items, last_sync_time
-
-
-class NewsItemTag(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(255))
-    tag_type = db.Column(db.String(255))
-    n_i_d_id = db.Column(db.ForeignKey(NewsItemData.id), nullable=False)
-    n_i_d = db.relationship(NewsItemData, backref="tags")
 
 
 class NewsItem(db.Model):
@@ -1188,3 +1179,11 @@ class ReportItemNewsItemAggregate(db.Model):
     @classmethod
     def count(cls, aggregate_id):
         return cls.query.filter_by(news_item_aggregate_id=aggregate_id).count()
+
+
+class NewsItemTag(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255))
+    tag_type = db.Column(db.String(255))
+    n_i_a_id = db.Column(db.ForeignKey(NewsItemAggregate.id), nullable=False)
+    n_i_a = db.relationship(NewsItemAggregate, backref="tags")

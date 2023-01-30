@@ -17,20 +17,21 @@ from core.managers.log_manager import logger
 from core.managers.auth_manager import auth_required, get_user_from_jwt
 from core.model import (
     acl_entry,
-    remote,
-    presenter,
-    collector,
+    attribute,
     bot,
+    bots_node,
+    collector,
+    collectors_node,
     parameter,
+    presenter,
     presenters_node,
+    product_type,
+    publisher,
     publisher_preset,
     publishers_node,
-    bots_node,
-    attribute,
-    collectors_node,
+    remote,
     organization,
     osint_source,
-    product_type,
     report_item_type,
     role,
     user,
@@ -490,7 +491,14 @@ class RemoteNodeConnect(Resource):
 
 class Presenters(Resource):
     def get(self):
-        return presenter.Presenter.to_dict()
+        search = request.args.get(key="search", default=None)
+        return presenter.Presenter.get_all_json(search)
+
+
+class Publishers(Resource):
+    def get(self):
+        search = request.args.get(key="search", default=None)
+        return publisher.Publisher.get_all_json(search)
 
 
 class PresentersNodes(Resource):
@@ -646,6 +654,7 @@ def initialize(api):
     api.add_resource(RemoteNodeConnect, "/api/v1/config/remote-nodes/<int:remote_node_id>/connect")
 
     api.add_resource(Presenters, "/api/v1/config/presenters")
+    api.add_resource(Publishers, "/api/v1/config/publishers")
     api.add_resource(PresentersNodes, "/api/v1/config/presenters-nodes", "/api/v1/config/presenters-nodes/<string:node_id>")
     api.add_resource(PublisherNodes, "/api/v1/config/publishers-nodes", "/api/v1/config/publishers-nodes/<string:node_id>")
     api.add_resource(PublisherPresets, "/api/v1/config/publishers-presets")

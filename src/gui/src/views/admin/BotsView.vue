@@ -56,13 +56,13 @@ export default {
           name: 'name',
           label: 'Name',
           type: 'text',
-          disabled: true
+          required: true
         },
         {
           name: 'description',
           label: 'Description',
           type: 'textarea',
-          disabled: true
+          required: true
         },
         {
           name: 'type',

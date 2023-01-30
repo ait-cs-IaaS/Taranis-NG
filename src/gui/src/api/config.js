@@ -108,6 +108,16 @@ export function getAllBots (filter_data) {
   return ApiService.get(`/config/bots?${filter}`)
 }
 
+export function getAllPresenters (filter_data) {
+  const filter = ApiService.getQueryStringFromNestedObject(filter_data)
+  return ApiService.get(`/config/presenters?${filter}`)
+}
+
+export function getAllPublishers (filter_data) {
+  const filter = ApiService.getQueryStringFromNestedObject(filter_data)
+  return ApiService.get(`/config/publishers?${filter}`)
+}
+
 export function getAllParameters (filter_data) {
   return ApiService.get('/config/parameters')
 }
