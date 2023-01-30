@@ -34,7 +34,6 @@ export default {
     this.loadReportItemGroups().then(() => {
       this.groups = this.getReportItemGroups()
 
-      console.log(this.links)
       this.links = [...this.links, ...this.groups.map(group => ({
         icon: 'mdi-arrow-down-bold-circle-outline',
         title: group,

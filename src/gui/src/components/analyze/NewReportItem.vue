@@ -233,9 +233,7 @@
                               class="pa-2 font-weight-bold primary--text rounded-0"
                             >
                               <v-row>
-                                <span>{{
-                                  attribute_item.attribute_group_item.title
-                                }}</span>
+                                <span> {{ attribute_item.attribute_group_item.title }}</span>
                               </v-row>
                             </v-expansion-panel-header>
                             <v-expansion-panel-content class="pt-0">
@@ -516,11 +514,7 @@ export default {
                   this.attribute_groups[i].attribute_group_items[j]
                     .attribute_group_item.attribute.type === 'BOOLEAN'
                 ) {
-                  if (value === true) {
-                    value = 'true'
-                  } else {
-                    value = 'false'
-                  }
+                  value = value ? 'true' : 'false'
                 }
 
                 if (

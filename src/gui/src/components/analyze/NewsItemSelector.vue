@@ -284,7 +284,6 @@ export default {
         })
       }
     })
-    console.debug('MOUNTED NewsItemSelector')
     this.$root.$on('report-item-updated', this.report_item_updated)
   },
 
