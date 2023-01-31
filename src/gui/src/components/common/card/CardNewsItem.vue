@@ -74,6 +74,7 @@
         >
         <popup-share-items
           :newsItem="newsItem"
+          @close="sharingDialog = false"
         />
         </news-item-action-dialog>
       </div>

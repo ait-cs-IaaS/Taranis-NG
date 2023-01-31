@@ -25,6 +25,7 @@
 <script>
 export default {
   name: 'newsItemActionDialog',
+  emits: ['close', 'click'],
   data: () => ({
   }),
   props: {
