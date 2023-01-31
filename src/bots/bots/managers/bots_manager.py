@@ -3,7 +3,7 @@ import importlib
 from bots.managers.log_manager import logger
 from bots.remote.core_api import CoreApi
 from bots.config import Config
-from shared.schema.bot import BotImportSchema
+from shared.schema.bot import BotImportSchema, BotSchema
 
 
 bots = {}
@@ -24,9 +24,14 @@ def initialize():
         logger.log_debug(f"Couldn't get Bot info: {response}")
         return
 
-    bot_schema = BotImportSchema(many=True)
     logger.log_debug(response)
-    bots = bot_schema.load(response)
+    try:
+        bot_schema = BotImportSchema(many=True)
+        bots = bot_schema.load(response)
+    except Exception:
+        bot_schema = BotSchema(many=True)
+        bots = bot_schema.load(response)
+
     parameters = {}
     for bot in bots:
         parameters[bot["type"]] = {}
