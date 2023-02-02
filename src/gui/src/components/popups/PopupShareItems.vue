@@ -1,6 +1,7 @@
 <template>
   <v-card>
     <v-card-text>
+      Select a report to share the item with:
       <v-select
           solo
           single-line

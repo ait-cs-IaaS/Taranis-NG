@@ -46,17 +46,18 @@ class NewsItems(Resource):
         user = auth_manager.get_user_from_jwt()
 
         try:
-            filter_keys = ["search", "read", "important", "relevant", "in_analyze", "range", "sort"]
-            filter_args = {k: v for k, v in request.args.items() if k in filter_keys}
+            filter_keys = ["search" "read", "important", "relevant", "in_analyze", "range", "sort"]
+            filter_args: dict[str, str | int] = {k: v for k, v in request.args.items() if k in filter_keys}
 
             group_id = request.args.get("group", osint_source.OSINTSourceGroup.get_default().id)
-            offset = int(request.args.get("offset", 0))
-            limit = min(int(request.args.get("limit", 50)), 200)
+            filter_args["limit"] = min(int(request.args.get("limit", 20)), 200)
+            page = int(request.args.get("page", 0))
+            filter_args["offset"] = int(request.args.get("offset", page * filter_args["limit"]))
         except Exception as ex:
             logger.log_debug(ex)
             return "", 400
 
-        return news_item.NewsItem.get_by_group_json(group_id, filter_args, offset, limit, user)
+        return news_item.NewsItem.get_by_group_json(group_id, filter_args, user)
 
 
 class NewsItemAggregates(Resource):
@@ -66,16 +67,17 @@ class NewsItemAggregates(Resource):
 
         try:
             filter_keys = ["search", "read", "important", "relevant", "in_analyze", "range", "sort"]
-            filter_args = {k: v for k, v in request.args.items() if k in filter_keys}
+            filter_args: dict[str, str | int] = {k: v for k, v in request.args.items() if k in filter_keys}
 
             group_id = request.args.get("group", osint_source.OSINTSourceGroup.get_default().id)
-            offset = int(request.args.get("offset", 0))
-            limit = min(int(request.args.get("limit", 50)), 200)
+            filter_args["limit"] = min(int(request.args.get("limit", 20)), 200)
+            page = int(request.args.get("page", 0))
+            filter_args["offset"] = int(request.args.get("offset", page * filter_args["limit"]))
         except Exception as ex:
             logger.log_debug(ex)
             return "", 400
 
-        return news_item.NewsItemAggregate.get_by_group_json(group_id, filter_args, offset, limit, user)
+        return news_item.NewsItemAggregate.get_by_group_json(group_id, filter_args, user)
 
 
 class NewsItemAggregatesByGroup(Resource):
@@ -86,15 +88,16 @@ class NewsItemAggregatesByGroup(Resource):
 
         try:
             filter_keys = ["search", "read", "important", "relevant", "in_analyze", "range", "sort"]
-            filter_args = {k: v for k, v in request.args.items() if k in filter_keys}
+            filter_args: dict[str, str | int] = {k: v for k, v in request.args.items() if k in filter_keys}
 
-            offset = int(request.args.get("offset", 0))
-            limit = min(int(request.args.get("limit", 50)), 200)
+            filter_args["limit"] = min(int(request.args.get("limit", 20)), 200)
+            page = int(request.args.get("page", 0))
+            filter_args["offset"] = int(request.args.get("offset", page * filter_args["limit"]))
         except Exception as ex:
             logger.log_debug(ex)
             return "", 400
 
-        return news_item.NewsItemAggregate.get_by_group_json(group_id, filter_args, offset, limit, user)
+        return news_item.NewsItemAggregate.get_by_group_json(group_id, filter_args, user)
 
 
 class NewsItem(Resource):

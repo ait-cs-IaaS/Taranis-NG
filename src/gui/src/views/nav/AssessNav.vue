@@ -197,9 +197,7 @@ export default {
   computed: {
     ...mapState('filter', {
       scopeState: (state) => state.scope,
-      filter: (state) => state.newsItemsFilter.filter,
-      offsetState: (state) => state.newsItemsFilter.offset,
-      limitState: (state) => state.newsItemsFilter.limit,
+      filter: (state) => state.newsItemsFilter,
       order: (state) => state.newsItemsOrder
     }),
     ...mapState(['drawerVisible']),
@@ -214,7 +212,7 @@ export default {
     },
     limit: {
       get() {
-        return this.limitState
+        return this.filter.limit
       },
       set(value) {
         this.setLimit(value)
@@ -223,7 +221,7 @@ export default {
     },
     offset: {
       get() {
-        return this.offsetState
+        return this.filter.offset
       },
       set(value) {
         this.setOffset(value)
@@ -247,6 +245,13 @@ export default {
       }
     },
     offsetRange () {
+      const list = []
+      for (let i = 0; i <= this.getItemCount().total; i++) {
+        list.push(i)
+      }
+      return list
+    },
+    pages () {
       const blocks = Math.ceil(this.getItemCount().total / this.getItemCount().filtered)
       const list = []
       for (let i = 0; i <= blocks; i++) {
