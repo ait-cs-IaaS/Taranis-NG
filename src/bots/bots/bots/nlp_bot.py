@@ -15,6 +15,11 @@ class NLPBot(BaseBot):
     type = "NLP_BOT"
     name = "NLP Bot"
     description = "Bot for naturale language processing of news items"
+    """
+    summary_threshold: int
+        if content is larger than summary_threshold it will be summarized
+    """
+    summary_threshold = 750
 
     r"""
     Parameters
@@ -73,8 +78,9 @@ class NLPBot(BaseBot):
                     current_keywords = self.generateKeywords(content)
                     keywords.extend(keyword[0] for keyword in current_keywords)
 
-                summary = self.predict_summary(content_list)
-                self.core_api.update_news_items_aggregate_summary(aggregate["id"], summary)
+                if len(content) > self.summary_threshold:
+                    summary = self.predict_summary(content_list)
+                    self.core_api.update_news_items_aggregate_summary(aggregate["id"], summary)
                 self.core_api.update_news_item_tags(aggregate["id"], keywords)
 
         except Exception:
