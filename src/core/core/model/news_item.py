@@ -1201,3 +1201,13 @@ class NewsItemTag(db.Model):
     @classmethod
     def find(cls, tag_id):
         return cls.query.get(tag_id)
+
+    @classmethod
+    def search(cls, tag_name=""):
+        return cls.query.filter(cls.name.ilike(f"%{tag_name}%"))
+
+    @classmethod
+    def get_json(cls, tag_name=""):
+        return cls.search(tag_name).all()
+
+

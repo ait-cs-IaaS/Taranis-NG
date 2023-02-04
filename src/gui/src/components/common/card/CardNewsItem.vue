@@ -72,11 +72,11 @@
           :showDialog="sharingDialog"
           @close="sharingDialog = false"
         >
-        <popup-share-items
-          v-if="sharingDialog"
-          :newsItem="newsItem"
-          @close="sharingDialog = false"
-        />
+          <popup-share-items
+            v-if="sharingDialog"
+            :newsItem="newsItem"
+            @close="sharingDialog = false"
+          />
         </news-item-action-dialog>
       </div>
 
@@ -109,7 +109,6 @@
                   cols="12"
                   class="mx-0 d-flex justify-start flex-wrap pt-1 pb-8"
                 >
-
                   <v-btn
                     class="buttonOutlined mr-1 mt-1"
                     :style="{ borderColor: '#c8c8c8' }"
@@ -202,19 +201,11 @@
                     icon
                     class="meta-link d-flex"
                   >
-                    <v-icon left x-small color="primary" class="mr-1"
+                    <v-icon left x-small color="primary"
                       >mdi-open-in-new</v-icon
                     >
                     <span class="label">{{ getSource().link }}</span>
                   </a>
-                </v-col>
-              </v-row>
-              <v-row class="news-item-meta-infos">
-                <v-col class="news-item-meta-infos-label">
-                  <strong>Source Type:</strong>
-                </v-col>
-                <v-col>
-                  {{ getSource().type }}
                 </v-col>
               </v-row>
               <v-row class="news-item-meta-infos">
@@ -289,10 +280,16 @@ export default {
     NewsItemDetail,
     votes
   },
-  emits: ['selectItem', 'deleteItem', 'downvoteItem', 'upvoteItem', 'readItem', 'importantItem'],
+  emits: [
+    'selectItem',
+    'deleteItem',
+    'downvoteItem',
+    'upvoteItem',
+    'readItem',
+    'importantItem'
+  ],
   props: {
     newsItem: {},
-    storiesList: [],
     selected: Boolean
   },
   data: () => ({
@@ -383,11 +380,16 @@ export default {
     },
 
     getDescription() {
-      return this.newsItem.summary || this.newsItem.description || this.newsItem.news_items[0].news_item_data.content || this.newsItem.news_items[0].news_item_data.review
+      return (
+        this.newsItem.summary ||
+        this.newsItem.description ||
+        this.newsItem.news_items[0].news_item_data.content ||
+        this.newsItem.news_items[0].news_item_data.review
+      )
     },
 
     getTags() {
-      return this.newsItem.tags.map(tag => tag.name)
+      return this.newsItem.tags.map((tag) => tag.name)
     },
 
     getPublishedDate() {
@@ -429,20 +431,6 @@ export default {
         link: this.newsItem.news_items[0].news_item_data.link,
         type: this.newsItem.news_items[0].news_item_data.osint_source_id
       }
-    },
-
-    getStoriesList() {
-      const storyTitles = []
-      this.newsItem.stories.forEach((id) => {
-        const newStoryTitle = this.storiesList.find(
-          (story) => story.id === id
-        ).title
-        if (storyTitles.indexOf(newStoryTitle) === -1) {
-          storyTitles.push(newStoryTitle)
-        }
-      })
-
-      return storyTitles.length ? storyTitles.join(', ') : '-'
     }
   },
   updated() {

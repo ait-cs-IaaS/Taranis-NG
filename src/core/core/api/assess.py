@@ -66,7 +66,7 @@ class NewsItemAggregates(Resource):
         user = auth_manager.get_user_from_jwt()
 
         try:
-            filter_keys = ["search", "read", "important", "relevant", "in_analyze", "range", "sort"]
+            filter_keys = ["search", "read", "important", "relevant", "in_analyze", "range", "sort", "tags"]
             filter_args: dict[str, str | int] = {k: v for k, v in request.args.items() if k in filter_keys}
 
             group_id = request.args.get("group", osint_source.OSINTSourceGroup.get_default().id)
@@ -79,6 +79,17 @@ class NewsItemAggregates(Resource):
 
         return news_item.NewsItemAggregate.get_by_group_json(group_id, filter_args, user)
 
+class NewsItemAggregateTags(Resource):
+    @auth_required("ASSESS_ACCESS")
+    def get(self):
+        user = auth_manager.get_user_from_jwt()
+
+        try:
+            search = request.args.get("search", "")
+            return news_item.NewsItemTag.get_json(search)
+        except Exception as ex:
+            logger.log_debug(ex)
+            return "", 400
 
 class NewsItemAggregatesByGroup(Resource):
     # DEPRECATED IN FAVOR OF NewsItemAggregates
@@ -215,6 +226,7 @@ def initialize(api):
         NewsItems,
         "/api/v1/assess/news-items",
     )
+    api.add_resource(NewsItemAggregateTags, "/api/v1/assess/tags")
     api.add_resource(NewsItem, "/api/v1/assess/news-items/<int:item_id>")
     api.add_resource(NewsItemAggregate, "/api/v1/assess/news-item-aggregates/<int:aggregate_id>")
     api.add_resource(GroupAction, "/api/v1/assess/news-item-aggregates-group-action")

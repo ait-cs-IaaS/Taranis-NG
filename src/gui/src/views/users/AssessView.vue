@@ -25,7 +25,6 @@
             :key="newsItem.id"
             :newsItem="newsItem"
             :position="index"
-            :storiesList="getStorieSelectionList()"
             :selected="getNewsItemsSelection().includes(newsItem.id)"
             @deleteItem="removeAndDeleteNewsItem(newsItem.id)"
             @selectItem="selectNewsItem(newsItem.id)"
@@ -76,8 +75,9 @@ export default {
     items: []
   }),
   methods: {
-    ...mapActions('filter', ['resetNewsItemsFilter']),
-    ...mapActions('assess', ['updateNewsItems',
+    ...mapActions(['updateItemCountTotal', 'updateItemCountFiltered']),
+    ...mapActions('assess', [
+      'updateNewsItems',
       'updateOSINTSourceGroupsList',
       'updateOSINTSources',
       'deleteNewsItem',
@@ -86,17 +86,14 @@ export default {
       'downvoteNewsItem',
       'removeStoryFromNewsItem'
     ]),
-    ...mapActions(['updateItemCountTotal', 'updateItemCountFiltered']),
     ...mapGetters('assess', [
       'getNewsItems',
       'getNewsItemList',
       'getNewsItemById',
       'getNewsItemsSelection',
-      'getNewsItemsByStoryId',
-      'getNewsItemsByStoryList'
+      'getOSINTSourceGroupList'
     ]),
-    ...mapGetters('dashboard', ['getStorieSelectionList', 'getNewsItemIds']),
-    ...mapActions('filter', ['nextPage']),
+    ...mapActions('filter', ['resetNewsItemsFilter', 'nextPage']),
 
     removeAndDeleteNewsItem (id) {
       this.items = this.items.filter((x) => x.id !== id)

@@ -20,6 +20,8 @@
 </template>
 
 <script>
+import { getTags } from '@/api/assess'
+
 export default {
   name: 'tagFilter',
   emits: ['input'],
@@ -38,13 +40,10 @@ export default {
   methods: {
     querySelections(v) {
       this.loading = true
-      // Simulated ajax query
-      setTimeout(() => {
-        this.items = this.states.filter((e) => {
-          return (e || '').toLowerCase().indexOf((v || '').toLowerCase()) > -1
-        })
+      getTags().then((res) => {
+        this.tags = res.data
         this.loading = false
-      }, 500)
+      })
     }
   },
   mounted() {

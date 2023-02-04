@@ -166,14 +166,14 @@ export default {
       {
         label: 'published date',
         icon: 'mdi-calendar-range-outline',
-        type: 'publishedDate',
-        direction: 'desc'
+        type: 'DATE',
+        direction: 'DESC'
       },
       {
         label: 'relevance',
         icon: 'mdi-counter',
-        type: 'relevanceScore',
-        direction: ''
+        type: 'RELEVANCE',
+        direction: 'DESC'
       }
     ],
     items_per_page: [5, 15, 25, 50, 100]
@@ -274,10 +274,6 @@ export default {
   },
   methods: {
     ...mapGetters(['getItemCount']),
-    ...mapGetters('dashboard', [
-      'getStorieSelectionList',
-      'getSharingSetSelectionList'
-    ]),
     ...mapGetters('assess', ['getScopeFilterList']),
     ...mapActions('assess', ['updateNewsItems']),
     ...mapActions('filter', [
