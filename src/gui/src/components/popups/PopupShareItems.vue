@@ -1,5 +1,8 @@
 <template>
   <v-card>
+    <v-card-title>
+      <span class="headline">Share Items</span>
+    </v-card-title>
     <v-card-text>
       Select a report to share the item with:
       <v-select
@@ -7,6 +10,7 @@
           single-line
           label="Select Report"
           v-model="reportItemSelection"
+          no-data-text="No reports found"
           :items="reportItems"
        />
     </v-card-text>

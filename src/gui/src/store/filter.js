@@ -5,7 +5,7 @@ const state = {
     offset: 0,
     limit: 15,
     search: undefined,
-    sort: undefined,
+    sort: 'DATE_DESC',
     range: undefined,
     date: undefined,
     tags: undefined,
@@ -43,8 +43,8 @@ const actions = {
   updateFilter(context, filter) {
     context.commit('UPDATE_FILTER', filter)
   },
-  setOrder(context, order) {
-    context.commit('SET_ORDER', order)
+  setSort(context, sort) {
+    context.commit('SET_SORT', sort)
   }
 }
 
@@ -92,8 +92,8 @@ const mutations = {
       state.newsItemsFilter[element] = filter[element]
     })
   },
-  SET_OREDER(state, order) {
-    state.newsItemsFilter.sort = order
+  SET_SORT(state, sort) {
+    state.newsItemsFilter.sort = sort
   },
   SET_LIMIT(state, limit) {
     state.newsItemsFilter.limit = limit

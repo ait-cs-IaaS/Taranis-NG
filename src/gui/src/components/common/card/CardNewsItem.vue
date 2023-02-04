@@ -73,6 +73,7 @@
           @close="sharingDialog = false"
         >
         <popup-share-items
+          v-if="sharingDialog"
           :newsItem="newsItem"
           @close="sharingDialog = false"
         />
@@ -272,7 +273,6 @@ import PopupDeleteItem from '@/components/popups/PopupDeleteItem'
 import PopupShareItems from '@/components/popups/PopupShareItems'
 
 import NewsItemDetail from '@/components/assess/NewsItemDetail'
-
 import votes from '@/components/_subcomponents/votes'
 import { isValidUrl } from '@/utils/helpers'
 
@@ -289,6 +289,7 @@ export default {
     NewsItemDetail,
     votes
   },
+  emits: ['selectItem', 'deleteItem', 'downvoteItem', 'upvoteItem', 'readItem', 'importantItem'],
   props: {
     newsItem: {},
     storiesList: [],
@@ -349,10 +350,10 @@ export default {
       this.$emit('selectItem', this.newsItem.id)
     },
     markAsRead() {
-      this.item_read = !this.item_read
+      this.$emit('readItem', this.newsItem.id)
     },
     markAsImportant() {
-      this.item_important = !this.item_important
+      this.$emit('importantItem', this.newsItem.id)
     },
     decorateSource() {
       this.item_decorateSource = !this.item_decorateSource
@@ -365,9 +366,6 @@ export default {
     },
     downvote(event) {
       this.$emit('downvoteItem', this.newsItem.id)
-    },
-    viewSingleDetails(event) {
-      this.$refs.newsItemSingleDetail.open(this.newsItem)
     },
     addToReport() {
       this.sharingDialog = true
