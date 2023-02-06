@@ -380,8 +380,9 @@ export default {
     },
 
     getDescription() {
+      const summary = this.openSummary ? false : this.newsItem.summary
       return (
-        this.newsItem.summary ||
+        summary ||
         this.newsItem.description ||
         this.newsItem.news_items[0].news_item_data.content ||
         this.newsItem.news_items[0].news_item_data.review

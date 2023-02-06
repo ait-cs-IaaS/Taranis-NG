@@ -11,11 +11,13 @@
     flat
     no-data-text="No tags found"
     hide-details
+    cache-items
     label="Tags"
-    item-text="name"
-    item-value="name"
     multiple
   >
+  <template v-slot:item="{ item }">
+   {{ shortText(item) }}
+  </template>
   </v-autocomplete>
 </template>
 
@@ -38,6 +40,9 @@ export default {
     }
   },
   methods: {
+    shortText(item) {
+      return item.length > 20 ? item.substring(0, 20) + '...' : item
+    },
     querySelections(v) {
       this.loading = true
       getTags().then((res) => {

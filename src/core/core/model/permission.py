@@ -1,10 +1,10 @@
 from sqlalchemy import func, or_
 
-from core.managers.db_manager import db
+from core.managers.db_manager import db, BaseModel
 from shared.schema.role import PermissionSchema
 
 
-class Permission(db.Model):
+class Permission(BaseModel):
     id = db.Column(db.String, primary_key=True)
     name = db.Column(db.String(), unique=True, nullable=False)
     description = db.Column(db.String())

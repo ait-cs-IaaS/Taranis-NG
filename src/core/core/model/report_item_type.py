@@ -3,7 +3,7 @@ from sqlalchemy import orm, func, or_, and_
 import sqlalchemy
 from sqlalchemy.sql.expression import cast
 
-from core.managers.db_manager import db
+from core.managers.db_manager import db, BaseModel
 from core.model.acl_entry import ACLEntry
 from core.model.attribute import Attribute
 from shared.schema.acl_entry import ItemType
@@ -23,7 +23,7 @@ class NewAttributeGroupItemSchema(AttributeGroupItemSchema):
         return AttributeGroupItem(**data)
 
 
-class AttributeGroupItem(db.Model):
+class AttributeGroupItem(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String())
     description = db.Column(db.String())
@@ -73,7 +73,7 @@ class NewAttributeGroupSchema(AttributeGroupBaseSchema):
         return AttributeGroup(**data)
 
 
-class AttributeGroup(db.Model):
+class AttributeGroup(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String())
     description = db.Column(db.String())
@@ -160,7 +160,7 @@ class NewReportItemTypeSchema(ReportItemTypeBaseSchema):
         return ReportItemType(**data)
 
 
-class ReportItemType(db.Model):
+class ReportItemType(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String())
     description = db.Column(db.String())

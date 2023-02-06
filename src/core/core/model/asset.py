@@ -2,7 +2,7 @@ import uuid
 from marshmallow import fields, post_load
 from sqlalchemy import orm, func, or_, text
 
-from core.managers.db_manager import db
+from core.managers.db_manager import db, BaseModel
 from core.model.report_item import ReportItem
 from core.model.user import User
 from core.model.notification_template import NotificationTemplate
@@ -23,7 +23,7 @@ class NewAssetCpeSchema(AssetCpeSchema):
         return AssetCpe(**data)
 
 
-class AssetCpe(db.Model):
+class AssetCpe(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     value = db.Column(db.String())
 
@@ -43,7 +43,7 @@ class NewAssetSchema(AssetSchema):
         return Asset(**data)
 
 
-class Asset(db.Model):
+class Asset(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), nullable=False)
     serial = db.Column(db.String())
@@ -214,7 +214,7 @@ class Asset(db.Model):
             db.session.commit()
 
 
-class AssetVulnerability(db.Model):
+class AssetVulnerability(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     solved = db.Column(db.Boolean, default=False)
 
@@ -243,7 +243,7 @@ class NewAssetGroupGroupSchema(AssetGroupSchema):
         return AssetGroup(**data)
 
 
-class AssetGroup(db.Model):
+class AssetGroup(BaseModel):
     id = db.Column(db.String(64), primary_key=True)
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())
@@ -371,16 +371,16 @@ class AssetGroup(db.Model):
             db.session.commit()
 
 
-class AssetGroupOrganization(db.Model):
+class AssetGroupOrganization(BaseModel):
     asset_group_id = db.Column(db.String, db.ForeignKey("asset_group.id"), primary_key=True)
     organization_id = db.Column(db.Integer, db.ForeignKey("organization.id"), primary_key=True)
 
 
-class AssetGroupUser(db.Model):
+class AssetGroupUser(BaseModel):
     asset_group_id = db.Column(db.String, db.ForeignKey("asset_group.id"), primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), primary_key=True)
 
 
-class AssetGroupNotificationTemplate(db.Model):
+class AssetGroupNotificationTemplate(BaseModel):
     asset_group_id = db.Column(db.String, db.ForeignKey("asset_group.id"), primary_key=True)
     notification_template_id = db.Column(db.Integer, db.ForeignKey("notification_template.id"), primary_key=True)

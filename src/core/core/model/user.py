@@ -1,7 +1,7 @@
 from marshmallow import fields, post_load
 from sqlalchemy import func, or_, orm
 
-from core.managers.db_manager import db
+from core.managers.db_manager import db, BaseModel
 from core.model.role import Role
 from core.model.permission import Permission
 from core.model.organization import Organization
@@ -26,7 +26,7 @@ class NewUserSchema(UserSchemaBase):
         return User(**data)
 
 
-class User(db.Model):
+class User(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), unique=True, nullable=False)
     name = db.Column(db.String(), nullable=False)
@@ -195,17 +195,17 @@ class User(db.Model):
         return cls.get_profile_json(user)
 
 
-class UserOrganization(db.Model):
+class UserOrganization(BaseModel):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), primary_key=True)
     organization_id = db.Column(db.Integer, db.ForeignKey("organization.id"), primary_key=True)
 
 
-class UserRole(db.Model):
+class UserRole(BaseModel):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), primary_key=True)
     role_id = db.Column(db.Integer, db.ForeignKey("role.id"), primary_key=True)
 
 
-class UserPermission(db.Model):
+class UserPermission(BaseModel):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), primary_key=True)
     permission_id = db.Column(db.String, db.ForeignKey("permission.id"), primary_key=True)
 
@@ -224,7 +224,7 @@ class NewUserProfileSchema(UserProfileSchema):
         return UserProfile(**data)
 
 
-class UserProfile(db.Model):
+class UserProfile(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
 
     spellcheck = db.Column(db.Boolean, default=True)
@@ -239,11 +239,11 @@ class UserProfile(db.Model):
         self.hotkeys = hotkeys
 
 
-class UserProfileWordList(db.Model):
+class UserProfileWordList(BaseModel):
     user_profile_id = db.Column(db.Integer, db.ForeignKey("user_profile.id"), primary_key=True)
 
 
-class Hotkey(db.Model):
+class Hotkey(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     key_code = db.Column(db.Integer)
     key = db.Column(db.String)

@@ -79,6 +79,7 @@ class NewsItemAggregates(Resource):
 
         return news_item.NewsItemAggregate.get_by_group_json(group_id, filter_args, user)
 
+
 class NewsItemAggregateTags(Resource):
     @auth_required("ASSESS_ACCESS")
     def get(self):
@@ -90,6 +91,7 @@ class NewsItemAggregateTags(Resource):
         except Exception as ex:
             logger.log_debug(ex)
             return "", 400
+
 
 class NewsItemAggregatesByGroup(Resource):
     # DEPRECATED IN FAVOR OF NewsItemAggregates
@@ -194,7 +196,7 @@ class DownloadAttachment(Resource):
                         logger.store_user_activity(user, "ASSESS_ACCESS", str({"file": attribute.value}))
                         return send_file(
                             io.BytesIO(attribute.binary_data),
-                            attachment_filename=attribute.value,
+                            download_name=attribute.value,
                             mimetype=attribute.binary_mime_type,
                             as_attachment=True,
                         )

@@ -50,7 +50,7 @@ news_item_data_news_item_tag = db.Table(
 )
 
 
-class NewsItemData(db.Model):
+class NewsItemData(BaseModel):
     id = db.Column(db.String(64), primary_key=True)
     hash = db.Column(db.String())
 
@@ -86,7 +86,7 @@ class NewsItemData(db.Model):
         osint_source_id,
         attributes,
     ):
-        self.id = str(uuid.uuid4()) if id is None else id
+        self.id = id or str(uuid.uuid4())
         self.hash = hash
         self.title = title
         self.review = review
@@ -172,6 +172,8 @@ class NewsItemData(db.Model):
 
         attributes_schema = NewNewsItemAttributeSchema(many=True)
         attributes = attributes_schema.load(attributes)
+        if attributes is None:
+            return
 
         for attribute in attributes:
             if not cls.attribute_value_identical(news_item_id, attribute.value):
@@ -228,7 +230,7 @@ class NewsItemData(db.Model):
         return items, last_sync_time
 
 
-class NewsItem(db.Model):
+class NewsItem(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
 
     read = db.Column(db.Boolean, default=False)
@@ -402,7 +404,7 @@ class NewsItem(db.Model):
         query = (
             db.session.query(
                 NewsItem.id,
-                func.count().filter(ACLEntry.id > 0).label("acls"),
+                func.count().filter(ACLEntry.id != None).label("acls"),
                 func.count().filter(ACLEntry.see).label("see"),
                 func.count().filter(ACLEntry.access).label("access"),
                 func.count().filter(ACLEntry.modify).label("modify"),
@@ -519,7 +521,7 @@ class NewsItem(db.Model):
         db.session.delete(news_item)
 
 
-class NewsItemVote(db.Model):
+class NewsItemVote(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     like = db.Column(db.Boolean)
     dislike = db.Column(db.Boolean)
@@ -555,7 +557,7 @@ class NewsItemVote(db.Model):
         return 1 if vote.like else -1
 
 
-class NewsItemAggregate(db.Model):
+class NewsItemAggregate(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String())
     description = db.Column(db.String())
@@ -726,6 +728,8 @@ class NewsItemAggregate(db.Model):
         news_item_data_schema = NewNewsItemDataSchema(many=True)
         news_items_data = news_item_data_schema.load(news_items_data_list)
         osint_source_ids = set()
+        if not news_items_data:
+            return
 
         for news_item_data in news_items_data:
             if not NewsItemData.identical(news_item_data.hash):
@@ -739,17 +743,18 @@ class NewsItemAggregate(db.Model):
 
     @classmethod
     def add_news_item(cls, news_item_data):
-        news_item_data_schema = NewNewsItemDataSchema()
-        news_item_data = news_item_data_schema.load(news_item_data)
-        if not news_item_data.id:
-            news_item_data.id = str(uuid.uuid4())
-        if not news_item_data.hash:
-            news_item_data.hash = news_item_data.id
+        news_item_data = NewNewsItemDataSchema().load(news_item_data)
+        if not news_item_data:
+            return
+        if not news_item_data.id:  # type: ignore
+            news_item_data.id = str(uuid.uuid4())  # type: ignore
+        if not news_item_data.hash:  # type: ignore
+            news_item_data.hash = news_item_data.id  # type: ignore
         db.session.add(news_item_data)
         cls.create_new_for_all_groups(news_item_data)
         db.session.commit()
 
-        return {news_item_data.osint_source_id}
+        return {news_item_data.osint_source_id}  # type: ignore
 
     @classmethod
     def reassign_to_new_groups(cls, osint_source_id, default_group_id):
@@ -767,10 +772,10 @@ class NewsItemAggregate(db.Model):
 
     @classmethod
     def add_remote_news_items(cls, news_items_data_list, remote_node, osint_source_group_id):
-        news_item_data_schema = NewNewsItemDataSchema(many=True)
-        news_items_data = news_item_data_schema.load(news_items_data_list)
-
+        news_items_data = NewNewsItemDataSchema(many=True).load(news_items_data_list)
         news_item_data_ids = set()
+        if not news_items_data:
+            return
         for news_item_data in news_items_data:
             news_item_data.remote_source = remote_node.name
             for attribute in news_item_data.attributes:
@@ -1092,7 +1097,7 @@ class NewsItemAggregate(db.Model):
         return news_item_aggregate_schema.dumps(news_item_aggregates)
 
 
-class NewsItemAggregateSearchIndex(db.Model):
+class NewsItemAggregateSearchIndex(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     data = db.Column(db.String)
     news_item_aggregate_id = db.Column(db.Integer, db.ForeignKey("news_item_aggregate.id"))
@@ -1132,7 +1137,7 @@ class NewsItemAggregateSearchIndex(db.Model):
         db.session.commit()
 
 
-class NewsItemAttribute(db.Model):
+class NewsItemAttribute(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     key = db.Column(db.String(), nullable=False)
     value = db.Column(db.String(), nullable=False)
@@ -1158,7 +1163,7 @@ class NewsItemAttribute(db.Model):
         return cls.query.get(attribute_id)
 
 
-class NewsItemDataNewsItemAttribute(db.Model):
+class NewsItemDataNewsItemAttribute(BaseModel):
     news_item_data_id = db.Column(db.String, db.ForeignKey("news_item_data.id"), primary_key=True)
     news_item_attribute_id = db.Column(db.Integer, db.ForeignKey("news_item_attribute.id"), primary_key=True)
 
@@ -1167,12 +1172,12 @@ class NewsItemDataNewsItemAttribute(db.Model):
         return cls.query.filter(NewsItemDataNewsItemAttribute.news_item_attribute_id == attribute_id).scalar()
 
 
-class NewsItemAggregateNewsItemAttribute(db.Model):
+class NewsItemAggregateNewsItemAttribute(BaseModel):
     news_item_aggregate_id = db.Column(db.Integer, db.ForeignKey("news_item_aggregate.id"), primary_key=True)
     news_item_attribute_id = db.Column(db.Integer, db.ForeignKey("news_item_attribute.id"), primary_key=True)
 
 
-class ReportItemNewsItemAggregate(db.Model):
+class ReportItemNewsItemAggregate(BaseModel):
     report_item_id = db.Column(db.Integer, db.ForeignKey("report_item.id"), primary_key=True)
     news_item_aggregate_id = db.Column(db.Integer, db.ForeignKey("news_item_aggregate.id"), primary_key=True)
 

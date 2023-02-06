@@ -23,11 +23,12 @@
             item-value="id"
             label="Sources"
             :hide-details="true"
+            solo
             dense
           ></v-select>
         </v-col>
         <v-col cols="6" class="pt-0 pb-0">
-          Display:
+          <h4>Display</h4>
           <v-select
             v-model="limit"
             :items="items_per_page"
@@ -38,7 +39,7 @@
           ></v-select>
         </v-col>
         <v-col cols="6" class="pt-0 pb-0">
-          Offset:
+          <h4>Offset</h4>
           <v-select
             v-model="offset"
             :items="offsetRange"
