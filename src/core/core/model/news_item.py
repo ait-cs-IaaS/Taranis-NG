@@ -6,7 +6,7 @@ import dateutil.parser as dateparser
 from marshmallow import post_load, fields
 from sqlalchemy import orm, and_, or_, func
 
-from core.managers.db_manager import db
+from core.managers.db_manager import db, BaseModel
 from core.managers.log_manager import logger
 from core.model.acl_entry import ACLEntry
 from core.model.osint_source import OSINTSourceGroup, OSINTSource
@@ -1164,8 +1164,7 @@ class NewsItemDataNewsItemAttribute(db.Model):
 
     @classmethod
     def find(cls, attribute_id):
-        news_item_attribute = cls.query.filter(NewsItemDataNewsItemAttribute.news_item_attribute_id == attribute_id).scalar()
-        return news_item_attribute
+        return cls.query.filter(NewsItemDataNewsItemAttribute.news_item_attribute_id == attribute_id).scalar()
 
 
 class NewsItemAggregateNewsItemAttribute(db.Model):
@@ -1186,7 +1185,7 @@ class ReportItemNewsItemAggregate(db.Model):
         return cls.query.filter_by(news_item_aggregate_id=aggregate_id).count()
 
 
-class NewsItemTag(db.Model):
+class NewsItemTag(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255))
     tag_type = db.Column(db.String(255))
@@ -1208,6 +1207,5 @@ class NewsItemTag(db.Model):
 
     @classmethod
     def get_json(cls, tag_name=""):
-        return cls.search(tag_name).all()
-
-
+        rows = cls.search(tag_name).all()
+        return [row.name for row in rows]
