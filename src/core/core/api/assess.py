@@ -173,41 +173,32 @@ class GroupAction(Resource):
 
 
 class DownloadAttachment(Resource):
+    @auth_required("ASSESS_ACCESS")
     def get(self, item_data_id, attribute_id):
-        if "jwt" in request.args:
-            user = auth_manager.decode_user_from_jwt(request.args["jwt"])
-            if user is not None:
-                permissions = user.get_permissions()
-                if "ASSESS_ACCESS" in permissions:
-                    attribute_mapping = news_item.NewsItemDataNewsItemAttribute.find(attribute_id)
-                    need_check = attribute_mapping is not None
-                    attribute = news_item.NewsItemAttribute.find(attribute_id)
-                    if (
-                        need_check
-                        and item_data_id == attribute_mapping.news_item_data_id
-                        and news_item.NewsItemData.allowed_with_acl(
-                            attribute_mapping.news_item_data_id,
-                            user,
-                            False,
-                            True,
-                            False,
-                        )
-                    ):
-                        logger.store_user_activity(user, "ASSESS_ACCESS", str({"file": attribute.value}))
-                        return send_file(
-                            io.BytesIO(attribute.binary_data),
-                            download_name=attribute.value,
-                            mimetype=attribute.binary_mime_type,
-                            as_attachment=True,
-                        )
-                    else:
-                        logger.store_auth_error_activity("Unauthorized access attempt to News Item Data")
-                else:
-                    logger.store_auth_error_activity("Insufficient permissions")
-            else:
-                logger.store_auth_error_activity("Invalid JWT")
+        user = auth_manager.get_user_from_jwt()
+        attribute_mapping = news_item.NewsItemDataNewsItemAttribute.find(attribute_id)
+        need_check = attribute_mapping is not None
+        attribute = news_item.NewsItemAttribute.find(attribute_id)
+        if (
+            need_check
+            and item_data_id == attribute_mapping.news_item_data_id
+            and news_item.NewsItemData.allowed_with_acl(
+                attribute_mapping.news_item_data_id,
+                user,
+                False,
+                True,
+                False,
+            )
+        ):
+            logger.store_user_activity(user, "ASSESS_ACCESS", str({"file": attribute.value}))
+            return send_file(
+                io.BytesIO(attribute.binary_data),
+                download_name=attribute.value,
+                mimetype=attribute.binary_mime_type,
+                as_attachment=True,
+            )
         else:
-            logger.store_auth_error_activity("Missing JWT")
+            logger.store_auth_error_activity("Unauthorized access attempt to News Item Data")
 
 
 def initialize(api):

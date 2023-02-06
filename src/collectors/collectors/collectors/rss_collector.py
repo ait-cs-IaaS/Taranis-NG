@@ -56,12 +56,13 @@ class RSSCollector(BaseCollector):
         return ""
 
     def collect(self, source):
-        feed_url = source.parameter_values["FEED_URL"]
-        # interval = source.parameter_values["REFRESH_INTERVAL"]
+        feed_url = source.parameter_values.get("FEED_URL", None)
+        if not feed_url:
+            logger.warning("No FEED_URL set")
 
         logger.log_collector_activity("rss", source.id, f"Starting collector for url: {feed_url}")
 
-        if user_agent := source.parameter_values["USER_AGENT"]:
+        if user_agent := source.parameter_values.get("USER_AGENT", None):
             self.headers = {"User-Agent": user_agent}
 
         try:
