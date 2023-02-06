@@ -28,15 +28,6 @@ class BaseCollector:
         pass
 
     @staticmethod
-    def print_exception(source, error):
-        logger.log_info(f"OSINTSource ID: {source.id}")
-        logger.log_info(f"OSINTSource name: {source.name}")
-        if str(error).startswith("b"):
-            logger.log_info(f"ERROR: {str(error)[2:-1]}")
-        else:
-            logger.log_info(f"ERROR: {str(error)}")
-
-    @staticmethod
     def history(interval):
         if interval[0].isdigit() and ":" in interval:
             return datetime.datetime.now() - datetime.timedelta(days=1)

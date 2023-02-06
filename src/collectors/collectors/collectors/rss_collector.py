@@ -59,6 +59,7 @@ class RSSCollector(BaseCollector):
         feed_url = source.parameter_values.get("FEED_URL", None)
         if not feed_url:
             logger.warning("No FEED_URL set")
+            return
 
         logger.log_collector_activity("rss", source.id, f"Starting collector for url: {feed_url}")
 
@@ -67,10 +68,9 @@ class RSSCollector(BaseCollector):
 
         try:
             self.rss_collector(feed_url, source)
-        except Exception as error:
-            logger.log_collector_activity("rss", source.id, "RSS collection exceptionally failed")
-            BaseCollector.print_exception(source, error)
-            logger.log_debug(traceback.format_exc())
+        except Exception:
+            logger.exception()
+            logger.collector_exception(source, "Could not collect RSS Feed")
 
         logger.log_debug(f"{self.type} collection finished.")
 
