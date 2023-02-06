@@ -1,6 +1,6 @@
 from marshmallow import post_load
 
-from core.managers.db_manager import db, BaseModel
+from core.managers.db_manager import db
 from shared.schema.address import AddressSchema
 
 
@@ -10,7 +10,7 @@ class NewAddressSchema(AddressSchema):
         return Address(**data)
 
 
-class Address(BaseModel):
+class Address(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
     street = db.Column(db.String())

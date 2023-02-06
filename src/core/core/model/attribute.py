@@ -4,7 +4,7 @@ from marshmallow import fields, post_load
 from sqlalchemy import orm, func, or_
 
 from core.managers.log_manager import logger
-from core.managers.db_manager import db, BaseModel
+from core.managers.db_manager import db
 from shared.schema.attribute import (
     AttributeBaseSchema,
     AttributeEnumSchema,
@@ -20,7 +20,7 @@ class NewAttributeEnumSchema(AttributeEnumSchema):
         return AttributeEnum(**data)
 
 
-class AttributeEnum(BaseModel):
+class AttributeEnum(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     index = db.Column(db.Integer)
     value = db.Column(db.String(), nullable=False)
@@ -138,7 +138,7 @@ class NewAttributeSchema(AttributeBaseSchema):
         return Attribute(**data)
 
 
-class Attribute(BaseModel):
+class Attribute(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())

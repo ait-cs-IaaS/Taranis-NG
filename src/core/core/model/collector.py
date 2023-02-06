@@ -2,7 +2,7 @@ from marshmallow import fields, post_load
 from sqlalchemy import or_, func
 import uuid
 
-from core.managers.db_manager import db, BaseModel
+from core.managers.db_manager import db
 from shared.schema.collector import CollectorSchema
 from core.model.parameter import Parameter
 
@@ -13,7 +13,7 @@ class NewCollectorSchema(CollectorSchema):
         return Collector(**data)
 
 
-class Collector(BaseModel):
+class Collector(db.Model):
     id = db.Column(db.String(64), primary_key=True)
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())
@@ -77,6 +77,6 @@ class Collector(BaseModel):
         return {"total_count": count, "items": items}
 
 
-class CollectorParameter(BaseModel):
+class CollectorParameter(db.Model):
     collector_id = db.Column(db.String, db.ForeignKey("collector.id", ondelete="CASCADE"), primary_key=True)
     parameter_id = db.Column(db.String, db.ForeignKey("parameter.key", ondelete="CASCADE"), primary_key=True)

@@ -3,7 +3,7 @@ from sqlalchemy import orm
 import uuid
 
 from core.managers.log_manager import logger
-from core.managers.db_manager import db, BaseModel
+from core.managers.db_manager import db
 from core.model.parameter_value import ParameterValueImportSchema
 
 from core.model.publishers_node import PublishersNode
@@ -21,7 +21,7 @@ class NewPublisherPresetSchema(PublisherPresetSchema):
         return PublisherPreset(**data)
 
 
-class PublisherPreset(BaseModel):
+class PublisherPreset(db.Model):
     id = db.Column(db.String(64), primary_key=True)
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())
@@ -124,6 +124,6 @@ class PublisherPreset(BaseModel):
         db.session.commit()
 
 
-class PublisherPresetParameterValue(BaseModel):
+class PublisherPresetParameterValue(db.Model):
     publisher_preset_id = db.Column(db.String, db.ForeignKey("publisher_preset.id"), primary_key=True)
     parameter_value_id = db.Column(db.Integer, db.ForeignKey("parameter_value.id"), primary_key=True)

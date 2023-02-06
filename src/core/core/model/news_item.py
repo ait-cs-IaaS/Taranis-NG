@@ -6,7 +6,7 @@ import dateutil.parser as dateparser
 from marshmallow import post_load, fields
 from sqlalchemy import orm, and_, or_, func
 
-from core.managers.db_manager import db, BaseModel
+from core.managers.db_manager import db
 from core.managers.log_manager import logger
 from core.model.acl_entry import ACLEntry
 from core.model.osint_source import OSINTSourceGroup, OSINTSource
@@ -34,7 +34,7 @@ class NewNewsItemDataSchema(NewsItemDataSchema):
         return NewsItemData(**data)
 
 
-class NewsItemData(BaseModel):
+class NewsItemData(db.Model):
     id = db.Column(db.String(64), primary_key=True)
     hash = db.Column(db.String())
 
@@ -214,7 +214,7 @@ class NewsItemData(BaseModel):
         return items, last_sync_time
 
 
-class NewsItem(BaseModel):
+class NewsItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
     read = db.Column(db.Boolean, default=False)
@@ -505,7 +505,7 @@ class NewsItem(BaseModel):
         db.session.delete(news_item)
 
 
-class NewsItemVote(BaseModel):
+class NewsItemVote(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     like = db.Column(db.Boolean)
     dislike = db.Column(db.Boolean)
@@ -541,7 +541,7 @@ class NewsItemVote(BaseModel):
         return 1 if vote.like else -1
 
 
-class NewsItemAggregate(BaseModel):
+class NewsItemAggregate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String())
     description = db.Column(db.String())
@@ -1081,7 +1081,7 @@ class NewsItemAggregate(BaseModel):
         return news_item_aggregate_schema.dumps(news_item_aggregates)
 
 
-class NewsItemAggregateSearchIndex(BaseModel):
+class NewsItemAggregateSearchIndex(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     data = db.Column(db.String)
     news_item_aggregate_id = db.Column(db.Integer, db.ForeignKey("news_item_aggregate.id"))
@@ -1121,7 +1121,7 @@ class NewsItemAggregateSearchIndex(BaseModel):
         db.session.commit()
 
 
-class NewsItemAttribute(BaseModel):
+class NewsItemAttribute(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     key = db.Column(db.String(), nullable=False)
     value = db.Column(db.String(), nullable=False)
@@ -1147,7 +1147,7 @@ class NewsItemAttribute(BaseModel):
         return cls.query.get(attribute_id)
 
 
-class NewsItemDataNewsItemAttribute(BaseModel):
+class NewsItemDataNewsItemAttribute(db.Model):
     news_item_data_id = db.Column(db.String, db.ForeignKey("news_item_data.id"), primary_key=True)
     news_item_attribute_id = db.Column(db.Integer, db.ForeignKey("news_item_attribute.id"), primary_key=True)
 
@@ -1156,12 +1156,12 @@ class NewsItemDataNewsItemAttribute(BaseModel):
         return cls.query.filter(NewsItemDataNewsItemAttribute.news_item_attribute_id == attribute_id).scalar()
 
 
-class NewsItemAggregateNewsItemAttribute(BaseModel):
+class NewsItemAggregateNewsItemAttribute(db.Model):
     news_item_aggregate_id = db.Column(db.Integer, db.ForeignKey("news_item_aggregate.id"), primary_key=True)
     news_item_attribute_id = db.Column(db.Integer, db.ForeignKey("news_item_attribute.id"), primary_key=True)
 
 
-class ReportItemNewsItemAggregate(BaseModel):
+class ReportItemNewsItemAggregate(db.Model):
     report_item_id = db.Column(db.Integer, db.ForeignKey("report_item.id"), primary_key=True)
     news_item_aggregate_id = db.Column(db.Integer, db.ForeignKey("news_item_aggregate.id"), primary_key=True)
 
@@ -1174,7 +1174,7 @@ class ReportItemNewsItemAggregate(BaseModel):
         return cls.query.filter_by(news_item_aggregate_id=aggregate_id).count()
 
 
-class NewsItemTag(BaseModel):
+class NewsItemTag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255))
     tag_type = db.Column(db.String(255))

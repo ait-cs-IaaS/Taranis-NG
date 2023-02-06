@@ -1,7 +1,7 @@
 from marshmallow import post_load, fields
 from sqlalchemy import func, or_, orm
 
-from core.managers.db_manager import db, BaseModel
+from core.managers.db_manager import db
 from core.model.address import NewAddressSchema
 from shared.schema.organization import OrganizationSchema, OrganizationPresentationSchema
 
@@ -14,7 +14,7 @@ class NewOrganizationSchema(OrganizationSchema):
         return Organization(**data)
 
 
-class Organization(BaseModel):
+class Organization(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())

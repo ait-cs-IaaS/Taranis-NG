@@ -4,7 +4,7 @@ from sqlalchemy import func, or_, orm, and_
 import sqlalchemy
 from sqlalchemy.sql.expression import cast
 
-from core.managers.db_manager import db, BaseModel
+from core.managers.db_manager import db
 from core.model.product import Product
 from core.model.parameter_value import ParameterValueImportSchema
 from core.model.acl_entry import ACLEntry
@@ -20,7 +20,7 @@ class NewProductTypeSchema(ProductTypeSchema):
         return ProductType(**data)
 
 
-class ProductType(BaseModel):
+class ProductType(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(64), unique=True, nullable=False)
     description = db.Column(db.String(), nullable=False)
@@ -128,6 +128,6 @@ class ProductType(BaseModel):
         db.session.commit()
 
 
-class ProductTypeParameterValue(BaseModel):
+class ProductTypeParameterValue(db.Model):
     product_type_id = db.Column(db.Integer, db.ForeignKey("product_type.id"), primary_key=True)
     parameter_value_id = db.Column(db.Integer, db.ForeignKey("parameter_value.id"), primary_key=True)

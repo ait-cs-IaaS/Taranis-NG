@@ -1,9 +1,9 @@
 from datetime import datetime
 
-from core.managers.db_manager import db, BaseModel
+from core.managers.db_manager import db
 
 
-class AuditRecord(BaseModel):
+class AuditRecord(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     timestamp = db.Column(db.DateTime, default=datetime.now)
 

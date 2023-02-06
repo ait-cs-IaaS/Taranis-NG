@@ -5,7 +5,7 @@ from sqlalchemy import orm, or_, func, text, and_
 from sqlalchemy.sql.expression import cast
 import sqlalchemy
 
-from core.managers.db_manager import db, BaseModel
+from core.managers.db_manager import db
 from core.managers.log_manager import logger
 from core.model.news_item import NewsItemAggregate
 from core.model.report_item_type import AttributeGroupItem
@@ -33,7 +33,7 @@ class NewReportItemAttributeSchema(ReportItemAttributeBaseSchema):
         return ReportItemAttribute(**data)
 
 
-class ReportItemAttribute(BaseModel):
+class ReportItemAttribute(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     value = db.Column(db.String(), nullable=False)
     binary_mime_type = db.Column(db.String())
@@ -93,12 +93,12 @@ class NewReportItemSchema(ReportItemBaseSchema):
         return ReportItem(**data)
 
 
-class ReportItemRemoteReportItem(BaseModel):
+class ReportItemRemoteReportItem(db.Model):
     report_item_id = db.Column(db.Integer, db.ForeignKey("report_item.id"), primary_key=True)
     remote_report_item_id = db.Column(db.Integer, db.ForeignKey("report_item.id"), primary_key=True)
 
 
-class ReportItem(BaseModel):
+class ReportItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     uuid = db.Column(db.String(64))
 
@@ -595,7 +595,7 @@ class ReportItem(BaseModel):
                     self.report_item_cpes.append(ReportItemCpe(attribute.value))
 
 
-class ReportItemCpe(BaseModel):
+class ReportItemCpe(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     value = db.Column(db.String())
 

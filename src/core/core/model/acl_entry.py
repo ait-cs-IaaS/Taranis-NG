@@ -2,7 +2,7 @@ from sqlalchemy import func, or_, orm, and_
 from marshmallow import fields, post_load
 from flask_sqlalchemy import BaseQuery
 
-from core.managers.db_manager import db, BaseModel
+from core.managers.db_manager import db
 from core.model.role import Role
 from core.model.user import User
 from shared.schema.role import RoleIdSchema
@@ -19,7 +19,7 @@ class NewACLEntrySchema(ACLEntrySchema):
         return ACLEntry(**data)
 
 
-class ACLEntry(BaseModel):
+class ACLEntry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=True, nullable=False)
     description = db.Column(db.String())
@@ -187,11 +187,11 @@ class ACLEntry(BaseModel):
         )
 
 
-class ACLEntryUser(BaseModel):
+class ACLEntryUser(db.Model):
     acl_entry_id = db.Column(db.Integer, db.ForeignKey("acl_entry.id"), primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), primary_key=True)
 
 
-class ACLEntryRole(BaseModel):
+class ACLEntryRole(db.Model):
     acl_entry_id = db.Column(db.Integer, db.ForeignKey("acl_entry.id"), primary_key=True)
     role_id = db.Column(db.Integer, db.ForeignKey("role.id"), primary_key=True)

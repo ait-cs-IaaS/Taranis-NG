@@ -1,7 +1,7 @@
 from marshmallow import fields, post_load
 from sqlalchemy import func, or_, orm
 
-from core.managers.db_manager import db, BaseModel
+from core.managers.db_manager import db
 from core.model.permission import Permission
 from shared.schema.role import RoleSchemaBase, PermissionIdSchema, RolePresentationSchema
 
@@ -14,7 +14,7 @@ class NewRoleSchema(RoleSchemaBase):
         return Role(**data)
 
 
-class Role(BaseModel):
+class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=True, nullable=False)
     description = db.Column(db.String())
@@ -96,6 +96,6 @@ class Role(BaseModel):
         db.session.commit()
 
 
-class RolePermission(BaseModel):
+class RolePermission(db.Model):
     role_id = db.Column(db.Integer, db.ForeignKey("role.id"), primary_key=True)
     permission_id = db.Column(db.String, db.ForeignKey("permission.id"), primary_key=True)

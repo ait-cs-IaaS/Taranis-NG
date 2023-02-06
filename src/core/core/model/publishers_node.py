@@ -2,7 +2,7 @@ from marshmallow import post_load
 from sqlalchemy import func, or_, orm
 import uuid
 
-from core.managers.db_manager import db, BaseModel
+from core.managers.db_manager import db
 from shared.schema.publishers_node import (
     PublishersNodeSchema,
     PublishersNodePresentationSchema,
@@ -15,7 +15,7 @@ class NewPublishersNodeSchema(PublishersNodeSchema):
         return PublishersNode(**data)
 
 
-class PublishersNode(BaseModel):
+class PublishersNode(db.Model):
     id = db.Column(db.String(64), primary_key=True)
     name = db.Column(db.String(), unique=True, nullable=False)
     description = db.Column(db.String())

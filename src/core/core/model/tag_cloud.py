@@ -4,7 +4,7 @@ from marshmallow import post_load
 from sqlalchemy import func
 from sqlalchemy.sql import label
 
-from core.managers.db_manager import db, BaseModel
+from core.managers.db_manager import db
 from shared.schema.tag_cloud import TagCloudSchema, GroupedWordsSchema
 
 
@@ -14,7 +14,7 @@ class NewTagCloudSchema(TagCloudSchema):
         return TagCloud(**data)
 
 
-class TagCloud(BaseModel):
+class TagCloud(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     word = db.Column(db.String())
     word_quantity = db.Column(db.BigInteger)

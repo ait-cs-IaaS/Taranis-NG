@@ -5,7 +5,7 @@ from marshmallow import post_load, fields
 from sqlalchemy import orm, func, or_, and_
 from sqlalchemy.types import JSON
 
-from core.managers.db_manager import db, BaseModel
+from core.managers.db_manager import db
 from core.managers.log_manager import logger
 from core.model.acl_entry import ACLEntry
 from core.model.collector import Collector
@@ -35,7 +35,7 @@ class NewOSINTSourceSchema(OSINTSourceSchema):
         return OSINTSource(**data)
 
 
-class OSINTSource(BaseModel):
+class OSINTSource(db.Model):
     id = db.Column(db.String(64), primary_key=True)
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())
@@ -281,12 +281,12 @@ class OSINTSource(BaseModel):
         self.last_data = status_schema.last_data
 
 
-class OSINTSourceParameterValue(BaseModel):
+class OSINTSourceParameterValue(db.Model):
     osint_source_id = db.Column(db.String, db.ForeignKey("osint_source.id"), primary_key=True)
     parameter_value_id = db.Column(db.Integer, db.ForeignKey("parameter_value.id"), primary_key=True)
 
 
-class OSINTSourceWordList(BaseModel):
+class OSINTSourceWordList(db.Model):
     osint_source_id = db.Column(db.String, db.ForeignKey("osint_source.id"), primary_key=True)
     word_list_id = db.Column(db.Integer, db.ForeignKey("word_list.id"), primary_key=True)
 
@@ -299,7 +299,7 @@ class NewOSINTSourceGroupSchema(OSINTSourceGroupSchema):
         return OSINTSourceGroup(**data)
 
 
-class OSINTSourceGroup(BaseModel):
+class OSINTSourceGroup(db.Model):
     id = db.Column(db.String(64), primary_key=True)
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())
@@ -459,6 +459,6 @@ class OSINTSourceGroup(BaseModel):
         return sources_in_default_group, "", 200
 
 
-class OSINTSourceGroupOSINTSource(BaseModel):
+class OSINTSourceGroupOSINTSource(db.Model):
     osint_source_group_id = db.Column(db.String, db.ForeignKey("osint_source_group.id", ondelete="CASCADE"), primary_key=True)
     osint_source_id = db.Column(db.String, db.ForeignKey("osint_source.id", ondelete="CASCADE"), primary_key=True)

@@ -1,6 +1,6 @@
 from marshmallow import post_load
 
-from core.managers.db_manager import db, BaseModel
+from core.managers.db_manager import db
 from shared.schema.parameter import ParameterType, ParameterSchema
 
 
@@ -10,7 +10,7 @@ class NewParameterSchema(ParameterSchema):
         return Parameter(**data)
 
 
-class Parameter(BaseModel):
+class Parameter(db.Model):
     key = db.Column(db.String(), primary_key=True)
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())

@@ -4,7 +4,7 @@ from datetime import datetime
 from marshmallow import post_load
 from sqlalchemy import or_, func, orm
 
-from core.managers.db_manager import db, BaseModel
+from core.managers.db_manager import db
 from core.managers.log_manager import logger
 from shared.schema.collectors_node import CollectorsNodeSchema, CollectorsNodePresentationSchema
 
@@ -21,7 +21,7 @@ class NewCollectorsNodeSchema(CollectorsNodeSchema):
         )
 
 
-class CollectorsNode(BaseModel):
+class CollectorsNode(db.Model):
     id = db.Column(db.String(), primary_key=True)
     name = db.Column(db.String(), unique=True, nullable=False)
     description = db.Column(db.String())

@@ -3,7 +3,7 @@ from datetime import datetime
 from marshmallow import post_load, fields
 from sqlalchemy import orm, func, or_, and_
 
-from core.managers.db_manager import db, BaseModel
+from core.managers.db_manager import db
 from core.model.osint_source import OSINTSource
 from core.model.report_item_type import ReportItemType
 from shared.schema.osint_source import OSINTSourceIdSchema
@@ -25,7 +25,7 @@ class NewRemoteAccessSchema(RemoteAccessSchema):
         return RemoteAccess(**data)
 
 
-class RemoteAccess(BaseModel):
+class RemoteAccess(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())
@@ -221,12 +221,12 @@ class RemoteAccess(BaseModel):
         db.session.commit()
 
 
-class RemoteAccessOSINTSource(BaseModel):
+class RemoteAccessOSINTSource(db.Model):
     remote_access_id = db.Column(db.Integer, db.ForeignKey("remote_access.id"), primary_key=True)
     osint_source_id = db.Column(db.String, db.ForeignKey("osint_source.id"), primary_key=True)
 
 
-class RemoteAccessReportItemType(BaseModel):
+class RemoteAccessReportItemType(db.Model):
     remote_access_id = db.Column(db.Integer, db.ForeignKey("remote_access.id"), primary_key=True)
     report_item_type_id = db.Column(db.Integer, db.ForeignKey("report_item_type.id"), primary_key=True)
 
@@ -237,7 +237,7 @@ class NewRemoteNodeSchema(RemoteNodeSchema):
         return RemoteNode(**data)
 
 
-class RemoteNode(BaseModel):
+class RemoteNode(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())

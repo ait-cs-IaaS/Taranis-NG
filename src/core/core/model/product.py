@@ -5,7 +5,7 @@ from marshmallow import post_load
 from sqlalchemy import orm, func, or_, and_
 from sqlalchemy.sql.expression import cast
 
-from core.managers.db_manager import db, BaseModel
+from core.managers.db_manager import db
 from core.model.acl_entry import ACLEntry
 from core.model.report_item import ReportItem
 from shared.schema.acl_entry import ItemType
@@ -21,7 +21,7 @@ class NewProductSchema(ProductSchemaBase):
         return Product(**data)
 
 
-class Product(BaseModel):
+class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())
@@ -179,6 +179,6 @@ class Product(BaseModel):
             db.session.commit()
 
 
-class ProductReportItem(BaseModel):
+class ProductReportItem(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey("product.id"), primary_key=True)
     report_item_id = db.Column(db.Integer, db.ForeignKey("report_item.id"), primary_key=True)
