@@ -6,7 +6,7 @@ import dateutil.parser as dateparser
 from marshmallow import post_load, fields
 from sqlalchemy import orm, and_, or_, func
 
-from core.managers.db_manager import db
+from core.managers.db_manager import db, BaseModel
 from core.managers.log_manager import logger
 from core.model.acl_entry import ACLEntry
 from core.model.osint_source import OSINTSourceGroup, OSINTSource
@@ -34,23 +34,7 @@ class NewNewsItemDataSchema(NewsItemDataSchema):
         return NewsItemData(**data)
 
 
-news_item_data_news_item_tag = db.Table(
-    db.Column(
-        "news_item_data_id",
-        db.String,
-        db.ForeignKey("news_item_data.id"),
-        primary_key=True,
-    ),
-    db.Column(
-        "news_item_tag_id",
-        db.Integer,
-        db.ForeignKey("news_item_tag.id"),
-        primary_key=True,
-    ),
-)
-
-
-class NewsItemData(db.Model):
+class NewsItemData(BaseModel):
     id = db.Column(db.String(64), primary_key=True)
     hash = db.Column(db.String())
 
@@ -86,7 +70,7 @@ class NewsItemData(db.Model):
         osint_source_id,
         attributes,
     ):
-        self.id = str(uuid.uuid4()) if id is None else id
+        self.id = id or str(uuid.uuid4())
         self.hash = hash
         self.title = title
         self.review = review
@@ -172,6 +156,8 @@ class NewsItemData(db.Model):
 
         attributes_schema = NewNewsItemAttributeSchema(many=True)
         attributes = attributes_schema.load(attributes)
+        if attributes is None:
+            return
 
         for attribute in attributes:
             if not cls.attribute_value_identical(news_item_id, attribute.value):
@@ -189,7 +175,7 @@ class NewsItemData(db.Model):
         try:
             n_i_a = NewsItemAggregate.find(news_item_aggregate_id)
             print(tags)
-            if (type(tags) is list):
+            if type(tags) is list:
                 for tag in tags:
                     n_i_a.tags.append(NewsItemTag(name=tag, tag_type="undef"))
             else:
@@ -228,7 +214,7 @@ class NewsItemData(db.Model):
         return items, last_sync_time
 
 
-class NewsItem(db.Model):
+class NewsItem(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
 
     read = db.Column(db.Boolean, default=False)
@@ -252,13 +238,17 @@ class NewsItem(db.Model):
         return cls.query.filter_by(news_item_data_id=news_item_data_id).all()
 
     @classmethod
+    def get_total_count(cls):
+        return {"total_count": cls.query.get.count()}
+
+    @classmethod
     def get_detail_json(cls, id):
         news_item = cls.query.get(id)
         news_item_schema = NewsItemSchema()
         return news_item_schema.dump(news_item)
 
     @classmethod
-    def get_by_group(cls, group_id, filter, offset, limit, user):
+    def get_by_group(cls, group_id, filter, user):
         query = cls.query.distinct().group_by(NewsItem.id)
         query = query.join(NewsItemData, NewsItem.news_item_data_id == NewsItemData.id)
         query = query.outerjoin(OSINTSource, NewsItemData.osint_source_id == OSINTSource.id)
@@ -317,11 +307,13 @@ class NewsItem(db.Model):
             elif filter["sort"] == "RELEVANCE_ASC":
                 query = query.order_by(db.asc(NewsItem.relevance), db.asc(NewsItem.id))
 
+        offset = filter.get("offset", 0)
+        limit = filter.get("limit", 20)
         return query.offset(offset).limit(limit).all(), query.count()
 
     @classmethod
-    def get_by_group_json(cls, group_id, filter, offset, limit, user):
-        news_items, count = cls.get_by_group(group_id, filter, offset, limit, user)
+    def get_by_group_json(cls, group_id, filter, user):
+        news_items, count = cls.get_by_group(group_id, filter, user)
 
         for news_item in news_items:
             see, access, modify = NewsItem.get_acl_status(news_item.id, user)
@@ -388,7 +380,7 @@ class NewsItem(db.Model):
         return query.scalar() is not None
 
     @classmethod
-    def get_acl_status(cls, news_item_id, user):
+    def get_acl_status(cls, news_item_id: int, user) -> tuple[bool, bool, bool]:
 
         news_item = cls.query.get(news_item_id)
         if news_item.news_item_data.remote_source is not None:
@@ -396,7 +388,7 @@ class NewsItem(db.Model):
         query = (
             db.session.query(
                 NewsItem.id,
-                func.count().filter(ACLEntry.id > 0).label("acls"),
+                func.count().filter(ACLEntry.id != None).label("acls"),
                 func.count().filter(ACLEntry.see).label("see"),
                 func.count().filter(ACLEntry.access).label("access"),
                 func.count().filter(ACLEntry.modify).label("modify"),
@@ -443,29 +435,31 @@ class NewsItem(db.Model):
 
         if data["vote"] > 0:
             if vote.like is True:
-                self.likes -= 1
-                self.relevance -= 1
-                vote.like = False
+                self.vote_like(vote)
             else:
                 self.likes += 1
                 self.relevance += 1
                 vote.like = True
                 if vote.dislike is True:
-                    self.dislikes -= 1
-                    self.relevance += 1
-                    vote.dislike = False
+                    self.vote_dislike(vote)
         elif vote.dislike is True:
-            self.dislikes -= 1
-            self.relevance += 1
-            vote.dislike = False
+            self.vote_dislike(vote)
         else:
             self.dislikes += 1
             self.relevance -= 1
             vote.dislike = True
             if vote.like is True:
-                self.likes -= 1
-                self.relevance -= 1
-                vote.like = False
+                self.vote_like(vote)
+
+    def vote_dislike(self, vote):
+        self.dislikes -= 1
+        self.relevance += 1
+        vote.dislike = False
+
+    def vote_like(self, vote):
+        self.likes -= 1
+        self.relevance -= 1
+        vote.like = False
 
     @classmethod
     def update(cls, id, data, user_id):
@@ -511,7 +505,7 @@ class NewsItem(db.Model):
         db.session.delete(news_item)
 
 
-class NewsItemVote(db.Model):
+class NewsItemVote(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     like = db.Column(db.Boolean)
     dislike = db.Column(db.Boolean)
@@ -547,7 +541,7 @@ class NewsItemVote(db.Model):
         return 1 if vote.like else -1
 
 
-class NewsItemAggregate(db.Model):
+class NewsItemAggregate(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String())
     description = db.Column(db.String())
@@ -576,7 +570,7 @@ class NewsItemAggregate(db.Model):
         return cls.query.get(news_item_aggregate_id)
 
     @classmethod
-    def get_by_group(cls, group_id, filter, offset, limit, user):
+    def get_by_group(cls, group_id, filter, user):
         query = cls.query.distinct().group_by(NewsItemAggregate.id)
 
         query = query.filter(NewsItemAggregate.osint_source_group_id == group_id)
@@ -602,11 +596,11 @@ class NewsItemAggregate(db.Model):
         query = ACLEntry.apply_query(query, user, True, False, False)
 
         if "search" in filter and filter["search"] != "":
-            search_string = "%" + filter["search"].lower() + "%"
+            search_string = f"%{filter['search']}%"
             query = query.join(
                 NewsItemAggregateSearchIndex,
                 NewsItemAggregate.id == NewsItemAggregateSearchIndex.news_item_aggregate_id,
-            ).filter(NewsItemAggregateSearchIndex.data.like(search_string))
+            ).filter(NewsItemAggregateSearchIndex.data.ilike(search_string))
 
         if "read" in filter and filter["read"].lower() == "true":
             query = query.filter(NewsItemAggregate.read is False)
@@ -647,11 +641,13 @@ class NewsItemAggregate(db.Model):
             elif filter["sort"] == "RELEVANCE_ASC":
                 query = query.order_by(db.asc(NewsItemAggregate.relevance), db.asc(NewsItemAggregate.id))
 
+        offset = filter.get("offset", 0)
+        limit = filter.get("limit", 20)
         return query.offset(offset).limit(limit).all(), query.count()
 
     @classmethod
-    def get_by_group_json(cls, group_id, filter, offset, limit, user):
-        news_item_aggregates, count = cls.get_by_group(group_id, filter, offset, limit, user)
+    def get_by_group_json(cls, group_id, filter, user):
+        news_item_aggregates, count = cls.get_by_group(group_id, filter, user)
         for news_item_aggregate in news_item_aggregates:
             news_item_aggregate.me_like = False
             news_item_aggregate.me_dislike = False
@@ -661,18 +657,10 @@ class NewsItemAggregate(db.Model):
                 news_item.access = access
                 news_item.modify = modify
                 vote = NewsItemVote.find(news_item.id, user.id)
-                if vote is not None:
-                    news_item.me_like = vote.like
-                    news_item.me_dislike = vote.dislike
-                else:
-                    news_item.me_like = False
-                    news_item.me_dislike = False
-
-                if news_item.me_like is True:
-                    news_item_aggregate.me_like = True
-
-                if news_item.me_dislike is True:
-                    news_item_aggregate.me_dislike = True
+                news_item.me_like = vote.like if vote is not None else False
+                news_item_aggregate.me_like = vote.like if vote is not None else False
+                news_item.me_dislike = vote.dislike if vote is not None else False
+                news_item_aggregate.me_dislike = vote.dislike if vote is not None else False
 
             news_item_aggregate.in_reports_count = ReportItemNewsItemAggregate.count(news_item_aggregate.id)
 
@@ -696,7 +684,7 @@ class NewsItemAggregate(db.Model):
             aggregate = NewsItemAggregate()
             aggregate.title = news_item_data.title
             aggregate.description = news_item_data.review
-            aggregate.created = news_item_data.collected
+            aggregate.created = news_item_data.published
             aggregate.osint_source_group_id = group.id
             aggregate.news_items.append(news_item)
             db.session.add(aggregate)
@@ -712,7 +700,7 @@ class NewsItemAggregate(db.Model):
         aggregate = NewsItemAggregate()
         aggregate.title = news_item_data.title
         aggregate.description = news_item_data.review
-        aggregate.created = news_item_data.collected
+        aggregate.created = news_item_data.published
         aggregate.osint_source_group_id = osint_source_group_id
         aggregate.news_items.append(news_item)
         db.session.add(aggregate)
@@ -724,6 +712,8 @@ class NewsItemAggregate(db.Model):
         news_item_data_schema = NewNewsItemDataSchema(many=True)
         news_items_data = news_item_data_schema.load(news_items_data_list)
         osint_source_ids = set()
+        if not news_items_data:
+            return
 
         for news_item_data in news_items_data:
             if not NewsItemData.identical(news_item_data.hash):
@@ -737,17 +727,18 @@ class NewsItemAggregate(db.Model):
 
     @classmethod
     def add_news_item(cls, news_item_data):
-        news_item_data_schema = NewNewsItemDataSchema()
-        news_item_data = news_item_data_schema.load(news_item_data)
-        if not news_item_data.id:
-            news_item_data.id = str(uuid.uuid4())
-        if not news_item_data.hash:
-            news_item_data.hash = news_item_data.id
+        news_item_data = NewNewsItemDataSchema().load(news_item_data)
+        if not news_item_data:
+            return
+        if not news_item_data.id:  # type: ignore
+            news_item_data.id = str(uuid.uuid4())  # type: ignore
+        if not news_item_data.hash:  # type: ignore
+            news_item_data.hash = news_item_data.id  # type: ignore
         db.session.add(news_item_data)
         cls.create_new_for_all_groups(news_item_data)
         db.session.commit()
 
-        return {news_item_data.osint_source_id}
+        return {news_item_data.osint_source_id}  # type: ignore
 
     @classmethod
     def reassign_to_new_groups(cls, osint_source_id, default_group_id):
@@ -765,10 +756,10 @@ class NewsItemAggregate(db.Model):
 
     @classmethod
     def add_remote_news_items(cls, news_items_data_list, remote_node, osint_source_group_id):
-        news_item_data_schema = NewNewsItemDataSchema(many=True)
-        news_items_data = news_item_data_schema.load(news_items_data_list)
-
+        news_items_data = NewNewsItemDataSchema(many=True).load(news_items_data_list)
         news_item_data_ids = set()
+        if not news_items_data:
+            return
         for news_item_data in news_items_data:
             news_item_data.remote_source = remote_node.name
             for attribute in news_item_data.attributes:
@@ -1090,7 +1081,7 @@ class NewsItemAggregate(db.Model):
         return news_item_aggregate_schema.dumps(news_item_aggregates)
 
 
-class NewsItemAggregateSearchIndex(db.Model):
+class NewsItemAggregateSearchIndex(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     data = db.Column(db.String)
     news_item_aggregate_id = db.Column(db.Integer, db.ForeignKey("news_item_aggregate.id"))
@@ -1130,7 +1121,7 @@ class NewsItemAggregateSearchIndex(db.Model):
         db.session.commit()
 
 
-class NewsItemAttribute(db.Model):
+class NewsItemAttribute(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     key = db.Column(db.String(), nullable=False)
     value = db.Column(db.String(), nullable=False)
@@ -1156,22 +1147,21 @@ class NewsItemAttribute(db.Model):
         return cls.query.get(attribute_id)
 
 
-class NewsItemDataNewsItemAttribute(db.Model):
+class NewsItemDataNewsItemAttribute(BaseModel):
     news_item_data_id = db.Column(db.String, db.ForeignKey("news_item_data.id"), primary_key=True)
     news_item_attribute_id = db.Column(db.Integer, db.ForeignKey("news_item_attribute.id"), primary_key=True)
 
     @classmethod
     def find(cls, attribute_id):
-        news_item_attribute = cls.query.filter(NewsItemDataNewsItemAttribute.news_item_attribute_id == attribute_id).scalar()
-        return news_item_attribute
+        return cls.query.filter(NewsItemDataNewsItemAttribute.news_item_attribute_id == attribute_id).scalar()
 
 
-class NewsItemAggregateNewsItemAttribute(db.Model):
+class NewsItemAggregateNewsItemAttribute(BaseModel):
     news_item_aggregate_id = db.Column(db.Integer, db.ForeignKey("news_item_aggregate.id"), primary_key=True)
     news_item_attribute_id = db.Column(db.Integer, db.ForeignKey("news_item_attribute.id"), primary_key=True)
 
 
-class ReportItemNewsItemAggregate(db.Model):
+class ReportItemNewsItemAggregate(BaseModel):
     report_item_id = db.Column(db.Integer, db.ForeignKey("report_item.id"), primary_key=True)
     news_item_aggregate_id = db.Column(db.Integer, db.ForeignKey("news_item_aggregate.id"), primary_key=True)
 
@@ -1184,7 +1174,7 @@ class ReportItemNewsItemAggregate(db.Model):
         return cls.query.filter_by(news_item_aggregate_id=aggregate_id).count()
 
 
-class NewsItemTag(db.Model):
+class NewsItemTag(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255))
     tag_type = db.Column(db.String(255))
@@ -1199,3 +1189,12 @@ class NewsItemTag(db.Model):
     @classmethod
     def find(cls, tag_id):
         return cls.query.get(tag_id)
+
+    @classmethod
+    def search(cls, tag_name=""):
+        return cls.query.filter(cls.name.ilike(f"%{tag_name}%"))
+
+    @classmethod
+    def get_json(cls, tag_name=""):
+        rows = cls.search(tag_name).all()
+        return [row.name for row in rows]

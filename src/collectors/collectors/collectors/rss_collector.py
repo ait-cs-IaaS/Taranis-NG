@@ -1,3 +1,4 @@
+import contextlib
 import datetime
 import hashlib
 import uuid
@@ -59,13 +60,12 @@ class RSSCollector(BaseCollector):
         # interval = source.parameter_values["REFRESH_INTERVAL"]
 
         logger.log_collector_activity("rss", source.id, f"Starting collector for url: {feed_url}")
-        content_location = source.parameter_values.get("CONTENT_LOCATION", "p")
 
         if user_agent := source.parameter_values["USER_AGENT"]:
             self.headers = {"User-Agent": user_agent}
 
         try:
-            self.rss_collector(feed_url, source, content_location)
+            self.rss_collector(feed_url, source)
         except Exception as error:
             logger.log_collector_activity("rss", source.id, "RSS collection exceptionally failed")
             BaseCollector.print_exception(source, error)
@@ -87,7 +87,44 @@ class RSSCollector(BaseCollector):
             return True, content_location
         return False, content_location
 
-    def rss_collector(self, feed_url, source, content_location):
+    def parse_feed(self, feed_entry: feedparser.FeedParserDict, feed_url: str, source) -> NewsItemData:
+        author: str = str(feed_entry.get("author", ""))
+        published: str | datetime.datetime = str(feed_entry.get("published", ""))
+        title: str = str(feed_entry.get("title", ""))
+        description: str = str(feed_entry.get("description", ""))
+        link: str = str(feed_entry.get("link", ""))
+        for_hash: str = author + title + link
+
+        with contextlib.suppress(Exception):
+            published = dateparser.parse(published)
+
+        # if published > limit: TODO: uncomment after testing, we need some initial data now
+        logger.log_collector_activity("rss", source.id, f"Processing entry [{link}]")
+
+        content_location = source.parameter_values.get("CONTENT_LOCATION", "p")
+        content_from_feed, content_location = self.content_from_feed(feed_entry, content_location)
+        if content_from_feed:
+            content = feed_entry[content_location]
+        else:
+            content = self.get_article_content(link_for_article=link)
+            content = self.parse_article_content(html_content=content, content_location=content_location)
+
+        return NewsItemData(
+            uuid.uuid4(),
+            hashlib.sha256(for_hash.encode()).hexdigest(),
+            title,
+            description,
+            feed_url,
+            link,
+            published,
+            author,
+            datetime.datetime.now(),
+            content,
+            source.id,
+            [],
+        )
+
+    def rss_collector(self, feed_url: str, source):
         feed_content = self.make_request(feed_url)
         if not feed_content:
             logger.log_collector_activity("rss", source.id, "RSS returned no content")
@@ -96,49 +133,6 @@ class RSSCollector(BaseCollector):
 
         logger.log_collector_activity("rss", source.id, f'RSS returned feed with {len(feed["entries"])} entries')
 
-        news_items = []
-
-        for feed_entry in feed["entries"]:
-
-            for key in ["author", "published", "title", "description", "link"]:
-                if key not in feed_entry:
-                    feed_entry[key] = ""
-
-            # limit = BaseCollector.history(interval)
-            published = ""
-            if "published" in feed_entry:
-                try:
-                    published = dateparser.parse(feed_entry["published"])
-                except Exception:
-                    published = feed_entry["published"]
-
-            # if published > limit: TODO: uncomment after testing, we need some initial data now
-            logger.log_collector_activity("rss", source.id, f"Processing entry [{feed_entry['link']}]")
-
-            content_from_feed, content_location = self.content_from_feed(feed_entry, content_location)
-            if content_from_feed:
-                content = feed_entry[content_location]
-            else:
-                content = self.get_article_content(link_for_article=feed_entry["link"])
-                content = self.parse_article_content(html_content=content, content_location=content_location)
-
-            for_hash = feed_entry["author"] + feed_entry["title"] + feed_entry["link"]
-
-            news_item = NewsItemData(
-                uuid.uuid4(),
-                hashlib.sha256(for_hash.encode()).hexdigest(),
-                feed_entry["title"],
-                feed_entry["description"],
-                feed_url,
-                feed_entry["link"],
-                published,
-                feed_entry["author"],
-                datetime.datetime.now(),
-                content,
-                source.id,
-                [],
-            )
-
-            news_items.append(news_item)
+        news_items = [self.parse_feed(feed_entry, feed_url, source) for feed_entry in feed["entries"]]
 
         self.publish(news_items, source)

@@ -2,7 +2,7 @@ from marshmallow import fields, post_load
 from sqlalchemy import or_, func
 import uuid
 
-from core.managers.db_manager import db
+from core.managers.db_manager import db, BaseModel
 from core.model.parameter_value import ParameterValueImportSchema
 from core.managers.log_manager import logger
 from shared.schema.bot import BotSchema
@@ -16,7 +16,7 @@ class NewBotSchema(BotSchema):
         return Bot(**data)
 
 
-class Bot(db.Model):
+class Bot(BaseModel):
     id = db.Column(db.String(64), primary_key=True)
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())
@@ -101,6 +101,6 @@ class Bot(db.Model):
         return {"total_count": count, "items": items}
 
 
-class BotParameterValue(db.Model):
+class BotParameterValue(BaseModel):
     bot_id = db.Column(db.String, db.ForeignKey("bot.id"), primary_key=True)
     parameter_value_id = db.Column(db.Integer, db.ForeignKey("parameter_value.id"), primary_key=True)

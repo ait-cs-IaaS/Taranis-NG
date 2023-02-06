@@ -2,7 +2,7 @@ from marshmallow import post_load
 from sqlalchemy import func, or_, orm
 import uuid
 
-from core.managers.db_manager import db
+from core.managers.db_manager import db, BaseModel
 from shared.schema.bots_node import BotsNodeSchema, BotsNodePresentationSchema
 
 
@@ -12,7 +12,7 @@ class NewBotsNodeSchema(BotsNodeSchema):
         return BotsNode(**data)
 
 
-class BotsNode(db.Model):
+class BotsNode(BaseModel):
     id = db.Column(db.String(64), primary_key=True)
     name = db.Column(db.String(), unique=True, nullable=False)
     description = db.Column(db.String())

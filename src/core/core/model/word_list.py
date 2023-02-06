@@ -3,7 +3,7 @@ from marshmallow import post_load, fields
 from sqlalchemy import orm, func, or_, and_
 from sqlalchemy.sql.expression import cast
 
-from core.managers.db_manager import db
+from core.managers.db_manager import db, BaseModel
 from core.model.acl_entry import ACLEntry
 from shared.schema.acl_entry import ItemType
 from shared.schema.word_list import (
@@ -27,7 +27,7 @@ class NewWordListSchema(WordListSchema):
         return WordList(**data)
 
 
-class WordList(db.Model):
+class WordList(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String(), nullable=False)
@@ -129,7 +129,7 @@ class WordList(db.Model):
         db.session.commit()
 
 
-class WordListEntry(db.Model):
+class WordListEntry(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     value = db.Column(db.String(), nullable=False)
     description = db.Column(db.String(), nullable=False)

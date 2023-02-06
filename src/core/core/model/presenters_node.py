@@ -2,7 +2,7 @@ from marshmallow import post_load
 from sqlalchemy import func, or_, orm
 import uuid
 
-from core.managers.db_manager import db
+from core.managers.db_manager import db, BaseModel
 from shared.schema.presenters_node import (
     PresentersNodeSchema,
     PresentersNodePresentationSchema,
@@ -15,7 +15,7 @@ class NewPresentersNodeSchema(PresentersNodeSchema):
         return PresentersNode(**data)
 
 
-class PresentersNode(db.Model):
+class PresentersNode(BaseModel):
     id = db.Column(db.String(64), primary_key=True)
     name = db.Column(db.String(), unique=True, nullable=False)
     description = db.Column(db.String())

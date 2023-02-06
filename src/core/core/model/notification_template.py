@@ -1,7 +1,7 @@
 from sqlalchemy import orm, func, or_
 from marshmallow import post_load, fields
 
-from core.managers.db_manager import db
+from core.managers.db_manager import db, BaseModel
 from shared.schema.notification_template import (
     NotificationTemplatePresentationSchema,
     NotificationTemplateSchema,
@@ -15,7 +15,7 @@ class NewEmailRecipientSchema(EmailRecipientSchema):
         return EmailRecipient(**data)
 
 
-class EmailRecipient(db.Model):
+class EmailRecipient(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(), nullable=False)
     name = db.Column(db.String())
@@ -36,7 +36,7 @@ class NewNotificationTemplateSchema(NotificationTemplateSchema):
         return NotificationTemplate(**data)
 
 
-class NotificationTemplate(db.Model):
+class NotificationTemplate(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())
@@ -122,6 +122,6 @@ class NotificationTemplate(db.Model):
             db.session.commit()
 
 
-class NotificationTemplateOrganization(db.Model):
+class NotificationTemplateOrganization(BaseModel):
     notification_template_id = db.Column(db.Integer, db.ForeignKey("notification_template.id"), primary_key=True)
     organization_id = db.Column(db.Integer, db.ForeignKey("organization.id"), primary_key=True)

@@ -2,7 +2,7 @@ from marshmallow import post_load
 import uuid
 from sqlalchemy import or_, func
 
-from core.managers.db_manager import db
+from core.managers.db_manager import db, BaseModel
 from core.model.parameter import Parameter
 from shared.schema.publisher import PublisherSchema
 
@@ -13,7 +13,7 @@ class NewPublisherSchema(PublisherSchema):
         return Publisher(**data)
 
 
-class Publisher(db.Model):
+class Publisher(BaseModel):
     id = db.Column(db.String(64), primary_key=True)
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())
@@ -89,6 +89,6 @@ class Publisher(db.Model):
         return cls.query.filter_by(type=type).first()
 
 
-class PublisherParameter(db.Model):
+class PublisherParameter(BaseModel):
     publisher_id = db.Column(db.String, db.ForeignKey("publisher.id"), primary_key=True)
     parameter_key = db.Column(db.String, db.ForeignKey("parameter.key"), primary_key=True)
