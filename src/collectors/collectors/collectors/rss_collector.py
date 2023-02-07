@@ -92,8 +92,12 @@ class RSSCollector(BaseCollector):
         link: str = str(feed_entry.get("link", ""))
         for_hash: str = author + title + link
 
-        with contextlib.suppress(Exception):
+        try:
             published = dateparser.parse(published)
+        except Exception:
+            logger.exception()
+            logger.debug(f"Could not parse date: {published}")
+            published = datetime.datetime.now()
 
         # if published > limit: TODO: uncomment after testing, we need some initial data now
         logger.log_collector_activity("rss", source.id, f"Processing entry [{link}]")
