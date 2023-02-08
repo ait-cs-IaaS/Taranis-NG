@@ -427,39 +427,51 @@ class NewsItem(db.Model):
     def vote(self, data, user_id):
         if "vote" not in data:
             return
-        self.news_item_data.updated = datetime.now()
+
         vote = NewsItemVote.find(self.id, user_id)
         if vote is None:
-            vote = NewsItemVote(self.id, user_id)
-            db.session.add(vote)
+            self.create_new_vote(vote, user_id)
 
         if data["vote"] > 0:
-            if vote.like is True:
-                self.vote_like(vote)
-            else:
-                self.likes += 1
-                self.relevance += 1
-                vote.like = True
-                if vote.dislike is True:
-                    self.vote_dislike(vote)
-        elif vote.dislike is True:
-            self.vote_dislike(vote)
+            self.update_like_vote(vote)
         else:
-            self.dislikes += 1
-            self.relevance -= 1
-            vote.dislike = True
-            if vote.like is True:
-                self.vote_like(vote)
+            self.update_dislike_vote(vote)
 
-    def vote_dislike(self, vote):
-        self.dislikes -= 1
-        self.relevance += 1
+        self.news_item_data.updated = datetime.now()
+
+    def create_new_vote(self, vote, user_id):
+        vote = NewsItemVote(self.id, user_id)
+        db.session.add(vote)
+
+    def update_like_vote(self, vote):
+        self.increment_likes()
+        self.increment_relevance()
+        vote.like = True
         vote.dislike = False
 
-    def vote_like(self, vote):
-        self.likes -= 1
-        self.relevance -= 1
+    def update_dislike_vote(self, vote):
+        self.increment_dislikes()
+        self.decrement_relevance()
+        vote.dislike = True
         vote.like = False
+
+    def increment_likes(self):
+        self.likes += 1
+
+    def decrement_likes(self):
+        self.likes -= 1
+
+    def increment_dislikes(self):
+        self.dislikes += 1
+
+    def decrement_dislikes(self):
+        self.dislikes -= 1
+
+    def increment_relevance(self):
+        self.relevance += 1
+
+    def decrement_relevance(self):
+        self.relevance -= 1
 
     @classmethod
     def update(cls, id, data, user_id):
@@ -469,11 +481,8 @@ class NewsItem(db.Model):
 
         NewsItemAggregate.update_status(news_item.news_item_aggregate_id)
         db.session.commit()
-
-        if "vote" in data:
-            return "success", {news_item.news_item_data.osint_source_id}, 200
-        else:
-            return "success", {}, 200
+        
+        return "success", 200
 
     def update_status(self, data, user_id):
         self.vote(data, user_id)
@@ -829,15 +838,13 @@ class NewsItemAggregate(db.Model):
     @classmethod
     def update(cls, id, data, user):
         aggregate = cls.find(id)
+        logger.debug(f"Updating news item aggregate {id} with data {data}")
 
         all_important = all(news_item.important is not False for news_item in aggregate.news_items)
-
-        osint_source_ids = set()
 
         for news_item in aggregate.news_items:
             if NewsItem.allowed_with_acl(news_item.id, user, False, False, True):
                 if "vote" in data:
-                    osint_source_ids.add(news_item.news_item_data.osint_source_id)
                     news_item.vote(data, user.id)
 
                 if "read" in data:
@@ -860,7 +867,7 @@ class NewsItemAggregate(db.Model):
 
         db.session.commit()
 
-        return "success", osint_source_ids, 200
+        return "success", 200
 
     @classmethod
     def delete(cls, id, user):

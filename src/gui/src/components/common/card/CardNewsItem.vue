@@ -346,10 +346,10 @@ export default {
       this.$emit('selectItem', this.newsItem.id)
     },
     markAsRead() {
-      readNewsItemAggregate(this.getGroupId(), this.newsItem.id)
+      readNewsItemAggregate(this.newsItem.id)
     },
     markAsImportant() {
-      importantNewsItemAggregate(this.getGroupId(), this.newsItem.id)
+      importantNewsItemAggregate(this.newsItem.id)
     },
     decorateSource() {
       this.item_decorateSource = !this.item_decorateSource
@@ -359,10 +359,10 @@ export default {
       this.$emit('deleteItem', this.newsItem.id)
     },
     upvote() {
-      voteNewsItemAggregate(this.getGroupId(), this.newsItem.id, 1)
+      voteNewsItemAggregate(this.newsItem.id, 1)
     },
     downvote() {
-      voteNewsItemAggregate(this.getGroupId(), this.newsItem.id, -1)
+      voteNewsItemAggregate(this.newsItem.id, -1)
     },
     addToReport() {
       this.sharingDialog = true

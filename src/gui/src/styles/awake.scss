@@ -1050,6 +1050,13 @@ textarea {
   max-width: 120px;
 }
 
+.openapi {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  border: none
+}
+
 .dropdown-list-item {
   font-size: 0.9rem;
   color: $dark-grey;
