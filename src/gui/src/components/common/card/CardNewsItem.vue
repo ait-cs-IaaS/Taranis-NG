@@ -176,7 +176,7 @@
                 </v-col>
                 <v-col>
                   <span :class="published_date_outdated ? 'red--text' : ''">
-                    {{ getPublishedDate() }}
+                    {{ $d(getPublishedDate(), 'long') }}
                   </span>
                   <v-icon v-if="published_date_outdated" small color="red"
                     >mdi-alert</v-icon
@@ -188,7 +188,7 @@
                   <strong>Collected:</strong>
                 </v-col>
                 <v-col>
-                  {{ getCollectedDate() }}
+                  {{ $d(getCollectedDate(), 'long') }}
                 </v-col>
               </v-row>
               <v-row class="news-item-meta-infos">
@@ -258,7 +258,6 @@
 </template>
 
 <script>
-import moment from 'moment'
 import TagList from '@/components/common/tags/TagList'
 import newsItemAction from '@/components/_subcomponents/newsItemAction'
 import newsItemActionDialog from '@/components/_subcomponents/newsItemActionDialog'
@@ -315,8 +314,7 @@ export default {
         : false
     },
     published_date() {
-      const published = this.newsItem.news_items[0].news_item_data.published
-      return published ? moment(published) : false
+      return this.newsItem.news_items[0].news_item_data.published || false
     },
     news_item_summary_class() {
       return this.openSummary
@@ -336,11 +334,9 @@ export default {
       if (!pub_date) {
         return false
       }
-      const last_week = moment().subtract(1, 'week') // date one week ago
-      if (last_week.diff(pub_date, 'weeks') > 0) {
-        return true
-      }
-      return false
+      const oneWeekAgo = new Date()
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
+      return oneWeekAgo > pub_date
     }
   },
   methods: {
@@ -399,21 +395,14 @@ export default {
     getPublishedDate() {
       const published = this.published_date
       if (published) {
-        return moment(published).format('DD/MM/YYYY hh:mm:ss')
+        return new Date(published)
       }
       return '** no published date **'
     },
 
     getCollectedDate() {
       const collected = this.newsItem.news_items[0].news_item_data.collected
-      if (collected) {
-        return moment(collected, 'DD.MM.YYYY - hh:mm').format(
-          'DD/MM/YYYY hh:mm:ss'
-        )
-      }
-      return moment(this.newsItem.created, 'DD.MM.YYYY - hh:mm').format(
-        'DD/MM/YYYY hh:mm:ss'
-      )
+      return collected ? new Date(collected) : new Date(this.newsItem.created)
     },
 
     getAuthor() {
