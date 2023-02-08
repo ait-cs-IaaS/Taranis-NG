@@ -352,6 +352,18 @@ export const router = new Router({
       }
     },
     {
+      path: '/config/openapi',
+      name: 'openapi',
+      components: {
+        default: () =>
+          import(/* webpackChunkName: "config" */ './views/admin/OpenAPI.vue'),
+        nav: ConfigNav
+      },
+      meta: {
+        requiresAuth: true
+      }
+    },
+    {
       path: '/login',
       name: 'login',
       component: () => import(/* webpackChunkName: "common" */ './views/Login.vue')
