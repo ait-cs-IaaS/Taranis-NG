@@ -116,6 +116,10 @@ class NewsItemData(db.Model):
         return db.session.query(db.exists().where(NewsItemData.hash == hash)).scalar()
 
     @classmethod
+    def find(cls, id):
+        return cls.query.get(id)
+
+    @classmethod
     def find_by_hash(cls, hash):
         return cls.query.filter(NewsItemData.hash == hash).all()
 
@@ -125,18 +129,16 @@ class NewsItemData(db.Model):
 
     @classmethod
     def latest_collected(cls):
-        news_item_data = cls.query.order_by(db.desc(NewsItemData.collected)).limit(1).all()
+        news_item_data = cls.query.order_by(db.desc(NewsItemData.collected)).first()
         if len(news_item_data) > 0:
-            return news_item_data[0].collected.strftime("%d.%m.%Y - %H:%M")
-        else:
-            return ""
+            return news_item_data[0].collected.isoformat()
+        return ""
 
     @classmethod
-    def get_all_news_items_data(cls, limit):
-        limit = datetime.strptime(limit, "%d.%m.%Y - %H:%M")
-        limit = datetime.strftime(limit, "%Y-%m-%d - %H:%M")
+    def get_all_news_items_data(cls, limit: str):
+        limit_date = datetime.fromisoformat(limit)
 
-        news_items_data = cls.query.filter(cls.collected > limit).all()
+        news_items_data = cls.query.filter(cls.collected > limit_date).all()
         news_items_data_schema = NewsItemDataSchema(many=True)
         return news_items_data_schema.dump(news_items_data)
 
@@ -149,6 +151,13 @@ class NewsItemData(db.Model):
             .filter(NewsItemAttribute.value == value)
             .scalar()
         )
+
+    @classmethod
+    def update_news_item_lang(cls, news_item_id, lang):
+        news_item = cls.find(news_item_id)
+
+        news_item.language = lang
+        db.session.commit()
 
     @classmethod
     def update_news_item_attributes(cls, news_item_id, attributes):
@@ -169,20 +178,6 @@ class NewsItemData(db.Model):
         query = cls.query.join(NewsItem, NewsItemData.id == NewsItem.news_item_data_id)
         query = query.filter(NewsItem.id == news_item_id)
         return query
-
-    @classmethod
-    def update_news_item_tags(cls, news_item_aggregate_id, tags):
-        try:
-            n_i_a = NewsItemAggregate.find(news_item_aggregate_id)
-            print(tags)
-            if type(tags) is list:
-                for tag in tags:
-                    n_i_a.tags.append(NewsItemTag(name=tag, tag_type="undef"))
-            else:
-                n_i_a.tags.append(NewsItemTag(name=tags, tag_type="undef"))
-            db.session.commit()
-        except Exception:
-            logger.log_debug_trace("Update News Item Tags Failed")
 
     @classmethod
     def get_for_sync(cls, last_synced, osint_sources):
@@ -935,6 +930,19 @@ class NewsItemAggregate(db.Model):
         cls.update_aggregates(processed_aggregates)
         db.session.commit()
         return "", 200
+
+    @classmethod
+    def update_tags(cls, news_item_aggregate_id, tags):
+        try:
+            n_i_a = cls.find(news_item_aggregate_id)
+            if type(tags) is list:
+                for tag in tags:
+                    n_i_a.tags.append(NewsItemTag(name=tag, tag_type="undef"))
+            else:
+                n_i_a.tags.append(NewsItemTag(name=tags, tag_type="undef"))
+            db.session.commit()
+        except Exception:
+            logger.log_debug_trace("Update News Item Tags Failed")
 
     @classmethod
     def group_aggregate(cls, items, user):

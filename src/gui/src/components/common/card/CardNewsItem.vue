@@ -174,7 +174,7 @@
             <v-container column style="height: 100%" class="pb-5">
               <v-row class="news-item-meta-infos">
                 <v-col class="news-item-meta-infos-label">
-                  <strong>Published:</strong>
+                  <strong>{{ $t('assess.published') }}:</strong>
                 </v-col>
                 <v-col>
                   <span :class="published_date_outdated ? 'red--text' : ''">
@@ -187,7 +187,7 @@
               </v-row>
               <v-row class="news-item-meta-infos">
                 <v-col class="news-item-meta-infos-label">
-                  <strong>Collected:</strong>
+                  <strong>{{ $t('assess.collected') }}:</strong>
                 </v-col>
                 <v-col>
                   {{ $d(getCollectedDate(), 'long') }}
@@ -195,7 +195,7 @@
               </v-row>
               <v-row class="news-item-meta-infos">
                 <v-col class="news-item-meta-infos-label">
-                  <strong>Source:</strong>
+                  <strong>{{ $t('assess.source') }}:</strong>
                 </v-col>
                 <v-col>
                   {{ getSource().name }} <br />
@@ -212,9 +212,9 @@
                   </a>
                 </v-col>
               </v-row>
-              <v-row class="news-item-meta-infos">
+              <v-row class="news-item-meta-infos" v-if="getAuthor()">
                 <v-col class="news-item-meta-infos-label">
-                  <strong>Author:</strong>
+                  <strong>{{ $t('assess.author') }}:</strong>
                 </v-col>
                 <v-col>
                   <span :class="[{ decorateSource: newsItem.decorateSource }]">
@@ -408,9 +408,7 @@ export default {
     },
 
     getAuthor() {
-      const author = this.newsItem.news_items[0].news_item_data.author
-      if (author) return author
-      return '** no author given **'
+      return this.newsItem.news_items[0].news_item_data.author
     },
 
     getSource() {
