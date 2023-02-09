@@ -552,6 +552,9 @@ textarea {
   margin-bottom: 0px !important;
   font-weight: 300;
   font-size: 13px;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  min-height: 6em;
 }
 
 .news-item-meta-infos.row {
