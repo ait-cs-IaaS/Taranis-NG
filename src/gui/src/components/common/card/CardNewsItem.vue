@@ -38,6 +38,7 @@
           tooltip="remove item"
           :showDialog="deleteDialog"
           @close="deleteDialog = false"
+          @open="deleteDialog = true"
         >
           <popup-delete-item
             v-if="deleteDialog"
@@ -73,6 +74,7 @@
           tooltip="add to report"
           :showDialog="sharingDialog"
           @close="sharingDialog = false"
+          @open="sharingDialog = true"
         >
           <popup-share-items
             v-if="sharingDialog"
@@ -141,14 +143,14 @@
 
                   <div class="d-flex align-start justify-center mr-3 ml-2 mt-1">
                     <votes
-                      :count="newsItem.likes"
+                      :count="likes"
                       type="up"
                       @input="upvote()"
                     />
                   </div>
                   <div class="d-flex align-start justify-center mr-3 mt-1">
                     <votes
-                      :count="newsItem.dislikes"
+                      :count="dislikes"
                       type="down"
                       @input="downvote()"
                     />
@@ -297,20 +299,17 @@ export default {
     viewDetails: false,
     openSummary: false,
     sharingDialog: false,
-    deleteDialog: false
+    deleteDialog: false,
+    likes: 0,
+    dislikes: 0
   }),
   computed: {
-    item_selected() {
-      return this.has('selected') ? this.get('selected') : false
-    },
     item_important() {
-      return this.newsItem.has('important')
-        ? this.newsItem.get('important')
-        : false
+      return 'important' in this.newsItem ? this.newsItem.important : false
     },
     item_decorateSource() {
-      return this.newsItem.has('decorateSource')
-        ? this.newsItem.get('decorateSource')
+      return 'decorateSource' in this.newsItem
+        ? this.newsItem.decorateSource
         : false
     },
     published_date() {
@@ -355,13 +354,15 @@ export default {
       this.item_decorateSource = !this.item_decorateSource
     },
     deleteNewsItem() {
-      deleteNewsItemAggregate(this.getGroupId(), this.newsItem.id)
+      deleteNewsItemAggregate(this.newsItem.id)
       this.$emit('deleteItem', this.newsItem.id)
     },
     upvote() {
+      this.likes += 1
       voteNewsItemAggregate(this.newsItem.id, 1)
     },
     downvote() {
+      this.dislikes += 1
       voteNewsItemAggregate(this.newsItem.id, -1)
     },
     addToReport() {
@@ -430,6 +431,9 @@ export default {
   updated() {
     // console.log('card rendered!')
   },
-  mounted() {}
+  mounted() {
+    this.likes = this.newsItem.likes
+    this.dislikes = this.newsItem.dislikes
+  }
 }
 </script>

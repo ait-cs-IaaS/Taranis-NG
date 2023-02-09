@@ -430,7 +430,7 @@ class NewsItem(db.Model):
 
         vote = NewsItemVote.find(self.id, user_id)
         if vote is None:
-            self.create_new_vote(vote, user_id)
+            vote = self.create_new_vote(vote, user_id)
 
         if data["vote"] > 0:
             self.update_like_vote(vote)
@@ -442,6 +442,7 @@ class NewsItem(db.Model):
     def create_new_vote(self, vote, user_id):
         vote = NewsItemVote(self.id, user_id)
         db.session.add(vote)
+        return vote
 
     def update_like_vote(self, vote):
         self.increment_likes()
@@ -481,7 +482,7 @@ class NewsItem(db.Model):
 
         NewsItemAggregate.update_status(news_item.news_item_aggregate_id)
         db.session.commit()
-        
+
         return "success", 200
 
     def update_status(self, data, user_id):
