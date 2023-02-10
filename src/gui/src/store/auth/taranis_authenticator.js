@@ -76,7 +76,6 @@ const getters = {
     } else if (typeof (process) !== 'undefined' && typeof (process.env) !== 'undefined' && process.env.VUE_APP_TARANIS_NG_LOGIN_URL) {
       login_uri = process.env.VUE_APP_TARANIS_NG_LOGIN_URL
     }
-
     login_uri = login_uri.replace('TARANIS_GUI_URI', encodeURIComponent(own_base_uri + '/login'))
     return login_uri
   },
