@@ -2,7 +2,6 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Home from './views/Home.vue'
 import { store } from '@/store/store'
-import AuthService from '@/services/auth/auth_service'
 import Permissions from '@/services/auth/permissions'
 
 Vue.use(Router)
@@ -188,7 +187,7 @@ export const router = new Router({
       components: {
         default: () =>
           import(
-            /* webpackChunkName: "config" */ './views/admin/ACLEntriesView.vue'
+            /* webpackChunkName: "config" */ './views/admin/ACLsView.vue'
           ),
         nav: () =>
           import(/* webpackChunkName: "config" */ './views/nav/ConfigNav.vue')
@@ -410,21 +409,12 @@ export const router = new Router({
   ]
 })
 
-router.beforeEach((to, from, next) => {
-  if (to.matched.some((record) => record.meta.requiresAuth)) {
-    if (!AuthService.isAuthenticated()) {
-      if (!store.getters.hasExternalLoginUrl) {
-        next({ path: store.getters.getLoginURL, query: { redirect: to.path } })
-      } else {
-        const loginURL = store.getters.getLoginURL
-          ? store.getters.getLoginURL
-          : '/login'
-        window.location = encodeURI(loginURL)
-      }
-    } else {
-      next()
+router.beforeEach(async (to, from, next) => {
+  if (to.meta.requiresAuth && !store.getters.isAuthenticated) {
+    if (store.getters.hasExternalLoginUrl) {
+      window.location = encodeURI(store.getters.getLoginURL)
     }
-  } else {
-    next()
+    next({ path: store.getters.getLoginURL, query: { redirect: to.path } })
   }
+  next()
 })
