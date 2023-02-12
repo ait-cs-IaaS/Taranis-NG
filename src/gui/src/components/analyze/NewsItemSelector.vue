@@ -99,8 +99,7 @@
 import AuthMixin from '@/services/auth/auth_mixin'
 import Permissions from '@/services/auth/permissions'
 import AssessContent from '../../components/assess/AssessContent'
-import ToolbarFilterAssess from '@/components/assess/ToolbarFilterAssess'
-import CardAssess from '@/components/assess/CardAssess'
+import CardAssess from '@/components/assess/legacy/CardAssess'
 import NewsItemSingleDetail from '@/components/assess/NewsItemSingleDetail'
 import NewsItemDetail from '@/components/assess/NewsItemDetail'
 import NewsItemAggregateDetail from '@/components/assess/NewsItemAggregateDetail'
@@ -111,7 +110,6 @@ export default {
   name: 'NewsItemSelector',
   components: {
     AssessContent,
-    ToolbarFilterAssess,
     CardAssess,
     NewsItemSingleDetail,
     NewsItemDetail,

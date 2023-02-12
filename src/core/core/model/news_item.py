@@ -569,8 +569,13 @@ class NewsItemAggregate(db.Model):
     news_item_attributes = db.relationship("NewsItemAttribute", secondary="news_item_aggregate_news_item_attribute")
 
     @classmethod
-    def find(cls, news_item_aggregate_id):
-        return cls.query.get(news_item_aggregate_id)
+    def find(cls, aggregate_id):
+        return cls.query.get(aggregate_id)
+
+    @classmethod
+    def get_by_id(cls, aggregate_id):
+        aggregate = cls.find(aggregate_id)
+        return NewsItemAggregateSchema().dump(aggregate)
 
     @classmethod
     def get_by_group(cls, group_id, filter, user):

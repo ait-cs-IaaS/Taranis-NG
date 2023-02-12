@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="view_details" fullscreen hide-overlay @keydown.esc="close">
+  <v-container fluid style="min-height: 100vh">
     <v-card>
       <v-toolbar dark color="secondary">
         <v-btn icon dark @click.native="close">
@@ -32,8 +32,8 @@
               </v-col>
               <v-col>
                 <span class="overline font-weight-bold">
-                  {{ $t('assess.source') }}
-                </span><br />
+                  {{ $t('assess.source') }} </span
+                ><br />
                 <span class="caption">
                   {{ news_item.news_item_data.source }}
                 </span>
@@ -48,9 +48,7 @@
                 </span>
               </v-col>
               <v-col>
-                <span class="overline font-weight-bold">
-                  NewsItem ID
-                </span>
+                <span class="overline font-weight-bold"> ID </span>
                 <br />
                 <span class="caption">
                   {{ news_item.id }}
@@ -83,32 +81,18 @@
         </v-container>
       </v-row>
     </v-card>
-  </v-dialog>
+  </v-container>
 </template>
 
 <script>
+import { getNewsItem } from '@/api/assess'
+
 export default {
   name: 'NewsItemDetail',
-  components: {},
-  emits: ['view'],
-  props: {
-    news_item_prop: {},
-    view_details_prop: { type: Boolean, default: false }
-  },
-  data: () => ({}),
+  data: () => ({
+    news_item: {}
+  }),
   computed: {
-    news_item() {
-      return this.news_item_prop
-    },
-    view_details: {
-      get() {
-        return this.view_details_prop
-      },
-      set(value) {
-        this.$emit('view', value)
-      }
-    },
-
     getDescription() {
       return (
         this.news_item.news_item_data.content ||
@@ -116,12 +100,17 @@ export default {
       )
     }
   },
-  mounted() {
-    console.log(this.news_item)
+  async created() {
+    this.news_item = await this.loadNewsItem()
+    console.debug(this.news_item)
   },
   methods: {
-    close() {
-      this.$emit('view', false)
+    async loadNewsItem() {
+      if (this.$route.params.id) {
+        return await getNewsItem(this.$route.params.id).then((response) => {
+          return response.data
+        })
+      }
     }
   }
 }

@@ -56,7 +56,7 @@
 
 <script>
 import KeyboardMixin from '../../assets/keyboard_mixin'
-import CardNewsItem from '@/components/common/card/CardNewsItem'
+import CardNewsItem from '@/components/assess/CardNewsItem'
 import AssessSelectionToolbar from '@/components/assess/AssessSelectionToolbar'
 
 import { mapState, mapGetters, mapActions } from 'vuex'
