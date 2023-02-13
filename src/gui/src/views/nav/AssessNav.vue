@@ -284,6 +284,7 @@ export default {
       'setSort',
       'setLimit',
       'setOffset',
+      'setTags',
       'updateFilter'
     ]),
     ...mapGetters('filter', ['getNewsItemsFilter'])

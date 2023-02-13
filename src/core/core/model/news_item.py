@@ -624,6 +624,12 @@ class NewsItemAggregate(db.Model):
                 ReportItemNewsItemAggregate,
                 NewsItemAggregate.id == ReportItemNewsItemAggregate.news_item_aggregate_id,
             )
+        if "tags" in filter and filter["tags"] != "":
+            query = query.join(
+                NewsItemTag,
+                NewsItemAggregate.id == NewsItemTag.n_i_a_id,
+            )
+            query = query.filter(NewsItemTag.name.in_(filter["tags"].split(",")))
 
         if "range" in filter and filter["range"] != "ALL":
             date_limit = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)

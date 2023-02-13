@@ -31,6 +31,9 @@ const actions = {
   setOffset(context, offset) {
     context.commit('SET_OFFSET', offset)
   },
+  setTags(context, tags) {
+    context.commit('SET_TAGS', tags)
+  },
   incrementOffset(context) {
     context.commit('INCREMENT_OFFSET')
   },
@@ -100,6 +103,9 @@ const mutations = {
   },
   SET_OFFSET(state, offset) {
     state.newsItemsFilter.offset = offset
+  },
+  SET_TAGS(state, tags) {
+    state.newsItemsFilter.tags = tags
   }
 }
 

@@ -7,31 +7,35 @@
         <v-icon color="red">mdi-delete</v-icon>
       </v-btn>
     </v-toolbar>
-    <v-row justify="center" class="px-4 py-4">
-      <v-row justify="center" class="subtitle-2 info--text pt-4 ma-0">
-        <v-flex>
-          <v-row class="text-center">
-            <v-col>
-              <span class="overline font-weight-bold">
-                {{ $t('assess.created') }}
-              </span>
-              <br />
-              <span class="caption">
-                {{ $d(new Date(story.created), 'long') }}
-              </span>
-            </v-col>
-            <v-col>
-              <span class="overline font-weight-bold"> NewsItem ID </span>
-              <br />
-              <span class="caption">
-                {{ story.id }}
-              </span>
-            </v-col>
-          </v-row>
-        </v-flex>
+
+    <v-container fluid>
+      <v-row class="text-center">
+        <v-col>
+          <span class="overline font-weight-bold">
+            {{ $t('assess.created') }}
+          </span>
+          <br />
+          <span class="caption">
+            {{ $d(new Date(story.created), 'long') }}
+          </span>
+        </v-col>
+        <v-col>
+          <span class="overline font-weight-bold"> NewsItem ID </span>
+          <br />
+          <span class="caption">
+            {{ story.id }}
+          </span>
+        </v-col>
       </v-row>
-      <hr style="width: calc(100%); border: 0px" />
-      <v-row class="headline">
+      <v-row align="center" justify="center" class="mt-5 mb-5">
+        <tag-list
+          key="tags"
+          :limit="getTags.length"
+          :truncate="false"
+          :tags="getTags"
+        />
+      </v-row>
+      <v-row>
         <span class="display-1 font-weight-light py-4">
           {{ story.title }}
         </span>
@@ -39,20 +43,27 @@
       <v-row class="py-4">
         <span>{{ getDescription }}</span>
       </v-row>
-    </v-row>
+    </v-container>
   </v-card>
 </template>
 
 <script>
+import TagList from '@/components/common/tags/TagList'
+
 export default {
   name: 'StoryDetail',
-  components: {},
+  components: {
+    TagList
+  },
   emits: ['view'],
   props: {
     story: {}
   },
   data: () => ({}),
   computed: {
+    getTags() {
+      return this.story.tags.map((tag) => tag.name)
+    },
     getDescription() {
       return this.story.summary || this.story.description
     }

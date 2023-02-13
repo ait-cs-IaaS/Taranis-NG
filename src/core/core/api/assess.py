@@ -64,7 +64,6 @@ class NewsItemAggregates(Resource):
     @auth_required("ASSESS_ACCESS")
     def get(self):
         user = auth_manager.get_user_from_jwt()
-
         try:
             filter_keys = ["search", "read", "important", "relevant", "in_analyze", "range", "sort", "tags"]
             filter_args: dict[str, str | int] = {k: v for k, v in request.args.items() if k in filter_keys}
