@@ -1,4 +1,5 @@
 <template>
+  <v-row class="ma-0 pa-0">
   <v-col cols="12">
     <v-card
       tile
@@ -17,14 +18,15 @@
       @click="toggleSelection"
     >
       <div
-        v-if="newsItem.shared && !newsItem.restricted"
+        v-if="story.in_reports_count > 0"
         class="news-item-corner-tag text-caption text-weight-bold text-uppercase white--text"
       >
         <v-icon x-small class="flipped-icon">mdi-share</v-icon>
+        <span>{{ story.in_reports_count }}</span>
       </div>
 
       <div
-        v-if="newsItem.restricted"
+        v-if="storyRestricted()"
         class="news-item-corner-tag text-caption text-weight-bold text-uppercase white--text"
       >
         <v-icon x-small>mdi-lock-outline</v-icon>
@@ -42,31 +44,24 @@
         >
           <popup-delete-item
             v-if="deleteDialog"
-            :newsItem="newsItem"
+            :newsItem="story"
             @deleteItem="deleteNewsItem()"
             @close="deleteDialog = false"
           />
         </news-item-action-dialog>
 
         <news-item-action
-          :active="newsItem.read"
+          :active="story.read"
           icon="mdi-email-mark-as-unread"
           @click="markAsRead()"
           tooltip="mark as read/unread"
         />
 
         <news-item-action
-          :active="newsItem.important"
+          :active="story.important"
           icon="mdi-exclamation"
           @click="markAsImportant()"
           tooltip="mark as important"
-        />
-
-        <news-item-action
-          :active="newsItem.decorateSource"
-          icon="mdi-seal"
-          @click="decorateSource()"
-          tooltip="emphasise originator"
         />
 
         <news-item-action-dialog
@@ -78,7 +73,7 @@
         >
           <popup-share-items
             v-if="sharingDialog"
-            :newsItem="newsItem"
+            :newsItem="story"
             @close="sharingDialog = false"
           />
         </news-item-action-dialog>
@@ -96,7 +91,7 @@
             <v-container column style="height: 100%">
               <v-row class="flex-grow-0 mt-0">
                 <v-col class="pb-1">
-                  <h2 class="news-item-title">{{ newsItem.title }}</h2>
+                  <h2 class="news-item-title">{{ story.title }}</h2>
                 </v-col>
               </v-row>
 
@@ -126,7 +121,7 @@
                     class="buttonOutlined mr-1 mt-1"
                     :style="{ borderColor: '#c8c8c8' }"
                     outlined
-                    @click.stop="viewDetails = true"
+                    :to="'/story/' + story.id "
                   >
                     <v-icon>mdi-eye</v-icon>
                     <span>view Details</span>
@@ -187,46 +182,10 @@
               </v-row>
               <v-row class="news-item-meta-infos">
                 <v-col class="news-item-meta-infos-label">
-                  <strong>{{ $t('assess.collected') }}:</strong>
+                  <strong>{{ $t('card_item.created') }}:</strong>
                 </v-col>
                 <v-col>
                   {{ $d(getCollectedDate(), 'long') }}
-                </v-col>
-              </v-row>
-              <v-row class="news-item-meta-infos">
-                <v-col class="news-item-meta-infos-label">
-                  <strong>{{ $t('assess.source') }}:</strong>
-                </v-col>
-                <v-col>
-                  {{ getSource().name }} <br />
-                  <a
-                    :href="getSource().link"
-                    target="_blank"
-                    icon
-                    class="meta-link d-flex"
-                  >
-                    <v-icon left x-small color="primary"
-                      >mdi-open-in-new</v-icon
-                    >
-                    <span class="label">{{ getSource().link }}</span>
-                  </a>
-                </v-col>
-              </v-row>
-              <v-row class="news-item-meta-infos" v-if="getAuthor()">
-                <v-col class="news-item-meta-infos-label">
-                  <strong>{{ $t('assess.author') }}:</strong>
-                </v-col>
-                <v-col>
-                  <span :class="[{ decorateSource: newsItem.decorateSource }]">
-                    {{ getAuthor() }}
-                    <v-icon
-                      right
-                      small
-                      v-if="newsItem.decorateSource"
-                      class="ml-0"
-                      >mdi-seal</v-icon
-                    >
-                  </span>
                 </v-col>
               </v-row>
               <v-row class="news-item-meta-infos">
@@ -250,13 +209,12 @@
         </v-row>
       </v-container>
     </v-card>
-    <NewsItemDetail
-      v-if="viewDetails"
-      @view="updateDetailsView"
-      :view_details_prop.sync="viewDetails"
-      :news_item_prop="newsItem.news_items[0]"
-    />
   </v-col>
+  <card-news-item v-if="openSummary" :newsItem="story.news_items[0]" />
+  </v-row>
+  <!-- <v-col v-if=false>
+    <card-news-item></card-news-item>
+  </v-col> -->
 </template>
 
 <script>
@@ -265,10 +223,8 @@ import newsItemAction from '@/components/_subcomponents/newsItemAction'
 import newsItemActionDialog from '@/components/_subcomponents/newsItemActionDialog'
 import PopupDeleteItem from '@/components/popups/PopupDeleteItem'
 import PopupShareItems from '@/components/popups/PopupShareItems'
-
-import NewsItemDetail from '@/components/assess/NewsItemDetail'
 import votes from '@/components/_subcomponents/votes'
-import { isValidUrl } from '@/utils/helpers'
+import CardNewsItem from '@/components/assess/CardNewsItem'
 
 import { mapGetters } from 'vuex'
 
@@ -285,14 +241,14 @@ export default {
     TagList,
     newsItemAction,
     newsItemActionDialog,
+    CardNewsItem,
     PopupDeleteItem,
     PopupShareItems,
-    NewsItemDetail,
     votes
   },
   emits: ['selectItem', 'deleteItem'],
   props: {
-    newsItem: {},
+    story: {},
     selected: Boolean
   },
   data: () => ({
@@ -305,15 +261,10 @@ export default {
   }),
   computed: {
     item_important() {
-      return 'important' in this.newsItem ? this.newsItem.important : false
-    },
-    item_decorateSource() {
-      return 'decorateSource' in this.newsItem
-        ? this.newsItem.decorateSource
-        : false
+      return 'important' in this.story ? this.story.important : false
     },
     published_date() {
-      return this.newsItem.news_items[0].news_item_data.published || false
+      return this.story.news_items[0].news_item_data.published || false
     },
     news_item_summary_class() {
       return this.openSummary
@@ -342,28 +293,25 @@ export default {
     ...mapGetters('users', ['getUsernameById']),
 
     toggleSelection() {
-      this.$emit('selectItem', this.newsItem.id)
+      this.$emit('selectItem', this.story.id)
     },
     markAsRead() {
-      readNewsItemAggregate(this.newsItem.id)
+      readNewsItemAggregate(this.story.id)
     },
     markAsImportant() {
-      importantNewsItemAggregate(this.newsItem.id)
-    },
-    decorateSource() {
-      this.item_decorateSource = !this.item_decorateSource
+      importantNewsItemAggregate(this.story.id)
     },
     deleteNewsItem() {
-      deleteNewsItemAggregate(this.newsItem.id)
-      this.$emit('deleteItem', this.newsItem.id)
+      deleteNewsItemAggregate(this.story.id)
+      this.$emit('deleteItem', this.story.id)
     },
     upvote() {
       this.likes += 1
-      voteNewsItemAggregate(this.newsItem.id, 1)
+      voteNewsItemAggregate(this.story.id, 1)
     },
     downvote() {
       this.dislikes += 1
-      voteNewsItemAggregate(this.newsItem.id, -1)
+      voteNewsItemAggregate(this.story.id, -1)
     },
     addToReport() {
       this.sharingDialog = true
@@ -377,21 +325,18 @@ export default {
     },
 
     isSummarized() {
-      return this.newsItem.summary !== undefined && this.newsItem.summary !== ''
+      return this.story.summary !== undefined && this.story.summary !== ''
     },
 
     getDescription() {
-      const summary = this.openSummary ? false : this.newsItem.summary
       return (
-        summary ||
-        this.newsItem.description ||
-        this.newsItem.news_items[0].news_item_data.content ||
-        this.newsItem.news_items[0].news_item_data.review
+        this.story.summary ||
+        this.story.description
       )
     },
 
     getTags() {
-      return this.newsItem.tags.map((tag) => tag.name)
+      return this.story.tags.map((tag) => tag.name)
     },
 
     getPublishedDate() {
@@ -403,35 +348,28 @@ export default {
     },
 
     getCollectedDate() {
-      const collected = this.newsItem.news_items[0].news_item_data.collected
-      return collected ? new Date(collected) : new Date(this.newsItem.created)
+      const collected = this.story.created
+      return collected ? new Date(collected) : new Date(this.story.created)
     },
 
     getAuthor() {
-      return this.newsItem.news_items[0].news_item_data.author
+      return this.story.news_items[0].news_item_data.author
     },
 
-    getSource() {
-      let source = this.newsItem.news_items[0].news_item_data.source
-      if (isValidUrl(source)) {
-        source = new URL(source).hostname.replace('www.', '')
-      }
+    storyInReport() {
+      return this.story.in_reports_count
+    },
 
-      // TODO: get Type (e.g. RSS, Web, Email, ...)
-
-      return {
-        name: source,
-        link: this.newsItem.news_items[0].news_item_data.link,
-        type: this.newsItem.news_items[0].news_item_data.osint_source_id
-      }
+    storyRestricted() {
+      return false
     }
   },
   updated() {
     // console.log('card rendered!')
   },
   mounted() {
-    this.likes = this.newsItem.likes
-    this.dislikes = this.newsItem.dislikes
+    this.likes = this.story.likes || 0
+    this.dislikes = this.story.dislikes || 0
   }
 }
 </script>

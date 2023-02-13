@@ -88,7 +88,7 @@
 import { getNewsItem } from '@/api/assess'
 
 export default {
-  name: 'NewsItemDetail',
+  name: 'NewsItemView',
   data: () => ({
     news_item: {}
   }),

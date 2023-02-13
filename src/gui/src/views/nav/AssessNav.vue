@@ -94,7 +94,7 @@
 
       <v-row class="my-3 mr-0 px-3">
         <v-col cols="12" class="pt-1">
-          <filter-selectList
+          <filter-select-list
             v-model="filterAttributeSelections"
             :items="filterAttributeOptions"
           />

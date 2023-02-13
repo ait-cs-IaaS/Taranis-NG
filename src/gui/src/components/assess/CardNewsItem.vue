@@ -1,5 +1,5 @@
 <template>
-  <v-col cols="12">
+  <v-col :cols="cardSize" :offset="cardOffset">
     <v-card
       tile
       elevation="4"
@@ -9,10 +9,7 @@
         'pl-5',
         'align-self-stretch',
         'news-item',
-        'dark-grey--text',
-        {
-          selected: selected
-        }
+        'dark-grey--text'
       ]"
       @click="toggleSelection"
     >
@@ -96,13 +93,13 @@
             <v-container column style="height: 100%">
               <v-row class="flex-grow-0 mt-0">
                 <v-col class="pb-1">
-                  <h2 class="news-item-title">{{ newsItem.title }}</h2>
+                  <h2 class="news-item-title">{{ newsItem.news_item_data.title }}</h2>
                 </v-col>
               </v-row>
 
               <v-row class="flex-grow-0 mt-0">
                 <v-col>
-                  <p :class="news_item_summary_class">
+                  <p class="news-item-summary">
                     {{ getDescription() }}
                   </p>
                 </v-col>
@@ -131,30 +128,6 @@
                     <v-icon>mdi-eye</v-icon>
                     <span>view Details</span>
                   </v-btn>
-                  <v-btn
-                    class="buttonOutlined mr-1 mt-1"
-                    :style="{ borderColor: '#c8c8c8' }"
-                    outlined
-                    @click.stop="openSummary = !openSummary"
-                  >
-                    <v-icon>{{ news_item_summary_icon }}</v-icon>
-                    <span>{{ news_item_summary_text }}</span>
-                  </v-btn>
-
-                  <div class="d-flex align-start justify-center mr-3 ml-2 mt-1">
-                    <votes
-                      :count="likes"
-                      type="up"
-                      @input="upvote()"
-                    />
-                  </div>
-                  <div class="d-flex align-start justify-center mr-3 mt-1">
-                    <votes
-                      :count="dislikes"
-                      type="down"
-                      @input="downvote()"
-                    />
-                  </div>
                 </v-col>
               </v-row>
             </v-container>
@@ -229,22 +202,6 @@
                   </span>
                 </v-col>
               </v-row>
-              <v-row class="news-item-meta-infos">
-                <v-col class="news-item-meta-infos-label d-flex align-center">
-                  <strong>Tags:</strong>
-                </v-col>
-                <v-col>
-                  <tag-list key="tags" limit="5" :tags="getTags()" />
-                </v-col>
-              </v-row>
-              <v-row class="news-item-meta-infos">
-                <v-col class="news-item-meta-infos-label d-flex align-center">
-                  <strong>Summarzied:</strong>
-                </v-col>
-                <v-col>
-                  {{ isSummarized() }}
-                </v-col>
-              </v-row>
             </v-container>
           </v-col>
         </v-row>
@@ -254,20 +211,18 @@
       v-if="viewDetails"
       @view="updateDetailsView"
       :view_details_prop.sync="viewDetails"
-      :news_item_prop="newsItem.news_items[0]"
+      :news_item_prop="newsItem"
     />
   </v-col>
 </template>
 
 <script>
-import TagList from '@/components/common/tags/TagList'
 import newsItemAction from '@/components/_subcomponents/newsItemAction'
 import newsItemActionDialog from '@/components/_subcomponents/newsItemActionDialog'
 import PopupDeleteItem from '@/components/popups/PopupDeleteItem'
 import PopupShareItems from '@/components/popups/PopupShareItems'
 
 import NewsItemDetail from '@/components/assess/NewsItemDetail'
-import votes from '@/components/_subcomponents/votes'
 import { isValidUrl } from '@/utils/helpers'
 
 import { mapGetters } from 'vuex'
@@ -275,35 +230,38 @@ import { mapGetters } from 'vuex'
 import {
   deleteNewsItemAggregate,
   importantNewsItemAggregate,
-  readNewsItemAggregate,
-  voteNewsItemAggregate
+  readNewsItemAggregate
 } from '@/api/assess'
 
 export default {
   name: 'CardNewsItem',
   components: {
-    TagList,
     newsItemAction,
     newsItemActionDialog,
     PopupDeleteItem,
     PopupShareItems,
-    NewsItemDetail,
-    votes
+    NewsItemDetail
   },
   emits: ['selectItem', 'deleteItem'],
   props: {
     newsItem: {},
-    selected: Boolean
+    selected: Boolean,
+    storyView: Boolean
   },
   data: () => ({
     viewDetails: false,
-    openSummary: false,
     sharingDialog: false,
     deleteDialog: false,
     likes: 0,
     dislikes: 0
   }),
   computed: {
+    cardSize() {
+      return this.storyView ? '12' : '11'
+    },
+    cardOffset() {
+      return this.storyView ? '0' : '1'
+    },
     item_important() {
       return 'important' in this.newsItem ? this.newsItem.important : false
     },
@@ -313,20 +271,7 @@ export default {
         : false
     },
     published_date() {
-      return this.newsItem.news_items[0].news_item_data.published || false
-    },
-    news_item_summary_class() {
-      return this.openSummary
-        ? 'news-item-summary-no-clip'
-        : 'news-item-summary'
-    },
-    news_item_summary_icon() {
-      return this.openSummary
-        ? 'mdi-unfold-less-horizontal'
-        : 'mdi-unfold-more-horizontal'
-    },
-    news_item_summary_text() {
-      return this.openSummary ? 'Close' : 'Open'
+      return this.newsItem.news_item_data.published || false
     },
     published_date_outdated() {
       const pub_date = this.published_date
@@ -357,41 +302,19 @@ export default {
       deleteNewsItemAggregate(this.newsItem.id)
       this.$emit('deleteItem', this.newsItem.id)
     },
-    upvote() {
-      this.likes += 1
-      voteNewsItemAggregate(this.newsItem.id, 1)
-    },
-    downvote() {
-      this.dislikes += 1
-      voteNewsItemAggregate(this.newsItem.id, -1)
-    },
     addToReport() {
       this.sharingDialog = true
-    },
-    showRelated(event) {
-      console.log('not yet implemented')
     },
 
     updateDetailsView(value) {
       this.viewDetails = value
     },
 
-    isSummarized() {
-      return this.newsItem.summary !== undefined && this.newsItem.summary !== ''
-    },
-
     getDescription() {
-      const summary = this.openSummary ? false : this.newsItem.summary
       return (
-        summary ||
-        this.newsItem.description ||
-        this.newsItem.news_items[0].news_item_data.content ||
-        this.newsItem.news_items[0].news_item_data.review
+        this.newsItem.news_item_data.content ||
+        this.newsItem.news_item_data.review
       )
-    },
-
-    getTags() {
-      return this.newsItem.tags.map((tag) => tag.name)
     },
 
     getPublishedDate() {
@@ -403,16 +326,16 @@ export default {
     },
 
     getCollectedDate() {
-      const collected = this.newsItem.news_items[0].news_item_data.collected
+      const collected = this.newsItem.news_item_data.collected
       return collected ? new Date(collected) : new Date(this.newsItem.created)
     },
 
     getAuthor() {
-      return this.newsItem.news_items[0].news_item_data.author
+      return this.newsItem.news_item_data.author
     },
 
     getSource() {
-      let source = this.newsItem.news_items[0].news_item_data.source
+      let source = this.newsItem.news_item_data.source
       if (isValidUrl(source)) {
         source = new URL(source).hostname.replace('www.', '')
       }
@@ -421,8 +344,8 @@ export default {
 
       return {
         name: source,
-        link: this.newsItem.news_items[0].news_item_data.link,
-        type: this.newsItem.news_items[0].news_item_data.osint_source_id
+        link: this.newsItem.news_item_data.link,
+        type: this.newsItem.news_item_data.osint_source_id
       }
     }
   },

@@ -7,6 +7,13 @@
         </v-btn>
         <v-toolbar-title>{{ news_item.news_item_data.title }}</v-toolbar-title>
         <v-spacer></v-spacer>
+        <v-btn
+          small
+          icon
+          :title="$t('assess.tooltip.delete_item')"
+        >
+          <v-icon small color="accent">mdi-delete</v-icon>
+        </v-btn>
       </v-toolbar>
       <v-row justify="center" class="px-4 py-4">
         <v-row justify="center" class="subtitle-2 info--text pt-4 ma-0">
@@ -32,8 +39,8 @@
               </v-col>
               <v-col>
                 <span class="overline font-weight-bold">
-                  {{ $t('assess.source') }}
-                </span><br />
+                  {{ $t('assess.source') }} </span
+                ><br />
                 <span class="caption">
                   {{ news_item.news_item_data.source }}
                 </span>
@@ -48,9 +55,7 @@
                 </span>
               </v-col>
               <v-col>
-                <span class="overline font-weight-bold">
-                  NewsItem ID
-                </span>
+                <span class="overline font-weight-bold"> NewsItem ID </span>
                 <br />
                 <span class="caption">
                   {{ news_item.id }}
