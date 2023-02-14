@@ -253,13 +253,13 @@ export default {
     },
 
     removeFromStory() {
-      unGroupAction(this.newsItem.id)
+      unGroupAction([this.newsItem.id])
         .then(() => {
-          notifySuccess('Items merged')
+          notifySuccess('News Item removed from Story')
           this.$emit('refresh')
         })
         .catch((err) => {
-          notifyFailure('Failed to merge items')
+          notifyFailure('Failed to remove Newsitem from Story')
           console.log(err)
         })
     }

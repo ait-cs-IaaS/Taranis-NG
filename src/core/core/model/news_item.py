@@ -955,7 +955,7 @@ class NewsItemAggregate(db.Model):
         try:
             processed_aggregates = set()
             for item in newsitem_ids:
-                news_item = NewsItem.find(item["id"])
+                news_item = NewsItem.find(item)
                 if not NewsItem.allowed_with_acl(news_item.id, user, False, False, True):
                     continue
                 aggregate = NewsItemAggregate.find(news_item.news_item_aggregate_id)

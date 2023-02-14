@@ -234,7 +234,8 @@ def initialize(api):
     api.add_resource(NewsItemAggregateTags, "/api/v1/assess/tags")
     api.add_resource(NewsItem, "/api/v1/assess/news-items/<int:item_id>")
     api.add_resource(NewsItemAggregate, "/api/v1/assess/news-item-aggregates/<int:aggregate_id>")
-    api.add_resource(GroupAction, "/api/v1/assess/news-item-aggregates-group-action")
+    api.add_resource(GroupAction, "/api/v1/assess/news-item-aggregates/group")
+    api.add_resource(UnGroupAction, "/api/v1/assess/news-item-aggregates/ungroup")
     api.add_resource(
         DownloadAttachment,
         "/api/v1/assess/news-item-data/<string:item_data_id>/attributes/<int:attribute_id>/file",
