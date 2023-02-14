@@ -5,6 +5,7 @@
         tile
         elevation="4"
         outlined
+        :ripple="false"
         height="100%"
         :class="[
           'pl-5',
@@ -21,7 +22,7 @@
           v-if="story.in_reports_count > 0"
           class="news-item-corner-tag text-caption text-weight-bold text-uppercase white--text"
         >
-          <v-icon x-small class="flipped-icon">mdi-share</v-icon>
+          <v-icon class="flipped-icon">mdi-share</v-icon>
           <span>{{ story.in_reports_count }}</span>
         </div>
 
@@ -29,7 +30,7 @@
           v-if="storyRestricted()"
           class="news-item-corner-tag text-caption text-weight-bold text-uppercase white--text"
         >
-          <v-icon x-small>mdi-lock-outline</v-icon>
+          <v-icon>mdi-lock-outline</v-icon>
         </div>
 
         <!-- Story Actions -->
@@ -120,11 +121,10 @@
                 <v-row class="flex-grow-0 mt-1">
                   <v-col
                     cols="12"
-                    class="mx-0 d-flex justify-start flex-wrap pt-1 pb-8"
+                    class="d-flex justify-start flex-wrap pt-1 pb-4"
                   >
                     <v-btn
-                      class="buttonOutlined mr-1 mt-1"
-                      :style="{ borderColor: '#c8c8c8' }"
+                      class="mr-1 mt-1"
                       outlined
                       @click.stop="addToReport()"
                     >
@@ -132,8 +132,7 @@
                       <span>add to report</span>
                     </v-btn>
                     <v-btn
-                      class="buttonOutlined mr-1 mt-1"
-                      :style="{ borderColor: '#c8c8c8' }"
+                      class="mr-1 mt-1"
                       outlined
                       :to="'/story/' + story.id"
                     >
@@ -141,9 +140,9 @@
                       <span>view Details</span>
                     </v-btn>
                     <v-btn
-                      class="buttonOutlined mr-1 mt-1"
-                      :style="{ borderColor: '#c8c8c8' }"
-                      outlined
+                      class="mr-1 mt-1"
+                      :outlined="news_item_length ? false : true"
+                      :color="news_item_length ? 'blue-grey' : null"
                       @click.stop="openSummary = !openSummary"
                     >
                       <v-icon>{{ news_item_summary_icon }}</v-icon>
@@ -279,11 +278,14 @@ export default {
         ? 'mdi-unfold-less-horizontal'
         : 'mdi-unfold-more-horizontal'
     },
+    news_item_length() {
+      return this.story.news_items.length > 1 ? this.story.news_items.length : ''
+    },
     news_item_summary_text() {
-      return this.openSummary ? 'Close' : 'Open'
+      return this.openSummary ? 'Close' : `Open ${this.news_item_length}`
     },
     published_date_outdated() {
-      const pub_date = this.published_date
+      const pub_date = new Date(this.published_date)
       if (!pub_date) {
         return false
       }

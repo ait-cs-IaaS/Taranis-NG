@@ -5,13 +5,9 @@
       elevation="4"
       outlined
       height="100%"
-      :class="[
-        'pl-5',
-        'align-self-stretch',
-        'news-item',
-        'dark-grey--text'
-      ]"
-      @click="toggleSelection"
+      :ripple="false"
+      :class="['pl-5', 'align-self-stretch', 'news-item', 'dark-grey--text']"
+      v-on="storyView ? { click: toggleSelection } : null"
     >
       <div
         v-if="newsItem.shared && !newsItem.restricted"
@@ -93,7 +89,9 @@
             <v-container column style="height: 100%">
               <v-row class="flex-grow-0 mt-0">
                 <v-col class="pb-1">
-                  <h2 class="news-item-title">{{ newsItem.news_item_data.title }}</h2>
+                  <h2 class="news-item-title">
+                    {{ newsItem.news_item_data.title }}
+                  </h2>
                 </v-col>
               </v-row>
 
@@ -119,24 +117,17 @@
             style="height: 100%"
           >
             <v-container column style="height: 100%" class="pb-5">
-
               <v-row class="flex-grow-0 mt-1">
                 <v-col
                   cols="12"
                   class="mx-0 d-flex justify-start flex-wrap pt-1 pb-8"
                 >
-                  <v-btn
-                    class="buttonOutlined mr-1 mt-1"
-                    :style="{ borderColor: '#c8c8c8' }"
-                    outlined
-                    @click.stop="addToReport()"
-                  >
+                  <v-btn class="mr-1 mt-1" outlined @click.stop="addToReport()">
                     <v-icon>mdi-google-circles-communities</v-icon>
                     <span>add to report</span>
                   </v-btn>
                   <v-btn
-                    class="buttonOutlined mr-1 mt-1"
-                    :style="{ borderColor: '#c8c8c8' }"
+                    class="mr-1 mt-1"
                     outlined
                     @click.stop="viewDetails = true"
                   >
@@ -144,8 +135,7 @@
                     <span>view Details</span>
                   </v-btn>
                   <v-btn
-                    class="buttonOutlined mr-1 mt-1"
-                    :style="{ borderColor: '#c8c8c8' }"
+                    class="mr-1 mt-1"
                     outlined
                     @click.stop="removeFromStory()"
                   >
@@ -175,6 +165,7 @@ import newsItemActionDialog from '@/components/_subcomponents/newsItemActionDial
 import PopupDeleteItem from '@/components/popups/PopupDeleteItem'
 import PopupShareItems from '@/components/popups/PopupShareItems'
 import metainfo from '@/components/assess/card/metainfo'
+import { notifySuccess, notifyFailure } from '@/utils/helpers'
 
 import NewsItemDetail from '@/components/assess/NewsItemDetail'
 
@@ -183,7 +174,8 @@ import { mapGetters } from 'vuex'
 import {
   deleteNewsItemAggregate,
   importantNewsItemAggregate,
-  readNewsItemAggregate
+  readNewsItemAggregate,
+  unGroupAction
 } from '@/api/assess'
 
 export default {
@@ -229,6 +221,7 @@ export default {
     ...mapGetters('users', ['getUsernameById']),
 
     toggleSelection() {
+      alert('toggleSelection')
       this.$emit('selectItem', this.newsItem.id)
     },
     markAsRead() {
@@ -260,7 +253,15 @@ export default {
     },
 
     removeFromStory() {
-      this.$emit('removeFromStory', this.newsItem.id)
+      unGroupAction(this.newsItem.id)
+        .then(() => {
+          notifySuccess('Items merged')
+          this.$emit('refresh')
+        })
+        .catch((err) => {
+          notifyFailure('Failed to merge items')
+          console.log(err)
+        })
     }
   },
   updated() {

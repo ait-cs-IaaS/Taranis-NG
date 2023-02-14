@@ -61,7 +61,11 @@ export function importantNewsItemAggregate (aggregate_id) {
 }
 
 export function groupAction (data) {
-  return ApiService.put('/assess/news-item-aggregates-group-action', data)
+  return ApiService.put('/assess/news-item-aggregates/group', data)
+}
+
+export function unGroupAction (data) {
+  return ApiService.put('/assess/news-item-aggregates/ungroup', data)
 }
 
 export function saveNewsItemAggregate (group_id, aggregate_id, title, description, comments) {

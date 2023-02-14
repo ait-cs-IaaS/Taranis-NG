@@ -75,7 +75,7 @@ const mutations = {
       offset: 0,
       limit: 15,
       search: undefined,
-      sort: undefined,
+      sort: 'DATE_DESC',
       range: undefined,
       date: undefined,
       tags: undefined,

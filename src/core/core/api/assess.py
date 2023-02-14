@@ -153,11 +153,26 @@ class NewsItemAggregate(Resource):
         return response, code
 
 
+class UnGroupAction(Resource):
+    @auth_required("ASSESS_UPDATE")
+    def put(self):
+        user = auth_manager.get_user_from_jwt()
+        newsitem_ids = request.json
+        if not newsitem_ids:
+            return {"No aggregate ids provided"}, 400
+        response, code = news_item.NewsItemAggregate.ungroup_aggregate(newsitem_ids, user)
+        sse_manager.news_items_updated()
+        return response, code
+
+
 class GroupAction(Resource):
     @auth_required("ASSESS_UPDATE")
     def put(self):
         user = auth_manager.get_user_from_jwt()
-        response, code = news_item.NewsItemAggregate.group_action(request.json, user)
+        aggregate_ids = request.json
+        if not aggregate_ids:
+            return {"No aggregate ids provided"}, 400
+        response, code = news_item.NewsItemAggregate.group_aggregate(aggregate_ids, user)
         sse_manager.news_items_updated()
         return response, code
 
