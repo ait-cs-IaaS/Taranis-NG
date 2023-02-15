@@ -941,37 +941,46 @@ paths:
       parameters:
         - name: search
           in: query
+          description: Defines a search string to filter the results
           schema:
             type: string
         - name: read
           in: query
+          description: Filter for news_items that are read
           schema:
             type: string
         - name: important
           in: query
+          description: Filter only important news
           schema:
             type: string
         - name: relevant
           in: query
+          description: Filter only relevant news
           schema:
             type: string
-        - name: in_analyze
+        - name: in_report
+          description: Filter news-items that are added to reports
           in: query
           schema:
             type: string
         - name: range
+          description: Filter news-items with a time-range(ALL, WEEKLY, MONTH)
           in: query
           schema:
             type: integer
         - name: sort
+          description: Sort the results(DATE_DESC, DATE_ASC, RELEVANCE_DESC, RELEVANCE_ASC)
           in: query
           schema:
             type: string
         - name: offset
           in: query
+          description: Use this offset for the results.
           schema:
             type: integer
         - name: limit
+          description: Limit results to a specific number.
           in: query
           schema:
             type: integer
