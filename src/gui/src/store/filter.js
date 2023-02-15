@@ -44,6 +44,7 @@ const actions = {
     context.commit('SET_FILTER', filter)
   },
   updateFilter(context, filter) {
+    console.debug('updateFilter', filter)
     context.commit('UPDATE_FILTER', filter)
   },
   setSort(context, sort) {

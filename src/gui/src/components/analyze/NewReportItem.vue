@@ -190,9 +190,14 @@
                         >
                           <v-expansion-panel
                             v-for="attribute_item in attribute_group.attribute_group_items"
-                            :key="attribute_item.id"
+                            :key="attribute_item.attribute_group_item.id"
                             class="item-panel"
                           >
+                            {{ attribute_item }}
+                            <br/>
+                            XXXX
+                            <br/>
+                            {{ attribute_item.attribute_group_item }}
                             <v-expansion-panel-header
                               class="pa-2 font-weight-bold primary--text rounded-0"
                             >
@@ -235,12 +240,12 @@
             class="pa-5 taranis-ng-vertical-view"
           >
 
-          <card-news-item
+          <card-story
             v-for="(newsItem, index) in news_item_aggregates"
             :key="newsItem.id"
             :newsItem="newsItem"
             :position="index"
-          ></card-news-item>
+          ></card-story>
 
           </v-col>
         </v-row>
@@ -275,7 +280,7 @@ import {
 } from '@/api/analyze'
 
 import AttributeContainer from '@/components/common/attribute/AttributeContainer'
-import CardNewsItem from '@/components/assess/CardNewsItem'
+import CardStory from '@/components/assess/CardStory'
 
 import VueCsvImport from '@/components/common/ImportCSV'
 import { mapActions, mapGetters } from 'vuex'
@@ -291,7 +296,7 @@ export default {
   components: {
     AttributeContainer,
     VueCsvImport,
-    CardNewsItem
+    CardStory
   },
   data: () => ({
     verticalView: true,

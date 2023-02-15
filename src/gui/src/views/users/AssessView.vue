@@ -104,7 +104,7 @@ export default {
       this.items = this.getNewsItems().items
       this.updateItemCountTotal(this.getNewsItems().total_count)
       this.updateItemCountFiltered(this.items.length)
-      console.log('number of newsitems: ' + this.getNewsItems().total_count)
+      console.debug('number of newsitems: ' + this.getNewsItems().total_count)
     }
 
   },
@@ -125,10 +125,8 @@ export default {
   },
 
   created () {
-    console.log('update SourceList')
     this.updateOSINTSourceGroupsList()
     this.updateOSINTSources()
-    this.resetNewsItemsFilter()
     this.updateNewsItems()
 
     this.unsubscribe = this.$store.subscribe((mutation, state) => {
@@ -139,16 +137,6 @@ export default {
   },
   beforeDestroy() {
     this.unsubscribe()
-  },
-  watch: {
-    scope: {
-      handler () {
-        // Update news items based on the selected scope
-        this.getNewsItemsFromStore()
-      },
-      deep: true
-    }
   }
-
 }
 </script>

@@ -289,9 +289,10 @@ export default {
     ]),
     ...mapGetters('filter', ['getNewsItemsFilter'])
   },
-  mounted() {
-    console.debug('loaded with query', this.query)
-  },
-  watch: {}
+  created() {
+    const query = Object.fromEntries(Object.entries(this.query).filter(([_, v]) => v != null))
+    this.updateFilter(query)
+    console.debug('loaded with query', query)
+  }
 }
 </script>

@@ -69,10 +69,10 @@ export default {
     }
   }),
   methods: {
-    attributeType: function () {
+    attributeType() {
       return (
         'Attribute' +
-        this.attributes[this.attribute_item.attribute_group_item.attribute.type]
+        this.attributes[this.attribute_item.attribute_group_item.attribute_name]
       )
     }
   },
