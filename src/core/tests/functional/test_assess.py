@@ -2,19 +2,6 @@ from core.model.news_item import NewsItemAggregate
 
 class TestAssessApi(object):
 
-    def _cleanup(self, dbsession):
-        # Clean Up the mess
-        dbsession.delete(os)
-        dbsession.delete(ni)
-        dbsession.delete(nv)
-        dbsession.delete(nia)
-        dbsession.delete(na)
-        dbsession.commit()
-
-
-    def teardown_class(self):
-        print("teardown test")
-
     def test_get_OSINTSourceGroupsAssess_auth(self, client, auth_header):
         """
         This test queries the OSINTSourceGroupsAssess authenticated.
@@ -103,7 +90,7 @@ class TestAssessApi(object):
         assert response.get_json()["error"] == "not authorized"
         assert response.status_code == 401
 
-    def test_post_AddNewsItem_auth(self, client, news_item_data, dbsession, auth_header):
+    def test_post_AddNewsItem_auth(self, client, news_item_data, db_session, auth_header):
         """
         This test queries the AddNewsItem authenticated.
         It expects a valid data and a valid status-code
@@ -135,12 +122,8 @@ class TestAssessApi(object):
         assert response.data
         assert response.status_code == 200
         assert before < news_item_data.count_all()
-        # cleanup
-        ni = news_item_data.query.filter_by(id="1337").one()
-        dbsession.delete(ni)
-        dbsession.commit()
 
-    def test_post_AddNewsItem_unauth(self, client, news_item_data, dbsession):
+    def test_post_AddNewsItem_unauth(self, client, news_item_data, db_session):
         """
         This test queries the AddNewsItem UNauthenticated.
         It expects "not authorized"
@@ -173,7 +156,7 @@ class TestAssessApi(object):
         assert response.status_code == 401
         assert before == news_item_data.count_all()
 
-    def test_get_NewsItemAggregates_auth(self, client, news_item, dbsession, auth_header):
+    def test_get_NewsItemAggregates_auth(self, client, news_item, db_session, auth_header):
         """
         This test queries the NewsItemAggregates authenticated.
         It expects a valid data and a valid status-code
@@ -274,6 +257,3 @@ class TestAssessApi(object):
 
         response = client.get("/api/v1/assess/news-item-aggregates?limit=-1", headers=auth_header)
         assert response.get_json()["total_count"] > 0
-
-
-

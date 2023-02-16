@@ -1,8 +1,9 @@
 import pytest
 from dotenv import load_dotenv
+# from sqlalchemy import event
+# from sqlalchemy.orm import sessionmaker
 
 load_dotenv(dotenv_path="tests/.env", override=True)
-
 
 
 @pytest.fixture()
@@ -16,19 +17,18 @@ def client(app):
     yield app.test_client()
 
 
-@pytest.fixture
-def dbsession(app):
+@pytest.fixture()
+def _db(app):
     with app.app_context():
         from core.managers.db_manager import db
-        yield db.session
-
+        yield db
 
 @pytest.fixture
 def news_item_data(app):
     with app.app_context():
         from core.model.news_item import NewsItemData
         yield NewsItemData
-    
+
 
 @pytest.fixture
 def news_item(app):
