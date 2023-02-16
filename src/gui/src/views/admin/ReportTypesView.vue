@@ -66,7 +66,6 @@ export default {
       this.edit = true
     },
     handleSubmit(submittedData) {
-      console.debug(submittedData)
       if (this.edit) {
         this.updateItem(submittedData)
       } else {

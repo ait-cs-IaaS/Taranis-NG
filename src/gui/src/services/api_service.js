@@ -30,7 +30,6 @@ const ApiService = {
       if (typeof val === 'object') {
         return ApiService.getQueryStringFromObject(val)
       }
-      console.debug('key', key, 'val', val)
       return `${key}=${val}`
     }).join('&')
   },
