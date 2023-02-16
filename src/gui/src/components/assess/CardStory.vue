@@ -19,11 +19,11 @@
         @click="toggleSelection"
       >
         <div
-          v-if="story.in_reports_count > 0"
+          v-if="story_in_reports > 0"
           class="news-item-corner-tag text-caption text-weight-bold text-uppercase white--text"
         >
           <v-icon class="flipped-icon">mdi-share</v-icon>
-          <span>{{ story.in_reports_count }}</span>
+          <span>{{ story_in_reports }}</span>
         </div>
 
         <div
@@ -250,7 +250,10 @@ export default {
   },
   emits: ['selectItem', 'deleteItem'],
   props: {
-    story: {},
+    story: {
+      type: Object,
+      required: true
+    },
     selected: Boolean
   },
   data: () => ({
@@ -292,6 +295,9 @@ export default {
       const oneWeekAgo = new Date()
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
       return oneWeekAgo > pub_date
+    },
+    story_in_reports() {
+      return this.story ? this.story.in_reports_count : 0
     }
   },
   methods: {
@@ -358,10 +364,6 @@ export default {
       return this.story.news_items[0].news_item_data.author
     },
 
-    storyInReport() {
-      return this.story.in_reports_count
-    },
-
     storyRestricted() {
       return false
     }
@@ -370,8 +372,8 @@ export default {
     // console.log('card rendered!')
   },
   mounted() {
-    this.likes = this.story.likes || 0
-    this.dislikes = this.story.dislikes || 0
+    this.likes = this.story ? this.story.likes : 0
+    this.dislikes = this.story ? this.story.dislikes : 0
   }
 }
 </script>

@@ -2,14 +2,14 @@ const state = {
   scope: '',
 
   newsItemsFilter: {
-    offset: 0,
-    limit: 15,
+    offset: undefined,
+    limit: undefined,
     search: undefined,
     sort: 'DATE_DESC',
     range: undefined,
-    date: undefined,
+    read: undefined,
     tags: undefined,
-    in_analyze: undefined,
+    in_report: undefined,
     relevant: undefined,
     important: undefined
   },
@@ -73,14 +73,14 @@ const mutations = {
   },
   RESET_NEWSITEMS_FILTERS(state) {
     state.newsItemsFilter = {
-      offset: 0,
-      limit: 15,
+      offset: undefined,
+      limit: undefined,
       search: undefined,
       sort: 'DATE_DESC',
       range: undefined,
-      date: undefined,
+      read: undefined,
       tags: undefined,
-      in_analyze: undefined,
+      in_report: undefined,
       relevant: undefined,
       important: undefined
     }

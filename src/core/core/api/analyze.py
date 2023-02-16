@@ -8,7 +8,7 @@ from core.managers.auth_manager import auth_required, ACLCheck
 from core.model import attribute, report_item, report_item_type
 
 
-class ReportItemTypes(Resource):
+class ReportTypes(Resource):
     @auth_required("ANALYZE_ACCESS")
     def get(self):
         return report_item_type.ReportItemType.get_all_json(None, auth_manager.get_user_from_jwt(), True)
@@ -214,7 +214,7 @@ class ReportItemDownloadAttachment(Resource):
 
 
 def initialize(api):
-    api.add_resource(ReportItemTypes, "/api/v1/analyze/report-item-types")
+    api.add_resource(ReportTypes, "/api/v1/analyze/report-types")
     api.add_resource(ReportItemGroups, "/api/v1/analyze/report-item-groups")
     api.add_resource(ReportItems, "/api/v1/analyze/report-items")
     api.add_resource(ReportItem, "/api/v1/analyze/report-items/<int:report_item_id>")

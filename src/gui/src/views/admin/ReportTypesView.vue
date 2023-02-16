@@ -44,12 +44,12 @@ export default {
   }),
   computed: {},
   methods: {
-    ...mapActions('config', ['loadReportItemTypesConfig']),
-    ...mapGetters('config', ['getReportItemTypesConfig']),
+    ...mapActions('config', ['loadReportTypesConfig']),
+    ...mapGetters('config', ['getReportTypesConfig']),
     ...mapActions(['updateItemCount']),
     updateData() {
-      this.loadReportItemTypesConfig().then(() => {
-        const sources = this.getReportItemTypesConfig()
+      this.loadReportTypesConfig().then(() => {
+        const sources = this.getReportTypesConfig()
         this.report_types = sources.items
         this.updateItemCount({
           total: sources.total_count,

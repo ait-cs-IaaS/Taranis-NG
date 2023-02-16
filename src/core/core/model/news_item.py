@@ -603,6 +603,8 @@ class NewsItemAggregate(db.Model):
 
         query = ACLEntry.apply_query(query, user, True, False, False)
 
+        logger.debug(filter)
+
         if "search" in filter and filter["search"] != "":
             search_string = f"%{filter['search']}%"
             query = query.join(
@@ -617,9 +619,9 @@ class NewsItemAggregate(db.Model):
             query = query.filter(NewsItemAggregate.important is True)
 
         if "relevant" in filter and filter["relevant"].lower() == "true":
-            query = query.filter(NewsItemAggregate.likes > 0)
+            query = query.filter(NewsItemAggregate.relevance > 0)
 
-        if "in_analyze" in filter and filter["in_analyze"].lower() == "true":
+        if "in_report" in filter and filter["in_report"].lower() == "true":
             query = query.join(
                 ReportItemNewsItemAggregate,
                 NewsItemAggregate.id == ReportItemNewsItemAggregate.news_item_aggregate_id,

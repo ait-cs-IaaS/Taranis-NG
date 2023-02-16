@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-container fluid style="min-height: 100vh">
+    <v-container fluid style="min-height: 40vh">
       <transition name="empty-list-transition" mode="out-in">
         <v-row v-if="!items">
           <v-col cols="12" class="empty-list-notification">

@@ -363,8 +363,8 @@ export default {
   },
   methods: {
     ...mapGetters(['getUserId']),
-    ...mapGetters('analyze', ['getReportItemTypes']),
-    ...mapActions('analyze', ['loadReportItemTypes']),
+    ...mapGetters('analyze', ['getReportTypes']),
+    ...mapActions('analyze', ['loadReportTypes']),
     addReportItem() {
       this.visible = true
       this.modify = true
@@ -956,8 +956,8 @@ export default {
 
     this.local_reports = !window.location.pathname.includes('/group/')
 
-    this.loadReportItemTypes().then(() => {
-      this.report_types = this.getReportItemTypes().items
+    this.loadReportTypes().then(() => {
+      this.report_types = this.getReportTypes().items
     })
 
     this.$root.$on('new-report', (data) => {
