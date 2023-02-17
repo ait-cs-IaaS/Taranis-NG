@@ -968,10 +968,6 @@ def pre_seed_report_items():
     from core.model.attribute import Attribute
 
     if not db.session.query(ReportItemType).filter_by(title="Vulnerability Report").first():
-        report_item_type = ReportItemType(None, "Vulnerability Report", "Basic report type", [])
-        db.session.add(report_item_type)
-        db.session.commit()
-
         cvss_item = AttributeGroupItem(
             None,
             "CVSS",
@@ -1063,8 +1059,6 @@ def pre_seed_report_items():
                 impact_item,
             ],
         )
-        db.session.add(group1)
-        db.session.commit()
 
         affected_systems_item = AttributeGroupItem(
             None,
@@ -1102,8 +1096,6 @@ def pre_seed_report_items():
             0,
             [affected_systems_item, ioc_item, recommendations_item],
         )
-        db.session.add(group2)
-        db.session.commit()
 
         links_item = AttributeGroupItem(
             None,
@@ -1114,14 +1106,17 @@ def pre_seed_report_items():
             1000,
             db.session.query(Attribute).filter_by(name="Text").first().id,
         )
-        db.session.add(AttributeGroup(None, "Resources", "", 0, "", 0, [links_item]))
+        group3 = AttributeGroup(None, "Resources", "", 0, "", 0, [links_item])
+        db.session.add(group1)
+        db.session.add(group2)
+        db.session.add(group3)
         db.session.commit()
 
-    if not db.session.query(ReportItemType).filter_by(title="MISP Report").first():
-        report_item_type = ReportItemType(None, "MISP Report", "MISP report type", [])
+        report_item_type = ReportItemType(None, "Vulnerability Report", "Basic report type", [group1, group2, group3])
         db.session.add(report_item_type)
         db.session.commit()
 
+    if not db.session.query(ReportItemType).filter_by(title="MISP Report").first():
         db.session.add(
             AttributeGroupItem(
                 None,
@@ -1168,8 +1163,6 @@ def pre_seed_report_items():
         )
 
         group4 = AttributeGroup(None, "Event", "", None, None, 0, [])
-        db.session.add(group4)
-        db.session.commit()
 
         db.session.add(
             AttributeGroupItem(
@@ -1260,8 +1253,13 @@ def pre_seed_report_items():
             )
         )
         group5 = AttributeGroup(None, "Attribute", "", None, None, 0, [])
-        db.session.add(group5)
 
+        db.session.add(group4)
+        db.session.add(group5)
+        db.session.commit()
+
+        report_item_type = ReportItemType(None, "MISP Report", "MISP report type", [group4, group5])
+        db.session.add(report_item_type)
         db.session.commit()
 
 

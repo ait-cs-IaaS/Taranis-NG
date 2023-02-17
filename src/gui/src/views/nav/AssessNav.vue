@@ -144,7 +144,7 @@ export default {
   },
   data: () => ({
     awaitingSearch: false,
-    filterAttributeSelections: {},
+    filterAttributeSelections: [],
     filterAttributeOptions: [
       { type: 'read', label: 'read', icon: 'mdi-email-mark-as-unread' },
       {

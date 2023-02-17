@@ -111,12 +111,13 @@ export default {
   computed: {
     ...mapState('filter', {
       scope: (state) => state.newsItemsFilter.scope,
-      filter: (state) => state.newsItemsFilter.filter,
-      order: (state) => state.newsItemsFilter.order
+      filter: (state) => state.newsItemsFilter
     }),
 
     moreToLoad () {
-      return this.items.length < this.getNewsItems().total_count
+      const offset = this.filter.offset ? parseInt(this.filter.offset) : 0
+      const length = offset + this.items.length
+      return length < this.getNewsItems().total_count
     },
 
     activeSelection () {

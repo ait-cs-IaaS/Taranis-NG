@@ -69,7 +69,10 @@ const mutations = {
     state.newsItemsFilter.offset++
   },
   NEXT_PAGE(state) {
-    state.newsItemsFilter.offset = state.newsItemsFilter.offset + state.newsItemsFilter.limit
+    const offset = state.newsItemsFilter.offset ? parseInt(state.newsItemsFilter.offset) : 0
+    const limit = state.newsItemsFilter.limit ? parseInt(state.newsItemsFilter.limit) : 20
+
+    state.newsItemsFilter.offset = offset + limit
   },
   RESET_NEWSITEMS_FILTERS(state) {
     state.newsItemsFilter = {

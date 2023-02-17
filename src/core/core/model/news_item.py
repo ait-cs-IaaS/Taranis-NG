@@ -579,6 +579,7 @@ class NewsItemAggregate(db.Model):
 
     @classmethod
     def get_by_group(cls, group_id, filter: dict, user: User):
+        logger.debug(f"Getting NewsItems Filtered: {filter}")
         query = cls.query.distinct().group_by(NewsItemAggregate.id)
 
         query = query.filter(NewsItemAggregate.osint_source_group_id == group_id)
@@ -602,8 +603,6 @@ class NewsItemAggregate(db.Model):
         )
 
         query = ACLEntry.apply_query(query, user, True, False, False)
-
-        logger.debug(filter)
 
         if "search" in filter and filter["search"] != "":
             search_string = f"%{filter['search']}%"

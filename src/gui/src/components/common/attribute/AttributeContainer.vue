@@ -79,9 +79,6 @@ export default {
   mounted() {
     console.debug('Mounted Attribute Container')
     console.debug(this.attribute_item)
-    console.debug(this.read_only)
-    console.debug(this.edit)
-    console.debug(this.report_item_id)
   }
 }
 </script>

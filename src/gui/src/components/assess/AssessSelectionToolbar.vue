@@ -6,11 +6,6 @@
     flat
     dense
     dark
-    style="
-      bottom: 0px !important;
-      top: auto !important;
-      height: auto !important;
-    "
     color="primary"
     class="selection-toolbar"
   >
@@ -32,8 +27,7 @@
 
         <v-col
           cols="1"
-          class="py-1 d-flex justify-content-center"
-          style="min-width: fit-content"
+          class="py-1 d-flex"
         >
           <span class="mr-2 my-auto selection-indicator">
             selected: <strong>{{ selection.length }}</strong>

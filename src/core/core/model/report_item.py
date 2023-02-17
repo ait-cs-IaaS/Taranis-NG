@@ -148,15 +148,14 @@ class ReportItem(db.Model):
 
         self.id = id
 
-        self.uuid = str(uuid_generator.uuid4()) if uuid is None else uuid
+        self.uuid = uuid or str(uuid_generator.uuid4())
         self.title = title
         self.title_prefix = title_prefix
         self.report_item_type_id = report_item_type_id
         self.attributes = attributes
         self.completed = completed
         self.report_item_cpes = []
-        self.subtitle = ""
-        self.tag = ""
+        self.tag = "mdi-file-table-outline"
 
         self.news_item_aggregates = [NewsItemAggregate.find(news_item_aggregate.id) for news_item_aggregate in news_item_aggregates]
 
@@ -164,7 +163,6 @@ class ReportItem(db.Model):
 
     @orm.reconstructor
     def reconstruct(self):
-        self.subtitle = ""
         self.tag = "mdi-file-table-outline"
         self.attributes.sort(key=ReportItemAttribute.sort)
 
@@ -227,7 +225,7 @@ class ReportItem(db.Model):
         return items, last_sync_time
 
     @classmethod
-    def get(cls, group, filter: dict, offset: int, limit: int, user, acl_check: bool):
+    def get(cls, group, filter: dict, user, acl_check: bool):
         query = cls.query
 
         if acl_check:
@@ -244,12 +242,12 @@ class ReportItem(db.Model):
             query = cls.query.filter(ReportItem.remote_user == group)
 
         if "search" in filter and filter["search"] != "":
-            search_string = f"%{filter['search'].lower()}%"
+            search_string = f"%{filter['search']}%"
             query = query.join(ReportItemAttribute, ReportItem.id == ReportItemAttribute.report_item_id).filter(
                 or_(
-                    func.lower(ReportItemAttribute.value).like(search_string),
-                    func.lower(ReportItem.title).like(search_string),
-                    func.lower(ReportItem.title_prefix).like(search_string),
+                    ReportItemAttribute.value.ilike(search_string),
+                    ReportItem.title.ilike(search_string),
+                    ReportItem.title_prefix.ilike(search_string),
                 )
             )
 
@@ -284,6 +282,9 @@ class ReportItem(db.Model):
 
             elif filter["sort"] == "DATE_ASC":
                 query = query.order_by(db.asc(ReportItem.created))
+        offset = filter.get("offset", 0)
+        limit = filter.get("limit", 20)
+
         return query.offset(offset).limit(limit).all(), query.count()
 
     @classmethod
@@ -310,8 +311,8 @@ class ReportItem(db.Model):
         return [row[0] for row in result if row[0] is not None]
 
     @classmethod
-    def get_json(cls, group, filter, offset, limit, user):
-        results, count = cls.get(group, filter, offset, limit, user, True)
+    def get_json(cls, group, filter, user):
+        results, count = cls.get(group, filter, user, True)
         logger.log_debug(f"Found {count} report items with filter {filter}")
         for result in results:
             logger.log_debug(result.__dict__)
@@ -322,8 +323,8 @@ class ReportItem(db.Model):
     @classmethod
     def get_detail_json(cls, id):
         report_item = cls.query.get(id)
-        report_item_schema = ReportItemSchema()
-        return report_item_schema.dump(report_item)
+        print(report_item.attributes)
+        return ReportItemSchema().dump(report_item)
 
     @classmethod
     def get_groups(cls):
@@ -543,12 +544,12 @@ class ReportItem(db.Model):
 
         report_item.last_updated = datetime.now()
 
-        data = dict()
-        data["add"] = True
-        data["user_id"] = user.id
-        data["report_item_id"] = int(id)
-        data["attribute_id"] = new_attribute.id
-
+        data = {
+            "add": True,
+            "user_id": user.id,
+            "report_item_id": int(id),
+            "attribute_id": new_attribute.id,
+        }
         db.session.commit()
 
         return data

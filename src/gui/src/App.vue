@@ -91,22 +91,23 @@ export default {
         }
       }
     }
-    // setInterval(
-    //   function () {
-    //     if (this.isAuthenticated()) {
-    //       if (this.needTokenRefresh() === true) {
-    //         this.$store.dispatch('refresh').then(() => {
-    //           this.reconnectSSE()
-    //         })
-    //       }
-    //     } else {
-    //       if (this.$store.getters.getJWT) {
-    //         this.$store.dispatch('logout')
-    //       }
-    //     }
-    //   }.bind(this),
-    //   5000
-    // )
+    setInterval(
+      function () {
+        if (this.isAuthenticated()) {
+          if (this.needTokenRefresh() === true) {
+            this.$store.dispatch('refresh').then(() => {
+              console.debug('Token refreshed')
+              // this.reconnectSSE()
+            })
+          }
+        } else {
+          if (this.$store.getters.getJWT) {
+            this.$store.dispatch('logout')
+          }
+        }
+      }.bind(this),
+      5000
+    )
   },
   created () {
 
