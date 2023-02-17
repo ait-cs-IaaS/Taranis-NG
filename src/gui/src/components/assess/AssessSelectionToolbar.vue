@@ -45,16 +45,13 @@
 </template>
 
 <script>
-import {
-  deleteNewsItemAggregate,
-  groupAction
-} from '@/api/assess'
+import { deleteNewsItemAggregate, groupAction } from '@/api/assess'
 
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
 
 export default {
   name: 'AssessSelectionToolbar',
-  components: { },
+  components: {},
   emits: ['refresh'],
   props: {
     selection: []
@@ -73,7 +70,7 @@ export default {
       },
       {
         label: 'delete items',
-        icon: 'mdi-delete-circle',
+        icon: 'mdi-delete-outline',
         action: 'deleteItems'
       }
     ],
@@ -88,7 +85,7 @@ export default {
             notifySuccess('Items merged')
             this.$emit('refresh')
           })
-          .catch(err => {
+          .catch((err) => {
             notifyFailure('Failed to merge items')
             console.log(err)
           })
@@ -100,7 +97,7 @@ export default {
             notifySuccess('Items deleted')
             this.$emit('refresh')
           })
-          .catch(err => {
+          .catch((err) => {
             notifyFailure('Failed to delete items')
             console.log(err)
           })
