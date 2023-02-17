@@ -6,7 +6,7 @@ Vue.use(Vuetify)
 const colors = {
   primary: '#7468E8',
   secondary: '#34a5e8',
-  accent: '#82B1FF',
+  accent: '#cfcde5',
   info: '#2196F3',
   error: '#FF5252',
   success: '#4CAF50',
@@ -24,9 +24,9 @@ const colors = {
   'cx-filter': '#9f02ff',
   'cx-wordlist': '#FFC107',
   'dark-grey': '#575757',
-  'awake-green-color': '#77BB70',
+  'awake-green-color': '#5d9458',
   'awake-yellow-color': '#E9C645',
-  'awake-red-color': '#D18E8E'
+  'awake-red-color': '#b65f5f'
 }
 
 const theme = {
