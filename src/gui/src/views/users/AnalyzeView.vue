@@ -1,5 +1,5 @@
 <template>
-<div>
+  <div>
     <DataTable
       :addButton="true"
       :items.sync="report_items"
@@ -12,18 +12,22 @@
       @update-items="updateData"
       @selection-change="selectionChange"
     >
-    <template v-slot:actionColumn>
-      <v-tooltip left>
-        <template v-slot:activator="{ on }">
-          <v-icon v-on="on" color="secondary" @click.stop="createProduct(item)"> mdi-file </v-icon>
-        </template>
-        <span>Create Product</span>
-      </v-tooltip>
-    </template>
+      <template v-slot:actionColumn>
+        <v-tooltip left>
+          <template v-slot:activator="{ on }">
+            <v-icon
+              v-on="on"
+              color="secondary"
+              @click.stop="createProduct(item)"
+            >
+              mdi-file
+            </v-icon>
+          </template>
+          <span>Create Product</span>
+        </v-tooltip>
+      </template>
     </DataTable>
-    <v-dialog
-      v-model="dialog"
-    >
+    <v-dialog v-model="dialog">
       <v-card>
         <v-card-title class="text-h5">
           {{ $t('report_item.add_new') }}
@@ -31,50 +35,46 @@
 
         <v-card-text>
           <v-row>
-            <v-col cols="4" class="pr-3">
-              {{ report_types }}
-              <v-select
-                v-model="report_item.report_item_type_id"
-                item-text="title"
-                item-value="id"
-                :items="report_types"
-                :label="$t('report_item.report_type')"
-              />
-            </v-col>
-            <v-col cols="4" class="pr-3">
-              <v-text-field
-                :label="$t('report_item.title_prefix')"
-                name="title_prefix"
-                v-model="report_item.title_prefix"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="4" class="pr-3">
-              <v-text-field
-                :label="$t('report_item.title')"
-                name="title"
-                v-model="report_item.title"
-              ></v-text-field>
-            </v-col>
+            {{ report_types }}
+            <v-select
+              v-model="report_item.report_item_type_id"
+              item-text="title"
+              item-value="id"
+              :items="report_types"
+              :label="$t('report_item.report_type')"
+            />
+          </v-row>
+          <v-row>
+            <v-text-field
+              :label="$t('report_item.title_prefix')"
+              name="title_prefix"
+              v-model="report_item.title_prefix"
+            ></v-text-field>
+          </v-row>
+          <v-row>
+            <v-text-field
+              :label="$t('report_item.title')"
+              name="title"
+              v-model="report_item.title"
+            ></v-text-field>
           </v-row>
         </v-card-text>
 
         <v-card-actions>
-          <v-btn
-            color="green darken-1"
-            @click="dialog = false"
-          >
-            Create
-          </v-btn>
+          <v-btn color="green darken-1" @click="dialog = false"> Create </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
-
-</div>
+  </div>
 </template>
 
 <script>
 import DataTable from '@/components/common/DataTable'
-import { deleteReportItem, createReportItem, updateReportItem } from '@/api/analyze'
+import {
+  deleteReportItem,
+  createReportItem,
+  updateReportItem
+} from '@/api/analyze'
 import { mapActions, mapGetters } from 'vuex'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
 
@@ -122,29 +122,35 @@ export default {
     },
     deleteItem(item) {
       if (!item.default) {
-        deleteReportItem(item).then(() => {
-          notifySuccess(`Successfully deleted ${item.name}`)
-          this.updateData()
-        }).catch(() => {
-          notifyFailure(`Failed to delete ${item.name}`)
-        })
+        deleteReportItem(item)
+          .then(() => {
+            notifySuccess(`Successfully deleted ${item.name}`)
+            this.updateData()
+          })
+          .catch(() => {
+            notifyFailure(`Failed to delete ${item.name}`)
+          })
       }
     },
     createItem(item) {
-      createReportItem(item).then(() => {
-        notifySuccess(`Successfully created ${item.name}`)
-        this.updateData()
-      }).catch(() => {
-        notifyFailure(`Failed to create ${item.name}`)
-      })
+      createReportItem(item)
+        .then(() => {
+          notifySuccess(`Successfully created ${item.name}`)
+          this.updateData()
+        })
+        .catch(() => {
+          notifyFailure(`Failed to create ${item.name}`)
+        })
     },
     updateItem(item) {
-      updateReportItem(item).then(() => {
-        notifySuccess(`Successfully updated ${item.name}`)
-        this.updateData()
-      }).catch(() => {
-        notifyFailure(`Failed to update ${item.name}`)
-      })
+      updateReportItem(item)
+        .then(() => {
+          notifySuccess(`Successfully updated ${item.name}`)
+          this.updateData()
+        })
+        .catch(() => {
+          notifyFailure(`Failed to update ${item.name}`)
+        })
     },
     createProduct() {
       this.$router.push({ name: 'product', params: { id: null } })
