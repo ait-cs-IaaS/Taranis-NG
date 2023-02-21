@@ -109,10 +109,10 @@ class TestAssessApi(object):
                 "source": "test source",
                 "link": "https://linky.link.lnk",
                 "hash": "test hash",
-                "published": "yes",
+                "published": "2022-02-21T15:00:15.086285",
                 "author": "James Bond",
                 "content": "Diamonds are forever",
-                "collected": "26.01.2023 - 16:36",
+                "collected": "2022-02-21T15:00:14.086285",
                 "attributes": [attribs]
         }
         before = news_item_data.count_all()
@@ -142,10 +142,10 @@ class TestAssessApi(object):
                 "source": "test source",
                 "link": "https://linky.link.lnk",
                 "hash": "test hash",
-                "published": "yes",
+                "published": "2022-02-21T15:00:15.086285",
                 "author": "James Bond",
                 "content": "Diamonds are forever",
-                "collected": "26.01.2023 - 16:36",
+                "collected": "2022-02-21T15:00:14.086285",
                 "attributes": [attribs]
         }
         before = news_item_data.count_all()
@@ -165,13 +165,14 @@ class TestAssessApi(object):
         from core.model.news_item import NewsItemAggregate, NewNewsItemDataSchema
         from core.model.osint_source import OSINTSource
         from shared.schema.osint_source import OSINTSourceExportSchema
+        import datetime;
 
         ossi = {
           "description": "",
-          "name": "BSI Bund",
+          "name": "Some Bind",
           "parameter_values": [
             {
-              "value": "https://www.bsi.bund.de/SiteGlobals/Functions/RSSFeed/RSSNewsfeed/RSSNewsfeed.xml",
+              "value": "https://www.some.bind.it/SiteGlobals/Functions/RSSFeed/RSSNewsfeed/RSSNewsfeed.xml",
               "parameter": {
                 "key": "FEED_URL"
               }
@@ -190,30 +191,32 @@ class TestAssessApi(object):
           {
             "id": "1be00eef-6ade-4818-acfc-25029531a9a5",
             "content": "TEST CONTENT YYYY",
-            "source": "https: //www.bsi.bund.de/SiteGlobals/Functions/RSSFeed/RSSNewsfeed/RSSNewsfeed.xml",
+            "source": "https: //www.some.link/RSSNewsfeed.xml",
             "title": "Mobile World Congress 2023",
+            "likes": 5,
             "author": "",
-            "collected": "26.01.2023 - 16:36",
+            "collected": "2022-02-21T15:00:14.086285",
             "hash": "82e6e99403686a1072d0fb2013901b843a6725ba8ac4266270f62b7614ec1adf",
             "attributes": [],
             "review": "",
-            "link": "https://www.bsi.bund.de/SharedDocs/Termine/DE/2023/MWC_2023.html",
+            "link": "https://www.some.other.link/2023.html",
             "osint_source_id": os.id,
-            "published": "2023-02-13T00: 00: 00+01: 00"
+            "published": "2022-02-21T15:01:14.086285"
           },
           {
             "id": "0a129597-592d-45cb-9a80-3218108b29a0",
             "content": "TEST CONTENT XXXX",
-            "source": "https: //www.bsi.bund.de/SiteGlobals/Functions/RSSFeed/RSSNewsfeed/RSSNewsfeed.xml",
+            "source": "https: //www.content.xxxx.link/RSSNewsfeed.xml",
             "title": "Bundesinnenministerin Nancy Faeser wird Claudia Plattner zur neuen BSI-Präsidentin berufen",
             "author": "",
-            "collected": "26.01.2023 - 16:36",
+            "likes": 0,
+            "collected": "2023-01-20T15:00:14.086285",
             "hash": "e270c3a7d87051dea6c3dc14234451f884b427c32791862dacdd7a3e3d318da6",
             "attributes": [],
             "review": "Claudia Plattner wird ab 1. Juli 2023 das Bundesamt für Sicherheitin der Informationstechnik (BSI) leiten.",
-            "link": "https: //www.bsi.bund.de/DE/Service-Navi/Presse/Alle-Meldungen-News/Meldungen/BSI-Praesidentin_230207.html",
+            "link": "https: //www.some.other.link/BSI-Praesidentin_230207.html",
             "osint_source_id": os.id,
-            "published": "2023-02-07T09:15:00+01:00"
+            "published": "2023-01-20T19:15:00+01:00"
           }
         ]
 
@@ -227,7 +230,7 @@ class TestAssessApi(object):
         response = client.get("/api/v1/assess/news-item-aggregates", headers=auth_header)
         assert response
         assert response.data
-        assert response.get_json()["total_count"] > 0
+        assert response.get_json()["total_count"] == 2
         assert response.content_type == "application/json"
         assert response.status_code == 200
 
@@ -237,14 +240,14 @@ class TestAssessApi(object):
         response = client.get("/api/v1/assess/news-item-aggregates?notexistent=notexist", headers=auth_header)
         assert response.get_json()["total_count"] > 0
 
-        response = client.get("/api/v1/assess/news-item-aggregates?read=1", headers=auth_header)
-        assert response.get_json()["total_count"] > 0
+        response = client.get("/api/v1/assess/news-item-aggregates?read=true", headers=auth_header)
+        assert len(response.get_json()["items"]) == 0
 
-        response = client.get("/api/v1/assess/news-item-aggregates?relevant", headers=auth_header)
-        assert response.get_json()["total_count"] > 0
+        response = client.get("/api/v1/assess/news-item-aggregates?relevant=true", headers=auth_header)
+        assert len(response.get_json()["items"]) == 1
 
         response = client.get("/api/v1/assess/news-item-aggregates?in_report=true", headers=auth_header)
-        assert response.get_json()["total_count"] > 0
+        assert len(response.get_json()["items"]) == 2
 
         response = client.get("/api/v1/assess/news-item-aggregates?range=20", headers=auth_header)
         assert response.get_json()["total_count"] == 0
@@ -253,7 +256,7 @@ class TestAssessApi(object):
         assert response.get_json()["total_count"] > 0
 
         response = client.get("/api/v1/assess/news-item-aggregates?offset=1", headers=auth_header)
-        assert response.get_json()["total_count"] > 0
+        assert len(response.get_json()["items"]) == 1
 
-        response = client.get("/api/v1/assess/news-item-aggregates?limit=-1", headers=auth_header)
-        assert response.get_json()["total_count"] > 0
+        response = client.get("/api/v1/assess/news-item-aggregates?limit=1", headers=auth_header)
+        assert len(response.get_json()["items"]) == 1
