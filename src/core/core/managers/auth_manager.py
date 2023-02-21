@@ -1,4 +1,3 @@
-import os
 from datetime import datetime, timedelta
 from enum import Enum, auto
 from functools import wraps
@@ -28,7 +27,7 @@ from core.model.token_blacklist import TokenBlacklist
 from core.model.user import User
 from core.config import Config
 
-current_authenticator = None
+current_authenticator = TestAuthenticator()
 
 api_key = Config.API_KEY
 
@@ -43,15 +42,13 @@ def initialize(app):
 
     JWTManager(app)
 
-    which = os.getenv("TARANIS_NG_AUTHENTICATOR")
-    if which == "openid":
+    authenticator = app.config.get("TARANIS_NG_AUTHENTICATOR", "test")
+    if authenticator == "openid":
         current_authenticator = OpenIDAuthenticator()
-    elif which == "keycloak":
+    elif authenticator == "keycloak":
         current_authenticator = KeycloakAuthenticator()
-    elif which == "database":
+    elif authenticator == "database":
         current_authenticator = DatabaseAuthenticator()
-    elif which == "test":
-        current_authenticator = TestAuthenticator()
     else:
         current_authenticator = TestAuthenticator()
 
@@ -201,18 +198,18 @@ def api_key_required(fn):
         # do we have the authorization header?
         auth_header = request.headers.get("Authorization", None)
         if not auth_header:
-            logger.store_auth_error_activity("Missing Authorization header for external access")
+            logger.store_auth_error_activity("Missing Authorization header")
             return error
 
         if not auth_header.startswith("Bearer"):
-            logger.store_auth_error_activity("Missing Authorization Bearer for external access")
+            logger.store_auth_error_activity("Missing Authorization Bearer")
             return error
 
         api_key = auth_header.replace("Bearer ", "")
 
         # does it match some of our collector's keys?
         if not CollectorsNode.exists_by_api_key(api_key) and Config.API_KEY != api_key:
-            logger.store_auth_error_activity(f"Incorrect api key: {api_key} for external access")
+            logger.store_auth_error_activity(f"Incorrect api key: {api_key}")
             return error
 
         # allow
@@ -250,7 +247,7 @@ def get_access_key():
     return request.headers["Authorization"].replace("Bearer ", "")
 
 
-def get_user_from_jwt():
+def get_user_from_jwt() -> User | None:
     try:
         verify_jwt_in_request()
     except JWTExtendedException:
@@ -265,8 +262,4 @@ def get_external_permissions_ids():
 
 
 def get_external_permissions():
-    permissions = []
-    for permission_id in get_external_permissions_ids():
-        permissions.append(Permission.find(permission_id))
-
-    return permissions
+    return [Permission.find(permission_id) for permission_id in get_external_permissions_ids()]

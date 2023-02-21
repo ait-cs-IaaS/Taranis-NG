@@ -1,6 +1,6 @@
 <template>
   <div>
-    <ConfigTable
+    <DataTable
       :addButton="true"
       :items.sync="osint_sources"
       :headerFilter="['tag', 'name', 'description', 'FEED_URL']"
@@ -12,13 +12,10 @@
       @update-items="updateData"
       @selection-change="selectionChange"
     >
-    <template v-slot:titlebar>
-      <ImportExport
-        @import="importData"
-        @export="exportData"
-      ></ImportExport>
-    </template>
-    </ConfigTable>
+      <template v-slot:titlebar>
+        <ImportExport @import="importData" @export="exportData"></ImportExport>
+      </template>
+    </DataTable>
     <EditConfig
       v-if="formData && Object.keys(formData).length > 0"
       :configData.sync="formData"
@@ -29,7 +26,7 @@
 </template>
 
 <script>
-import ConfigTable from '../../components/config/ConfigTable'
+import DataTable from '@/components/common/DataTable'
 import EditConfig from '../../components/config/EditConfig'
 import ImportExport from '../../components/config/ImportExport'
 import {
@@ -40,12 +37,18 @@ import {
   importOSINTSources
 } from '@/api/config'
 import { mapActions, mapGetters } from 'vuex'
-import { notifySuccess, objectFromFormat, notifyFailure, parseParameterValues, createParameterValues } from '@/utils/helpers'
+import {
+  notifySuccess,
+  objectFromFormat,
+  notifyFailure,
+  parseParameterValues,
+  createParameterValues
+} from '@/utils/helpers'
 
 export default {
   name: 'OSINTSources',
   components: {
-    ConfigTable,
+    DataTable,
     EditConfig,
     ImportExport
   },
@@ -106,14 +109,16 @@ export default {
       })
       this.loadCollectors().then(() => {
         const collectors = this.getCollectors()
-        this.collectors = collectors.items.map(collector => {
-          this.parameters[collector.id] = collector.parameters.map(parameter => {
-            return {
-              name: parameter.key,
-              label: parameter.name,
-              type: 'text'
+        this.collectors = collectors.items.map((collector) => {
+          this.parameters[collector.id] = collector.parameters.map(
+            (parameter) => {
+              return {
+                name: parameter.key,
+                label: parameter.name,
+                type: 'text'
+              }
             }
-          })
+          )
           return {
             value: collector.id,
             text: collector.name
@@ -133,7 +138,9 @@ export default {
     },
     handleSubmit(submittedData) {
       delete submittedData.parameter_values
-      const parameter_list = this.parameters[this.formData.collector_id].map(item => item.name)
+      const parameter_list = this.parameters[this.formData.collector_id].map(
+        (item) => item.name
+      )
       const updateItem = createParameterValues(parameter_list, submittedData)
       console.debug('createParameterValues', updateItem)
       if (this.edit) {
@@ -143,40 +150,52 @@ export default {
       }
     },
     deleteItem(item) {
-      deleteOSINTSource(item).then(() => {
-        notifySuccess(`Successfully deleted ${item.name}`)
-        this.updateData()
-      }).catch(() => {
-        notifyFailure(`Failed to delete ${item.name}`)
-      })
+      deleteOSINTSource(item)
+        .then(() => {
+          notifySuccess(`Successfully deleted ${item.name}`)
+          this.updateData()
+        })
+        .catch(() => {
+          notifyFailure(`Failed to delete ${item.name}`)
+        })
     },
     createItem(item) {
-      createOSINTSource(item).then(() => {
-        notifySuccess(`Successfully created ${item.name}`)
-        this.updateData()
-      }).catch(() => {
-        notifyFailure(`Failed to create ${item.name}`)
-      })
+      createOSINTSource(item)
+        .then(() => {
+          notifySuccess(`Successfully created ${item.name}`)
+          this.updateData()
+        })
+        .catch(() => {
+          notifyFailure(`Failed to create ${item.name}`)
+        })
     },
     updateItem(item) {
-      updateOSINTSource(item).then(() => {
-        notifySuccess(`Successfully updated ${item.name}`)
-        this.updateData()
-      }).catch(() => {
-        notifyFailure(`Failed to update ${item.name}`)
-      })
+      updateOSINTSource(item)
+        .then(() => {
+          notifySuccess(`Successfully updated ${item.name}`)
+          this.updateData()
+        })
+        .catch(() => {
+          notifyFailure(`Failed to update ${item.name}`)
+        })
     },
     importData(data) {
       importOSINTSources(data)
+        .then(() => {
+          notifySuccess(`Successfully imported ${data.get('file').name}`)
+          setTimeout(this.updateData(), 1000)
+        })
+        .catch(() => {
+          notifyFailure('Failed to import')
+        })
     },
     exportData() {
-      console.debug('export OSINT sources')
-      exportOSINTSources(this.selected)
+      const queryString = 'ids=' + this.selected.join('&ids=')
+      exportOSINTSources(queryString)
     },
     selectionChange(selected) {
-      this.selected = selected.map(item => item.id)
+      this.selected = selected.map((item) => item.id)
     }
-
   },
   mounted() {
     this.updateData()

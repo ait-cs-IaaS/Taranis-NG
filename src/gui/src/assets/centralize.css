@@ -412,7 +412,7 @@ html {
     background-color: #caecff;
 }
 
-/* --- AssessContent.vue --- */
+/* --- AssessView.vue --- */
 html,
 .v-dialog--active .cs-inside {
     scroll-behavior: smooth;
@@ -437,7 +437,7 @@ html,
     background-color: rgba(255, 0, 0, 0.3);
 }
 
-/* --- NewsItemAggregateDetail.vue --- */
+/* --- StoryDetail.vue --- */
 [role='tablist'] {
     top: 48px;
 }
@@ -553,11 +553,6 @@ html,
 .v-toolbar .v-input {
     padding-top: 12px;
     margin-right: 16px;
-}
-
-/* --- CSButton.vue --- */
-.v-tooltip__content.hide-tooltip {
-    display: none !important;
 }
 
 /* --- CalculatorCVSS.vue --- */

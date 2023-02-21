@@ -25,9 +25,7 @@ class Role(db.Model):
         self.name = name
         self.description = description
         self.permissions = []
-        self.permissions.extend(
-            Permission.find(permission.id) for permission in permissions
-        )
+        self.permissions.extend(Permission.find(permission.id) for permission in permissions)
         self.tag = "mdi-account-arrow-right"
 
     @orm.reconstructor

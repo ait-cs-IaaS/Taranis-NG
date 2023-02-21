@@ -52,15 +52,7 @@
           class="pa-0 pt-12 pl-8 ma-0 ml-16"
           style="width: calc(100% - 64px); position: sticky"
         >
-          <div :style="UI.STYLE.sticky_filter_toolbar">
-            <ToolbarFilterAssess
-              analyze_selector
-              total_count_title="assess.total_count"
-              ref="toolbarFilter"
-            />
-          </div>
-
-          <AssessContent
+          <assess-view
             analyze_selector
             :selection="values"
             class="item-selector"
@@ -99,33 +91,29 @@
 
     <NewsItemSingleDetail ref="newsItemSingleDetail" />
     <NewsItemDetail ref="newsItemDetail" />
-    <NewsItemAggregateDetail ref="newsItemAggregateDetail" />
+    <StoryDetail ref="StoryDetail" />
   </v-row>
 </template>
 
 <script>
 import AuthMixin from '@/services/auth/auth_mixin'
 import Permissions from '@/services/auth/permissions'
-import ViewLayout from '@/components/layouts/ViewLayout'
 import AssessContent from '../../components/assess/AssessContent'
-import ToolbarFilterAssess from '@/components/assess/ToolbarFilterAssess'
-import CardAssess from '@/components/assess/CardAssess'
+import CardAssess from '@/components/assess/legacy/CardAssess'
 import NewsItemSingleDetail from '@/components/assess/NewsItemSingleDetail'
 import NewsItemDetail from '@/components/assess/NewsItemDetail'
-import NewsItemAggregateDetail from '@/components/assess/NewsItemAggregateDetail'
+import StoryDetail from '@/components/assess/StoryDetail'
 import { getReportItemData, updateReportItem } from '@/api/analyze'
 import { mapActions, mapGetters } from 'vuex'
 
 export default {
   name: 'NewsItemSelector',
   components: {
-    ViewLayout,
     AssessContent,
-    ToolbarFilterAssess,
     CardAssess,
     NewsItemSingleDetail,
     NewsItemDetail,
-    NewsItemAggregateDetail
+    StoryDetail
   },
   props: {
     item_values: Array,
@@ -238,7 +226,7 @@ export default {
     },
 
     showAggregateDetail (news_item) {
-      this.$refs.newsItemAggregateDetail.open(news_item)
+      this.$refs.StoryDetail.open(news_item)
     },
 
     showItemDetail (news_item) {

@@ -219,6 +219,11 @@ textarea {
   max-width: 88px;
 }
 
+.v-chip.story-label-no-trunc {
+  font-size: 12px !important;
+  padding: 12px 8px !important;
+}
+
 .v-application .v-card .activity-row {
   min-height: 54px;
   line-height: 1;
@@ -449,7 +454,7 @@ textarea {
 
 .date-filter-group .v-slide-group__content {
   justify-content: space-between;
-  column-gap: 10px;
+  column-gap: 7px;
 }
 
 .v-application .sidebar .filter-btn,
@@ -552,6 +557,9 @@ textarea {
   margin-bottom: 0px !important;
   font-weight: 300;
   font-size: 13px;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  min-height: 6em;
 }
 
 .news-item-meta-infos.row {
@@ -1050,6 +1058,13 @@ textarea {
   max-width: 120px;
 }
 
+.openapi {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  border: none
+}
+
 .dropdown-list-item {
   font-size: 0.9rem;
   color: $dark-grey;
@@ -1116,6 +1131,10 @@ textarea {
   line-height: 1.2;
   letter-spacing: normal;
   font-size: 1.5rem !important;
+}
+
+.nocaps {
+  text-transform: unset !important;
 }
 
 .corner-close {

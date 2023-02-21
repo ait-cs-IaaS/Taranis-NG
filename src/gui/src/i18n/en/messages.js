@@ -1,4 +1,4 @@
-const messages_en = {
+export const messages_en = {
 
   validations: {
     messages: {
@@ -42,7 +42,8 @@ const messages_en = {
     username: "Username",
     password: "Password",
     submit: "Login",
-    error: "Username or password is incorrect"
+    error: "Username or password is incorrect",
+    backend_error: "Taranis Core Backend error"
   },
 
   user_menu: {
@@ -85,6 +86,7 @@ const messages_en = {
     bots: "Bots",
     user: "User",
     nodes: "Nodes",
+    openapi: "OpenAPI",
     organizations: "Organizations",
     word_lists: "Word Lists",
     asset_groups: "Asset Groups",
@@ -790,6 +792,7 @@ const messages_en = {
     delete_item: "Delete",
     spellcheck: "Spellcheck",
     dark_theme: "Dark Theme",
+    locale: "Language",
     press_key: "Press new key for ",
     cancel_press_key: "Cancel",
     selection: "Selection",
@@ -967,5 +970,3 @@ const messages_en = {
     server_error: "Unknown server error..."
   }
 }
-
-export default messages_en

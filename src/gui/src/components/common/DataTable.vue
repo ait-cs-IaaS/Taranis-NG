@@ -1,7 +1,6 @@
 <template>
   <v-container fluid class="ma-5 mt-5 pa-5 pt-0">
       <v-data-table
-        ref="configTable"
         v-model="selected"
         @change="emitSelectionChange"
         @update:search="emitSearchChange"
@@ -72,8 +71,7 @@
         <template v-slot:[`item.actions`]="{ item }">
           <div class="d-inline-flex">
             <slot name="actionColumn"></slot>
-            <v-icon small class="mr-1" @click.stop="rowClick(item)"> mdi-pencil </v-icon>
-            <v-icon small @click.stop="deleteItem(item)"> mdi-delete </v-icon>
+            <v-icon color="red" @click.stop="deleteItem(item)"> mdi-delete </v-icon>
           </div>
         </template>
         <template v-slot:no-data>
@@ -89,7 +87,7 @@
 <script>
 import { mapActions } from 'vuex'
 export default {
-  name: 'ConfigTable',
+  name: 'DataTable',
   components: {},
   emits: ['delete-item', 'edit-item', 'add-item', 'selection-change', 'search-change'],
   props: {

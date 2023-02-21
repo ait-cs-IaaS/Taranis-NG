@@ -1,4 +1,5 @@
 import ApiService from '@/services/api_service'
+import { router } from '@/router'
 
 export function getOSINTSourceGroupsList () {
   return ApiService.get('/assess/osint-source-group-list')
@@ -14,6 +15,7 @@ export function getManualOSINTSources () {
 
 export function getNewsItemsAggregates (filter_data) {
   const filter = ApiService.getQueryStringFromNestedObject(filter_data)
+  router.replace({ query: filter_data }).catch(() => {})
   return ApiService.get(`/assess/news-item-aggregates?${filter}`)
 }
 
@@ -26,35 +28,44 @@ export function getTopStories () {
   return ApiService.get('/assess/top-stories')
 }
 
+export function getTags () {
+  return ApiService.get('/assess/tags')
+}
+
 export function addNewsItem (data) {
   return ApiService.post('/assess/news-items', data)
+}
+
+export function getNewsItem (news_item_id) {
+  return ApiService.get(`/assess/news-items/${news_item_id}`)
 }
 
 export function getNewsItemAggregate (aggregate_id) {
   return ApiService.get(`/assess/news-item-aggregates/${aggregate_id}`)
 }
 
-export function voteNewsItemAggregate (group_id, aggregate_id, vote) {
-  return ApiService.put(`/assess/news-item-aggregates/${aggregate_id}`, { group_id: group_id, vote: vote })
+export function voteNewsItemAggregate (aggregate_id, vote) {
+  return ApiService.put(`/assess/news-item-aggregates/${aggregate_id}`, { vote: vote })
 }
 
-export function readNewsItemAggregate (group_id, aggregate_id) {
-  return ApiService.put(`/assess/news-item-aggregates/${aggregate_id}`, { group_id: group_id, read: true })
+export function readNewsItemAggregate (aggregate_id) {
+  return ApiService.put(`/assess/news-item-aggregates/${aggregate_id}`, { read: true })
 }
 
 export function deleteNewsItemAggregate (aggregate_id) {
   return ApiService.delete(`/assess/news-item-aggregates/${aggregate_id}`)
 }
 
-export function importantNewsItemAggregate (group_id, aggregate_id) {
-  return ApiService.put(`/assess/news-item-aggregates/${aggregate_id}`, {
-    group_id: group_id,
-    important: true
-  })
+export function importantNewsItemAggregate (aggregate_id) {
+  return ApiService.put(`/assess/news-item-aggregates/${aggregate_id}`, { important: true })
 }
 
 export function groupAction (data) {
-  return ApiService.put('/assess/news-item-aggregates-group-action', data)
+  return ApiService.put('/assess/news-item-aggregates/group', data)
+}
+
+export function unGroupAction (data) {
+  return ApiService.put('/assess/news-item-aggregates/ungroup', data)
 }
 
 export function saveNewsItemAggregate (group_id, aggregate_id, title, description, comments) {
@@ -64,10 +75,6 @@ export function saveNewsItemAggregate (group_id, aggregate_id, title, descriptio
     description: description,
     comments: comments
   })
-}
-
-export function getNewsItem (news_item_id) {
-  return ApiService.get(`/assess/news-items/${news_item_id}`)
 }
 
 export function voteNewsItem (group_id, news_item_id, vote) {

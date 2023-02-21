@@ -17,7 +17,6 @@
         <span>{{ tooltip }}</span>
       </v-tooltip>
     </template>
-
     <slot />
   </v-dialog>
 </template>
@@ -25,7 +24,7 @@
 <script>
 export default {
   name: 'newsItemActionDialog',
-  emits: ['close', 'click'],
+  emits: ['open', 'close'],
   data: () => ({
   }),
   props: {
@@ -44,15 +43,12 @@ export default {
       set(value) {
         if (!value) {
           this.$emit('close')
+        } else {
+          this.$emit('open')
         }
       }
     }
   },
-  methods: {
-    modDialog (event) {
-      event.stopPropagation()
-      this.$emit('click', event)
-    }
-  }
+  methods: {}
 }
 </script>

@@ -12,10 +12,22 @@ from core.model import news_item, word_list, bots_node, bot
 class BotGroupAction(Resource):
     @api_key_required
     def put(self):
-        response, osint_source_ids, code = news_item.NewsItemAggregate.group_action(request.json, None)
+        aggregate_ids = request.json
+        if not aggregate_ids:
+            return {"No aggregate ids provided"}, 400
+        response, code = news_item.NewsItemAggregate.group_aggregate(aggregate_ids)
         sse_manager.news_items_updated()
-        if len(osint_source_ids) > 0:
-            sse_manager.remote_access_news_items_updated(osint_source_ids)
+        return response, code
+
+
+class BotUnGroupAction(Resource):
+    @api_key_required
+    def put(self):
+        newsitem_ids = request.json
+        if not newsitem_ids:
+            return {"No aggregate ids provided"}, 400
+        response, code = news_item.NewsItemAggregate.ungroup_aggregate(newsitem_ids)
+        sse_manager.news_items_updated()
         return response, code
 
 
@@ -23,14 +35,25 @@ class NewsItemData(Resource):
     @api_key_required
     def get(self):
         try:
-            limit = datetime.strftime(datetime.now() - timedelta(weeks=1), "%d.%m.%Y - %H:%M")
-            if "limit" in request.args:
-                limit = request.args["limit"]
+            limit = request.args.get("limit", default=(datetime.now() - timedelta(weeks=1)).isoformat())
+            return news_item.NewsItemData.get_all_news_items_data(limit)
         except Exception:
             logger.log_debug_trace("GET /api/v1/bots/news-item-data failed")
             return "", 400
 
-        return news_item.NewsItemData.get_all_news_items_data(limit)
+
+class UpdateNewsItemData(Resource):
+    @api_key_required
+    def put(self, news_item_data_id):
+        try:
+            if not request.json:
+                return {"Not update data provided"}
+            if language := request.json.get("language"):
+                return news_item.NewsItemData.update_news_item_lang(news_item_data_id, language)
+            return {"Not implemented"}
+        except Exception:
+            logger.log_debug_trace("GET /api/v1/bots/news-item-data failed")
+            return "", 400
 
 
 class BotsNode(Resource):
@@ -60,7 +83,7 @@ class UpdateNewsItemAttributes(Resource):
 class UpdateNewsItemTags(Resource):
     @api_key_required
     def put(self, aggregate_id):
-        news_item.NewsItemData.update_news_item_tags(aggregate_id, request.json)
+        news_item.NewsItemAggregate.update_tags(aggregate_id, request.json)
 
 
 class UpdateNewsItemsAggregateSummary(Resource):
@@ -72,8 +95,8 @@ class UpdateNewsItemsAggregateSummary(Resource):
 class GetNewsItemsAggregate(Resource):
     @api_key_required
     def get(self, group_id):
-
-        resp_str = news_item.NewsItemAggregate.get_news_items_aggregate(group_id, request.json)
+        limit = request.args.get("limit", "")
+        resp_str = news_item.NewsItemAggregate.get_news_items_aggregate(group_id, limit)
         return json.loads(resp_str)
 
 
@@ -118,10 +141,15 @@ def initialize(api):
         "/api/v1/bots/news-items-aggregate/<string:aggregate_id>/tags",
     )
     api.add_resource(
+        UpdateNewsItemData,
+        "/api/v1/bots/news-item-data/<string:news_item_data_id>",
+    )
+    api.add_resource(
         UpdateNewsItemAttributes,
         "/api/v1/bots/news-item-data/<string:news_item_data_id>/attributes",
     )
-    api.add_resource(BotGroupAction, "/api/v1/bots/news-item-aggregates-group-action")
+    api.add_resource(BotGroupAction, "/api/v1/bots/news-item-aggregates/group")
+    api.add_resource(BotUnGroupAction, "/api/v1/bots/news-item-aggregates/ungroup")
     api.add_resource(
         GetNewsItemsAggregate,
         "/api/v1/bots/news-item-aggregates-by-group/<string:group_id>",

@@ -1,6 +1,5 @@
-import urllib
 import requests
-import base64
+import hashlib
 from urllib.parse import quote
 from collectors.managers.log_manager import logger
 from collectors.config import Config
@@ -18,10 +17,10 @@ class CoreApi:
         return {"Authorization": f"Bearer {self.api_key}", "Content-type": "application/json"}
 
     def get_node_id(self) -> str:
-        uid = self.api_url + self.api_key
-        return base64.urlsafe_b64encode(uid.encode("utf-8")).decode("utf-8")
+        uid = Config.NODE_URL + Config.API_KEY + Config.NODE_NAME + Config.TARANIS_NG_CORE_URL
+        return hashlib.md5(uid.encode("utf-8")).hexdigest()
 
-    def get_osint_sources(self, collector_type):
+    def get_osint_sources(self, collector_type: str) -> dict | None:
         try:
             response = requests.get(
                 f"{self.api_url}/api/v1/collectors/osint-sources/{quote(collector_type)}",
@@ -29,10 +28,14 @@ class CoreApi:
                 verify=self.verify,
             )
 
-            return response.json(), response.status_code
+            if response.ok:
+                return response.json()
+
+            logger.critical(f"Can't get OSINT Sources: {response.text}")
+            return None
         except Exception:
             logger.log_debug_trace("Can't get OSINT Sources")
-            return None, 400
+            return None
 
     def register_node(self):
         try:
@@ -65,7 +68,7 @@ class CoreApi:
         except Exception:
             logger.log_debug_trace("Can't register Collector node")
 
-    def get_collector_status(self) -> dict|None:
+    def get_collector_status(self) -> dict | None:
         try:
             response = requests.get(f"{self.api_url}/api/v1/collectors/node/{self.node_id}", headers=self.headers, verify=self.verify)
             return response.json() if response.ok else None
@@ -73,13 +76,13 @@ class CoreApi:
             logger.log_debug_trace("Cannot update Collector status")
             return None
 
-    def add_news_items(self, news_items):
+    def add_news_items(self, news_items) -> bool:
         try:
             response = requests.post(
                 f"{self.api_url}/api/v1/collectors/news-items", json=news_items, headers=self.headers, verify=self.verify
             )
 
-            return response.status_code
+            return response.ok
         except Exception:
             logger.log_debug_trace("Cannot add Newsitem")
-            return None, 400
+            return False
