@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import Vuetify from 'vuetify'
+import Vuetify from 'vuetify/lib'
 import { Scroll } from 'vuetify/lib/directives'
 
 Vue.use(Vuetify)
@@ -36,28 +36,15 @@ const theme = {
   }
 }
 
-const breakpoint = {
-  thresholds: {
-    xs: 600,
-    sm: 976,
-    md: 1280,
-    lg: 2200
-  },
-  scrollBarWidth: 16
-}
-
 const icons = {
   iconfont: 'mdi'
 }
 
 const directives = { Scroll }
 
-// Set vuetify
-
 const vuetify = new Vuetify(
   {
     directives: directives,
-    breakpoint: breakpoint,
     icons: icons,
     theme: theme
   })
