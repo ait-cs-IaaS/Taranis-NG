@@ -1,16 +1,19 @@
 <template>
   <v-container>
     <v-app-bar :elevation="2" app class="mt-12">
-      <v-app-bar-title>{{ $t('report_item.edit') }}</v-app-bar-title>
+      <v-app-bar-title>{{ container_title }}</v-app-bar-title>
       <v-spacer></v-spacer>
       <v-switch
         v-model="verticalView"
         label="Side-by-side view"
       ></v-switch>
+      <div v-if="edit">
       <v-switch
+        v-if="edit"
         v-model="report_item.completed"
         label="Completed"
       ></v-switch>
+      </div>
       <v-btn color="success" class="mr-2">
         <v-icon left>mdi-content-save</v-icon>
         <span>{{ $t('report_item.save') }}</span>
@@ -143,6 +146,9 @@ export default {
       return this.report_types.find(
         (report_type) => report_type.id === this.report_item.report_item_type_id
       )
+    },
+    container_title() {
+      return this.edit ? this.$t('report_item.edit') : this.$t('report_item.add_new')
     }
   },
   methods: {
@@ -151,6 +157,8 @@ export default {
     ...mapActions('analyze', ['loadReportTypes'])
   },
   mounted() {
+    console.debug(`edit ${this.edit}`)
+    console.debug(`report_item ${this.report_item}`)
     this.loadReportTypes().then(() => {
       this.report_types = this.getReportTypes().items
     })

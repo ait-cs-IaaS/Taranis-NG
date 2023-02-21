@@ -91,6 +91,7 @@
                 @click.stop="openSummary = !openSummary"
               >
                 <span>{{ news_item_summary_text }}</span>
+                <span v-if="news_item_length > 1" class="primary--text">&nbsp;[{{ news_item_length }}]</span>
                 <v-icon right>mdi-chevron-down</v-icon>
               </v-btn>
 
@@ -314,16 +315,12 @@ export default {
         : 'news-item-summary'
     },
     news_item_length() {
-      return this.story.news_items.length + 1
+      return this.story.news_items.length
     },
     news_item_summary_text() {
       return this.openSummary
-        ? `Close ${
-            this.news_item_length > 1 ? '(' + this.news_item_length + ')' : ''
-          }`
-        : `Open ${
-            this.news_item_length > 1 ? '(' + this.news_item_length + ')' : ''
-          }`
+        ? 'Close'
+        : 'Open'
     },
     minButtonWidth() {
       const longestText = `${
@@ -388,7 +385,8 @@ export default {
     },
 
     getTags() {
-      return this.story.tags.map((tag) => tag.name)
+      const tags = this.story.tags.map((tag) => tag.name)
+      return tags.slice(0, this.openSummary ? tags.length : 5)
     },
 
     getPublishedDate() {
