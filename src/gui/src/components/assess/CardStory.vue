@@ -41,52 +41,56 @@
               cols="12"
               sm="12"
               lg="6"
-              xl="7"
               class="d-flex flex-grow-1 mt-3 px-5 py-2"
               align-self="center"
               order="1"
-              order-lg="1"
+              order-sm="1"
             >
-              <h2 class="news-item-title">{{ story.title }}</h2>
+              <h2 class="news-item-title">
+                {{ story.title }}
+              </h2>
             </v-col>
 
             <!-- STORY ACTIONS -->
             <v-col
               order="3"
-              order-lg="2"
+              order-sm="2"
               class="d-flex flex-row flex-grow-1 mt-3 px-5 py-2 item-action-container"
               cols="12"
               sm="12"
               lg="6"
-              xl="5"
+              style="justify-content: space-evenly"
             >
               <v-btn
+                small
                 class="item-action-btn"
                 outlined
                 :to="'/story/' + story.id"
                 v-on:click.stop
-                :ripple="false"
+                v-ripple="false"
               >
                 <span>Details</span>
                 <v-icon right>mdi-text-box-search-outline</v-icon>
               </v-btn>
 
               <v-btn
+                small
                 class="item-action-btn"
                 outlined
                 v-on:click.stop="sharingDialog = true"
-                :ripple="false"
+                v-ripple="false"
               >
                 <span>Add to Report</span>
                 <v-icon right>mdi-google-circles-communities</v-icon>
               </v-btn>
 
               <v-btn
+                small
                 class="item-action-btn open-close-btn"
                 :class="openSummary ? 'opened' : 'closed'"
                 outlined
                 v-on:click.stop
-                :ripple="false"
+                v-ripple="false"
                 :style="{ minWidth: minButtonWidth }"
                 @click.stop="openSummary = !openSummary"
               >
@@ -95,23 +99,34 @@
               </v-btn>
 
               <v-btn
+                small
                 class="item-action-btn hidden-lg-and-down"
                 outlined
                 v-on:click.stop="markAsRead()"
-                :ripple="false"
+                v-ripple="false"
               >
                 <span>mark as read</span>
                 <v-icon right>mdi-eye-outline</v-icon>
               </v-btn>
 
               <div class="item-action-btn btn-group">
-                <v-btn outlined v-on:click.stop="upvote()" v-ripple="false">
+                <v-btn
+                  small
+                  outlined
+                  v-on:click.stop="upvote()"
+                  v-ripple="false"
+                >
                   <span>{{ likes }}</span>
                   <v-icon right color="awake-green-color"
                     >mdi-arrow-up-circle-outline</v-icon
                   >
                 </v-btn>
-                <v-btn outlined v-on:click.stop="downvote()" v-ripple="false">
+                <v-btn
+                  small
+                  outlined
+                  v-on:click.stop="downvote()"
+                  v-ripple="false"
+                >
                   <span>{{ dislikes }}</span>
                   <v-icon right color="awake-red-color"
                     >mdi-arrow-down-circle-outline</v-icon
@@ -122,7 +137,8 @@
               <v-menu open-on-hover bottom offset-y>
                 <template v-slot:activator="{ on, attrs }">
                   <v-btn
-                    class="item-action-btn solo-icon"
+                    small
+                    class="item-action-btn expandable"
                     outlined
                     v-on:click.stop
                     v-ripple="false"
@@ -158,9 +174,8 @@
               sm="12"
               class="px-5"
               order="2"
-              order-lg="3"
+              order-sm="3"
               lg="6"
-              xl="7"
               align-self="stretch"
             >
               <!-- DESCRIPTION -->
@@ -171,11 +186,10 @@
             <v-col
               class="item-meta-info px-5 pt-2 pb-3"
               order="4"
-              order-lg="4"
+              order-sm="4"
               cols="12"
               sm="12"
               lg="6"
-              xl="5"
             >
               <v-container column class="pa-0 pb-3">
                 <!-- META INFO -->
@@ -311,7 +325,7 @@ export default {
         : 'news-item-summary'
     },
     news_item_length() {
-      return this.story.news_items.length + 1
+      return this.story.news_items.length + Math.floor(Math.random() * 200)
     },
     news_item_summary_text() {
       return this.openSummary
