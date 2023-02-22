@@ -604,6 +604,9 @@ class NewsItemAggregate(db.Model):
 
         query = ACLEntry.apply_query(query, user, True, False, False)
 
+        if "source" in filter and filter["source"] != "":
+            query = query.filter(OSINTSource.id == filter["source"])
+
         if "search" in filter and filter["search"] != "":
             search_string = f"%{filter['search']}%"
             query = query.join(
@@ -893,39 +896,14 @@ class NewsItemAggregate(db.Model):
         return any(ReportItemNewsItemAggregate.assigned(aggregate_id) for aggregate_id in aggregate_ids)
 
     @classmethod
-    def group_action_delete(cls, data, user):
-        if cls.is_assigned_to_report(data["items"]):
-            return "aggregate_in_use", 500
-        processed_aggregates = set()
-        for item in data["items"]:
-            if item["type"] == "AGGREGATE":
-                aggregate = NewsItemAggregate.find(item["id"])
-                for news_item in aggregate.news_items:
-                    if NewsItem.allowed_with_acl(news_item.id, user, False, False, True):
-                        aggregate.news_items.remove(news_item)
-                        NewsItem.delete_only(news_item)
-
-                processed_aggregates.add(aggregate)
-            else:
-                news_item = NewsItem.find(item["id"])
-                if NewsItem.allowed_with_acl(news_item.id, user, False, False, True):
-                    aggregate = NewsItemAggregate.find(news_item.news_item_aggregate_id)
-                    aggregate.news_items.remove(news_item)
-                    NewsItem.delete_only(news_item)
-                    processed_aggregates.add(aggregate)
-
-        cls.update_aggregates(processed_aggregates)
-        db.session.commit()
-        return "", 200
-
-    @classmethod
     def update_tags(cls, news_item_aggregate_id, tags):
         try:
             n_i_a = cls.find(news_item_aggregate_id)
             if type(tags) is list:
                 for tag in tags:
-                    n_i_a.tags.append(NewsItemTag(name=tag, tag_type="undef"))
-            else:
+                    if tag not in n_i_a.tags:
+                        n_i_a.tags.append(NewsItemTag(name=tag, tag_type="undef"))
+            elif tags not in n_i_a.tags:
                 n_i_a.tags.append(NewsItemTag(name=tags, tag_type="undef"))
             db.session.commit()
         except Exception:
@@ -972,12 +950,15 @@ class NewsItemAggregate(db.Model):
             return "error", 500
 
     @classmethod
-    def update_aggregates(cls, aggregates):
+    def update_aggregates(cls, aggregates: set):
         try:
+            logger.debug("UPDATE AGGREGATES")
+            logger.debug(aggregates)
             for aggregate in aggregates:
                 if len(aggregate.news_items) == 0:
                     NewsItemAggregateSearchIndex.remove(aggregate)
-                    NewsItemTag.remove(aggregate)
+                    NewsItemTag.remove_by_aggregate(aggregate)
+                    logger.debug(f"Trying to delete: {aggregate}")
                     db.session.delete(aggregate)
                 else:
                     NewsItemAggregateSearchIndex.prepare(aggregate)
@@ -1175,7 +1156,14 @@ class NewsItemTag(db.Model):
         return [row.name for row in rows]
 
     @classmethod
-    def remove(cls, aggregate):
-        if tag := cls.find(aggregate.id):
+    def remove(cls, tag):
+        if tag := cls.find(tag.id):
             db.session.delete(tag)
             db.session.commit()
+
+    @classmethod
+    def remove_by_aggregate(cls, aggregate):
+        tags = cls.query.filter_by(n_i_a_id=aggregate.id).all()
+        for tag in tags:
+            db.session.delete(tag)
+        db.session.commit()

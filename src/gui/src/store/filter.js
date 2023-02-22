@@ -1,6 +1,4 @@
 const state = {
-  scope: '',
-
   newsItemsFilter: {
     offset: undefined,
     limit: undefined,
@@ -9,21 +7,17 @@ const state = {
     range: undefined,
     read: undefined,
     tags: undefined,
+    group: undefined,
+    source: undefined,
     in_report: undefined,
     relevant: undefined,
     important: undefined
-  },
-  newsItemsOrder: {
-    selected: {}
   }
 }
 
 const actions = {
   resetNewsItemsFilter(context) {
     context.commit('RESET_NEWSITEMS_FILTERS')
-  },
-  setScope(context, scope) {
-    context.commit('SET_SCOPE', scope)
   },
   setLimit(context, limit) {
     context.commit('SET_LIMIT', limit)
@@ -44,7 +38,6 @@ const actions = {
     context.commit('SET_FILTER', filter)
   },
   updateFilter(context, filter) {
-    console.debug('updateFilter', filter)
     context.commit('UPDATE_FILTER', filter)
   },
   setSort(context, sort) {
@@ -69,8 +62,12 @@ const mutations = {
     state.newsItemsFilter.offset++
   },
   NEXT_PAGE(state) {
-    const offset = state.newsItemsFilter.offset ? parseInt(state.newsItemsFilter.offset) : 0
-    const limit = state.newsItemsFilter.limit ? parseInt(state.newsItemsFilter.limit) : 20
+    const offset = state.newsItemsFilter.offset
+      ? parseInt(state.newsItemsFilter.offset)
+      : 0
+    const limit = state.newsItemsFilter.limit
+      ? parseInt(state.newsItemsFilter.limit)
+      : 20
 
     state.newsItemsFilter.offset = offset + limit
   },
@@ -83,19 +80,18 @@ const mutations = {
       range: undefined,
       read: undefined,
       tags: undefined,
+      group: undefined,
+      source: undefined,
       in_report: undefined,
       relevant: undefined,
       important: undefined
     }
   },
-  SET_SCOPE(state, scope) {
-    state.scope = scope
-  },
   SET_FILTER(state, filter) {
     state.newsItemsFilter = filter
   },
   UPDATE_FILTER(state, filter) {
-    Object.keys(filter).forEach(element => {
+    Object.keys(filter).forEach((element) => {
       state.newsItemsFilter[element] = filter[element]
     })
   },

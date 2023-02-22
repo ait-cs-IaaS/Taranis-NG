@@ -11,17 +11,34 @@
       <!-- scope -->
       <v-row class="my-3 mr-0 px-3">
         <v-col cols="12" class="pb-0">
-          <h4>scope</h4>
+          <h4>group</h4>
         </v-col>
 
         <v-col cols="12" class="pt-0">
           <v-select
-            v-model="scope"
-            :items="getScopeFilterList()"
+            v-model="group"
+            :items="getOSINTSourceGroupsList()"
             prepent-icon="mdi-format-list-numbered"
             item-text="title"
             item-value="id"
-            label="Sources"
+            label="Source Group"
+            :hide-details="true"
+            solo
+            dense
+          ></v-select>
+        </v-col>
+        <v-col cols="12" class="pb-0">
+          <h4>source</h4>
+        </v-col>
+
+        <v-col cols="12" class="pt-0">
+          <v-select
+            v-model="source"
+            :items="getOSINTSourcesList()"
+            prepent-icon="mdi-format-list-numbered"
+            item-text="title"
+            item-value="id"
+            label="Source"
             :hide-details="true"
             solo
             dense
@@ -181,17 +198,25 @@ export default {
   }),
   computed: {
     ...mapState('filter', {
-      scopeState: (state) => state.scope,
       filter: (state) => state.newsItemsFilter
     }),
     ...mapState(['drawerVisible']),
     ...mapState('route', ['query']),
-    scope: {
+    source: {
       get() {
-        return this.scopeState
+        return this.filter.source
       },
       set(value) {
-        this.setScope(value)
+        this.updateFilter({ source: value })
+        this.updateNewsItems()
+      }
+    },
+    group: {
+      get() {
+        return this.filter.group
+      },
+      set(value) {
+        this.updateFilter({ group: value })
         this.updateNewsItems()
       }
     },
@@ -293,7 +318,7 @@ export default {
   },
   methods: {
     ...mapGetters(['getItemCount']),
-    ...mapGetters('assess', ['getScopeFilterList']),
+    ...mapGetters('assess', ['getOSINTSourceGroupsList', 'getOSINTSourcesList']),
     ...mapActions('assess', ['updateNewsItems']),
     ...mapActions('filter', [
       'setScope',

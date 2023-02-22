@@ -209,8 +209,8 @@
                     <div>
                       <span
                         class="plain-tags"
-                        v-for="tag in getTags()"
-                        v-bind:key="tag"
+                        v-for="(tag, i) in getTags()"
+                        v-bind:key="tag+i"
                       >
                         <a href="#">{{ tag }}</a
                         >,

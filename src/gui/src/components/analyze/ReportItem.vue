@@ -60,6 +60,7 @@
           </v-row>
           <v-row>
             <v-col cols="12" class="pa-0 ma-0" v-if="report_type">
+              {{ report_type }}
               <v-expansion-panels
                 class="mb-1"
                 v-for="attribute_group in report_type.attribute_groups"
