@@ -15,6 +15,11 @@ class NLPBot(BaseBot):
     type = "NLP_BOT"
     name = "NLP Bot"
     description = "Bot for naturale language processing of news items"
+    """
+    summary_threshold: int
+        if content is larger than summary_threshold it will be summarized
+    """
+    summary_threshold = 750
 
     r"""
     Parameters
@@ -71,7 +76,8 @@ class NLPBot(BaseBot):
                     content = (
                         news_item["news_item_data"]["content"] + news_item["news_item_data"]["review"] + news_item["news_item_data"]["title"]
                     )
-                    content_list.append(content)
+                    if len(content) > self.summary_threshold:
+                        content_list.append(content)
 
                     self.language = self.detect_language(content)
 
