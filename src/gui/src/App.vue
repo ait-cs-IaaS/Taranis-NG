@@ -24,7 +24,7 @@ export default {
     MainMenu,
     Notification
   },
-  computed: { },
+  computed: {},
   mixins: [AuthMixin],
   methods: {
     ...mapActions('dashboard', ['updateStories']),
@@ -33,7 +33,8 @@ export default {
     ...mapActions('settings', ['loadUserProfile']),
     ...mapGetters('settings', ['getProfileDarkTheme']),
 
-    connectSSE () { // TODO: unsubscribe
+    connectSSE() {
+      // TODO: unsubscribe
       if (process.env.VUE_APP_TARANIS_NG_CORE_SSE === undefined) {
         return
       }
@@ -59,7 +60,7 @@ export default {
       })
     },
 
-    reconnectSSE () {
+    reconnectSSE() {
       if (this.sseConnection !== null) {
         this.sseConnection.close()
         this.sseConnection = null
@@ -67,10 +68,10 @@ export default {
       this.connectSSE()
     }
   },
-  updated () {
+  updated() {
     this.$root.$emit('app-updated')
   },
-  mounted () {
+  mounted() {
     if (this.$cookies.isKey('jwt')) {
       this.$store.dispatch('setToken', this.$cookies.get('jwt')).then(() => {
         this.$cookies.remove('jwt')
@@ -109,9 +110,7 @@ export default {
       5000
     )
   },
-  created () {
-
-  }
+  created() {}
 }
 </script>
 
@@ -119,6 +118,5 @@ export default {
 <style src="./assets/centralize.css"></style>
 
 <style lang="scss">
-@import '@/styles/variables.scss';
 @import '@/styles/awake.scss';
 </style>
