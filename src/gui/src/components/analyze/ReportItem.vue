@@ -71,14 +71,14 @@
                     {{ attribute_group.title }}
                   </v-expansion-panel-header>
                   <v-expansion-panel-content>
-                    {{ attribute_values }}
                     <attribute-item
                       :read_only="!edit"
-                      v-for="attribute_item in report_item.attributes"
+                      v-for="attribute_item in attributes[attribute_group.id]"
                       :attribute_item="attribute_item"
-                      :key="attribute_item.attribute_group_item_id"
-                      v-model="attribute_item.value"
+                      :key="attribute_item.id"
+                      v-model="values[attribute_item.id]"
                     />
+                    <!-- v-model="report_item.attributes.find(attr => attr.attribute_group_item_id === attribute_item.id).value" -->
                   </v-expansion-panel-content>
                 </v-expansion-panel>
               </v-expansion-panels>
@@ -123,6 +123,7 @@ export default {
     report_item_prop: Object,
     edit: { type: Boolean, default: false }
   },
+  emits: ['reportcreated'],
   components: {
     AttributeItem,
     CardStory
@@ -134,18 +135,10 @@ export default {
     selected_report_type: null,
     report_types: [],
     report_types_selection: [],
-    attribute_values_data: {}
+    attributes: {},
+    values: {}
   }),
   computed: {
-    attribute_values: {
-      get() {
-        return {}
-      },
-      set(value) {
-        console.debug(`attribute_values ${value}`)
-        // this.attribute_values_data = value
-      }
-    },
     report_item() {
       return this.report_item_prop
     },
@@ -154,21 +147,22 @@ export default {
         return this.selected_report_type
       },
       set(value) {
-        console.debug(`report_type ${value}`)
         this.selected_report_type = this.report_types.find(
           (report_type) => report_type.id === value
         )
         this.report_item.report_item_type_id = value
-        console.debug(this.selected_report_type)
-        if (typeof this.report_item.attributes !== 'undefined' || this.report_item.attributes.length > 0) {
+        this.attributes = this.extractAttributes(
+          this.selected_report_type.attribute_groups
+        )
+
+        if (this.report_item.attributes.length > 0) {
           return
         }
         this.report_item.attributes =
           this.selected_report_type.attribute_groups.flatMap((group) =>
             group.attribute_group_items.map((item) => ({
               attribute_group_item_id: item.id,
-              value: '',
-              id: -1
+              value: ''
             }))
           )
       }
@@ -184,11 +178,29 @@ export default {
     ...mapGetters('analyze', ['getReportTypes']),
     ...mapActions('analyze', ['loadReportTypes']),
 
+    extractAttributes(attribute_groups) {
+      const result = {}
+      for (const group of attribute_groups) {
+        const items = group.attribute_group_items.map((item) => ({
+          ...item.attribute,
+          title: item.title
+        }))
+        result[group.id] = items.reduce((acc, item) => {
+          acc[item.id] = item
+          return acc
+        }, {})
+      }
+      return result
+    },
+
     saveReportItem() {
       if (this.edit) {
         updateReportItem(this.report_item.id, this.report_item)
       } else {
-        createReportItem(this.report_item)
+        createReportItem(this.report_item).then((response) => {
+          this.$router.push('/report/' + response.data)
+          this.$emit('reportcreated', response.data)
+        })
       }
     }
   },

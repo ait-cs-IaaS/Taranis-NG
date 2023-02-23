@@ -1,12 +1,13 @@
 <template>
   <v-container fluid style="min-height: 100vh">
-    <report-item v-if="report_item" :report_item_prop="report_item" :edit="edit" />
+    <report-item v-if="report_item" :report_item_prop="report_item" :edit.sync="edit" @reportcreated="reportCreated"/>
   </v-container>
 </template>
 
 <script>
 import { getReportItem } from '@/api/analyze'
 import ReportItem from '@/components/analyze/ReportItem'
+import { notifySuccess } from '@/utils/helpers'
 
 export default {
   name: 'ReportView',
@@ -42,6 +43,10 @@ export default {
           return response.data
         })
       }
+    },
+    reportCreated(report_item) {
+      notifySuccess(`Report with ID ${report_item} created`)
+      this.edit = true
     }
   }
 }
