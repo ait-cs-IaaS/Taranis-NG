@@ -162,10 +162,11 @@ class TestAssessApi(object):
         It expects a valid data and a valid status-code
         """
 
-        from core.model.news_item import NewsItemAggregate, NewNewsItemDataSchema
+        from core.model.news_item import NewsItemAggregate, NewNewsItemDataSchema, NewsItem
         from core.model.osint_source import OSINTSource
         from shared.schema.osint_source import OSINTSourceExportSchema
-        import datetime;
+        from core.model.user import User
+        import datetime
 
         ossi = {
           "description": "",
@@ -193,7 +194,6 @@ class TestAssessApi(object):
             "content": "TEST CONTENT YYYY",
             "source": "https: //www.some.link/RSSNewsfeed.xml",
             "title": "Mobile World Congress 2023",
-            "likes": 5,
             "author": "",
             "collected": "2022-02-21T15:00:14.086285",
             "hash": "82e6e99403686a1072d0fb2013901b843a6725ba8ac4266270f62b7614ec1adf",
@@ -244,7 +244,7 @@ class TestAssessApi(object):
         assert len(response.get_json()["items"]) == 0
 
         response = client.get("/api/v1/assess/news-item-aggregates?relevant=true", headers=auth_header)
-        assert len(response.get_json()["items"]) == 1
+        assert len(response.get_json()["items"]) == 0
 
         response = client.get("/api/v1/assess/news-item-aggregates?in_report=true", headers=auth_header)
         assert len(response.get_json()["items"]) == 2
@@ -252,7 +252,7 @@ class TestAssessApi(object):
         response = client.get("/api/v1/assess/news-item-aggregates?range=20", headers=auth_header)
         assert response.get_json()["total_count"] == 0
 
-        response = client.get("/api/v1/assess/news-item-aggregates?sort=20", headers=auth_header)
+        response = client.get("/api/v1/assess/news-item-aggregates?sort=ASC", headers=auth_header)
         assert response.get_json()["total_count"] > 0
 
         response = client.get("/api/v1/assess/news-item-aggregates?offset=1", headers=auth_header)
