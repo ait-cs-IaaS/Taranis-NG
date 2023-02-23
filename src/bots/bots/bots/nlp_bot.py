@@ -63,8 +63,6 @@ class NLPBot(BaseBot):
                 return
 
             for aggregate in data:
-                keywords = []
-
                 if aggregate.get("summary", None) and aggregate.get("tags", None):
                     logger.debug(f"Skipping aggregate: {aggregate['id']}")
                     continue
@@ -81,10 +79,10 @@ class NLPBot(BaseBot):
                     if len(content) > self.summary_threshold:
                         content_list.append(content)
 
-                    self.core_api.update_news_item_data(
-                        news_item["news_item_data"]["id"],
-                        {"language": self.detect_language(content)},
-                    )
+                    self.language = self.detect_language(content)
+
+                    if "language" in news_item["news_item_data"] and self.language != news_item["news_item_data"]["language"]:
+                        self.core_api.update_news_item_data(news_item["news_item_data"]["id"], {"language": self.language})
 
                     current_keywords = self.generateKeywords(content)
                     keywords.extend(keyword[0] for keyword in current_keywords[:10])
@@ -109,11 +107,9 @@ class NLPBot(BaseBot):
         stop_words = "german" if self.language == "de" else "english"
         return self.kw_model.extract_keywords(
             text,
-            keyphrase_ngram_range=(1, 2),
+            keyphrase_ngram_range=(1, 1),
             stop_words=stop_words,
-            use_mmr=True,
-            diversity=0.8,
-            top_n=15,
+            top_n=10,
         )
 
     def detect_language(self, text) -> str:
