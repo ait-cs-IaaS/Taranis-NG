@@ -38,7 +38,6 @@ class ReportItemAttribute(db.Model):
     value = db.Column(db.String(), nullable=False)
     binary_mime_type = db.Column(db.String())
     binary_data = orm.deferred(db.Column(db.LargeBinary))
-    binary_size = db.Column(db.Integer)
     binary_description = db.Column(db.String())
     created = db.Column(db.DateTime, default=datetime.now)
     last_updated = db.Column(db.DateTime, default=datetime.now)
@@ -58,7 +57,6 @@ class ReportItemAttribute(db.Model):
         id,
         value,
         binary_mime_type,
-        binary_size,
         binary_description,
         attribute_group_item_id,
         attribute_group_item_title,
@@ -66,7 +64,6 @@ class ReportItemAttribute(db.Model):
         self.id = None
         self.value = value
         self.binary_mime_type = binary_mime_type
-        self.binary_size = binary_size
         self.binary_description = binary_description
         self.attribute_group_item_id = attribute_group_item_id
         self.attribute_group_item_title = attribute_group_item_title
@@ -483,7 +480,7 @@ class ReportItem(db.Model):
                     for attribute in report_item.attributes:
                         if attribute.id == data["attribute_id"]:
                             data["attribute_value"] = attribute.value
-                            data["attribute_last_updated"] = attribute.last_updated.strftime("%d.%m.%Y - %H:%M")
+                            data["attribute_last_updated"] = attribute.last_updated.isoformat()
                             break
 
             if "add" in data:
@@ -506,7 +503,6 @@ class ReportItem(db.Model):
                         if attribute.id == data["attribute_id"]:
                             data["attribute_value"] = attribute.value
                             data["binary_mime_type"] = attribute.binary_mime_type
-                            data["binary_size"] = attribute.binary_size
                             data["binary_description"] = attribute.binary_description
                             data["attribute_last_updated"] = attribute.last_updated.strftime("%d.%m.%Y - %H:%M")
                             break

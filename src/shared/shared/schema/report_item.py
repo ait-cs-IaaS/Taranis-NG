@@ -12,7 +12,6 @@ class ReportItemAttributeBaseSchema(Schema):
     id = fields.Int(load_default=None)
     value = fields.Str()
     binary_mime_type = fields.Str(load_default=None)
-    binary_size = fields.Int(load_default=0)
     binary_description = fields.Str(load_default=None)
     attribute_group_item_title = fields.Str(load_default=None)
     attribute_group_item_id = fields.Integer(load_default=None)
@@ -35,7 +34,6 @@ class ReportItemAttribute:
         id,
         value,
         binary_mime_type,
-        binary_size,
         binary_description,
         attribute_group_item_id,
         attribute_group_item_title,
@@ -51,7 +49,6 @@ class ReportItemAttribute:
         self.version = version
         self.current = current
         self.binary_mime_type = binary_mime_type
-        self.binary_size = binary_size
         self.binary_description = binary_description
         self.attribute_group_item_id = attribute_group_item_id
         self.attribute_group_item_title = attribute_group_item_title

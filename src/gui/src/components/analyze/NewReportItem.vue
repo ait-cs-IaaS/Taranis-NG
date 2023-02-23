@@ -727,7 +727,6 @@ export default {
                     index: values.length,
                     value: value,
                     binary_mime_type: data.attributes[k].binary_mime_type,
-                    binary_size: data.attributes[k].binary_size,
                     binary_description: data.attributes[k].binary_description,
                     last_updated: data.attributes[k].last_updated,
                     user: data.attributes[k].user,
@@ -771,8 +770,6 @@ export default {
                       binary_mime_type:
                         data.remote_report_items[l].attributes[k]
                           .binary_mime_type,
-                      binary_size:
-                        data.remote_report_items[l].attributes[k].binary_size,
                       binary_description:
                         data.remote_report_items[l].attributes[k]
                           .binary_description,
@@ -857,8 +854,6 @@ export default {
                     this.remote_report_items[l].attributes[k].last_updated,
                   binary_mime_type:
                     this.remote_report_items[l].attributes[k].binary_mime_type,
-                  binary_size:
-                    this.remote_report_items[l].attributes[k].binary_size,
                   binary_description:
                     this.remote_report_items[l].attributes[k]
                       .binary_description,

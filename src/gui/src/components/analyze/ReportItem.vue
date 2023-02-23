@@ -57,7 +57,6 @@
           </v-row>
           <v-row>
             <v-col cols="12" class="pa-0 ma-0" v-if="report_type">
-              {{ report_item }}
               <v-expansion-panels
                 class="mb-1"
                 v-for="attribute_group in report_type.attribute_groups"
@@ -75,10 +74,10 @@
                     {{ attribute_values }}
                     <attribute-item
                       :read_only="!edit"
-                      v-for="attribute_item in attribute_group.attribute_group_items"
+                      v-for="attribute_item in report_item.attributes"
                       :attribute_item="attribute_item"
-                      :key="attribute_item.id"
-                      v-model="attribute_values[attribute_item.id]"
+                      :key="attribute_item.attribute_group_item_id"
+                      v-model="attribute_item.value"
                     />
                   </v-expansion-panel-content>
                 </v-expansion-panel>
@@ -135,9 +134,18 @@ export default {
     selected_report_type: null,
     report_types: [],
     report_types_selection: [],
-    attribute_values: {}
+    attribute_values_data: {}
   }),
   computed: {
+    attribute_values: {
+      get() {
+        return {}
+      },
+      set(value) {
+        console.debug(`attribute_values ${value}`)
+        // this.attribute_values_data = value
+      }
+    },
     report_item() {
       return this.report_item_prop
     },
@@ -152,7 +160,7 @@ export default {
         )
         this.report_item.report_item_type_id = value
         console.debug(this.selected_report_type)
-        if (this.report.attributes !== undefined || this.report.attributes.length < 1) {
+        if (typeof this.report_item.attributes !== 'undefined' || this.report_item.attributes.length > 0) {
           return
         }
         this.report_item.attributes =
