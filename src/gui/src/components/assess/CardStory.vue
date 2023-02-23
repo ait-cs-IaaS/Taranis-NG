@@ -135,7 +135,7 @@
                 </v-btn>
               </div>
 
-              <v-menu open-on-hover bottom offset-y>
+              <v-menu bottom offset-y>
                 <template v-slot:activator="{ on, attrs }">
                   <v-btn
                     small
@@ -146,7 +146,7 @@
                     v-bind="attrs"
                     v-on="on"
                   >
-                    <v-icon>mdi-dots-horizontal-circle-outline</v-icon>
+                    <v-icon>mdi-dots-vertical</v-icon>
                   </v-btn>
                 </template>
 

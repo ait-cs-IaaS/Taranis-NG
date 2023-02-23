@@ -1,6 +1,6 @@
 <template>
   <v-container fluid style="min-height: 100vh">
-    <report-item :report_item_prop="report_item" :edit="edit" />
+    <report-item v-if="report_item" :report_item_prop="report_item" :edit="edit" />
   </v-container>
 </template>
 
@@ -11,7 +11,7 @@ import ReportItem from '@/components/analyze/ReportItem'
 export default {
   name: 'ReportView',
   data: () => ({
-    report_item: {},
+    report_item: undefined,
     default_report_item: {
       id: null,
       uuid: null,
@@ -31,8 +31,8 @@ export default {
   async created() {
     this.report_item = await this.loadReportItem()
     if (this.report_item === undefined) {
-      this.report_item = this.default_report_item
       this.edit = false
+      this.report_item = this.default_report_item
     }
   },
   methods: {

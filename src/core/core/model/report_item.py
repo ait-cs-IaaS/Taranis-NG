@@ -53,9 +53,6 @@ class ReportItemAttribute(db.Model):
     report_item_id = db.Column(db.Integer, db.ForeignKey("report_item.id"), nullable=True)
     report_item = db.relationship("ReportItem")
 
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
-    user = db.relationship("User")
-
     def __init__(
         self,
         id,
@@ -323,7 +320,6 @@ class ReportItem(db.Model):
     @classmethod
     def get_detail_json(cls, id):
         report_item = cls.query.get(id)
-        print(report_item.attributes)
         return ReportItemSchema().dump(report_item)
 
     @classmethod
@@ -341,16 +337,12 @@ class ReportItem(db.Model):
     @classmethod
     def add_report_item(cls, report_item_data, user):
         report_item_schema = NewReportItemSchema()
-        print(report_item_data)
         report_item = report_item_schema.load(report_item_data)
 
         if not ReportItemType.allowed_with_acl(report_item.report_item_type_id, user, False, False, True):
             return report_item, 401
 
         report_item.user_id = user.id
-        for attribute in report_item.attributes:
-            attribute.user_id = user.id
-
         report_item.update_cpes()
 
         db.session.add(report_item)
@@ -405,7 +397,6 @@ class ReportItem(db.Model):
                             modified = True
                             attribute.value = data["attribute_value"]
                             data["attribute_value"] = ""
-                            attribute.user = user
                             attribute.last_updated = datetime.now()
                             break
 
@@ -413,7 +404,6 @@ class ReportItem(db.Model):
                 if "attribute_id" in data:
                     modified = True
                     new_attribute = ReportItemAttribute(None, "", None, 0, None, data["attribute_group_item_id"], None)
-                    new_attribute.user = user
                     report_item.attributes.append(new_attribute)
 
                 if "aggregate_ids" in data:
@@ -494,7 +484,6 @@ class ReportItem(db.Model):
                         if attribute.id == data["attribute_id"]:
                             data["attribute_value"] = attribute.value
                             data["attribute_last_updated"] = attribute.last_updated.strftime("%d.%m.%Y - %H:%M")
-                            data["attribute_user"] = attribute.user.name
                             break
 
             if "add" in data:
@@ -520,7 +509,6 @@ class ReportItem(db.Model):
                             data["binary_size"] = attribute.binary_size
                             data["binary_description"] = attribute.binary_description
                             data["attribute_last_updated"] = attribute.last_updated.strftime("%d.%m.%Y - %H:%M")
-                            data["attribute_user"] = attribute.user.name
                             break
 
         return data
@@ -538,7 +526,6 @@ class ReportItem(db.Model):
             attribute_group_item_id,
             None,
         )
-        new_attribute.user = user
         new_attribute.binary_data = file_data
         report_item.attributes.append(new_attribute)
 

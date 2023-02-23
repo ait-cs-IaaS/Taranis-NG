@@ -53,13 +53,12 @@ export default {
     }
   }),
   methods: {
-    ...mapActions('analyze', ['loadReportItems']),
+    ...mapActions('analyze', ['loadReportItems', 'loadReportTypes']),
     ...mapGetters('analyze', ['getReportItems']),
     ...mapActions(['updateItemCount']),
     updateData() {
       this.loadReportItems().then(() => {
         const sources = this.getReportItems()
-        console.debug(sources)
         this.report_items = sources
         this.updateItemCount({
           total: sources.length,

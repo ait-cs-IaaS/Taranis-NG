@@ -3,18 +3,15 @@
     <v-app-bar :elevation="2" app class="mt-12">
       <v-app-bar-title>{{ container_title }}</v-app-bar-title>
       <v-spacer></v-spacer>
-      <v-switch
-        v-model="verticalView"
-        label="Side-by-side view"
-      ></v-switch>
+      <v-switch v-model="verticalView" label="Side-by-side view"></v-switch>
       <div v-if="edit">
-      <v-switch
-        v-if="edit"
-        v-model="report_item.completed"
-        label="Completed"
-      ></v-switch>
+        <v-switch
+          v-if="edit"
+          v-model="report_item.completed"
+          label="Completed"
+        ></v-switch>
       </div>
-      <v-btn color="success" class="mr-2">
+      <v-btn color="success" class="mr-2" @click="saveReportItem">
         <v-icon left>mdi-content-save</v-icon>
         <span>{{ $t('report_item.save') }}</span>
       </v-btn>
@@ -33,7 +30,7 @@
             <v-col cols="4" class="pr-3">
               <v-select
                 :disabled="edit"
-                v-model="report_item.report_item_type_id"
+                v-model="report_type"
                 item-text="title"
                 item-value="id"
                 :items="report_types"
@@ -60,7 +57,7 @@
           </v-row>
           <v-row>
             <v-col cols="12" class="pa-0 ma-0" v-if="report_type">
-              {{ report_type }}
+              {{ report_item }}
               <v-expansion-panels
                 class="mb-1"
                 v-for="attribute_group in report_type.attribute_groups"
@@ -76,8 +73,8 @@
                   </v-expansion-panel-header>
                   <v-expansion-panel-content>
                     {{ attribute_values }}
-                    {{ attribute_group.attribute_group_items }}
                     <attribute-item
+                      :read_only="!edit"
                       v-for="attribute_item in attribute_group.attribute_group_items"
                       :attribute_item="attribute_item"
                       :key="attribute_item.id"
@@ -105,16 +102,16 @@
 </template>
 
 <script>
-// import {
-//   createReportItem,
-//   updateReportItem,
-//   lockReportItem,
-//   unlockReportItem,
-//   holdLockReportItem,
-//   getReportItem,
-//   getReportItemData,
-//   getReportItemLocks
-// } from '@/api/analyze'
+import {
+  createReportItem,
+  updateReportItem
+  //   lockReportItem,
+  //   unlockReportItem,
+  //   holdLockReportItem,
+  //   getReportItem,
+  //   getReportItemData,
+  //   getReportItemLocks
+} from '@/api/analyze'
 
 import AttributeItem from '@/components/analyze/AttributeItem'
 import CardStory from '@/components/assess/CardStory'
@@ -135,6 +132,7 @@ export default {
     verticalView: true,
     expand_panel_groups: [],
     modify: true,
+    selected_report_type: null,
     report_types: [],
     report_types_selection: [],
     attribute_values: {}
@@ -143,25 +141,59 @@ export default {
     report_item() {
       return this.report_item_prop
     },
-    report_type() {
-      return this.report_types.find(
-        (report_type) => report_type.id === this.report_item.report_item_type_id
-      )
+    report_type: {
+      get() {
+        return this.selected_report_type
+      },
+      set(value) {
+        console.debug(`report_type ${value}`)
+        this.selected_report_type = this.report_types.find(
+          (report_type) => report_type.id === value
+        )
+        this.report_item.report_item_type_id = value
+        console.debug(this.selected_report_type)
+        if (this.report.attributes !== undefined || this.report.attributes.length < 1) {
+          return
+        }
+        this.report_item.attributes =
+          this.selected_report_type.attribute_groups.flatMap((group) =>
+            group.attribute_group_items.map((item) => ({
+              attribute_group_item_id: item.id,
+              value: '',
+              id: -1
+            }))
+          )
+      }
     },
     container_title() {
-      return this.edit ? this.$t('report_item.edit') : this.$t('report_item.add_new')
+      return this.edit
+        ? this.$t('report_item.edit')
+        : this.$t('report_item.add_new')
     }
   },
   methods: {
     ...mapGetters(['getUserId']),
     ...mapGetters('analyze', ['getReportTypes']),
-    ...mapActions('analyze', ['loadReportTypes'])
+    ...mapActions('analyze', ['loadReportTypes']),
+
+    saveReportItem() {
+      if (this.edit) {
+        updateReportItem(this.report_item.id, this.report_item)
+      } else {
+        createReportItem(this.report_item)
+      }
+    }
   },
   mounted() {
-    console.debug(`edit ${this.edit}`)
-    console.debug(`report_item ${this.report_item}`)
     this.loadReportTypes().then(() => {
       this.report_types = this.getReportTypes().items
+      this.report_type = this.report_item.report_item_type_id
+      console.debug('REPORT ITEM')
+      console.debug(this.report_item)
+      console.debug('Report Types')
+      console.debug(this.report_types)
+      console.debug('Report Type')
+      console.debug(this.report_type)
     })
   },
   beforeDestroy() {}

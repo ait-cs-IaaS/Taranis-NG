@@ -2,19 +2,19 @@
   <div>
   <v-textarea
     v-if="attribute_item.attribute_name === 'Text'"
-    :disable="read_only"
+    :readonly="read_only"
     v-model="input"
     :label="attribute_item.title"
   ></v-textarea>
   <v-text-field
     v-if="attribute_item.attribute_name === 'String'"
-    :disable="read_only"
+    :readonly="read_only"
     v-model="input"
     :label="attribute_item.title"
   ></v-text-field>
   <v-checkbox
-    :disabled="read_only"
     v-if="attribute_item.attribute_name === 'Boolean'"
+    :readonly="read_only"
     v-model="input"
     :label="attribute_item.title"
   />
@@ -51,7 +51,7 @@ export default {
   },
   methods: {},
   mounted() {
-    console.debug('Mounted Attribute Container')
+    console.debug('Mounted AttributeItem')
     console.debug(this.attribute_item)
   }
 }

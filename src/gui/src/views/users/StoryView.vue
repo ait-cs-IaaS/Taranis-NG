@@ -18,7 +18,6 @@ export default {
   },
   async created() {
     this.story = await this.loadStories()
-    console.debug(this.story)
   },
   methods: {
     async loadStories() {

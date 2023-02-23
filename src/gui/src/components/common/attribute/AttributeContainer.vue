@@ -77,8 +77,6 @@ export default {
     }
   },
   mounted() {
-    console.debug('Mounted Attribute Container')
-    console.debug(this.attribute_item)
   }
 }
 </script>
