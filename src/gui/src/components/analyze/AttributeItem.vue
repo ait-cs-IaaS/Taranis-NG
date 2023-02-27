@@ -53,6 +53,7 @@
       :disabled="read_only"
       row
       v-model="input"
+      :label="attribute_item.title"
     >
       <v-radio
         :label="$t('attribute.tlp_white')"
@@ -75,16 +76,53 @@
         value="RED"
       ></v-radio>
     </v-radio-group>
+    <date-picker
+      v-if="attribute_item.type === 'DATE'"
+      :placeholder="attribute_item.title"
+      :disabled="read_only"
+      v-model="input"
+    />
+    <date-picker
+      v-if="attribute_item.type === 'DATE_TIME'"
+      :placeholder="attribute_item.title"
+      type="datetime"
+      :disabled="read_only"
+      v-model="input"
+    />
+    <date-picker
+      v-if="attribute_item.type === 'TIME'"
+      :placeholder="attribute_item.title"
+      type="time"
+      :show-second='false'
+      :disabled="read_only"
+      v-model="input"
+    />
+    <v-autocomplete
+      v-if="attribute_item.type === 'CPE' || attribute_item.type === 'CVE'"
+      :readonly="read_only"
+      v-model="input"
+      :label="attribute_item.title"
+      :items="attribute_item.attribute_enums"
+    >
+    <!-- TODO: Use MyAssets for Autocomplete -->
+    </v-autocomplete>
+    <AttributeCVSS
+      v-model="input"
+      v-if="attribute_item.type === 'CVSS'"
+    />
   </div>
 </template>
 
-// ATTACHMENT: 'Attachment', // DATE: 'Date', // CPE: 'CPE', // CVE: 'CVE', //
-TIME: 'Time', // DATE_TIME: 'DateTime', // CVSS: 'CVSS'
+// ATTACHMENT: 'Attachment', // CVSS: 'CVSS'
 
 <script>
+import AttributeCVSS from './AttributeCVSS.vue'
+
 export default {
   name: 'AttributeItem',
-  components: {},
+  components: {
+    AttributeCVSS
+  },
   props: {
     value: {
       type: String,
@@ -110,8 +148,7 @@ export default {
   },
   methods: {},
   mounted() {
-    console.debug('Mounted AttributeItem')
-    console.debug(this.attribute_item)
+
   }
 }
 </script>
