@@ -3,6 +3,7 @@ from datetime import datetime
 import uuid as uuid_generator
 from sqlalchemy import orm, or_, func, text, and_
 from sqlalchemy.sql.expression import cast
+from typing import Any
 import sqlalchemy
 
 from core.managers.db_manager import db
@@ -11,6 +12,7 @@ from core.model.news_item import NewsItemAggregate
 from core.model.report_item_type import AttributeGroupItem
 from core.model.report_item_type import ReportItemType
 from core.model.acl_entry import ACLEntry
+from core.model.user import User
 from shared.schema.acl_entry import ItemType
 from shared.schema.attribute import AttributeType
 from shared.schema.news_item import NewsItemAggregateIdSchema, NewsItemAggregateSchema
@@ -38,7 +40,6 @@ class ReportItemAttribute(db.Model):
     value = db.Column(db.String(), nullable=False)
     binary_mime_type = db.Column(db.String())
     binary_data = orm.deferred(db.Column(db.LargeBinary))
-    binary_size = db.Column(db.Integer)
     binary_description = db.Column(db.String())
     created = db.Column(db.DateTime, default=datetime.now)
     last_updated = db.Column(db.DateTime, default=datetime.now)
@@ -53,15 +54,11 @@ class ReportItemAttribute(db.Model):
     report_item_id = db.Column(db.Integer, db.ForeignKey("report_item.id"), nullable=True)
     report_item = db.relationship("ReportItem")
 
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
-    user = db.relationship("User")
-
     def __init__(
         self,
         id,
         value,
         binary_mime_type,
-        binary_size,
         binary_description,
         attribute_group_item_id,
         attribute_group_item_title,
@@ -69,7 +66,6 @@ class ReportItemAttribute(db.Model):
         self.id = None
         self.value = value
         self.binary_mime_type = binary_mime_type
-        self.binary_size = binary_size
         self.binary_description = binary_description
         self.attribute_group_item_id = attribute_group_item_id
         self.attribute_group_item_title = attribute_group_item_title
@@ -148,15 +144,14 @@ class ReportItem(db.Model):
 
         self.id = id
 
-        self.uuid = str(uuid_generator.uuid4()) if uuid is None else uuid
+        self.uuid = uuid or str(uuid_generator.uuid4())
         self.title = title
         self.title_prefix = title_prefix
         self.report_item_type_id = report_item_type_id
         self.attributes = attributes
         self.completed = completed
         self.report_item_cpes = []
-        self.subtitle = ""
-        self.tag = ""
+        self.tag = "mdi-file-table-outline"
 
         self.news_item_aggregates = [NewsItemAggregate.find(news_item_aggregate.id) for news_item_aggregate in news_item_aggregates]
 
@@ -164,7 +159,6 @@ class ReportItem(db.Model):
 
     @orm.reconstructor
     def reconstruct(self):
-        self.subtitle = ""
         self.tag = "mdi-file-table-outline"
         self.attributes.sort(key=ReportItemAttribute.sort)
 
@@ -227,7 +221,7 @@ class ReportItem(db.Model):
         return items, last_sync_time
 
     @classmethod
-    def get(cls, group, filter: dict, offset: int, limit: int, user, acl_check: bool):
+    def get(cls, group, filter: dict, user, acl_check: bool):
         query = cls.query
 
         if acl_check:
@@ -244,12 +238,12 @@ class ReportItem(db.Model):
             query = cls.query.filter(ReportItem.remote_user == group)
 
         if "search" in filter and filter["search"] != "":
-            search_string = f"%{filter['search'].lower()}%"
+            search_string = f"%{filter['search']}%"
             query = query.join(ReportItemAttribute, ReportItem.id == ReportItemAttribute.report_item_id).filter(
                 or_(
-                    func.lower(ReportItemAttribute.value).like(search_string),
-                    func.lower(ReportItem.title).like(search_string),
-                    func.lower(ReportItem.title_prefix).like(search_string),
+                    ReportItemAttribute.value.ilike(search_string),
+                    ReportItem.title.ilike(search_string),
+                    ReportItem.title_prefix.ilike(search_string),
                 )
             )
 
@@ -284,6 +278,9 @@ class ReportItem(db.Model):
 
             elif filter["sort"] == "DATE_ASC":
                 query = query.order_by(db.asc(ReportItem.created))
+        offset = filter.get("offset", 0)
+        limit = filter.get("limit", 20)
+
         return query.offset(offset).limit(limit).all(), query.count()
 
     @classmethod
@@ -310,20 +307,21 @@ class ReportItem(db.Model):
         return [row[0] for row in result if row[0] is not None]
 
     @classmethod
-    def get_json(cls, group, filter, offset, limit, user):
-        results, count = cls.get(group, filter, offset, limit, user, True)
+    def get_json(cls, group, filter, user):
+        results, count = cls.get(group, filter, user, True)
         logger.log_debug(f"Found {count} report items with filter {filter}")
-        for result in results:
-            logger.log_debug(result.__dict__)
         report_items_schema = ReportItemPresentationSchema(many=True)
-        logger.log_debug(report_items_schema.dump(results))
         return {"total_count": count, "items": report_items_schema.dump(results)}
+
+    @classmethod
+    def get_aggregate_ids(cls, id):
+        report_item = cls.query.get(id)
+        return [aggregate.id for aggregate in report_item.aggregates]
 
     @classmethod
     def get_detail_json(cls, id):
         report_item = cls.query.get(id)
-        report_item_schema = ReportItemSchema()
-        return report_item_schema.dump(report_item)
+        return ReportItemSchema().dump(report_item)
 
     @classmethod
     def get_groups(cls):
@@ -339,17 +337,12 @@ class ReportItem(db.Model):
 
     @classmethod
     def add_report_item(cls, report_item_data, user):
-        report_item_schema = NewReportItemSchema()
-        print(report_item_data)
-        report_item = report_item_schema.load(report_item_data)
+        report_item = NewReportItemSchema().load(report_item_data)
 
         if not ReportItemType.allowed_with_acl(report_item.report_item_type_id, user, False, False, True):
             return report_item, 401
 
         report_item.user_id = user.id
-        for attribute in report_item.attributes:
-            attribute.user_id = user.id
-
         report_item.update_cpes()
 
         db.session.add(report_item)
@@ -359,8 +352,7 @@ class ReportItem(db.Model):
 
     @classmethod
     def add_remote_report_items(cls, report_item_data, remote_node_name):
-        report_item_schema = NewReportItemSchema(many=True)
-        report_items = report_item_schema.load(report_item_data)
+        report_items = NewReportItemSchema(many=True).load(report_item_data)
 
         for report_item in report_items:
             original_report_item = cls.find_by_uuid(report_item.uuid)
@@ -377,102 +369,47 @@ class ReportItem(db.Model):
         db.session.commit()
 
     @classmethod
-    def update_report_item(cls, id, data, user):
-        modified = False
-        new_attribute = None
+    def add_aggregates(cls, id: int, aggregate_ids: list, user: User) -> tuple[Any, int]:
         report_item = cls.query.get(id)
-        if report_item is not None:
-            if "update" in data:
-                if "title" in data and report_item.title != data["title"]:
-                    modified = True
-                    report_item.title = data["title"]
-                    data["title"] = ""
+        if report_item is None:
+            return None, 404
 
-                if "title_prefix" in data and report_item.title_prefix != data["title_prefix"]:
-                    modified = True
-                    report_item.title_prefix = data["title_prefix"]
-                    data["title_prefix"] = ""
+        if not ReportItemType.allowed_with_acl(report_item.report_item_type_id, user, False, False, True):
+            return report_item, 401
 
-                if "completed" in data and report_item.completed != data["completed"]:
-                    modified = True
-                    report_item.completed = data["completed"]
-                    data["completed"] = ""
+        for aggregate_id in aggregate_ids:
+            aggregate = NewsItemAggregate.find(aggregate_id)
+            report_item.news_item_aggregates.append(aggregate)
 
-                if "attribute_id" in data:
-                    for attribute in report_item.attributes:
-                        if attribute.id == data["attribute_id"] and attribute.value != data["attribute_value"]:
-                            modified = True
-                            attribute.value = data["attribute_value"]
-                            data["attribute_value"] = ""
-                            attribute.user = user
-                            attribute.last_updated = datetime.now()
-                            break
+        db.session.commit()
 
-            if "add" in data:
-                if "attribute_id" in data:
-                    modified = True
-                    new_attribute = ReportItemAttribute(None, "", None, 0, None, data["attribute_group_item_id"], None)
-                    new_attribute.user = user
-                    report_item.attributes.append(new_attribute)
+        return f"Successfully added {aggregate_ids} to {report_item.id}", 200
 
-                if "aggregate_ids" in data:
-                    modified = True
-                    for aggregate_id in data["aggregate_ids"]:
-                        aggregate = NewsItemAggregate.find(aggregate_id)
-                        report_item.news_item_aggregates.append(aggregate)
+    @classmethod
+    def update_report_item(cls, id: int, data: dict, user: User) -> tuple[Any, int]:
+        report_item = cls.query.get(id)
+        if report_item is None:
+            return None, 404
 
-                if "remote_report_item_ids" in data:
-                    modified = True
-                    for remote_report_item_id in data["remote_report_item_ids"]:
-                        remote_report_item = ReportItem.find(remote_report_item_id)
-                        report_item.remote_report_items.append(remote_report_item)
+        if not ReportItemType.allowed_with_acl(report_item.report_item_type_id, user, False, False, True):
+            return report_item, 401
 
-            if "delete" in data:
-                if "attribute_id" in data:
-                    attribute_to_delete = None
-                    for attribute in report_item.attributes:
-                        if attribute.id == data["attribute_id"]:
-                            attribute_to_delete = attribute
-                            break
+        report_item.title = data["title"]
+        report_item.title_prefix = data["title_prefix"]
+        report_item.completed = data["completed"]
 
-                    if attribute_to_delete is not None:
-                        modified = True
-                        report_item.attributes.remove(attribute_to_delete)
+        attributes = NewReportItemAttributeSchema(many=True).load(data["attributes"])
 
-                if "aggregate_id" in data:
-                    aggregate_to_delete = None
-                    for aggregate in report_item.news_item_aggregates:
-                        if aggregate.id == data["aggregate_id"]:
-                            aggregate_to_delete = aggregate
-                            break
+        report_item.attributes = attributes
 
-                    if aggregate_to_delete is not None:
-                        modified = True
-                        report_item.news_item_aggregates.remove(aggregate_to_delete)
+        if "aggregate_ids" in data:
+            for aggregate_id in data["aggregate_ids"]:
+                aggregate = NewsItemAggregate.find(aggregate_id)
+                report_item.news_item_aggregates.append(aggregate)
 
-                if "remote_report_item_id" in data:
-                    remote_report_item_to_delete = None
-                    for remote_report_item in report_item.remote_report_items:
-                        if remote_report_item.id == data["remote_report_item_id"]:
-                            remote_report_item_to_delete = remote_report_item
-                            break
+        db.session.commit()
 
-                    if remote_report_item_to_delete is not None:
-                        modified = True
-                        report_item.remote_report_items.remove(remote_report_item_to_delete)
-
-            if modified:
-                report_item.last_updated = datetime.now()
-                data["user_id"] = user.id
-                data["report_item_id"] = int(id)
-                report_item.update_cpes()
-
-            db.session.commit()
-
-            if new_attribute is not None:
-                data["attribute_id"] = new_attribute.id
-
-        return modified, data
+        return f"Successfully updated: {report_item.id}", 200
 
     @classmethod
     def get_updated_data(cls, id, data):
@@ -492,8 +429,7 @@ class ReportItem(db.Model):
                     for attribute in report_item.attributes:
                         if attribute.id == data["attribute_id"]:
                             data["attribute_value"] = attribute.value
-                            data["attribute_last_updated"] = attribute.last_updated.strftime("%d.%m.%Y - %H:%M")
-                            data["attribute_user"] = attribute.user.name
+                            data["attribute_last_updated"] = attribute.last_updated.isoformat()
                             break
 
             if "add" in data:
@@ -516,10 +452,8 @@ class ReportItem(db.Model):
                         if attribute.id == data["attribute_id"]:
                             data["attribute_value"] = attribute.value
                             data["binary_mime_type"] = attribute.binary_mime_type
-                            data["binary_size"] = attribute.binary_size
                             data["binary_description"] = attribute.binary_description
                             data["attribute_last_updated"] = attribute.last_updated.strftime("%d.%m.%Y - %H:%M")
-                            data["attribute_user"] = attribute.user.name
                             break
 
         return data
@@ -537,18 +471,17 @@ class ReportItem(db.Model):
             attribute_group_item_id,
             None,
         )
-        new_attribute.user = user
         new_attribute.binary_data = file_data
         report_item.attributes.append(new_attribute)
 
         report_item.last_updated = datetime.now()
 
-        data = dict()
-        data["add"] = True
-        data["user_id"] = user.id
-        data["report_item_id"] = int(id)
-        data["attribute_id"] = new_attribute.id
-
+        data = {
+            "add": True,
+            "user_id": user.id,
+            "report_item_id": int(id),
+            "attribute_id": new_attribute.id,
+        }
         db.session.commit()
 
         return data

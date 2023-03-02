@@ -5,6 +5,7 @@ import feedparser
 import requests
 from bs4 import BeautifulSoup
 import dateutil.parser as dateparser
+from trafilatura import extract
 
 from .base_collector import BaseCollector
 from collectors.managers.log_manager import logger
@@ -40,13 +41,15 @@ class RSSCollector(BaseCollector):
 
         return html_content.content.decode("utf-8") if html_content is not None else ""
 
-    def parse_article_content(self, html_content: str, content_location: str = "p") -> str:
-        if html_content:
-            soup = BeautifulSoup(html_content, features="html.parser")
-            content_text = [p.text.strip() for p in soup.findAll(content_location)]
-            content = [w.replace("\xa0", " ") for w in content_text]
-            return " ".join(content)
-        return ""
+    def parse_article_content(self, html_content: str, content_location: str | None) -> str:
+        if not html_content:
+            return ""
+
+        if not content_location:
+            return extract(html_content, include_links=False, include_comments=False, include_formatting=False, with_metadata=False)
+        soup = BeautifulSoup(html_content, features="html.parser")
+        content_text = [p.text.strip() for p in soup.findAll(content_location)]
+        return " ".join([w.replace("\xa0", " ") for w in content_text])
 
     def collect(self, source):
         feed_url = source.parameter_values.get("FEED_URL", None)
@@ -68,11 +71,8 @@ class RSSCollector(BaseCollector):
         logger.log_debug(f"{self.type} collection finished.")
 
     def content_from_feed(self, feed_entry, content_location) -> tuple[bool, str]:
-        if content_location.startswith("xml_"):
-            content_location = content_location.replace("xml_", "")
-            if content_location in feed_entry:
-                return True, content_location
-            return False, content_location
+        if content_location in feed_entry:
+            return True, content_location
         if "content" in feed_entry:
             content_location = "content"
             return True, content_location
@@ -81,25 +81,35 @@ class RSSCollector(BaseCollector):
             return True, content_location
         return False, content_location
 
+    def get_published_date(self, feed_entry: feedparser.FeedParserDict) -> datetime.datetime:
+        published: str | datetime.datetime = str(feed_entry.get("published", ""))
+        if not published:
+            link: str = str(feed_entry.get("link", ""))
+            if not link:
+                return datetime.datetime.now()
+            response = requests.head(link, headers=self.headers, proxies=self.proxies)
+            if not response.ok:
+                return datetime.datetime.now()
+
+            published = str(response.headers.get("Last-Modified", ""))
+        try:
+            return dateparser.parse(published) if published else datetime.datetime.now()
+        except Exception:
+            return datetime.datetime.now()
+
     def parse_feed(self, feed_entry: feedparser.FeedParserDict, feed_url: str, source) -> NewsItemData:
         author: str = str(feed_entry.get("author", ""))
-        published: str | datetime.datetime = str(feed_entry.get("published", ""))
         title: str = str(feed_entry.get("title", ""))
         description: str = str(feed_entry.get("description", ""))
         link: str = str(feed_entry.get("link", ""))
         for_hash: str = author + title + link
 
-        try:
-            published = dateparser.parse(published) if published else datetime.datetime.now()
-        except Exception:
-            logger.exception()
-            logger.debug(f"Could not parse date: {published}")
-            published = datetime.datetime.now()
+        published = self.get_published_date(feed_entry)
 
         # if published > limit: TODO: uncomment after testing, we need some initial data now
         logger.log_collector_activity("rss", source.id, f"Processing entry [{link}]")
 
-        content_location = source.parameter_values.get("CONTENT_LOCATION", "p")
+        content_location = source.parameter_values.get("CONTENT_LOCATION", None)
         content_from_feed, content_location = self.content_from_feed(feed_entry, content_location)
         if content_from_feed:
             content = str(feed_entry[content_location])

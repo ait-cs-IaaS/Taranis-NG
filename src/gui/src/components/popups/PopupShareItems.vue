@@ -41,7 +41,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { updateReportItem } from '@/api/analyze'
+import { addAggregatesToReportItem } from '@/api/analyze'
 
 export default {
   name: 'PopupShareItems',
@@ -62,9 +62,7 @@ export default {
     ...mapActions('analyze', ['loadReportItems']),
 
     share () {
-      const reportItemData = { add: true, report_item_id: this.reportItemSelection, aggregate_ids: [this.newsItem.id] }
-      console.debug(reportItemData)
-      updateReportItem(this.reportItemSelection, reportItemData)
+      addAggregatesToReportItem(this.reportItemSelection, [this.newsItem.id])
       this.close()
     },
     close () {
@@ -79,7 +77,6 @@ export default {
           value: item.id
         }
       })
-      console.debug(this.reportItems)
     })
   }
 }
