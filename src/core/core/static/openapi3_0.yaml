@@ -867,108 +867,51 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/resp.auth.error'
-  /assess/news-item-aggregates-by-group/{group_id}:
-    parameters:
-      - name: group_id
-        in: path
-        required: true
-        schema:
-          type: string
-    get:
-      tags: [assess]
-      summary: get news items of a specific group
-      parameters:
-        - name: search
-          in: query
-          schema:
-            type: string
-        - name: read
-          in: query
-          schema:
-            type: string
-        - name: important
-          in: query
-          schema:
-            type: string
-        - name: relevant
-          in: query
-          schema:
-            type: string
-        - name: in_analyze
-          in: query
-          schema:
-            type: string
-        - name: range
-          in: query
-          schema:
-            type: integer
-        - name: sort
-          in: query
-          schema:
-            type: string
-        - name: offset
-          in: query
-          schema:
-            type: integer
-        - name: limit
-          in: query
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: the news items of the specified group
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  total_count:
-                    type: integer
-                  items:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/news_item_aggregate'
-        '401':
-          description: authorization error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/resp.auth.error'
   /assess/news-item-aggregates:
     get:
       tags: [assess]
-      summary: get news items of the default group
+      summary: get stories by filters
       parameters:
         - name: search
           in: query
-          description: Defines a search string to filter the results
+          description: Filter search string
+          schema:
+            type: string
+        - name: source
+          in: query
+          description: Filter based on OSINT source
+          schema:
+            type: string
+        - name: group
+          in: query
+          description: Filter based on OSINT source group
           schema:
             type: string
         - name: read
           in: query
           description: Filter for news_items that are read
           schema:
-            type: string
+            type: boolean
         - name: important
           in: query
           description: Filter only important news
           schema:
-            type: string
+            type: boolean
         - name: relevant
           in: query
           description: Filter only relevant news
           schema:
-            type: string
+            type: boolean
         - name: in_report
           description: Filter news-items that are added to reports
           in: query
           schema:
-            type: string
+            type: boolean
         - name: range
-          description: Filter news-items with a time-range(ALL, WEEKLY, MONTH)
+          description: Filter news-items with a time-range(DAY, WEEK, MONTH)
           in: query
           schema:
-            type: integer
+            type: string
         - name: sort
           description: Sort the results(DATE_DESC, DATE_ASC, RELEVANCE_DESC, RELEVANCE_ASC)
           in: query
@@ -976,7 +919,7 @@ paths:
             type: string
         - name: offset
           in: query
-          description: Use this offset for the results.
+          description: Offset for the results.
           schema:
             type: integer
         - name: limit
