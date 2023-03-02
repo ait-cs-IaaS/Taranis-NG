@@ -22,13 +22,11 @@
           tile
           elevation="3"
           outlined
-          v-ripple="{ class: 'accent--text' }"
           class="container no-gutters"
           :class="[
             'pl-5',
             'align-self-stretch',
             'news-item',
-            'dark-grey--text',
             {
               selected: selected
             }
@@ -210,9 +208,7 @@
                   </v-col>
                 </v-row>
                 <v-row v-if="openSummary && !published_date_outdated">
-                  <week-chart
-                    :story="story"
-                  />
+                  <week-chart :story="story" />
                 </v-row>
                 <metainfo
                   v-if="openSummary && news_item_length == 1"
@@ -224,26 +220,20 @@
         </v-card>
       </v-col>
     </v-row>
-    <v-row dense class="ma-0 py-0 px-5">
-      <v-col cols="12" class="py-0 px-1">
-        <div
-          class="hidden-story-items-wrapper"
-          :class="openSummary && news_item_length > 1 ? 'expanded' : ''"
+    <v-row dense class="ma-0 py-0 px-5" v-if="openSummary && news_item_length > 1">
+      <v-col cols="11" offset="1">
+        <transition-group
+          name="news-items-grid"
+          class="row d-flex row--dense"
+          appear
         >
-          <transition name="collapse" mode="in-out">
-            <div
-              v-if="openSummary && news_item_length > 1"
-              class="hidden-story-items-internal-wrapper"
-            >
-              <card-news-item
-                class="pa-0 my-2 story-news-item"
-                v-for="item in story.news_items"
-                :key="item.id"
-                :newsItem="item"
-              />
-            </div>
-          </transition>
-        </div>
+          <card-news-item
+            v-for="item in story.news_items"
+            :key="item.id"
+            :newsItem="item"
+            class="mt-3"
+          />
+        </transition-group>
       </v-col>
     </v-row>
   </v-row>
@@ -294,21 +284,14 @@ export default {
     item_important() {
       return 'important' in this.story ? this.story.important : false
     },
-    published_date_newest() {
-      return (
-        this.story.news_items
-          .map((item) => item.news_item_data.published)
-          .sort()[0] || false
-      )
+    published_dates() {
+      const pub_dates = this.story.news_items
+        .map((item) => item.news_item_data.published)
+        .sort()
+
+      return [pub_dates[pub_dates.length - 1], pub_dates[0]]
     },
 
-    published_date_oldest() {
-      return (
-        this.story.news_items
-          .map((item) => item.news_item_data.published)
-          .sort()[this.news_item_length - 1] || false
-      )
-    },
     news_item_summary_class() {
       return this.openSummary
         ? 'news-item-summary-no-clip'
@@ -331,7 +314,7 @@ export default {
       return longestText.length + 11 + 'ch'
     },
     published_date_outdated() {
-      const pub_date = new Date(this.published_date_newest)
+      const pub_date = new Date(this.published_dates[0])
       if (!pub_date) {
         return false
       }
@@ -385,9 +368,9 @@ export default {
     },
 
     getPublishedDate() {
-      const pubDateNew = new Date(this.published_date_newest)
+      const pubDateNew = new Date(this.published_dates[0])
       const pubDateNewStr = this.$d(pubDateNew, 'short')
-      const pubDateOld = new Date(this.published_date_oldest)
+      const pubDateOld = new Date(this.published_dates[1])
       const pubDateOldStr = this.$d(pubDateOld, 'short')
       if (pubDateNew && pubDateOld) {
         return pubDateNewStr === pubDateOldStr
@@ -413,6 +396,6 @@ export default {
   updated() {
     // console.log('card rendered!')
   },
-  mounted() {}
+  mounted() { }
 }
 </script>
