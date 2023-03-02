@@ -1,6 +1,6 @@
 <template>
   <v-container fluid style="min-height: 100vh">
-    <card-story :story="story" />
+    <card-story :story="story" :detailView="true"/>
   </v-container>
 </template>
 
