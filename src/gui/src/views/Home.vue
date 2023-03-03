@@ -1,10 +1,9 @@
 <template>
   <v-container fluid>
-    {{ clusters }}
     <v-row no-gutters>
       <dash-board-card v-for="cluster in clusters" :key="cluster.name" :linkTo="`/assess?tags=${cluster.name}`" :linkText="cluster.name">
         <template v-slot:content>
-          {{ cluster }}
+          <trending-card :cluster="cluster.name"/>
         </template>
       </dash-board-card>
 
@@ -52,11 +51,13 @@
 <script>
 import DashBoardCard from '@/components/common/DashBoardCard'
 import { mapGetters, mapActions } from 'vuex'
+import TrendingCard from '@/components/common/TrendingCard'
 
 export default {
   name: 'Home',
   components: {
-    DashBoardCard
+    DashBoardCard,
+    TrendingCard
   },
   data: () => ({
     dashboardData: {},
