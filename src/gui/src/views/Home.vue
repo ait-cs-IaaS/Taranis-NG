@@ -2,6 +2,12 @@
   <v-container fluid>
     {{ clusters }}
     <v-row no-gutters>
+      <dash-board-card v-for="cluster in clusters" :key="cluster.name" :linkTo="`/assess?tags=${cluster.name}`" :linkText="cluster.name">
+        <template v-slot:content>
+          {{ cluster }}
+        </template>
+      </dash-board-card>
+
       <dash-board-card linkTo="/assess" linkText="Assess">
         <template v-slot:content>
           <v-icon class="mr-2"> mdi-email-multiple </v-icon>
