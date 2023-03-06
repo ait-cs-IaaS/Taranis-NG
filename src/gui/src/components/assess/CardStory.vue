@@ -176,51 +176,95 @@
               lg="6"
             >
               <v-container column class="pa-0 pb-3">
-                <!-- META INFO -->
-                <v-row class="news-item-meta-infos">
-                  <v-col class="news-item-meta-infos-label">
-                    <strong>{{ $t('assess.published') }}:</strong>
-                  </v-col>
-                  <v-col>
-                    <span :class="published_date_outdated ? 'red--text' : ''">
-                      {{ getPublishedDate() }}
-                    </span>
-                    <v-icon v-if="published_date_outdated" small color="red"
-                      >mdi-alert</v-icon
-                    >
-                  </v-col>
-                </v-row>
-                <v-row class="news-item-meta-infos">
-                  <v-col class="news-item-meta-infos-label d-flex align-center">
-                    <strong>Tags:</strong>
-                  </v-col>
-                  <v-col>
-                    <div>
-                      <span
-                        class="plain-tags"
-                        v-for="(tag, i) in getTags()"
-                        v-bind:key="tag + i"
+                <v-row>
+                  <v-col class="px-0">
+                    <!-- META INFO -->
+                    <v-row class="news-item-meta-infos">
+                      <v-col class="news-item-meta-infos-label">
+                        <strong>{{ $t('assess.published') }}:</strong>
+                      </v-col>
+                      <v-col>
+                        <span
+                          :class="published_date_outdated ? 'red--text' : ''"
+                        >
+                          {{ getPublishedDate() }}
+                        </span>
+                        <v-icon v-if="published_date_outdated" small color="red"
+                          >mdi-alert</v-icon
+                        >
+                      </v-col>
+                    </v-row>
+                    <v-row class="news-item-meta-infos">
+                      <v-col
+                        class="news-item-meta-infos-label d-flex align-center"
                       >
-                        <a href="#">{{ tag }}</a
-                        >,
-                      </span>
-                    </div>
+                        <strong>Tags:</strong>
+                      </v-col>
+                      <v-col>
+                        <div>
+                          <span
+                            class="plain-tags"
+                            v-for="(tag, i) in getTags()"
+                            v-bind:key="tag + i"
+                          >
+                            <a href="#">{{ tag }}</a
+                            >,
+                          </span>
+                        </div>
+                      </v-col>
+                    </v-row>
+                  </v-col>
+                  <v-col
+                    cols="12"
+                    sm="12"
+                    lg="6"
+                    xl="5"
+                    class="px-0"
+                    v-if="!openSummary && !published_date_outdated"
+                  >
+                    <v-row class="news-item-meta-infos">
+                      <v-col>
+                        <week-chart
+                          :chartHeight="90"
+                          class="pr-5 pb-5 pt-2"
+                          :story="story"
+                        />
+                      </v-col>
+                    </v-row>
+                    <metainfo
+                      v-if="openSummary && news_item_length == 1"
+                      :newsItem="story.news_items[0]"
+                    />
                   </v-col>
                 </v-row>
-                <v-row v-if="openSummary && !published_date_outdated">
-                  <week-chart :story="story" />
+                <v-row>
+                  <v-col class="px-0">
+                    <v-row
+                      class="news-item-meta-infos"
+                      v-if="openSummary && !published_date_outdated"
+                    >
+                      <!-- <v-col
+                        class="news-item-meta-infos-label d-flex align-start"
+                      >
+                        <strong>Trend:</strong>
+                      </v-col> -->
+                      <v-col>
+                        <week-chart :chartHeight="140" :story="story" />
+                      </v-col>
+                    </v-row>
+                  </v-col>
                 </v-row>
-                <metainfo
-                  v-if="openSummary && news_item_length == 1"
-                  :newsItem="story.news_items[0]"
-                />
               </v-container>
             </v-col>
           </v-row>
         </v-card>
       </v-col>
     </v-row>
-    <v-row dense class="ma-0 py-0 px-5" v-if="openSummary && news_item_length > 1">
+    <v-row
+      dense
+      class="ma-0 py-0 px-5"
+      v-if="openSummary && news_item_length > 1"
+    >
       <v-col cols="11" offset="1">
         <transition-group
           name="news-items-grid"
@@ -396,6 +440,6 @@ export default {
   updated() {
     // console.log('card rendered!')
   },
-  mounted() { }
+  mounted() {}
 }
 </script>
