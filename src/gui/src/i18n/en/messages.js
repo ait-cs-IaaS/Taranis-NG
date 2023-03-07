@@ -60,7 +60,7 @@ export const messages_en = {
     publish: "Publish",
     config: "Configuration",
     dashboard: "Dashboard",
-    my_assets: "My Assets"
+    assets: "Assets"
   },
 
   nav_menu: {

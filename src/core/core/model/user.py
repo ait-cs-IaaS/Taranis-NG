@@ -65,6 +65,10 @@ class User(db.Model):
         return cls.query.get(user_id)
 
     @classmethod
+    def find_by_role(cls, role_id: int):
+        return cls.query.filter(cls.roles.any(id=role_id)).all()
+
+    @classmethod
     def get_all(cls):
         return cls.query.order_by(db.asc(User.name)).all()
 

@@ -55,7 +55,7 @@ export const messages_de = {
     publish: 'Publish',
     config: 'Config',
     dashboard: 'Dashboard',
-    my_assets: 'Assets'
+    assets: 'Assets'
   },
   nav_menu: {
     enter: 'Newsbeitrag erstellen',

@@ -5,6 +5,7 @@ from sqlalchemy import orm, or_, text
 from core.managers.db_manager import db
 from core.model.report_item import ReportItem
 from core.model.user import User
+from core.model.organization import Organization
 from core.model.notification_template import NotificationTemplate
 from shared.schema.asset import (
     AssetCpeSchema,
@@ -247,11 +248,9 @@ class AssetGroup(db.Model):
         self.id = id or str(uuid.uuid4())
         self.name = name
         self.description = description
-        self.organizations = []
-        self.users = []
-        self.users.extend(User.find_by_id(user.id) for user in users)
-        self.templates = []
-        self.templates.extend(NotificationTemplate.find(template.id) for template in templates)
+        self.users = [User.find_by_id(user.id) for user in users] if users else []
+        self.organizations = [user.organizations for user in self.users] if self.users else []
+        self.templates = [NotificationTemplate.find(template.id) for template in templates] if templates else []
         self.tag = "mdi-folder-multiple"
 
     @orm.reconstructor
@@ -303,16 +302,21 @@ class AssetGroup(db.Model):
         return {"total_count": count, "items": group_schema.dump(groups)}
 
     @classmethod
+    def create(cls, name: str, description: str, users: list | None = None, templates: list | None = None, id: str | None = None):
+        group = AssetGroup(id, name, description, users, templates)
+        db.session.add(group)
+        db.session.commit()
+
+    @classmethod
     def add(cls, user, data):
-        new_group_schema = NewAssetGroupGroupSchema()
-        group = new_group_schema.load(data)
+        group = NewAssetGroupGroupSchema().load(data)
         group.organizations = user.organizations
         for added_user in group.users[:]:
-            if not any(org in added_user.organizations for org in group.organizations):
+            if all(org not in added_user.organizations for org in group.organizations):
                 group.users.remove(added_user)
 
         for added_template in group.templates[:]:
-            if not any(org in added_template.organizations for org in group.organizations):
+            if all(org not in added_template.organizations for org in group.organizations):
                 group.temlates.remove(added_template)
 
         db.session.add(group)

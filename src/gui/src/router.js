@@ -113,12 +113,12 @@ export const router = new Router({
       meta: { requiresAuth: true, requiresPerm: [Permissions.ASSESS_ACCESS] }
     },
     {
-      path: '/myassets*',
-      name: 'myassets',
+      path: '/assets',
+      name: 'assets',
       components: {
         default: () =>
           import(
-            /* webpackChunkName: "assets" */ './views/users/MyAssetsView.vue'
+            /* webpackChunkName: "assets" */ './views/users/AssetsView.vue'
           ),
         nav: () =>
           import(/* webpackChunkName: "assets" */ './views/nav/MyAssetsNav.vue')
@@ -131,7 +131,7 @@ export const router = new Router({
       components: {
         default: () =>
           import(
-            /* webpackChunkName: "assets" */ './views/users/ReportView.vue'
+            /* webpackChunkName: "assets" */ './views/users/AssetView.vue'
           )
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.MY_ASSETS_ACCESS] }
