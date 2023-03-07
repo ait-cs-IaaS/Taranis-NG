@@ -126,6 +126,17 @@ export const router = new Router({
       meta: { requiresAuth: true, requiresPerm: [Permissions.MY_ASSETS_ACCESS] }
     },
     {
+      path: '/asset/:id',
+      name: 'asset',
+      components: {
+        default: () =>
+          import(
+            /* webpackChunkName: "assets" */ './views/users/ReportView.vue'
+          )
+      },
+      meta: { requiresAuth: true, requiresPerm: [Permissions.MY_ASSETS_ACCESS] }
+    },
+    {
       path: '/user',
       name: 'user',
       components: {

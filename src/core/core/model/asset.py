@@ -64,14 +64,10 @@ class Asset(db.Model):
         self.description = description
         self.asset_group_id = asset_group_id
         self.asset_cpes = asset_cpes
-        self.title = ""
-        self.subtitle = ""
-        self.tag = ""
+        self.tag = "mdi-laptop"
 
     @orm.reconstructor
     def reconstruct(self):
-        self.title = self.name
-        self.subtitle = self.description
         self.tag = "mdi-laptop"
 
     @classmethod
@@ -166,7 +162,11 @@ class Asset(db.Model):
         return query.all(), query.count()
 
     @classmethod
-    def get_all_json(cls, user, group_id, search, sort, vulnerable):
+    def get_all_json(cls, user, filter):
+        group_id = filter.get("group")
+        search = filter.get("search")
+        sort = filter.get("sort")
+        vulnerable = filter.get("vulnerable")
         if AssetGroup.access_allowed(user, group_id):
             assets, count = cls.get(group_id, search, sort, vulnerable)
             asset_schema = AssetPresentationSchema(many=True)
