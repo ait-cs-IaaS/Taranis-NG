@@ -1,25 +1,34 @@
 <template>
-  <v-container fluid style="min-height: 100vh">
-    {{ asset }}
-  </v-container>
+  <asset
+    v-if="asset"
+    :asset_prop="asset"
+    :edit.sync="edit"
+    @assetcreated="assetcreated"
+  />
 </template>
 
 <script>
 import { getAsset } from '@/api/assets'
 import { notifySuccess } from '@/utils/helpers'
+import Asset from '@/components/assets/Asset'
 
 export default {
   name: 'Asset',
   data: () => ({
     default_asset: {
-      id: null,
+      id: -1,
       name: '',
-      description: ''
+      serial: '',
+      description: '',
+      asset_cpes: [],
+      asset_group_id: ''
     },
     asset: undefined,
     edit: true
   }),
-  components: { },
+  components: {
+    Asset
+  },
   mounted() {
     this.asset = this.default_asset
   },
@@ -38,7 +47,7 @@ export default {
         })
       }
     },
-    reportCreated(asset) {
+    assetcreated(asset) {
       notifySuccess(`Asset with ID ${asset} created`)
       this.edit = true
     }

@@ -1,59 +1,46 @@
 <template>
-  <container>
-    <DataTable
-      :addButton="true"
-      :items.sync="assets"
-      :headerFilter="headers"
-      sortByItem="id"
-      groupByItem="asset_group"
-      :actionColumn="true"
-      @delete-item="deleteAsset"
-      @edit-item="editAsset"
-      @add-item="addAsset"
-      @update-items="updateData"
-      @selection-change="selectionChange"
-    >
-      <template v-slot:header>
-        <h1>Assets</h1>
-      </template>
-      <template v-slot:[`item.name`]="{ item }">
-        <v-chip
-          color="red"
+  <v-container fluid>
+    <v-card>
+      <v-card-title>
+        <v-text-field
+          v-model="search"
+          append-icon="mdi-magnify"
+          label="Search"
+          single-line
+          class="mr-8"
+          hide-details
+        ></v-text-field>
+        <v-btn
+          color="error"
           dark
+          class="ml-8"
+          @click="deleteItems(selected)"
+          v-if="selected.length > 0"
         >
-          {{ item }}
-        </v-chip>
-      </template>
-    </DataTable>
-    <DataTable
-      :addButton="true"
-      :items.sync="asset_groups"
-      :headerFilter="['tag', 'name', 'description']"
-      sortByItem="id"
-      :actionColumn="true"
-      @delete-item="deleteAssetGroup"
-      @edit-item="editAssetGroup"
-      @add-item="addAssetGroup"
-      @update-items="updateData"
-      @selection-change="selectionChange"
-    >
-      <template v-slot:header>
-        <h1>Asset Groups</h1>
-      </template>
-      <template v-slot:[`item.name`]="{ item }">
-        <v-chip
-          color="red"
-          dark
-        >
-          {{ item }}
-        </v-chip>
-      </template>
-    </DataTable>
-  </container>
+          Delete {{ selected.length }}
+        </v-btn>
+        <v-btn color="primary" dark class="ml-8" @click="addAssetGroup">
+          New Asset Group
+        </v-btn>
+        <v-btn color="primary" dark class="ml-4" @click="addAsset">
+          New Asset
+        </v-btn>
+      </v-card-title>
+    </v-card>
+    <v-card v-for="asset in assets" :key="asset.id" class="mt-3">
+      <v-card-title>
+        {{ asset.name }}
+      </v-card-title>
+    </v-card>
+    <v-card v-for="asset_group in asset_groups" :key="asset_group.id" class="mt-3">
+      <v-card-title>
+        {{ asset_group.name }}
+      </v-card-title>
+    </v-card>
+  </v-container>
 </template>
 
 <script>
-import DataTable from '@/components/common/DataTable'
 import {
   deleteAssetGroup,
   // solveVulnerability,
@@ -64,9 +51,7 @@ import { notifySuccess, notifyFailure } from '@/utils/helpers'
 
 export default {
   name: 'Assets',
-  components: {
-    DataTable
-  },
+  components: {},
   data: function () {
     return {
       selected: [],

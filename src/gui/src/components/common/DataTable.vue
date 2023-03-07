@@ -49,7 +49,6 @@
           </v-card-title>
         </v-card>
       </template>
-      <slot name="tablebody"></slot>
       <template v-slot:[`header.tag`]="{}"></template>
       <template v-slot:[`header.actions`]="{}"></template>
 
