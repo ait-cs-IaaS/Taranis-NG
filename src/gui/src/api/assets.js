@@ -39,6 +39,10 @@ export function getAllAssets (filter_data) {
   return ApiService.get(`/assets?${filter}`)
 }
 
+export function getAsset (asset_id) {
+  return ApiService.get(`/asset/${asset_id}`)
+}
+
 export function createAsset (asset) {
   return ApiService.post(`/my-assets/asset-groups/${asset.asset_group_id}/assets`, asset)
 }

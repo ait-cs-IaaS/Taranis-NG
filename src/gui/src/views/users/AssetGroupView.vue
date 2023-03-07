@@ -9,7 +9,7 @@ import { getAsset } from '@/api/assets'
 import { notifySuccess } from '@/utils/helpers'
 
 export default {
-  name: 'Asset',
+  name: 'AssetGroup',
   data: () => ({
     default_asset: {
       id: null,

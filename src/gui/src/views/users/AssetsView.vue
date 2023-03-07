@@ -1,49 +1,69 @@
 <template>
+  <container>
     <DataTable
       :addButton="true"
-      :items.sync="report_items"
-      :headerFilter="['tag', 'title', 'created']"
+      :items.sync="assets"
+      :headerFilter="headers"
       sortByItem="id"
+      groupByItem="asset_group"
       :actionColumn="true"
-      @delete-item="deleteItem"
-      @edit-item="editItem"
-      @add-item="addItem"
+      @delete-item="deleteAsset"
+      @edit-item="editAsset"
+      @add-item="addAsset"
       @update-items="updateData"
       @selection-change="selectionChange"
     >
-      <template v-slot:actionColumn>
-        <v-tooltip left>
-          <template v-slot:activator="{ on }">
-            <v-icon
-              v-on="on"
-              color="secondary"
-              @click.stop="createProduct(item)"
-            >
-              mdi-file
-            </v-icon>
-          </template>
-          <span>Create Product</span>
-        </v-tooltip>
+      <template v-slot:header>
+        <h1>Assets</h1>
+      </template>
+      <template v-slot:[`item.name`]="{ item }">
+        <v-chip
+          color="red"
+          dark
+        >
+          {{ item }}
+        </v-chip>
       </template>
     </DataTable>
+    <DataTable
+      :addButton="true"
+      :items.sync="asset_groups"
+      :headerFilter="['tag', 'name', 'description']"
+      sortByItem="id"
+      :actionColumn="true"
+      @delete-item="deleteAssetGroup"
+      @edit-item="editAssetGroup"
+      @add-item="addAssetGroup"
+      @update-items="updateData"
+      @selection-change="selectionChange"
+    >
+      <template v-slot:header>
+        <h1>Asset Groups</h1>
+      </template>
+      <template v-slot:[`item.name`]="{ item }">
+        <v-chip
+          color="red"
+          dark
+        >
+          {{ item }}
+        </v-chip>
+      </template>
+    </DataTable>
+  </container>
 </template>
 
 <script>
 import DataTable from '@/components/common/DataTable'
 import {
-  // createAssetGroup,
-  // updateAssetGroup,
-  // deleteAssetGroup,
+  deleteAssetGroup,
   // solveVulnerability,
-  createAsset,
-  updateAsset,
   deleteAsset
 } from '@/api/assets'
 import { mapActions, mapGetters } from 'vuex'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
 
 export default {
-  name: 'Analyze',
+  name: 'Assets',
   components: {
     DataTable
   },
@@ -51,7 +71,12 @@ export default {
     return {
       selected: [],
       assets: [],
-      asset_groups: []
+      asset_groups: [],
+      headers: [
+        { text: 'tag', value: 'tag', sortable: false, width: '15px' },
+        { text: 'name', value: 'name' },
+        { text: 'description', value: 'description' }
+      ]
     }
   },
   methods: {
@@ -61,9 +86,9 @@ export default {
     updateData() {
       this.loadAssets().then(() => {
         const sources = this.getAssets()
-        this.assets = sources
+        this.assets = sources.items
         this.updateItemCount({
-          total: sources.length,
+          total: sources.total_count,
           filtered: sources.length
         })
       })
@@ -71,16 +96,19 @@ export default {
         this.asset_groups = this.getAssetGroups().items
       })
     },
-    addItem() {
+    addAsset() {
       this.$router.push('/asset/0')
     },
-    editItem(item) {
+    editAsset(item) {
       this.$router.push('/asset/' + item.id)
     },
-    handleSubmit(submittedData) {
-      console.log(submittedData)
+    addAssetGroup() {
+      this.$router.push('/asset-group/0')
     },
-    deleteItem(item) {
+    editAssetGroup(item) {
+      this.$router.push('/asset-group/' + item.id)
+    },
+    deleteAsset(item) {
       deleteAsset(item)
         .then(() => {
           notifySuccess(`Successfully deleted ${item.name}`)
@@ -90,28 +118,15 @@ export default {
           notifyFailure(`Failed to delete ${item.name}`)
         })
     },
-    createItem(item) {
-      createAsset(item)
+    deleteAssetGroup(item) {
+      deleteAssetGroup(item)
         .then(() => {
-          notifySuccess(`Successfully created ${item.name}`)
+          notifySuccess(`Successfully deleted ${item.name}`)
           this.updateData()
         })
         .catch(() => {
-          notifyFailure(`Failed to create ${item.name}`)
+          notifyFailure(`Failed to delete ${item.name}`)
         })
-    },
-    updateItem(item) {
-      updateAsset(item)
-        .then(() => {
-          notifySuccess(`Successfully updated ${item.name}`)
-          this.updateData()
-        })
-        .catch(() => {
-          notifyFailure(`Failed to update ${item.name}`)
-        })
-    },
-    createProduct() {
-      this.$router.push({ name: 'product', params: { id: null } })
     },
     selectionChange(selected) {
       this.selected = selected.map((item) => item.id)

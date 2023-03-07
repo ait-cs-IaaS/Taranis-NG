@@ -1339,11 +1339,7 @@ def pre_seed_default_user():
                     },
                 ],
                 "permissions": [],
-                "organizations": [
-                    {
-                        "id": 1,
-                    },
-                ],
+                "organization": {"id": 1},
                 "password": generate_password_hash("admin", method="sha256"),
             }
         )
@@ -1375,11 +1371,7 @@ def pre_seed_default_user():
                     },
                 ],
                 "permissions": [],
-                "organizations": [
-                    {
-                        "id": 2,
-                    },
-                ],
+                "organization": {"id": 2},
                 "password": generate_password_hash("user", method="sha256"),
             }
         )
@@ -1389,5 +1381,9 @@ def pre_seed_assets():
     from core.model.asset import AssetGroup
     from core.model.user import User
 
+    if AssetGroup.find("default"):
+        return
     users = User.get_all()
-    AssetGroup.create(name="Default", description="Default group for uncategorized assets", users=users, id="default")
+    AssetGroup.create(
+        name="Default", description="Default group for uncategorized assets", organization_id=users[0].organization.id, id="default"
+    )

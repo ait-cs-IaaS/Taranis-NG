@@ -129,19 +129,16 @@ export default {
     AttributeItem,
     CardStory
   },
-  data: () => ({
-    verticalView: true,
-    expand_panel_groups: [],
-    modify: true,
-    selected_report_type: null,
-    report_types: [],
-    report_types_selection: [],
-    attributes: {},
-    report_item: {}
-  }),
-  watch: {
-    report_item_prop(val) {
-      this.report_item = val
+  data: function () {
+    return {
+      verticalView: true,
+      expand_panel_groups: [],
+      modify: true,
+      selected_report_type: null,
+      report_types: [],
+      report_types_selection: [],
+      attributes: {},
+      report_item: this.report_item_prop
     }
   },
   computed: {
@@ -224,12 +221,11 @@ export default {
     }
   },
   mounted() {
-    this.report_item = this.report_item_prop
+    console.debug(`Loaded REPORT ITEM ${this.report_item.id}`)
+
     this.loadReportTypes().then(() => {
       this.report_types = this.getReportTypes().items
       this.report_type = this.report_item.report_item_type_id
-      console.debug('REPORT ITEM')
-      console.debug(this.report_item)
     })
   },
   beforeDestroy() {}
