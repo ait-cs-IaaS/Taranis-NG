@@ -13,14 +13,14 @@ from shared.schema.user import (
     UserPresentationSchema,
 )
 from shared.schema.role import RoleIdSchema, PermissionIdSchema
-from shared.schema.organization import OrganizationIdSchema
+from shared.schema.organization import OrganizationSchema
 from core.managers.log_manager import logger
 
 
 class NewUserSchema(UserSchemaBase):
     roles = fields.Nested(RoleIdSchema, many=True)
     permissions = fields.Nested(PermissionIdSchema, many=True)
-    organization = fields.Nested(OrganizationIdSchema)
+    organization = fields.Nested(OrganizationSchema, only=["id"])
 
     @post_load
     def make(self, data, **kwargs):
@@ -77,7 +77,7 @@ class User(db.Model):
     def get(cls, search, organization):
         query = cls.query
 
-        if organization is not None:
+        if organization:
             query = query.filter(User.organization_id == organization.id)
 
         if search is not None:
@@ -176,8 +176,7 @@ class User(db.Model):
 
     @classmethod
     def get_profile_json(cls, user):
-        profile_schema = UserProfileSchema()
-        return profile_schema.dump(user.profile)
+        return UserProfileSchema().dump(user.profile)
 
     @classmethod
     def update_profile(cls, user, data):

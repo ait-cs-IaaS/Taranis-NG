@@ -183,7 +183,7 @@ export const messages_en = {
     successful_edit: "User was successfully updated",
     removed: "User was successfully removed",
     removed_error: "User is in use and could not be deleted",
-    organizations: "Organizations",
+    organization: "Organization",
     roles: "Roles",
     permissions: "Permissions",
     total_count: "Users count: ",
