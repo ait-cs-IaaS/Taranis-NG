@@ -119,7 +119,10 @@ export const router = new Router({
         default: () =>
           import(
             /* webpackChunkName: "assets" */ './views/users/AssetsView.vue'
-          )
+          ),
+        nav: () =>
+          import(/* webpackChunkName: "assets" */ './views/nav/AssetsNav.vue')
+
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.MY_ASSETS_ACCESS] }
     },
@@ -183,12 +186,8 @@ export const router = new Router({
       meta: { requiresAuth: true, requiresPerm: [Permissions.MY_ASSETS_CONFIG] }
     },
     {
-      path: '/config',
-      name: 'config',
-      redirect: '/config/dashboard'
-    },
-    {
       path: '/config/dashboard',
+      alias: '/config',
       name: 'configDashboard',
       components: {
         default: () =>

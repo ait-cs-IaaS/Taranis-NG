@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <v-app-bar :elevation="2" app class="mt-12">
-      <v-app-bar-title>{{ container_title }}</v-app-bar-title>
+      <v-toolbar-title>{{ container_title }}</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-switch v-model="verticalView" label="Side-by-side view"></v-switch>
       <div v-if="edit">
@@ -13,7 +13,7 @@
       </div>
       <v-btn color="success" class="mr-2" @click="saveReportItem">
         <v-icon left>mdi-content-save</v-icon>
-        <span>{{ $t('report_item.save') }}</span>
+        <span>{{ $t('button.save') }}</span>
       </v-btn>
     </v-app-bar>
 
@@ -33,6 +33,7 @@
                 v-model="report_type"
                 item-text="title"
                 item-value="id"
+                :rules="required"
                 :items="report_types"
                 :label="$t('report_item.report_type')"
               />
@@ -50,7 +51,7 @@
                 name="title"
                 type="text"
                 v-model="report_item.title"
-                v-validate="'required'"
+                :rules="required"
                 :error-messages="errors.collect('title')"
               ></v-text-field>
             </v-col>
@@ -138,7 +139,8 @@ export default {
       report_types: [],
       report_types_selection: [],
       attributes: {},
-      report_item: this.report_item_prop
+      report_item: this.report_item_prop,
+      required: [(v) => !!v || 'Required']
     }
   },
   computed: {
@@ -175,8 +177,8 @@ export default {
     },
     container_title() {
       return this.edit
-        ? this.$t('report_item.edit')
-        : this.$t('report_item.add_new')
+        ? `${this.$t('title.edit')} report item`
+        : `${this.$t('title.add_new')} report item`
     }
   },
   methods: {

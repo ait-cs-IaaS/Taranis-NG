@@ -1,32 +1,5 @@
 <template>
   <v-container fluid>
-    <v-card>
-      <v-card-title>
-        <v-text-field
-          v-model="search"
-          append-icon="mdi-magnify"
-          label="Search"
-          single-line
-          class="mr-8"
-          hide-details
-        ></v-text-field>
-        <v-btn
-          color="error"
-          dark
-          class="ml-8"
-          @click="deleteItems(selected)"
-          v-if="selected.length > 0"
-        >
-          Delete {{ selected.length }}
-        </v-btn>
-        <v-btn color="primary" dark class="ml-8" @click="addAssetGroup">
-          New Asset Group
-        </v-btn>
-        <v-btn color="primary" dark class="ml-4" @click="addAsset">
-          New Asset
-        </v-btn>
-      </v-card-title>
-    </v-card>
     <v-card v-for="asset in assets" :key="asset.id" class="mt-3">
       <v-card-title>
         {{ asset.name }}

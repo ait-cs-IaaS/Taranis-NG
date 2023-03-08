@@ -1,5 +1,14 @@
 <template>
   <v-container fluid>
+    <v-app-bar :elevation="2" app class="mt-12">
+      <v-toolbar-title>{{ container_title }}</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-btn color="success" class="mr-2" @click="saveReportItem">
+        <v-icon left>mdi-content-save</v-icon>
+        <span>{{ $t('button.save') }}</span>
+      </v-btn>
+    </v-app-bar>
+
     <v-row no-gutters>
       <v-col cols="6" class="pr-3">
         <v-text-field
@@ -21,10 +30,10 @@
     </v-row>
     <v-row no-gutters>
       <v-col cols="12">
-        <CPETable :asset_cpes="asset.asset_cpes" @update-cpes="update" />
+        {{ asset.asset_cpes }}
       </v-col>
       <v-col cols="12">
-        <card-vulnerability :vulnerabilities="vulnerabilities" />
+        {{ vulnerabilities }}
       </v-col>
     </v-row>
   </v-container>
@@ -33,15 +42,9 @@
 <script>
 import { createAsset, updateAsset } from '@/api/assets'
 
-import CPETable from '@/components/assets/CPETable'
-import CardVulnerability from '@/components/assets/CardVulnerability'
-
 export default {
   name: 'Asset',
-  components: {
-    CPETable,
-    CardVulnerability
-  },
+  components: {},
   props: {
     asset_prop: { type: Object, default: () => {}, required: true },
     edit: { type: Boolean, default: false }
@@ -54,10 +57,14 @@ export default {
       asset: this.asset_prop
     }
   },
+  computed: {
+    container_title() {
+      return this.edit
+        ? `${this.$t('title.edit')} asset`
+        : `${this.$t('title.add_new')} asset`
+    }
+  },
   methods: {
-    cardLayout() {
-      return 'CardVulnerability'
-    },
     addAsset() {
       this.visible = true
       this.asset.id = -1
@@ -70,45 +77,33 @@ export default {
     },
 
     add() {
-      this.$validator.validateAll().then(() => {
-        if (!this.$validator.errors.any()) {
-          for (let i = 0; i < this.asset.asset_cpes.length; i++) {
-            this.asset.asset_cpes[i].value = this.asset.asset_cpes[
-              i
-            ].value.replace('*', '%')
-          }
-
-          if (this.edit === true) {
-            updateAsset(this.asset)
-              .then(() => {
-                this.$validator.reset()
-                this.visible = false
-                this.$root.$emit('notification', {
-                  type: 'success',
-                  loc: 'asset.successful_edit'
-                })
-              })
-              .catch(() => {
-                this.show_error = true
-              })
-          } else {
-            createAsset(this.asset)
-              .then(() => {
-                this.$validator.reset()
-                this.visible = false
-                this.$root.$emit('notification', {
-                  type: 'success',
-                  loc: 'asset.successful'
-                })
-              })
-              .catch(() => {
-                this.show_error = true
-              })
-          }
-        } else {
-          this.show_validation_error = true
-        }
-      })
+      if (this.edit === true) {
+        updateAsset(this.asset)
+          .then(() => {
+            this.$validator.reset()
+            this.visible = false
+            this.$root.$emit('notification', {
+              type: 'success',
+              loc: 'asset.successful_edit'
+            })
+          })
+          .catch(() => {
+            this.show_error = true
+          })
+      } else {
+        createAsset(this.asset)
+          .then(() => {
+            this.$validator.reset()
+            this.visible = false
+            this.$root.$emit('notification', {
+              type: 'success',
+              loc: 'asset.successful'
+            })
+          })
+          .catch(() => {
+            this.show_error = true
+          })
+      }
     },
 
     update(cpes) {

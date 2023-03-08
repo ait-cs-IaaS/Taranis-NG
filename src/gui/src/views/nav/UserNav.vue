@@ -1,14 +1,14 @@
 <template>
-  <Navigation :links="links" icon="mdi-ballot-outline" />
+  <icon-navigation :links="links" icon="mdi-ballot-outline" />
 </template>
 
 <script>
-import Navigation from '@/components/common/Navigation'
+import IconNavigation from '@/components/common/IconNavigation'
 
 export default {
   name: 'UserNav',
   components: {
-    Navigation
+    IconNavigation
   },
   data: () => ({
     links: [
