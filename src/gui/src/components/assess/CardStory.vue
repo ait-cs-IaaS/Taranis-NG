@@ -164,7 +164,7 @@
               align-self="stretch"
             >
               <!-- DESCRIPTION -->
-              <summarized-content :is_summarized="is_summarized" :content="getDescription()"/>
+              <summarized-content :open="openSummary" :is_summarized="is_summarized" :content="getDescription()"/>
             </v-col>
             <v-col
               class="item-meta-info px-5 pt-2 pb-3"
@@ -367,7 +367,7 @@ export default {
 
     getDescription() {
       return this.openSummary
-        ? this.story.description
+        ? this.news_item_length > 1 ? this.story.description : this.story.news_items[0].news_item_data.content
         : this.story.summary || this.story.description
     },
 
