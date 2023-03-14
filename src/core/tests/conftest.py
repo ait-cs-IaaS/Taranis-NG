@@ -16,6 +16,11 @@ def app():
 def client(app):
     yield app.test_client()
 
+@pytest.fixture
+def dbsession(app):
+    with app.app_context():
+        from core.managers.db_manager import db
+        yield db.session
 
 @pytest.fixture()
 def _db(app):
