@@ -426,3 +426,9 @@ class TestAssessApi(object):
         assert len(response.get_json()) == 2
         assert response.content_type == "application/json"
         assert response.status_code == 200
+        response = client.get("/api/v1/assess/tags?search=fo", headers=auth_header)
+        assert len(response.get_json()) == 1
+        response = client.get("/api/v1/assess/tags?limit=1", headers=auth_header)
+        assert len(response.get_json()) == 1
+        response = client.get("/api/v1/assess/tags?offset=1", headers=auth_header)
+        assert len(response.get_json()) == 1
