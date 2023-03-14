@@ -1,10 +1,11 @@
 import uuid
 from marshmallow import fields, post_load
-from sqlalchemy import orm, func, or_, text
+from sqlalchemy import orm, or_, text
 
 from core.managers.db_manager import db
 from core.model.report_item import ReportItem
 from core.model.user import User
+from core.model.organization import Organization
 from core.model.notification_template import NotificationTemplate
 from shared.schema.asset import (
     AssetCpeSchema,
@@ -15,6 +16,7 @@ from shared.schema.asset import (
 )
 from shared.schema.user import UserIdSchema
 from shared.schema.notification_template import NotificationTemplateIdSchema
+from core.managers.log_manager import logger
 
 
 class NewAssetCpeSchema(AssetCpeSchema):
@@ -64,36 +66,31 @@ class Asset(db.Model):
         self.description = description
         self.asset_group_id = asset_group_id
         self.asset_cpes = asset_cpes
-        self.title = ""
-        self.subtitle = ""
-        self.tag = ""
+        self.tag = "mdi-laptop"
 
     @orm.reconstructor
     def reconstruct(self):
-        self.title = self.name
-        self.subtitle = self.description
         self.tag = "mdi-laptop"
 
     @classmethod
     def get_by_cpe(cls, cpes):
 
-        if len(cpes) > 0:
-            query_string = "SELECT DISTINCT asset_id FROM asset_cpe WHERE value LIKE ANY(:cpes) OR {}"
-            params = {"cpes": cpes}
-
-            inner_query = ""
-            for i in range(len(cpes)):
-                if i > 0:
-                    inner_query += " OR "
-                param = "cpe" + str(i)
-                inner_query += ":" + param + " LIKE value"
-                params[param] = cpes[i]
-
-            result = db.engine.execute(text(query_string.format(inner_query)), params)
-
-            return [cls.query.get(row[0]) for row in result]
-        else:
+        if len(cpes) <= 0:
             return []
+        query_string = "SELECT DISTINCT asset_id FROM asset_cpe WHERE value LIKE ANY(:cpes) OR {}"
+        params = {"cpes": cpes}
+
+        inner_query = ""
+        for i in range(len(cpes)):
+            if i > 0:
+                inner_query += " OR "
+            param = f"cpe{str(i)}"
+            inner_query += f":{param} LIKE value"
+            params[param] = cpes[i]
+
+        result = db.engine.execute(text(query_string.format(inner_query)), params)
+
+        return [cls.query.get(row[0]) for row in result]
 
     @classmethod
     def remove_vulnerability(cls, report_item_id):
@@ -112,17 +109,10 @@ class Asset(db.Model):
         self.vulnerabilities_count += 1
 
     def update_vulnerabilities(self):
-        cpes = []
-        for cpe in self.asset_cpes:
-            cpes.append(cpe.value)
-
+        cpes = [cpe.value for cpe in self.asset_cpes]
         report_item_ids = ReportItem.get_by_cpe(cpes)
 
-        solved = []
-        for vulnerability in self.vulnerabilities:
-            if vulnerability.solved is True:
-                solved.append(vulnerability.report_item_id)
-
+        solved = [vulnerability.report_item_id for vulnerability in self.vulnerabilities if vulnerability.solved is True]
         self.vulnerabilities = []
         self.vulnerabilities_count = 0
         for report_item_id in report_item_ids:
@@ -134,7 +124,7 @@ class Asset(db.Model):
             self.vulnerabilities.append(vulnerability)
 
     @classmethod
-    def solve_vulnerability(cls, user, group_id, asset_id, report_item_id, solved):
+    def solve_vulnerability(cls, user, asset_id, report_item_id, solved):
         asset = cls.query.get(asset_id)
         if AssetGroup.access_allowed(user, asset.asset_group_id):
             for vulnerability in asset.vulnerabilities:
@@ -149,25 +139,26 @@ class Asset(db.Model):
                     return
 
     @classmethod
-    def get(cls, group_id, search, sort, vulnerable):
+    def get_by_filter(cls, group_id, search, sort, vulnerable, organization):
         query = cls.query.filter(Asset.asset_group_id == group_id)
 
-        if vulnerable is not None:
-            if vulnerable == "true":
-                query = query.filter(Asset.vulnerabilities_count > 0)
+        if vulnerable:
+            query = query.filter(Asset.vulnerabilities_count > 0)
 
-        if search is not None:
-            search_string = "%" + search.lower() + "%"
+        if search:
             query = query.join(AssetCpe, Asset.id == AssetCpe.asset_id).filter(
                 or_(
-                    func.lower(Asset.name).like(search_string),
-                    func.lower(Asset.description).like(search_string),
-                    func.lower(Asset.serial).like(search_string),
-                    func.lower(AssetCpe.value).like(search_string),
+                    Asset.name.ilike(f"%{search}%"),
+                    Asset.description.ilike(f"%{search}%"),
+                    Asset.serial.ilike(f"%{search}%"),
+                    AssetCpe.value.ilike(f"%{search}%"),
                 )
             )
 
-        if sort is not None:
+        if organization:
+            query = query.join(AssetGroup, Asset.asset_group_id == AssetGroup.id).filter(AssetGroup.organization == organization)
+
+        if sort:
             if sort == "ALPHABETICAL":
                 query = query.order_by(db.asc(Asset.name))
             else:
@@ -176,12 +167,30 @@ class Asset(db.Model):
         return query.all(), query.count()
 
     @classmethod
-    def get_all_json(cls, user, group_id, search, sort, vulnerable):
-        if AssetGroup.access_allowed(user, group_id):
-            assets, count = cls.get(group_id, search, sort, vulnerable)
-            asset_schema = AssetPresentationSchema(many=True)
-            items = asset_schema.dump(assets)
-            return {"total_count": count, "items": items}
+    def get_by_id(cls, asset_id, organization):
+        query = cls.query.filter(Asset.id == asset_id)
+
+        if organization:
+            query = query.join(AssetGroup, Asset.asset_group_id == AssetGroup.id).filter(AssetGroup.organization == organization)
+
+        return query.first()
+
+    @classmethod
+    def get_all_json(cls, user, filter):
+        group_id = filter.get("group", AssetGroup.get_default_group().id)
+        search = filter.get("search")
+        sort = filter.get("sort")
+        vulnerable = filter.get("vulnerable")
+        organization = user.organization
+        assets, count = cls.get_by_filter(group_id, search, sort, vulnerable, organization)
+        items = AssetPresentationSchema(many=True).dump(assets)
+        return {"total_count": count, "items": items}, 200
+
+    @classmethod
+    def get_json(cls, user, asset_id):
+        organization = user.organization
+        asset = cls.get_by_id(asset_id, organization)
+        return AssetPresentationSchema().dump(asset), 200
 
     @classmethod
     def add(cls, user, group_id, data):
@@ -249,59 +258,48 @@ class AssetGroup(db.Model):
     description = db.Column(db.String())
 
     templates = db.relationship("NotificationTemplate", secondary="asset_group_notification_template")
+    organization_id = db.Column(db.Integer, db.ForeignKey("organization.id"))
+    organization = db.relationship("Organization")
 
-    organizations = db.relationship("Organization", secondary="asset_group_organization")
-    users = db.relationship("User", secondary="asset_group_user")
-
-    def __init__(self, id, name, description, users, templates):
-        self.id = str(uuid.uuid4())
+    def __init__(self, id, name: str, description: str, organization_id: int, templates: list | None = None):
+        self.id = id or str(uuid.uuid4())
         self.name = name
         self.description = description
-        self.organizations = []
-        self.users = []
-        for user in users:
-            self.users.append(User.find_by_id(user.id))
-
-        self.templates = []
-        for template in templates:
-            self.templates.append(NotificationTemplate.find(template.id))
-
-        self.title = ""
-        self.subtitle = ""
-        self.tag = ""
+        try:
+            self.organization = Organization.find(organization_id)
+            self.templates = [NotificationTemplate.find(template.id) for template in templates] if templates else []
+            self.tag = "mdi-folder-multiple"
+        except Exception:
+            logger.exception("Error creating asset group")
 
     @orm.reconstructor
     def reconstruct(self):
-        self.title = self.name
-        self.subtitle = self.description
         self.tag = "mdi-folder-multiple"
 
     @classmethod
     def find(cls, group_id):
-        group = cls.query.get(group_id)
-        return group
+        return cls.query.get(group_id)
 
     @classmethod
-    def access_allowed(cls, user, group_id):
-        group = cls.query.get(group_id)
-        return any(org in user.organizations for org in group.organizations)
+    def access_allowed(cls, user: User, group_id: str):
+        return cls.query.get(group_id).organization == user.organization
 
     @classmethod
-    def get(cls, search, organization):
+    def get_default_group(cls):
+        return cls.query.get("default")
+
+    @classmethod
+    def get(cls, search: str | None, organization: Organization | None = None):
         query = cls.query
 
-        if organization is not None:
-            query = query.join(
-                AssetGroupOrganization,
-                AssetGroup.id == AssetGroupOrganization.asset_group_id,
-            )
+        if organization:
+            query = query.filter_by(organization_id=organization.id)
 
-        if search is not None:
-            search_string = "%" + search.lower() + "%"
+        if search:
             query = query.filter(
                 or_(
-                    func.lower(AssetGroup.name).like(search_string),
-                    func.lower(AssetGroup.description).like(search_string),
+                    AssetGroup.name.ilike(f"%{search}%"),
+                    AssetGroup.description.ilike(f"%{search}%"),
                 )
             )
 
@@ -309,76 +307,53 @@ class AssetGroup(db.Model):
 
     @classmethod
     def get_all_json(cls, user, search):
-        groups, count = cls.get(search, user.organizations[0])
-        permissions = user.get_permissions()
-        if "MY_ASSETS_CONFIG" not in permissions:
-            for group in groups[:]:
-                if len(group.users) > 0:
-                    found = False
-                    for accessed_user in group.users:
-                        if accessed_user.id == user.id:
-                            found = True
-                            break
-
-                    if found is False:
-                        groups.remove(group)
-                        count -= 1
-
+        groups, count = cls.get(search, user.organization)
         group_schema = AssetGroupPresentationSchema(many=True)
         return {"total_count": count, "items": group_schema.dump(groups)}
 
     @classmethod
-    def add(cls, user, data):
-        new_group_schema = NewAssetGroupGroupSchema()
-        group = new_group_schema.load(data)
-        group.organizations = user.organizations
-        for added_user in group.users[:]:
-            if not any(org in added_user.organizations for org in group.organizations):
-                group.users.remove(added_user)
-
-        for added_template in group.templates[:]:
-            if not any(org in added_template.organizations for org in group.organizations):
-                group.temlates.remove(added_template)
-
+    def create(cls, name: str, description: str, organization_id: int, templates: list | None = None, id: str | None = None):
+        group = AssetGroup(id, name, description, organization_id, templates)
         db.session.add(group)
         db.session.commit()
 
     @classmethod
+    def add(cls, user, data):
+        group = NewAssetGroupGroupSchema().load(data)
+        if not group:
+            return "Invalid group data", 400
+        group.organization = user.organization
+        db.session.add(group)
+        db.session.commit()
+        return "Group added", 200
+
+    @classmethod
     def delete(cls, user, group_id):
+        if group_id == "default":
+            return "Cannot delete default group", 400
+        if not cls.access_allowed(user, group_id):
+            return "Access denied", 403
+
         group = cls.query.get(group_id)
-        if any(org in user.organizations for org in group.organizations):
-            db.session.delete(group)
-            db.session.commit()
+        db.session.delete(group)
+        db.session.commit()
+
+        return "Group deleted", 200
 
     @classmethod
     def update(cls, user, group_id, data):
-        new_group_schema = NewAssetGroupGroupSchema()
-        updated_group = new_group_schema.load(data)
+        if not cls.access_allowed(user, group_id):
+            return "Access denied", 403
+
+        updated_group = NewAssetGroupGroupSchema().load(data)
+        if not updated_group:
+            return "Invalid group data", 400
         group = cls.query.get(group_id)
-        if any(org in user.organizations for org in group.organizations):
-            group.name = updated_group.name
-            group.description = updated_group.description
-            group.users = []
-            for added_user in updated_group.users:
-                if any(org in added_user.organizations for org in group.organizations):
-                    group.users.append(added_user)
-
-            group.templates = []
-            for added_template in updated_group.templates:
-                if any(org in added_template.organizations for org in group.organizations):
-                    group.templates.append(added_template)
-
-            db.session.commit()
-
-
-class AssetGroupOrganization(db.Model):
-    asset_group_id = db.Column(db.String, db.ForeignKey("asset_group.id"), primary_key=True)
-    organization_id = db.Column(db.Integer, db.ForeignKey("organization.id"), primary_key=True)
-
-
-class AssetGroupUser(db.Model):
-    asset_group_id = db.Column(db.String, db.ForeignKey("asset_group.id"), primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), primary_key=True)
+        group.name = updated_group.name
+        group.description = updated_group.description
+        group.templates = [added_template for added_template in updated_group.templates if added_template.organization == group.organization]
+        db.session.commit()
+        return "Group updated", 200
 
 
 class AssetGroupNotificationTemplate(db.Model):

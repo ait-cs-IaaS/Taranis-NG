@@ -104,7 +104,7 @@ class CoreApi:
         except Exception:
             return 400
 
-    def update_news_item_tags(self, id, tags) -> int:
+    def update_news_item_tags(self, id: int, tags: dict | list) -> int:
         try:
             response = requests.put(
                 f"{self.api_url}/api/v1/bots/news-items-aggregate/{id}/tags",
@@ -191,7 +191,7 @@ class CoreApi:
     def news_items_grouping(self, data):
         try:
             response = requests.put(
-                f"{self.api_url}/api/v1/bots/news-item-aggregates-group-action",
+                f"{self.api_url}/api/v1/bots/news-item-aggregates/group",
                 json=data,
                 headers=self.headers,
             )

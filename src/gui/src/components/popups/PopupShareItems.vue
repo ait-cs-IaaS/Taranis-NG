@@ -41,14 +41,14 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { updateReportItem } from '@/api/analyze'
+import { addAggregatesToReportItem } from '@/api/analyze'
 
 export default {
   name: 'PopupShareItems',
   components: {
   },
   props: {
-    newsItem: [],
+    item_ids: [],
     dialog: Boolean
   },
   emits: ['close'],
@@ -62,9 +62,7 @@ export default {
     ...mapActions('analyze', ['loadReportItems']),
 
     share () {
-      const reportItemData = { add: true, report_item_id: this.reportItemSelection, aggregate_ids: [this.newsItem.id] }
-      console.debug(reportItemData)
-      updateReportItem(this.reportItemSelection, reportItemData)
+      addAggregatesToReportItem(this.reportItemSelection, this.item_ids)
       this.close()
     },
     close () {
@@ -72,6 +70,8 @@ export default {
     }
   },
   mounted () {
+    console.debug('PopupShareItems mounted')
+    console.debug(this.item_ids)
     this.loadReportItems().then(() => {
       this.reportItems = this.getReportItems().map(item => {
         return {
@@ -79,7 +79,6 @@ export default {
           value: item.id
         }
       })
-      console.debug(this.reportItems)
     })
   }
 }

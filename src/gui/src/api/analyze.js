@@ -67,24 +67,24 @@ export function updateReportItem (report_item_id, data) {
   return ApiService.put(`/analyze/report-items/${report_item_id}`, data)
 }
 
+export function addAggregatesToReportItem (report_item_id, data) {
+  return ApiService.put(`/analyze/report-items/${report_item_id}/aggregates`, data)
+}
+
 export function getReportItemLocks (report_item_id) {
-  return ApiService.get(`/analyze/report-items/${report_item_id}/field-locks`)
+  return ApiService.get(`/analyze/report-items/${report_item_id}/locks`)
 }
 
 export function lockReportItem (report_item_id, data) {
-  return ApiService.put(`/analyze/report-items/${report_item_id}/field-locks/${data.field_id}/lock`, data)
+  return ApiService.put(`/analyze/report-items/${report_item_id}/lock`, data)
 }
 
 export function unlockReportItem (report_item_id, data) {
-  return ApiService.put(`/analyze/report-items/${report_item_id}/field-locks/${data.field_id}/unlock`, data)
+  return ApiService.put(`/analyze/report-items/${report_item_id}/unlock`, data)
 }
 
-export function holdLockReportItem (report_item_id, data) {
-  return ApiService.put(`/analyze/report-items/${report_item_id}/field-locks/${data.field_id}/hold`, data)
-}
-
-export function getAllReportItemTypes () {
-  return ApiService.get('/analyze/report-item-types')
+export function getAllReportTypes () {
+  return ApiService.get('/analyze/report-types')
 }
 
 export function getAttributeEnums (filter) {

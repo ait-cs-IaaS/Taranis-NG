@@ -1,24 +1,23 @@
 <template>
-  <v-container fluid style="min-height: 100vh">
-    <story-detail :story="story" />
+  <v-container fluid style="min-height: 100vh" v-if="story">
+    <card-story :story="story" :detailView="true"/>
   </v-container>
 </template>
 
 <script>
 import { getNewsItemAggregate } from '@/api/assess'
-import StoryDetail from '@/components/assess/StoryDetail'
+import CardStory from '@/components/assess/CardStory'
 
 export default {
   name: 'StoryView',
   data: () => ({
-    story: {}
+    story: null
   }),
   components: {
-    StoryDetail
+    CardStory
   },
   async created() {
     this.story = await this.loadStories()
-    console.debug(this.story)
   },
   methods: {
     async loadStories() {

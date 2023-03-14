@@ -103,18 +103,18 @@ export default {
   data: () => ({
     buttons: [
       {
-        title: 'main_menu.administration',
-        icon: 'mdi-cog-outline',
-        permission: 'CONFIG_ACCESS',
-        route: '/config/dashboard',
+        title: 'main_menu.dashboard',
+        icon: 'mdi-monitor-dashboard',
+        permission: 'ASSESS_ACCESS',
+        route: '/',
         show: true
       },
       {
-        title: 'main_menu.dashboard',
-        icon: 'mdi-chart-box',
-        permission: 'ASSESS_ACCESS',
-        route: '/dashboard',
-        show: false
+        title: 'main_menu.administration',
+        icon: 'mdi-cog-outline',
+        permission: 'CONFIG_ACCESS',
+        route: '/config',
+        show: true
       },
       {
         title: 'main_menu.enter',
@@ -134,7 +134,7 @@ export default {
         title: 'main_menu.analyze',
         icon: 'mdi-google-circles-communities',
         permission: 'ANALYZE_ACCESS',
-        route: '/analyze/local',
+        route: '/analyze',
         show: true
       },
       {
@@ -145,10 +145,10 @@ export default {
         show: true
       },
       {
-        title: 'main_menu.my_assets',
+        title: 'main_menu.assets',
         icon: 'mdi-file-multiple-outline',
         permission: 'MY_ASSETS_ACCESS',
-        route: '/myassets',
+        route: '/assets',
         show: true
       }
     ],

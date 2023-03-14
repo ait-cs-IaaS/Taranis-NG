@@ -2,7 +2,8 @@ import io
 from flask import request, send_file
 from flask_restful import Resource
 
-from core.managers import auth_manager, sse_manager
+from core.managers import auth_manager
+from core.managers.sse_manager import sse_manager
 from core.managers.log_manager import logger
 from core.managers.auth_manager import ACLCheck, auth_required
 from core.model import news_item, osint_source
@@ -65,10 +66,10 @@ class NewsItemAggregates(Resource):
     def get(self):
         user = auth_manager.get_user_from_jwt()
         try:
-            filter_keys = ["search", "read", "important", "relevant", "in_analyze", "range", "sort", "tags"]
+            filter_keys = ["search", "read", "unread", "important", "relevant", "in_report", "range", "sort", "tags", "source"]
             filter_args: dict[str, str | int] = {k: v for k, v in request.args.items() if k in filter_keys}
 
-            group_id = request.args.get("group", osint_source.OSINTSourceGroup.get_default().id)
+            filter_args["group"] = request.args.get("group", osint_source.OSINTSourceGroup.get_default().id) or "default"
             filter_args["limit"] = min(int(request.args.get("limit", 20)), 200)
             page = int(request.args.get("page", 0))
             filter_args["offset"] = int(request.args.get("offset", page * filter_args["limit"]))
@@ -76,20 +77,35 @@ class NewsItemAggregates(Resource):
             logger.log_debug(ex)
             return "", 400
 
-        return news_item.NewsItemAggregate.get_by_group_json(group_id, filter_args, user)
+        return news_item.NewsItemAggregate.get_by_filter_json(filter_args, user)
 
 
 class NewsItemAggregateTags(Resource):
     @auth_required("ASSESS_ACCESS")
     def get(self):
-        user = auth_manager.get_user_from_jwt()
-
         try:
             search = request.args.get("search", "")
-            return news_item.NewsItemTag.get_json(search)
+            limit = int(request.args.get("limit", 20))
+            offset = int(request.args.get("offset", 0))
+            filter_args = {"limit": limit, "offset": offset, "search": search}
+            return news_item.NewsItemTag.get_json(filter_args)
         except Exception as ex:
             logger.log_debug(ex)
-            return "", 400
+            return "Failed to get Tags", 400
+
+
+class NewsItemAggregateTagList(Resource):
+    @auth_required("ASSESS_ACCESS")
+    def get(self):
+        try:
+            search = request.args.get("search", "")
+            limit = int(request.args.get("limit", 20))
+            offset = int(request.args.get("offset", 0))
+            filter_args = {"limit": limit, "offset": offset, "search": search}
+            return news_item.NewsItemTag.get_list(filter_args)
+        except Exception as ex:
+            logger.log_debug(ex)
+            return "Failed to get Tags", 400
 
 
 class NewsItemAggregatesByGroup(Resource):
@@ -99,7 +115,7 @@ class NewsItemAggregatesByGroup(Resource):
         user = auth_manager.get_user_from_jwt()
 
         try:
-            filter_keys = ["search", "read", "important", "relevant", "in_analyze", "range", "sort"]
+            filter_keys = ["search", "read", "unread", "important", "relevant", "in_report", "range", "sort"]
             filter_args: dict[str, str | int] = {k: v for k, v in request.args.items() if k in filter_keys}
 
             filter_args["limit"] = min(int(request.args.get("limit", 20)), 200)
@@ -176,13 +192,6 @@ class GroupAction(Resource):
         sse_manager.news_items_updated()
         return response, code
 
-    @auth_required("ASSESS_UPDATE")
-    def delete(self):
-        user = auth_manager.get_user_from_jwt()
-        response, code = news_item.NewsItemAggregate.group_action_delete(request.json, user)
-        sse_manager.news_items_updated()
-        return response, code
-
 
 class DownloadAttachment(Resource):
     @auth_required("ASSESS_ACCESS")
@@ -232,6 +241,8 @@ def initialize(api):
         "/api/v1/assess/news-items",
     )
     api.add_resource(NewsItemAggregateTags, "/api/v1/assess/tags")
+    api.add_resource(NewsItemAggregateTagList, "/api/v1/assess/taglist")
+
     api.add_resource(NewsItem, "/api/v1/assess/news-items/<int:item_id>")
     api.add_resource(NewsItemAggregate, "/api/v1/assess/news-item-aggregates/<int:aggregate_id>")
     api.add_resource(GroupAction, "/api/v1/assess/news-item-aggregates/group")

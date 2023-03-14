@@ -190,9 +190,14 @@
                         >
                           <v-expansion-panel
                             v-for="attribute_item in attribute_group.attribute_group_items"
-                            :key="attribute_item.id"
+                            :key="attribute_item.attribute_group_item.id"
                             class="item-panel"
                           >
+                            {{ attribute_item }}
+                            <br/>
+                            XXXX
+                            <br/>
+                            {{ attribute_item.attribute_group_item }}
                             <v-expansion-panel-header
                               class="pa-2 font-weight-bold primary--text rounded-0"
                             >
@@ -201,12 +206,6 @@
                               </v-row>
                             </v-expansion-panel-header>
                             <v-expansion-panel-content class="pt-0">
-                              <AttributeContainer
-                                :attribute_item="attribute_item"
-                                :edit="edit"
-                                :modify="modify"
-                                :report_item_id="report_item.id"
-                              />
                             </v-expansion-panel-content>
                           </v-expansion-panel>
                         </v-expansion-panels>
@@ -235,12 +234,12 @@
             class="pa-5 taranis-ng-vertical-view"
           >
 
-          <card-news-item
+          <card-story
             v-for="(newsItem, index) in news_item_aggregates"
             :key="newsItem.id"
             :newsItem="newsItem"
             :position="index"
-          ></card-news-item>
+          ></card-story>
 
           </v-col>
         </v-row>
@@ -268,14 +267,12 @@ import {
   updateReportItem,
   lockReportItem,
   unlockReportItem,
-  holdLockReportItem,
   getReportItem,
   getReportItemData,
   getReportItemLocks
 } from '@/api/analyze'
 
-import AttributeContainer from '@/components/common/attribute/AttributeContainer'
-import CardNewsItem from '@/components/assess/CardNewsItem'
+import CardStory from '@/components/assess/CardStory'
 
 import VueCsvImport from '@/components/common/ImportCSV'
 import { mapActions, mapGetters } from 'vuex'
@@ -289,9 +286,8 @@ export default {
     csv_codes: Array
   },
   components: {
-    AttributeContainer,
     VueCsvImport,
-    CardNewsItem
+    CardStory
   },
   data: () => ({
     verticalView: true,
@@ -358,8 +354,8 @@ export default {
   },
   methods: {
     ...mapGetters(['getUserId']),
-    ...mapGetters('analyze', ['getReportItemTypes']),
-    ...mapActions('analyze', ['loadReportItemTypes']),
+    ...mapGetters('analyze', ['getReportTypes']),
+    ...mapActions('analyze', ['loadReportTypes']),
     addReportItem() {
       this.visible = true
       this.modify = true
@@ -553,12 +549,6 @@ export default {
     onKeyUp(field_id) {
       if (this.edit === true) {
         clearTimeout(this.key_timeout)
-        const self = this
-        this.key_timeout = setTimeout(function () {
-          holdLockReportItem(self.report_item.id, { field_id: field_id }).then(
-            () => {}
-          )
-        }, 1000)
       }
     },
 
@@ -722,7 +712,6 @@ export default {
                     index: values.length,
                     value: value,
                     binary_mime_type: data.attributes[k].binary_mime_type,
-                    binary_size: data.attributes[k].binary_size,
                     binary_description: data.attributes[k].binary_description,
                     last_updated: data.attributes[k].last_updated,
                     user: data.attributes[k].user,
@@ -766,8 +755,6 @@ export default {
                       binary_mime_type:
                         data.remote_report_items[l].attributes[k]
                           .binary_mime_type,
-                      binary_size:
-                        data.remote_report_items[l].attributes[k].binary_size,
                       binary_description:
                         data.remote_report_items[l].attributes[k]
                           .binary_description,
@@ -852,8 +839,6 @@ export default {
                     this.remote_report_items[l].attributes[k].last_updated,
                   binary_mime_type:
                     this.remote_report_items[l].attributes[k].binary_mime_type,
-                  binary_size:
-                    this.remote_report_items[l].attributes[k].binary_size,
                   binary_description:
                     this.remote_report_items[l].attributes[k]
                       .binary_description,
@@ -951,8 +936,8 @@ export default {
 
     this.local_reports = !window.location.pathname.includes('/group/')
 
-    this.loadReportItemTypes().then(() => {
-      this.report_types = this.getReportItemTypes().items
+    this.loadReportTypes().then(() => {
+      this.report_types = this.getReportTypes().items
     })
 
     this.$root.$on('new-report', (data) => {

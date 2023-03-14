@@ -115,3 +115,29 @@ export function createParameterValues(parameters, data) {
   }))
   return data
 }
+
+export function tagIconFromType(tag_type) {
+  if (tag_type === 'ORG') {
+    return 'mdi-domain'
+  }
+  if (tag_type === 'LOC') {
+    return 'mdi-map-marker'
+  }
+  if (tag_type === 'PER') {
+    return 'mdi-account'
+  }
+  return 'mdi-tag'
+}
+
+export function tagTextFromType(tag_type) {
+  if (tag_type === 'ORG') {
+    return 'Organization'
+  }
+  if (tag_type === 'LOC') {
+    return 'Location'
+  }
+  if (tag_type === 'PER') {
+    return 'Person'
+  }
+  return 'Miscellaneous'
+}

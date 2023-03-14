@@ -5,7 +5,6 @@ from flask_restful import Resource
 
 from core.managers import (
     auth_manager,
-    sse_manager,
     remote_manager,
     presenters_manager,
     publishers_manager,
@@ -50,7 +49,7 @@ class DictionariesReload(Resource):
 
 
 class Attributes(Resource):
-    @auth_required("CONFIG_ATTRIBUTE_ACCESS")
+    @auth_required(["CONFIG_ATTRIBUTE_ACCESS", "ANALYZE_ACCESS"])
     def get(self):
         search = request.args.get(key="search", default=None)
         return attribute.Attribute.get_all_json(search)
@@ -61,6 +60,10 @@ class Attributes(Resource):
 
 
 class Attribute(Resource):
+    @auth_required(["CONFIG_ATTRIBUTE_ACCESS", "ANALYZE_ACCESS"])
+    def get(self, attribute_id):
+        return attribute.Attribute.find_by_id(attribute_id)
+
     @auth_required("CONFIG_ATTRIBUTE_UPDATE")
     def put(self, attribute_id):
         attribute.Attribute.update(attribute_id, request.json)
@@ -384,8 +387,7 @@ class OSINTSource(Resource):
 class OSINTSourceRefresh(Resource):
     @auth_required("CONFIG_OSINT_SOURCE_ACCESS")
     def put(self, source_id):
-        result = collectors_manager.refresh_osint_source(source_id)
-        return result
+        return collectors_manager.refresh_osint_source(source_id)
 
 
 class OSINTSourcesExport(Resource):
@@ -451,9 +453,7 @@ class RemoteAccesses(Resource):
 class RemoteAccess(Resource):
     @auth_required("CONFIG_REMOTE_ACCESS_UPDATE")
     def put(self, remote_access_id):
-        event_id, disconnect = remote.RemoteAccess.update(remote_access_id, request.json)
-        if disconnect:
-            sse_manager.remote_access_disconnect([event_id])
+        return remote.RemoteAccess.update(remote_access_id, request.json)
 
     @auth_required("CONFIG_REMOTE_ACCESS_DELETE")
     def delete(self, remote_access_id):

@@ -1,29 +1,44 @@
 const state = {
-  scope: '',
-
   newsItemsFilter: {
-    offset: 0,
-    limit: 15,
+    offset: undefined,
+    limit: undefined,
     search: undefined,
-    sort: 'DATE_DESC',
+    sort: undefined,
     range: undefined,
-    date: undefined,
+    read: undefined,
     tags: undefined,
-    in_analyze: undefined,
+    group: undefined,
+    source: undefined,
+    in_report: undefined,
     relevant: undefined,
     important: undefined
   },
-  newsItemsOrder: {
-    selected: {}
+  assetFilter: {
+    offset: undefined,
+    limit: undefined,
+    search: undefined,
+    sort: undefined
+  },
+  reportFilter: {
+    offset: undefined,
+    limit: undefined,
+    search: undefined,
+    sort: undefined,
+    range: undefined,
+    completed: undefined
+  },
+  productFilter: {
+    offset: undefined,
+    limit: undefined,
+    search: undefined,
+    sort: undefined,
+    range: undefined
   }
 }
 
 const actions = {
   resetNewsItemsFilter(context) {
     context.commit('RESET_NEWSITEMS_FILTERS')
-  },
-  setScope(context, scope) {
-    context.commit('SET_SCOPE', scope)
   },
   setLimit(context, limit) {
     context.commit('SET_LIMIT', limit)
@@ -33,6 +48,9 @@ const actions = {
   },
   setTags(context, tags) {
     context.commit('SET_TAGS', tags)
+  },
+  appendTag(context, tag) {
+    context.commit('APPEND_TAG', tag)
   },
   incrementOffset(context) {
     context.commit('INCREMENT_OFFSET')
@@ -48,6 +66,24 @@ const actions = {
   },
   setSort(context, sort) {
     context.commit('SET_SORT', sort)
+  },
+  updateAssetFilter(context, filter) {
+    context.commit('UPDATE_ASSET_FILTER', filter)
+  },
+  setAssetFilter(context, filter) {
+    context.commit('SET_ASSET_FILTER', filter)
+  },
+  updateReportFilter(context, filter) {
+    context.commit('UPDATE_REPORT_FILTER', filter)
+  },
+  setReportFilter(context, filter) {
+    context.commit('SET_REPORT_FILTER', filter)
+  },
+  updateProductFilter(context, filter) {
+    context.commit('UPDATE_PRODUCT_FILTER', filter)
+  },
+  setProductFilter(context, filter) {
+    context.commit('SET_PRODUCT_FILTER', filter)
   }
 }
 
@@ -58,8 +94,23 @@ const getters = {
   getNewsItemsFilter(state) {
     return state.newsItemsFilter
   },
+  getAssetFilter(state) {
+    return state.assetFilter
+  },
+  getReportFilter(state) {
+    return state.reportFilter
+  },
+  getProductFilter(state) {
+    return state.productFilter
+  },
   getOffset(state) {
     return state.newsItemsFilter.offset
+  },
+  getFilterTags(state) {
+    if (typeof state.newsItemsFilter.tags === 'string') {
+      return [state.newsItemsFilter.tags]
+    }
+    return state.newsItemsFilter.tags
   }
 }
 
@@ -68,31 +119,61 @@ const mutations = {
     state.newsItemsFilter.offset++
   },
   NEXT_PAGE(state) {
-    state.newsItemsFilter.offset = state.newsItemsFilter.offset + state.newsItemsFilter.limit
+    const offset = state.newsItemsFilter.offset
+      ? parseInt(state.newsItemsFilter.offset)
+      : 0
+    const limit = state.newsItemsFilter.limit
+      ? parseInt(state.newsItemsFilter.limit)
+      : 20
+
+    state.newsItemsFilter.offset = offset + limit
   },
   RESET_NEWSITEMS_FILTERS(state) {
     state.newsItemsFilter = {
-      offset: 0,
-      limit: 15,
+      offset: undefined,
+      limit: undefined,
       search: undefined,
-      sort: 'DATE_DESC',
+      sort: undefined,
       range: undefined,
-      date: undefined,
+      read: undefined,
       tags: undefined,
-      in_analyze: undefined,
+      group: undefined,
+      source: undefined,
+      in_report: undefined,
       relevant: undefined,
       important: undefined
     }
-  },
-  SET_SCOPE(state, scope) {
-    state.scope = scope
   },
   SET_FILTER(state, filter) {
     state.newsItemsFilter = filter
   },
   UPDATE_FILTER(state, filter) {
-    Object.keys(filter).forEach(element => {
+    Object.keys(filter).forEach((element) => {
       state.newsItemsFilter[element] = filter[element]
+    })
+  },
+  SET_ASSET_FILTER(state, filter) {
+    state.assetFilter = filter
+  },
+  UPDATE_ASSET_FILTER(state, filter) {
+    Object.keys(filter).forEach((element) => {
+      state.assetFilter[element] = filter[element]
+    })
+  },
+  SET_REPORT_FILTER(state, filter) {
+    state.reportFilter = filter
+  },
+  UPDATE_REPORT_FILTER(state, filter) {
+    Object.keys(filter).forEach((element) => {
+      state.reportFilter[element] = filter[element]
+    })
+  },
+  SET_PRODUCT_FILTER(state, filter) {
+    state.productFilter = filter
+  },
+  UPDATE_PRODUCT_FILTER(state, filter) {
+    Object.keys(filter).forEach((element) => {
+      state.productFilter[element] = filter[element]
     })
   },
   SET_SORT(state, sort) {
@@ -106,6 +187,13 @@ const mutations = {
   },
   SET_TAGS(state, tags) {
     state.newsItemsFilter.tags = tags
+  },
+  APPEND_TAG(state, tag) {
+    if (state.newsItemsFilter.tags) {
+      state.newsItemsFilter.tags.push(tag)
+    } else {
+      state.newsItemsFilter.tags = [tag]
+    }
   }
 }
 

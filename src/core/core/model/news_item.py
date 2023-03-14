@@ -268,9 +268,15 @@ class NewsItem(db.Model):
 
         query = ACLEntry.apply_query(query, user, True, False, False)
 
-        if "search" in filter and filter["search"] != "":
-            search_string = f"%{filter['search'].lower()}%"
-            query = query.filter(NewsItemData.content.like(search_string))
+        search = filter.get("search", None)
+        if search and search != "":
+            query = query.filter(
+                db.or_(
+                    NewsItemData.content.ilike(f"%{search}%"),
+                    NewsItemData.review.ilike(f"%{search}%"),
+                    NewsItemData.title.ilike(f"%{search}%"),
+                )
+            )
 
         if "read" in filter and filter["read"].lower() == "true":
             query = query.filter(NewsItem.read is False)
@@ -589,113 +595,142 @@ class NewsItemAggregate(db.Model):
         return NewsItemAggregateSchema().dump(aggregate)
 
     @classmethod
-    def get_by_group(cls, group_id, filter: dict, user: User):
+    def get_story_clusters(cls, days: int = 7, limit: int = 10):
+        start_date = datetime.now() - timedelta(days=days)
+        clusters = (
+            cls.query.join(NewsItem)
+            .join(NewsItemData)
+            .filter(NewsItemData.published >= start_date)
+            .group_by(cls.title, cls.id)
+            .order_by(func.count().desc())
+            .having(func.count() > 1)
+            .limit(limit)
+            .all()
+        )
+        return [
+            {
+                "name": cluster.title,
+                "size": len(cluster.news_items),
+                "published": [ni.news_item_data.published.isoformat() for ni in cluster.news_items],
+            }
+            for cluster in clusters
+        ]
+
+    @classmethod
+    def get_by_filter(cls, filter: dict, user: User):
+        logger.debug(f"Getting NewsItems Filtered: {filter}")
         query = cls.query.distinct().group_by(NewsItemAggregate.id)
 
-        query = query.filter(NewsItemAggregate.osint_source_group_id == group_id)
+        if group := filter.get("group"):
+            query = query.filter(NewsItemAggregate.osint_source_group_id == group)
 
         query = query.join(NewsItem, NewsItem.news_item_aggregate_id == NewsItemAggregate.id)
         query = query.join(NewsItemData, NewsItem.news_item_data_id == NewsItemData.id)
         query = query.outerjoin(OSINTSource, NewsItemData.osint_source_id == OSINTSource.id)
 
-        query = query.outerjoin(
-            ACLEntry,
-            or_(
-                and_(
-                    NewsItemData.osint_source_id == ACLEntry.item_id,
-                    ACLEntry.item_type == ItemType.OSINT_SOURCE,
+        if ACLEntry.has_rows():
+            query = query.outerjoin(
+                ACLEntry,
+                or_(
+                    and_(
+                        NewsItemData.osint_source_id == ACLEntry.item_id,
+                        ACLEntry.item_type == ItemType.OSINT_SOURCE,
+                    ),
+                    and_(
+                        OSINTSource.collector_id == ACLEntry.item_id,
+                        ACLEntry.item_type == ItemType.COLLECTOR,
+                    ),
                 ),
-                and_(
-                    OSINTSource.collector_id == ACLEntry.item_id,
-                    ACLEntry.item_type == ItemType.COLLECTOR,
-                ),
-            ),
-        )
+            )
 
-        query = ACLEntry.apply_query(query, user, True, False, False)
+            query = ACLEntry.apply_query(query, user, True, False, False)
 
-        if "search" in filter and filter["search"] != "":
-            search_string = f"%{filter['search']}%"
+        if source := filter.get("source"):
+            query = query.filter(OSINTSource.id == source)
+
+        if search := filter.get("search"):
             query = query.join(
                 NewsItemAggregateSearchIndex,
                 NewsItemAggregate.id == NewsItemAggregateSearchIndex.news_item_aggregate_id,
-            ).filter(NewsItemAggregateSearchIndex.data.ilike(search_string))
+            ).filter(NewsItemAggregateSearchIndex.data.ilike(f"%{search}%"))
 
-        if "read" in filter and filter["read"].lower() == "true":
+        if "read" in filter:
             query = query.filter(NewsItemAggregate.read is False)
 
-        if "important" in filter and filter["important"].lower() == "true":
-            query = query.filter(NewsItemAggregate.important is True)
+        if "unread" in filter:
+            query = query.filter(NewsItemAggregate.read)
 
-        if "relevant" in filter and filter["relevant"].lower() == "true":
-            query = query.filter(NewsItemAggregate.likes > 0)
+        if "important" in filter:
+            query = query.filter(NewsItemAggregate.important)
 
-        if "in_analyze" in filter and filter["in_analyze"].lower() == "true":
+        if "unimportant" in filter:
+            query = query.filter(NewsItemAggregate.important is False)
+
+        if "relevant" in filter:
+            query = query.filter(NewsItemAggregate.relevance > 0)
+
+        if "in_report" in filter:
             query = query.join(
                 ReportItemNewsItemAggregate,
                 NewsItemAggregate.id == ReportItemNewsItemAggregate.news_item_aggregate_id,
             )
-        if "tags" in filter and filter["tags"] != "":
+
+        if tags := filter.get("tags"):
             query = query.join(
                 NewsItemTag,
                 NewsItemAggregate.id == NewsItemTag.n_i_a_id,
             )
-            query = query.filter(NewsItemTag.name.in_(filter["tags"].split(",")))
+            query = query.filter(NewsItemTag.name.in_(tags.split(",")))
 
-        if "range" in filter and filter["range"] != "ALL":
+        filter_range = filter.get("range", "").lower()
+        if filter_range and filter_range in ["day", "week", "month"]:
             date_limit = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
-            if filter["range"] == "WEEK":
+            if filter_range == "day":
+                pass
+
+            elif filter_range == "week":
                 date_limit -= timedelta(days=date_limit.weekday())
 
-            elif filter["range"] == "MONTH":
+            elif filter_range == "month":
                 date_limit = date_limit.replace(day=1)
 
             query = query.filter(NewsItemAggregate.created >= date_limit)
 
-        if "sort" in filter:
-            if filter["sort"] == "DATE_DESC":
+        if sort := filter.get("sort", "date_desc").lower():
+            if sort == "date_desc":
                 query = query.order_by(db.desc(NewsItemAggregate.created), db.desc(NewsItemAggregate.id))
 
-            elif filter["sort"] == "DATE_ASC":
+            elif sort == "date_asc":
                 query = query.order_by(db.asc(NewsItemAggregate.created), db.asc(NewsItemAggregate.id))
 
-            elif filter["sort"] == "RELEVANCE_DESC":
+            elif sort == "relevance_desc":
                 query = query.order_by(db.desc(NewsItemAggregate.relevance), db.desc(NewsItemAggregate.id))
 
-            elif filter["sort"] == "RELEVANCE_ASC":
+            elif sort == "relevance_asc":
                 query = query.order_by(db.asc(NewsItemAggregate.relevance), db.asc(NewsItemAggregate.id))
+
+            elif sort == "source":
+                query = query.order_by(db.desc(OSINTSource.name), db.desc(NewsItemAggregate.created), db.desc(NewsItemAggregate.id))
 
         offset = filter.get("offset", 0)
         limit = filter.get("limit", 20)
         return query.offset(offset).limit(limit).all(), query.count()
 
     @classmethod
-    def get_by_group_json(cls, group_id, filter, user):
-        news_item_aggregates, count = cls.get_by_group(group_id, filter, user)
+    def get_by_filter_json(cls, filter, user):
+        news_item_aggregates, count = cls.get_by_filter(filter, user)
         for news_item_aggregate in news_item_aggregates:
-            news_item_aggregate.me_like = False
-            news_item_aggregate.me_dislike = False
-            for news_item in news_item_aggregate.news_items:
-                see, access, modify = NewsItem.get_acl_status(news_item.id, user)
-                if not see:
-                    news_item_aggregate.news_items.remove(news_item)
-                    continue
-                news_item.see = see
-                news_item.access = access
-                news_item.modify = modify
-                vote = NewsItemVote.find(news_item.id, user.id)
-                news_item.me_like = vote.like if vote is not None else False
-                news_item_aggregate.me_like = vote.like if vote is not None else False
-                news_item.me_dislike = vote.dislike if vote is not None else False
-                news_item_aggregate.me_dislike = vote.dislike if vote is not None else False
-
             news_item_aggregate.in_reports_count = ReportItemNewsItemAggregate.count(news_item_aggregate.id)
 
-        news_item_aggregate_schema = NewsItemAggregateSchema(many=True)
-        items = news_item_aggregate_schema.dump(news_item_aggregates)
+        items = NewsItemAggregateSchema(many=True).dump(news_item_aggregates)
 
         return {"total_count": count, "items": items}
+
+    @classmethod
+    def get_by_group_json(cls, group_id, filter, user):
+        filter.update({"group": group_id})
+        return cls.get_by_filter_json(filter, user)
 
     @classmethod
     def create_new_for_all_groups(cls, news_item_data):
@@ -903,43 +938,23 @@ class NewsItemAggregate(db.Model):
         return any(ReportItemNewsItemAggregate.assigned(aggregate_id) for aggregate_id in aggregate_ids)
 
     @classmethod
-    def group_action_delete(cls, data, user):
-        if cls.is_assigned_to_report(data["items"]):
-            return "aggregate_in_use", 500
-        processed_aggregates = set()
-        for item in data["items"]:
-            if item["type"] == "AGGREGATE":
-                aggregate = NewsItemAggregate.find(item["id"])
-                for news_item in aggregate.news_items:
-                    if NewsItem.allowed_with_acl(news_item.id, user, False, False, True):
-                        aggregate.news_items.remove(news_item)
-                        NewsItem.delete_only(news_item)
-
-                processed_aggregates.add(aggregate)
-            else:
-                news_item = NewsItem.find(item["id"])
-                if NewsItem.allowed_with_acl(news_item.id, user, False, False, True):
-                    aggregate = NewsItemAggregate.find(news_item.news_item_aggregate_id)
-                    aggregate.news_items.remove(news_item)
-                    NewsItem.delete_only(news_item)
-                    processed_aggregates.add(aggregate)
-
-        cls.update_aggregates(processed_aggregates)
-        db.session.commit()
-        return "", 200
-
-    @classmethod
-    def update_tags(cls, news_item_aggregate_id, tags):
+    def update_tags(cls, news_item_aggregate_id: int, tags: list) -> tuple[str, int]:
         try:
             n_i_a = cls.find(news_item_aggregate_id)
-            if type(tags) is list:
-                for tag in tags:
-                    n_i_a.tags.append(NewsItemTag(name=tag, tag_type="undef"))
-            else:
-                n_i_a.tags.append(NewsItemTag(name=tags, tag_type="undef"))
+            for tag in tags:
+                if type(tag) is dict:
+                    tag_name = tag["name"]
+                    tag_type = tag["type"]
+                else:
+                    tag_name = tag
+                    tag_type = "undef"
+                if tag_name not in [tag.name for tag in n_i_a.tags]:
+                    n_i_a.tags.append(NewsItemTag(name=tag_name, tag_type=tag_type))
             db.session.commit()
+            return "success", 200
         except Exception:
             logger.log_debug_trace("Update News Item Tags Failed")
+            return "error", 500
 
     @classmethod
     def group_aggregate(cls, aggregate_ids: list, user: User | None = None):
@@ -951,6 +966,7 @@ class NewsItemAggregate(db.Model):
                 for news_item in aggregate.news_items[:]:
                     if user is None or NewsItem.allowed_with_acl(news_item.id, user, False, False, True):
                         first_aggregate.news_items.append(news_item)
+                        first_aggregate.relevance += news_item.relevance + 1
                         aggregate.news_items.remove(news_item)
                 processed_aggregates.add(aggregate)
 
@@ -982,12 +998,15 @@ class NewsItemAggregate(db.Model):
             return "error", 500
 
     @classmethod
-    def update_aggregates(cls, aggregates):
+    def update_aggregates(cls, aggregates: set):
         try:
+            logger.debug("UPDATE AGGREGATES")
+            logger.debug(aggregates)
             for aggregate in aggregates:
                 if len(aggregate.news_items) == 0:
                     NewsItemAggregateSearchIndex.remove(aggregate)
-                    NewsItemTag.remove(aggregate)
+                    NewsItemTag.remove_by_aggregate(aggregate)
+                    logger.debug(f"Trying to delete: {aggregate}")
                     db.session.delete(aggregate)
                 else:
                     NewsItemAggregateSearchIndex.prepare(aggregate)
@@ -1180,12 +1199,74 @@ class NewsItemTag(db.Model):
         return cls.query.filter(cls.name.ilike(f"%{tag_name}%"))
 
     @classmethod
-    def get_json(cls, tag_name=""):
-        rows = cls.search(tag_name).all()
+    def find_largest_tag_clusters(cls, days: int = 7, limit: int = 12):
+        start_date = datetime.now() - timedelta(days=days)
+        subquery = (
+            db.session.query(cls.name, cls.tag_type, NewsItemAggregate.id, NewsItemAggregate.created)
+            .join(cls.n_i_a)
+            .filter(NewsItemAggregate.created >= start_date)
+            .subquery()
+        )
+        clusters = (
+            db.session.query(
+                subquery.c.name, subquery.c.tag_type, func.group_concat(subquery.c.created), func.count(subquery.c.name).label("count")
+            )
+            .select_from(subquery.join(NewsItemAggregate, subquery.c.id == NewsItemAggregate.id))
+            .group_by(subquery.c.name, subquery.c.tag_type)
+            .order_by(func.count(subquery.c.name).desc())
+            .limit(limit)
+            .all()
+        )
+
+        return (
+            [
+                {
+                    "name": cluster[0],
+                    "tag_type": cluster[1],
+                    "published": list(cluster[2].split(",")),
+                    "size": cluster[3],
+                }
+                for cluster in clusters
+            ]
+            if clusters
+            else []
+        )
+
+    @classmethod
+    def get_json(cls, filter_args: dict):
+        query = cls.query
+
+        if search := filter_args.get("search", None):
+            query = query.filter(cls.name.ilike(f"%{search}%"))
+
+        offset = filter_args.get("offset", 0)
+        limit = filter_args.get("limit", 20)
+        rows = query.offset(offset).limit(limit).all()
+        # count = query.count()
+        return [{"name": row.name, "tag_type": row.tag_type} for row in rows]
+
+    @classmethod
+    def get_list(cls, filter_args: dict):
+        query = cls.query
+
+        if search := filter_args.get("search", None):
+            query = query.filter(cls.name.ilike(f"%{search}%"))
+
+        offset = filter_args.get("offset", 0)
+        limit = filter_args.get("limit", 20)
+        rows = query.offset(offset).limit(limit).all()
+        # count = query.count()
         return [row.name for row in rows]
 
     @classmethod
-    def remove(cls, aggregate):
-        if tag := cls.find(aggregate.id):
+    def remove(cls, tag):
+        if tag := cls.find(tag.id):
             db.session.delete(tag)
             db.session.commit()
+
+    @classmethod
+    def remove_by_aggregate(cls, aggregate):
+        tags = cls.query.filter_by(n_i_a_id=aggregate.id).all()
+        for tag in tags:
+            db.session.delete(tag)
+        db.session.commit()

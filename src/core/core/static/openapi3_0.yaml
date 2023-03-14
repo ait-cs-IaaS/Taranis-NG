@@ -273,7 +273,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/resp.auth.error'
 
-  /analyze/report-item-types:
+  /analyze/report-types:
     get:
       tags: [analyze]
       summary: get the types of report items
@@ -937,38 +937,48 @@ paths:
   /assess/news-item-aggregates:
     get:
       tags: [assess]
-      summary: get news items of the default group
+      summary: get stories by filters
       parameters:
         - name: search
           in: query
-          description: Defines a search string to filter the results
+          description: Filter search string
+          schema:
+            type: string
+        - name: source
+          in: query
+          description: Filter based on OSINT source
+          schema:
+            type: string
+        - name: group
+          in: query
+          description: Filter based on OSINT source group
           schema:
             type: string
         - name: read
           in: query
           description: Filter for news_items that are read
           schema:
-            type: string
+            type: boolean
         - name: important
           in: query
           description: Filter only important news
           schema:
-            type: string
+            type: boolean
         - name: relevant
           in: query
           description: Filter only relevant news
           schema:
-            type: string
+            type: boolean
         - name: in_report
           description: Filter news-items that are added to reports
           in: query
           schema:
-            type: string
+            type: boolean
         - name: range
-          description: Filter news-items with a time-range(ALL, WEEKLY, MONTH)
+          description: Filter news-items with a time-range(DAY, WEEK, MONTH)
           in: query
           schema:
-            type: integer
+            type: string
         - name: sort
           description: Sort the results(DATE_DESC, DATE_ASC, RELEVANCE_DESC, RELEVANCE_ASC)
           in: query
@@ -976,7 +986,7 @@ paths:
             type: string
         - name: offset
           in: query
-          description: Use this offset for the results.
+          description: Offset for the results.
           schema:
             type: integer
         - name: limit
@@ -4891,8 +4901,6 @@ components:
           type: string
         binary_mime_type:
           type: string
-        binary_size:
-          type: integer
         binary_description:
           type: string
         attribute_group_item_title:
@@ -5387,8 +5395,6 @@ components:
               type: string
             binary_mime_type:
               type: string
-            binary_size:
-              type: integer
             binary_description:
               type: string
             attribute_last_updated:

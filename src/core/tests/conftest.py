@@ -42,6 +42,26 @@ def news_item(app):
         yield NewsItem
 
 
+@pytest.fixture()
+def _db(app):
+    with app.app_context():
+        from core.managers.db_manager import db
+        yield db
+
+@pytest.fixture
+def news_item_data(app):
+    with app.app_context():
+        from core.model.news_item import NewsItemData
+        yield NewsItemData
+
+
+@pytest.fixture
+def news_item(app):
+    with app.app_context():
+        from core.model.news_item import NewsItem
+        yield NewsItem
+
+
 @pytest.fixture
 def access_token(app):
     from flask_jwt_extended import create_access_token

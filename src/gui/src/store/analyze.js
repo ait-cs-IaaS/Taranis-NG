@@ -1,4 +1,5 @@
-import { getAllReportItems, getAllReportItemTypes, getAllReportItemGroups } from '@/api/analyze'
+import { getAllReportItems, getAllReportTypes, getAllReportItemGroups } from '@/api/analyze'
+import { filter } from '@/store/filter'
 
 const state = {
   report_items: { total_count: 0, items: [] },
@@ -25,8 +26,15 @@ const actions = {
       })
   },
 
-  loadReportItemTypes (context, data) {
-    return getAllReportItemTypes(data)
+  updateReportItems (context) {
+    return getAllReportItems(filter.state.reportFilter)
+      .then(response => {
+        context.commit('setReportItems', response.data)
+      })
+  },
+
+  loadReportTypes (context, data) {
+    return getAllReportTypes(data)
       .then(response => {
         context.commit('setReportItemTypes', response.data)
       })
@@ -100,7 +108,7 @@ const getters = {
     return state.report_items.items
   },
 
-  getReportItemTypes (state) {
+  getReportTypes (state) {
     return state.report_item_types
   },
 

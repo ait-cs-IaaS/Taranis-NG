@@ -128,7 +128,6 @@ export default {
     },
 
     addItem() {
-      console.debug(this.formFormat)
       this.formData = objectFromFormat(this.formFormat)
       this.edit = false
     },
@@ -142,7 +141,6 @@ export default {
         (item) => item.name
       )
       const updateItem = createParameterValues(parameter_list, submittedData)
-      console.debug('createParameterValues', updateItem)
       if (this.edit) {
         this.updateItem(updateItem)
       } else {
@@ -190,7 +188,10 @@ export default {
         })
     },
     exportData() {
-      const queryString = 'ids=' + this.selected.join('&ids=')
+      let queryString = ''
+      if (this.selected.length > 0) {
+        queryString = 'ids=' + this.selected.join('&ids=')
+      }
       exportOSINTSources(queryString)
     },
     selectionChange(selected) {
