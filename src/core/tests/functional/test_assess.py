@@ -1,5 +1,6 @@
 from core.model.news_item import NewsItemAggregate
 
+
 class TestAssessApi(object):
     def test_get_OSINTSourceGroupsAssess_auth(self, client, auth_header):
         """
@@ -271,19 +272,15 @@ class TestAssessApi(object):
         import datetime
 
         ossi = {
-          "description": "",
-          "name": "Some Bind",
-          "parameter_values": [
-            {
-              "value": "https://www.some.bind.it/SiteGlobals/Functions/RSSFeed/RSSNewsfeed/RSSNewsfeed.xml",
-              "parameter": {
-                "key": "FEED_URL"
-              }
-            },
-          ],
-          "collector": {
-            "type": "RSS_COLLECTOR"
-          }
+            "description": "",
+            "name": "Some Bind",
+            "parameter_values": [
+                {
+                    "value": "https://www.some.bind.it/SiteGlobals/Functions/RSSFeed/RSSNewsfeed/RSSNewsfeed.xml",
+                    "parameter": {"key": "FEED_URL"},
+                },
+            ],
+            "collector": {"type": "RSS_COLLECTOR"},
         }
 
         osint_source = OSINTSourceExportSchema().load(ossi)
@@ -291,35 +288,35 @@ class TestAssessApi(object):
         os = OSINTSource.get_all()[0]
 
         news_items_data_list = [
-          {
-            "id": "1be00eef-6ade-4818-acfc-25029531a9a5",
-            "content": "TEST CONTENT YYYY",
-            "source": "https: //www.some.link/RSSNewsfeed.xml",
-            "title": "Mobile World Congress 2023",
-            "author": "",
-            "collected": "2022-02-21T15:00:14.086285",
-            "hash": "82e6e99403686a1072d0fb2013901b843a6725ba8ac4266270f62b7614ec1adf",
-            "attributes": [],
-            "review": "",
-            "link": "https://www.some.other.link/2023.html",
-            "osint_source_id": os.id,
-            "published": "2022-02-21T15:01:14.086285"
-          },
-          {
-            "id": "0a129597-592d-45cb-9a80-3218108b29a0",
-            "content": "TEST CONTENT XXXX",
-            "source": "https: //www.content.xxxx.link/RSSNewsfeed.xml",
-            "title": "Bundesinnenministerin Nancy Faeser wird Claudia Plattner zur neuen BSI-Präsidentin berufen",
-            "author": "",
-            "likes": 0,
-            "collected": "2023-01-20T15:00:14.086285",
-            "hash": "e270c3a7d87051dea6c3dc14234451f884b427c32791862dacdd7a3e3d318da6",
-            "attributes": [],
-            "review": "Claudia Plattner wird ab 1. Juli 2023 das Bundesamt für Sicherheitin der Informationstechnik (BSI) leiten.",
-            "link": "https: //www.some.other.link/BSI-Praesidentin_230207.html",
-            "osint_source_id": os.id,
-            "published": "2023-01-20T19:15:00+01:00"
-          }
+            {
+                "id": "1be00eef-6ade-4818-acfc-25029531a9a5",
+                "content": "TEST CONTENT YYYY",
+                "source": "https: //www.some.link/RSSNewsfeed.xml",
+                "title": "Mobile World Congress 2023",
+                "author": "",
+                "collected": "2022-02-21T15:00:14.086285",
+                "hash": "82e6e99403686a1072d0fb2013901b843a6725ba8ac4266270f62b7614ec1adf",
+                "attributes": [],
+                "review": "",
+                "link": "https://www.some.other.link/2023.html",
+                "osint_source_id": os.id,
+                "published": "2022-02-21T15:01:14.086285",
+            },
+            {
+                "id": "0a129597-592d-45cb-9a80-3218108b29a0",
+                "content": "TEST CONTENT XXXX",
+                "source": "https: //www.content.xxxx.link/RSSNewsfeed.xml",
+                "title": "Bundesinnenministerin Nancy Faeser wird Claudia Plattner zur neuen BSI-Präsidentin berufen",
+                "author": "",
+                "likes": 0,
+                "collected": "2023-01-20T15:00:14.086285",
+                "hash": "e270c3a7d87051dea6c3dc14234451f884b427c32791862dacdd7a3e3d318da6",
+                "attributes": [],
+                "review": "Claudia Plattner wird ab 1. Juli 2023 das Bundesamt für Sicherheitin der Informationstechnik (BSI) leiten.",
+                "link": "https: //www.some.other.link/BSI-Praesidentin_230207.html",
+                "osint_source_id": os.id,
+                "published": "2023-01-20T19:15:00+01:00",
+            },
         ]
 
         news_item_data_schema = NewNewsItemDataSchema(many=True)
@@ -332,7 +329,6 @@ class TestAssessApi(object):
         response = client.get("/api/v1/assess/news-items", headers=auth_header)
         assert response
         assert response.data
-        print(response.get_json())
         assert response.content_type == "application/json"
         assert response.status_code == 200
         assert len(response.get_json()["items"]) == 2

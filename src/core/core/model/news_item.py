@@ -243,14 +243,11 @@ class NewsItem(db.Model):
 
     @classmethod
     def get_by_group(cls, group_id, filter, user):
-#        osint_source_id = OSINTSourceGroup.find(group_id).osint_sources[0].id
-
         query = cls.query.distinct().group_by(NewsItem.id)
         query = query.join(NewsItemData, NewsItem.news_item_data_id == NewsItemData.id)
         query = query.join(OSINTSourceGroupOSINTSource, OSINTSourceGroupOSINTSource.osint_source_id == OSINTSource.id)
         query = query.outerjoin(OSINTSource, NewsItemData.osint_source_id == OSINTSource.id)
         query = query.filter(OSINTSourceGroupOSINTSource.osint_source_group_id == group_id)
-#        query = query.filter(OSINTSource.id == osint_source_id)
 
         query = query.outerjoin(
             ACLEntry,
@@ -317,7 +314,6 @@ class NewsItem(db.Model):
             elif filter["sort"] == "RELEVANCE_ASC":
                 query = query.order_by(db.asc(NewsItem.relevance), db.asc(NewsItem.id))
 
-#        logger.debug(f"Query: {query} - QueryString: {query.statement.compile()}")
         offset = filter.get("offset", 0)
         limit = filter.get("limit", 20)
         return query.offset(offset).limit(limit).all(), query.count()
