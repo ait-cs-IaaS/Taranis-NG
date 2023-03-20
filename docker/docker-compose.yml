@@ -94,6 +94,7 @@ services:
       TARANIS_NG_CORE_URL: "http://core"
       TARANIS_NG_CORE_SSE: "http://core/sse"
       WORKERS_PER_CORE: "1"
+      WEB_CONCURRENCY: "1"
     logging:
       driver: "json-file"
       options:
@@ -113,6 +114,7 @@ services:
       TARANIS_NG_CORE_URL: "http://core"
       API_KEY: "${API_KEY}"
       WORKERS_PER_CORE: "1"
+      WEB_CONCURRENCY: "1"
         # ports:
         #      - "5001:80"
     volumes:
@@ -136,6 +138,7 @@ services:
       TARANIS_NG_CORE_URL: "http://core"
       API_KEY: "${API_KEY}"
       WORKERS_PER_CORE: "1"
+      WEB_CONCURRENCY: "1"
         # ports:
         # - "5002:80"
     volumes:
@@ -159,6 +162,7 @@ services:
       TARANIS_NG_CORE_URL: "http://core"
       API_KEY: "${API_KEY}"
       WORKERS_PER_CORE: "1"
+      WEB_CONCURRENCY: "1"
         #    ports:
         # - "5003:80"
     logging:
