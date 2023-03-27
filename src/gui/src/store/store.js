@@ -1,5 +1,4 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
+import { createStore } from 'vuex'
 
 import { authenticator } from '@/store/authenticator'
 import { assess } from '@/store/assess'
@@ -12,7 +11,6 @@ import { dashboard } from '@/store/dashboard'
 import { users } from '@/store/users'
 import { filter } from '@/store/filter'
 
-Vue.use(Vuex)
 
 const state = {
   user: {
@@ -143,7 +141,8 @@ const getters = {
   }
 }
 
-export const store = new Vuex.Store({
+export const store = createStore({
+
   state,
   actions,
   mutations,

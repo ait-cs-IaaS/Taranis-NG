@@ -1,11 +1,6 @@
-module.exports = {
-  css: {
-    loaderOptions: {
-      scss: {
-        additionalData: '@import "@/styles/variables.scss";'
-      }
-    }
-  },
+const { defineConfig } = require('@vue/cli-service')
+
+module.exports = defineConfig({
   configureWebpack: {
     devtool: 'source-map',
   },
@@ -14,4 +9,4 @@ module.exports = {
       'taranis'
     ]
   }
-}
+})

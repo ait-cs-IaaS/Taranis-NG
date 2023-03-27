@@ -1,4 +1,4 @@
-import { vm } from '../main.js'
+import { app } from '../main.js'
 
 export function xorConcat(array, element) {
   const i = array.indexOf(element)
@@ -30,14 +30,14 @@ export function stripHtml(html) {
 }
 
 export function notifySuccess(text) {
-  vm.$emit('notification', {
+  app.$emit('notification', {
     type: 'success',
     loc: text
   })
 }
 
 export function notifyFailure(text) {
-  vm.$emit('notification', {
+  app.$emit('notification', {
     type: 'red',
     loc: text
   })

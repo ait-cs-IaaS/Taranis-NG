@@ -8,18 +8,14 @@ import ApiService from '@/services/api_service'
 import { createI18n } from 'vue-i18n'
 import { messages } from '@/i18n/messages'
 import { dateTimeFormats } from '@/i18n/datetimeformat'
-import VeeValidate from 'vee-validate'
 import VueCookies from 'vue-cookies'
 import DatePicker from 'vue-datepicker-next'
 import { vuetify } from '@/plugins/vuetify'
 
-Vue.config.productionTip = false
-
-const app = createApp(App)
+export const app = createApp(App)
 
 app.use(require('vue-cookies'))
 app.use(VueCookies)
-app.use(VueSSE)
 app.use(DatePicker)
 
 
@@ -35,10 +31,11 @@ const i18n = createI18n({
 
 app.use(i18n)
 
-app.use(VeeValidate, {
-  i18nRootKey: 'validations',
-  i18n
-})
+//import VeeValidate from 'vee-validate'
+// app.use(VeeValidate, {
+//   i18nRootKey: 'validations',
+//   i18n
+// })
 
 const coreAPIURL =
   typeof process.env.VUE_APP_TARANIS_NG_CORE_API === 'undefined'

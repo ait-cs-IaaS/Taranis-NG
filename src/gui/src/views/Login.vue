@@ -13,9 +13,7 @@
                   prepend-icon="person"
                   type="text"
                   v-model="username"
-                  v-validate="'required'"
-                  data-vv-name="username"
-                  :error-messages="errors.collect('username')"
+                  :rules="[acceptUser]"
                   required
                 />
               </v-flex>
@@ -28,9 +26,7 @@
                   prepend-icon="lock"
                   type="password"
                   v-model="password"
-                  v-validate="'required'"
-                  :error-messages="errors.collect('password')"
-                  data-vv-name="password"
+                  :rules="[acceptPassword]"
                   required
                 ></v-text-field>
               </v-flex>
@@ -60,32 +56,35 @@ export default {
     login_error: undefined
   }),
   mixins: [AuthMixin],
+  computed: {
+    acceptPassword() {
+      return this.password.length > 0
+    },
+
+    acceptUser() {
+      return this.username.length > 0
+    },
+  },
   methods: {
     ...mapActions(['login']),
     authenticate () {
-      this.$validator.validateAll().then(() => {
-        if (!this.$validator.errors.any()) {
-          this.login({ username: this.username, password: this.password })
-            .then((error) => {
-              if (this.isAuthenticated()) {
-                this.login_error = undefined
-                this.$router.push('/')
-                return
-              }
-              if (error) {
-                this.$refs.form.reset()
-                this.$validator.reset()
-                if (error.status > 500) {
-                  this.login_error = 'login.backend_error'
-                } else {
-                  this.login_error = 'login.error'
-                }
-              }
-            })
-        } else {
-          this.login_error = undefined
-        }
-      })
+      this.login({ username: this.username, password: this.password })
+        .then((error) => {
+          if (this.isAuthenticated()) {
+            this.login_error = undefined
+            this.$router.push('/')
+            return
+          }
+          if (error) {
+            this.$refs.form.reset()
+            this.$validator.reset()
+            if (error.status > 500) {
+              this.login_error = 'login.backend_error'
+            } else {
+              this.login_error = 'login.error'
+            }
+          }
+        })
     }
   }
 }
