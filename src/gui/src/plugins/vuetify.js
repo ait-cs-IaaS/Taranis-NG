@@ -1,8 +1,10 @@
-import Vue from 'vue'
-import Vuetify from 'vuetify/lib'
-import { Scroll } from 'vuetify/lib/directives'
+import { createVuetify } from "vuetify";
+import 'vuetify/lib/styles/main.sass'
+import { aliases, mdi } from "vuetify/iconsets/mdi";
+import * as components from "vuetify/components";
+import * as directives from "vuetify/directives";
+import { VDataTable } from 'vuetify/labs/VDataTable'
 
-Vue.use(Vuetify)
 const colors = {
   primary: '#7468E8',
   secondary: '#34a5e8',
@@ -36,17 +38,18 @@ const theme = {
   }
 }
 
-const icons = {
-  iconfont: 'mdi'
-}
-
-const directives = { Scroll }
-
-const vuetify = new Vuetify(
-  {
-    directives: directives,
-    icons: icons,
-    theme: theme
-  })
-
-export default vuetify
+export const vuetify = createVuetify({
+  components: {
+    ...components,
+    VDataTable,
+  },
+  directives,
+  theme: theme,
+  icons: {
+    defaultSet: "mdi",
+    aliases,
+    sets: {
+      mdi,
+    },
+  },
+});

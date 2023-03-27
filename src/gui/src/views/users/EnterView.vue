@@ -37,7 +37,7 @@
           v-model="news_item.link"
         ></v-text-field>
 
-        <vue-editor v-model="editorData" :editorOptions="editorOptionVue2" />
+        <quill-editor v-model:value="editorData" :editorOptions="editorOptions" />
       </v-card-text>
     </v-card>
     <v-spacer class="pt-2"></v-spacer>
@@ -46,21 +46,20 @@
 </template>
 
 <script>
-import { VueEditor } from 'vue2-editor'
+import { quillEditor } from 'vue3-quill'
 import { addNewsItem } from '@/api/assess'
 
 export default {
   name: 'Enter',
   components: {
-    VueEditor
+    quillEditor
   },
   data: () => ({
     show_error: false,
     show_validation_error: false,
 
     editorData: '<p></p>',
-    editorOptionVue2: {
-      theme: 'snow',
+    editorOptions: {
       placeholder: 'insert text here ...'
     },
 

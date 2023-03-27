@@ -200,7 +200,7 @@
           </v-tab-item>
 
           <v-tab-item value="tab-3" class="pa-5">
-            <vue-editor
+            <quill-editor
               ref="assessDetailComments"
               :editorOptions="editorOptionVue2"
             />
@@ -224,7 +224,7 @@ import {
 import AuthMixin from '@/services/auth/auth_mixin'
 import Permissions from '@/services/auth/permissions'
 
-import { VueEditor } from 'vue2-editor'
+import { quillEditor } from 'vue3-quill'
 
 const toolbarOptions = [
   ['bold', 'italic', 'underline', 'strike'], // toggled buttons
@@ -249,7 +249,7 @@ const toolbarOptions = [
 
 export default {
   name: 'NewsItemSingleDetail',
-  components: { VueEditor },
+  components: { quillEditor },
   mixins: [AuthMixin],
   props: {
     analyze_selector: Boolean,
