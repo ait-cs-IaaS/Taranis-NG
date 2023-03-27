@@ -1,6 +1,6 @@
 <template>
   <v-container fluid style="min-height: 100vh">
-    <report-item v-if="report_item" :report_item_prop="report_item" :edit.sync="edit" @reportcreated="reportCreated"/>
+    <report-item v-if="report_item" :report_item_prop="report_item" :edit="edit" @reportcreated="reportCreated"/>
   </v-container>
 </template>
 
