@@ -10,7 +10,8 @@ module.exports = {
     devtool: 'source-map',
   },
   devServer: {
-    disableHostCheck: true,
-    public: 'taranis'
+    allowedHosts: [
+      'taranis'
+    ]
   }
 }
