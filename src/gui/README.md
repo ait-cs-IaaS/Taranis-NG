@@ -22,8 +22,9 @@ You can run the GUI on the local machine, and edit it with your favorite IDE or 
 # set the environment variables needed by GUI
 export VUE_APP_TARANIS_NG_CORE_API="http://localhost:5000/api/v1"
 export VUE_APP_TARANIS_NG_CORE_SSE="http://localhost:5000/sse"
-export VUE_APP_TARANIS_NG_URL="http://localhost:8080"
+export VUE_APP_TARANIS_NG_URL="http://localhost:5000"  
 export VUE_APP_TARANIS_NG_LOCALE="en"
+export VUE_APP_TARANIS_NG_LOGIN_URL=""
 
 # run the development server
 npm run serve

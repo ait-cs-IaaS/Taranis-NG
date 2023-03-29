@@ -6,7 +6,7 @@
           <v-icon class="mr-2"> mdi-email-multiple </v-icon>
           <span class="caption">
             There are
-            <strong>{{ dashboardData.total_news_items }}</strong> total Assess
+            <strong>{{ dashboard_data.total_news_items }}</strong> total Assess
             items.
           </span>
         </template>
@@ -15,7 +15,7 @@
         <template v-slot:content>
           <v-icon class="mr-2" color="orange"> mdi-email-check-outline </v-icon>
           <span class="caption">
-            There are <b>{{ dashboardData.total_products }}</b> products ready
+            There are <b>{{ dashboard_data.total_products }}</b> products ready
             for publications.
           </span>
         </template>
@@ -26,7 +26,7 @@
         <template v-slot:content>
           <v-icon class="mr-2"> mdi-account </v-icon>
           <span class="caption">
-            There are <b>{{ dashboardData.report_items_completed }}</b>
+            There are <b>{{ dashboard_data.report_items_completed }}</b>
             completed analyses.
           </span>
           <v-divider inset></v-divider>
@@ -34,7 +34,7 @@
             mdi-account-question-outline
           </v-icon>
           <span class="caption">
-            There are <b>{{ dashboardData.report_items_in_progress }}</b>
+            There are <b>{{ dashboard_data.report_items_in_progress }}</b>
             pending analyses.
           </span>
         </template>
@@ -48,19 +48,15 @@
           <v-divider inset></v-divider>
 
           <v-icon class="mr-2"> mdi-clock-check-outline </v-icon>
-          <span class="caption"
-            >Last successful run ended at
-            <b>{{ dashboardData.latest_collected }}</b></span
-          >
+          <span class="caption">Last successful run ended at
+            <b>{{ dashboard_data.latest_collected }}</b></span>
         </template>
       </dash-board-card>
       <dash-board-card linkTo="#" linkText="Database">
         <template v-slot:content>
           <v-icon class="mr-2" color="blue"> mdi-database </v-icon>
-          <span class="caption"
-            >There are <b>{{ dashboardData.total_database_items }}</b> live
-            items.</span
-          >
+          <span class="caption">There are <b>{{ dashboard_data.total_database_items }}</b> live
+            items.</span>
           <v-divider inset></v-divider>
 
           <v-icon class="mr-2"> mdi-database-check </v-icon>
@@ -72,29 +68,28 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
+import { mapActions, mapState } from 'pinia'
+import { dashboardStore } from '../../stores/DashboardStore'
+
 import DashBoardCard from '@/components/common/DashBoardCard'
 
 export default {
   name: 'DashBoardConfig',
   components: { DashBoardCard },
-  data: () => ({
-    dashboardData: {}
-  }),
+  data: () => ({ }),
   computed: {
     totalItems() {
       return this.getItemCount().total
-    }
+    },
+    ...mapState(dashboardStore, ['dashboard_data'])
   },
   methods: {
-    ...mapActions('dashboard', ['loadDashboardData']),
-    ...mapGetters('dashboard', ['getDashboardData']),
+    ...mapActions(dashboardStore, ['loadDashboardData']),
     ...mapGetters(['getItemCount'])
   },
-  mounted() {
-    this.loadDashboardData().then(() => {
-      this.dashboardData = this.getDashboardData()
-    })
+  async mounted() {
+    await this.loadDashboardData()
   }
 }
 </script>

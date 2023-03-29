@@ -4,7 +4,7 @@ import Vue from 'vue'
 import App from './App.vue'
 import { router } from './router'
 import { store } from '@/store/store'
-import { sync } from 'vuex-router-sync'
+// import { sync } from 'vuex-router-sync'
 import ApiService from '@/services/api_service'
 import VueI18n from 'vue-i18n'
 import { messages } from '@/i18n/messages'
@@ -15,6 +15,8 @@ import VueSSE from 'vue-sse'
 import DatePicker from 'vue2-datepicker'
 import 'vue2-datepicker/index.css'
 import vuetify from '@/plugins/vuetify'
+
+import { createPinia, PiniaVuePlugin } from 'pinia'
 
 Vue.config.productionTip = false
 
@@ -51,11 +53,14 @@ if (localStorage.ACCESS_TOKEN) {
   store.dispatch('setToken', localStorage.ACCESS_TOKEN).then()
 }
 
-sync(store, router)
+// pinia
+Vue.use(PiniaVuePlugin)
+const pinia = createPinia()
 
 export const vm = new Vue({
   i18n,
   vuetify,
+  pinia,
   store,
   router,
   render: (h) => h(App)

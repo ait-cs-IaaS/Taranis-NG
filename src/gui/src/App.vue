@@ -27,7 +27,8 @@ export default {
   computed: {},
   mixins: [AuthMixin],
   methods: {
-    ...mapActions('dashboard', ['updateStories']),
+
+    // ...mapActions('dashboard', ['updateStories']),
     ...mapActions('users', ['updateUsers']),
     ...mapActions('assess', ['updateNewsItems']),
     ...mapActions('settings', ['loadUserProfile']),
@@ -110,7 +111,7 @@ export default {
       5000
     )
   },
-  created() {}
+  created() { }
 }
 </script>
 

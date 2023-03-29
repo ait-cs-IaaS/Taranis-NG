@@ -8,7 +8,7 @@ import { analyze } from '@/store/analyze'
 import { publish } from '@/store/publish'
 import { settings } from '@/store/settings'
 import { assets } from '@/store/assets'
-import { dashboard } from '@/store/dashboard'
+// import { dashboard } from '@/store/dashboard'
 import { users } from '@/store/users'
 import { filter } from '@/store/filter'
 
@@ -156,7 +156,7 @@ export const store = new Vuex.Store({
     publish,
     settings,
     assets,
-    dashboard,
+    // dashboard,
     users,
     filter
   }
