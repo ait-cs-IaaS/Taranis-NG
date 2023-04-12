@@ -86,7 +86,6 @@ class NewsItemData(db.Model):
 
     @classmethod
     def allowed_with_acl(cls, news_item_data_id, user, see, access, modify):
-
         news_item_data = cls.query.get(news_item_data_id)
         if news_item_data.remote_source is not None:
             return True
@@ -386,7 +385,6 @@ class NewsItem(db.Model):
 
     @classmethod
     def get_acl_status(cls, news_item_id: int, user) -> tuple[bool, bool, bool]:
-
         news_item = cls.query.get(news_item_id)
         if news_item.news_item_data.remote_source is not None:
             return True, True, True
