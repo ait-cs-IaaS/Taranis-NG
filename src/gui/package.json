@@ -81,7 +81,4 @@
       "autoprefixer": {}
     }
   },
-  "browserslist": [
-    "> 1%"
-  ]
 }
