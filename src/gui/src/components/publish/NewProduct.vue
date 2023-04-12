@@ -30,7 +30,7 @@
                         <v-col cols="6" class="pr-3">
                             <v-combobox v-on:change="productSelected" :disabled="!canModify"
                                         v-model="selected_type"
-                                        :items="product_types"
+                                        :items="product_types.items"
                                         item-text="title"
                                         :label="$t('product.report_type')"
                             />
@@ -44,7 +44,7 @@
                                           v-validate="'required'"
                                           data-vv-name="title"
                                           :error-messages="errors.collect('title')"
-                                          :spellcheck="$store.state.settings.spellcheck"
+                                          :spellcheck="spellcheck"
                             />
                         </v-col>
                         <v-col cols="12" class="pr-3">
@@ -52,7 +52,7 @@
                                         :label="$t('product.description')"
                                         name="description"
                                         v-model="product.description"
-                                        :spellcheck="$store.state.settings.spellcheck"
+                                        :spellcheck="spellcheck"
                             />
                         </v-col>
                     </v-row>
@@ -115,7 +115,10 @@ import AuthMixin from '../../services/auth/auth_mixin'
 import { createProduct, publishProduct, updateProduct } from '@/api/publish'
 import ReportItemSelector from '@/components/publish/ReportItemSelector'
 import Permissions from '@/services/auth/permissions'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapState } from 'pinia'
+import { configStore } from '@/stores/ConfigStore'
+import { mapActions as mapActionsVuex, mapGetters } from 'vuex'
+import { settingsStore } from '@/stores/SettingsStore'
 
 export default {
   name: 'NewProduct',
@@ -128,7 +131,6 @@ export default {
     show_error: false,
     modify: false,
     access: false,
-    product_types: [],
     publisher_presets: [],
     selected_type: null,
     report_items: [],
@@ -143,6 +145,8 @@ export default {
   }),
   mixins: [AuthMixin],
   computed: {
+    ...mapState(settingsStore, ['spellcheck']),
+    ...mapState(configStore, ['product_types']),
     canCreate () {
       return this.checkPermission(Permissions.PUBLISH_CREATE)
     },
@@ -156,10 +160,9 @@ export default {
     }
   },
   methods: {
-    ...mapGetters('config', ['getProductTypes']),
-    ...mapActions('config', ['loadUserProductTypes']),
+    ...mapActions(configStore, ['loadUserProductTypes']),
     ...mapGetters('publish', ['getProductsPublisherPresets']),
-    ...mapActions('publish', ['loadUserPublishersPresets']),
+    ...mapActionsVuex('publish', ['loadUserPublishersPresets']),
 
     addProduct () {
       this.visible = true
@@ -314,17 +317,14 @@ export default {
       })
     }
   },
-  mounted () {
+  async mounted () {
     this.$root.$on('new-product', (data) => {
       this.visible = true
       this.selected_type = null
       this.report_items = data
     })
 
-    this.loadUserProductTypes({ search: '' })
-      .then(() => {
-        this.product_types = this.getProductTypes().items
-      })
+    await this.loadUserProductTypes({ search: '' })
 
     this.loadUserPublishersPresets({ search: '' })
       .then(() => {
@@ -349,9 +349,9 @@ export default {
       this.product.description = data.description
       this.product.product_type_id = data.product_type_id
 
-      for (let i = 0; i < this.product_types.length; i++) {
-        if (this.product_types[i].id === this.product.product_type_id) {
-          this.selected_type = this.product_types[i]
+      for (let i = 0; i < this.product_types.items.length; i++) {
+        if (this.product_types.items[i].id === this.product.product_type_id) {
+          this.selected_type = this.product_types.items[i]
           break
         }
       }

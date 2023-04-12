@@ -3,11 +3,11 @@ import Vuex from 'vuex'
 
 import { authenticator } from '@/store/authenticator'
 import { assess } from '@/store/assess'
-import { config } from '@/store/config'
+// import { config } from '@/store/config'
 import { analyze } from '@/store/analyze'
 import { publish } from '@/store/publish'
-import { settings } from '@/store/settings'
-import { assets } from '@/store/assets'
+// import { settings } from '@/store/settings'
+// import { assets } from '@/store/assets'
 // import { dashboard } from '@/store/dashboard'
 import { users } from '@/store/users'
 import { filter } from '@/store/filter'
@@ -151,11 +151,11 @@ export const store = new Vuex.Store({
   modules: {
     authenticator,
     assess,
-    config,
+    // config,
     analyze,
     publish,
-    settings,
-    assets,
+    // settings,
+    // assets,
     // dashboard,
     users,
     filter

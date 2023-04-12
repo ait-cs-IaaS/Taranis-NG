@@ -63,21 +63,21 @@
                 name="name"
                 type="text"
                 v-model="group.title"
-                :spellcheck="$store.state.settings.spellcheck"
+                :spellcheck="spellcheck"
               ></v-text-field>
               <v-textarea
                 :disabled="!canUpdate"
                 :label="$t('report_type.description')"
                 name="description"
                 v-model="group.description"
-                :spellcheck="$store.state.settings.spellcheck"
+                :spellcheck="spellcheck"
               ></v-textarea>
               <v-text-field
                 :disabled="!canUpdate"
                 :label="$t('report_type.section_title')"
                 name="section_title"
                 v-model="group.section_title"
-                :spellcheck="$store.state.settings.spellcheck"
+                :spellcheck="spellcheck"
               ></v-text-field>
               <AttributeTable
                 :attributes.sync="report_type.attribute_groups[index].attribute_group_items"
@@ -99,6 +99,9 @@ import AuthMixin from '@/services/auth/auth_mixin'
 import Permissions from '@/services/auth/permissions'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
 
+import { mapState } from 'pinia'
+import { settingsStore } from '@/stores/SettingsStore'
+
 export default {
   name: 'NewReportType',
   components: {
@@ -118,6 +121,7 @@ export default {
   },
   mixins: [AuthMixin],
   computed: {
+    ...mapState(settingsStore, ['spellcheck']),
     canCreate() {
       return this.checkPermission(Permissions.CONFIG_REPORT_TYPE_CREATE)
     },

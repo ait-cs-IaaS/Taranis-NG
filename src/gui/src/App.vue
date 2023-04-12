@@ -16,7 +16,9 @@
 import MainMenu from './components/MainMenu'
 import AuthMixin from './services/auth/auth_mixin'
 import Notification from './components/common/Notification'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapState } from 'pinia'
+import { settingsStore } from './stores/SettingsStore'
+import { mapActions as mapActionsVuex } from 'vuex'
 
 export default {
   name: 'App',
@@ -24,15 +26,15 @@ export default {
     MainMenu,
     Notification
   },
-  computed: {},
+  computed: {
+    ...mapState(settingsStore, ['dark_theme'])
+  },
   mixins: [AuthMixin],
   methods: {
-
     // ...mapActions('dashboard', ['updateStories']),
-    ...mapActions('users', ['updateUsers']),
-    ...mapActions('assess', ['updateNewsItems']),
-    ...mapActions('settings', ['loadUserProfile']),
-    ...mapGetters('settings', ['getProfileDarkTheme']),
+    ...mapActions(settingsStore, ['loadUserProfile']),
+    ...mapActionsVuex('users', ['updateUsers']),
+    ...mapActionsVuex('assess', ['updateNewsItems']),
 
     connectSSE() {
       // TODO: unsubscribe
@@ -84,7 +86,7 @@ export default {
       if (this.isAuthenticated()) {
         this.$store.dispatch('setAuthURLs')
         this.loadUserProfile().then(() => {
-          this.$vuetify.theme.dark = this.getProfileDarkTheme()
+          this.$vuetify.theme.dark = this.dark_theme
         })
         this.connectSSE()
       } else {

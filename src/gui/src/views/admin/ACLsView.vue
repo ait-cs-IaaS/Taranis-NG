@@ -1,20 +1,9 @@
 <template>
   <div>
-    <DataTable
-      :addButton="true"
-      :items.sync="acls"
-      :headerFilter="['tag', 'id', 'name', 'username']"
-      sortByItem="id"
-      :actionColumn="true"
-      @delete-item="deleteItem"
-      @edit-item="editItem"
-      @add-item="addItem"
-      @update-items="updateData"
-    />
-    <NewACL
-      v-if="showForm"
-      :user_id.sync="userID"
-    ></NewACL>
+    <DataTable :addButton="true" :items.sync="acls.items" :headerFilter="['tag', 'id', 'name', 'username']" sortByItem="id"
+      :actionColumn="true" @delete-item="deleteItem" @edit-item="editItem" @add-item="addItem"
+      @update-items="updateData" />
+    <NewACL v-if="showForm" :user_id.sync="userID"></NewACL>
   </div>
 </template>
 
@@ -23,7 +12,9 @@ import DataTable from '@/components/common/DataTable'
 import NewACL from '../../components/config/user/NewACL'
 import { deleteACLEntry, createACLEntry, updateACLEntry } from '@/api/config'
 import { notifySuccess } from '@/utils/helpers'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapState } from 'pinia'
+import { configStore } from '@/stores/ConfigStore'
+import { mapActions as mapActionsVuex } from 'vuex'
 
 export default {
   name: 'ACLsView',
@@ -32,21 +23,20 @@ export default {
     NewACL
   },
   data: () => ({
-    acls: [],
     showForm: false,
     edit: false
   }),
+  computed: {
+    ...mapState(configStore, ['acls'])
+  },
   methods: {
-    ...mapActions('config', ['loadACLEntries']),
-    ...mapGetters('config', ['getACLEntries']),
-    ...mapActions(['updateItemCount']),
+    ...mapActions(configStore, ['loadACLEntries']),
+    ...mapActionsVuex(['updateItemCount']),
     updateData() {
       this.loadACLEntries().then(() => {
-        const sources = this.getACLEntries()
-        this.acls = sources.items
         this.updateItemCount({
-          total: sources.total_count,
-          filtered: sources.length
+          total: this.acls.total_count,
+          filtered: this.acls.length
         })
       })
     },
@@ -87,7 +77,7 @@ export default {
   mounted() {
     this.updateData()
   },
-  beforeDestroy() {}
+  beforeDestroy() { }
 }
 
 </script>

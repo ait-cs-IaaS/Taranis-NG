@@ -12,7 +12,7 @@
       @update-items="updateData"
     />
     <report-type-form
-      v-if="newItem || formData && Object.keys(formData).length > 0"
+      v-if="newItem || (formData && Object.keys(formData).length > 0)"
       :report_type_data.sync="formData"
     />
   </div>
@@ -21,11 +21,12 @@
 <script>
 import DataTable from '@/components/common/DataTable'
 import ReportTypeForm from '../../components/config/ReportTypeForm'
-import {
-  deleteReportItemType
-} from '@/api/config'
-import { mapActions, mapGetters } from 'vuex'
+import { deleteReportItemType } from '@/api/config'
+import { mapActions as mapActionsVuex } from 'vuex'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
+
+import { mapActions, mapState } from 'pinia'
+import { configStore } from '@/stores/ConfigStore'
 
 export default {
   name: 'ReportTypes',
@@ -39,14 +40,15 @@ export default {
     formData: {},
     newItem: false
   }),
-  computed: {},
+  computed: {
+    ...mapState(configStore, ['report_item_types_config'])
+  },
   methods: {
-    ...mapActions('config', ['loadReportTypesConfig']),
-    ...mapGetters('config', ['getReportTypesConfig']),
-    ...mapActions(['updateItemCount']),
+    ...mapActions(configStore, ['loadReportTypesConfig']),
+    ...mapActionsVuex(['updateItemCount']),
     updateData() {
       this.loadReportTypesConfig().then(() => {
-        const sources = this.getReportTypesConfig()
+        const sources = this.report_item_types_config
         this.report_types = sources.items
         this.updateItemCount({
           total: sources.total_count,
@@ -64,16 +66,18 @@ export default {
     },
     deleteItem(item) {
       if (!item.default) {
-        deleteReportItemType(item).then(() => {
-          notifySuccess(`Successfully deleted ${item.name}`)
-          this.updateData()
-        }).catch(() => {
-          notifyFailure(`Failed to delete ${item.name}`)
-        })
+        deleteReportItemType(item)
+          .then(() => {
+            notifySuccess(`Successfully deleted ${item.name}`)
+            this.updateData()
+          })
+          .catch(() => {
+            notifyFailure(`Failed to delete ${item.name}`)
+          })
       }
     },
     selectionChange(selected) {
-      this.selected = selected.map(item => item.id)
+      this.selected = selected.map((item) => item.id)
     }
   },
   mounted() {

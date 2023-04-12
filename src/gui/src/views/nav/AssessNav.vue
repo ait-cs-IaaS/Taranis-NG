@@ -159,7 +159,6 @@ export default {
       filter: (state) => state.newsItemsFilter
     }),
     ...mapState(['drawerVisible']),
-    ...mapState('route', ['query']),
     source: {
       get() {
         return this.filter.source
@@ -268,7 +267,7 @@ export default {
   },
   created() {
     const query = Object.fromEntries(
-      Object.entries(this.query).filter(([_, v]) => v != null)
+      Object.entries(this.$route.query).filter(([_, v]) => v != null)
     )
     this.updateFilter(query)
     console.debug('loaded with query', query)

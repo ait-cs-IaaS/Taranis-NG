@@ -2,7 +2,7 @@
   <div>
     <DataTable
       :addButton="true"
-      :items.sync="roles"
+      :items.sync="roles.items"
       :headerFilter="['tag', 'id', 'name', 'description']"
       sortByItem="id"
       :actionColumn="true"
@@ -23,13 +23,12 @@
 <script>
 import DataTable from '@/components/common/DataTable'
 import EditConfig from '../../components/config/EditConfig'
-import {
-  deleteRole,
-  createRole,
-  updateRole
-} from '@/api/config'
-import { mapActions, mapGetters } from 'vuex'
+import { deleteRole, createRole, updateRole } from '@/api/config'
+import { mapActions as mapActionsVuex } from 'vuex'
 import { notifySuccess, objectFromFormat, notifyFailure } from '@/utils/helpers'
+
+import { mapActions, mapState } from 'pinia'
+import { configStore } from '@/stores/ConfigStore'
 
 export default {
   name: 'Roles',
@@ -38,13 +37,12 @@ export default {
     EditConfig
   },
   data: () => ({
-    roles: [],
     formData: {},
     selected: [],
-    edit: false,
-    permissions: []
+    edit: false
   }),
   computed: {
+    ...mapState(configStore, ['roles', 'permissions']),
     formFormat() {
       return [
         {
@@ -83,27 +81,22 @@ export default {
             { text: 'Name', value: 'name' },
             { text: 'Description', value: 'description' }
           ],
-          items: this.permissions
+          items: this.permissions.items
         }
       ]
     }
   },
   methods: {
-    ...mapActions('config', ['loadRoles', 'loadPermissions']),
-    ...mapGetters('config', ['getRoles', 'getPermissions']),
-    ...mapActions(['updateItemCount']),
-    updateData() {
+    ...mapActions(configStore, ['loadRoles', 'loadPermissions']),
+    ...mapActionsVuex(['updateItemCount']),
+    async updateData() {
       this.loadRoles().then(() => {
-        const sources = this.getRoles()
-        this.roles = sources.items
         this.updateItemCount({
-          total: sources.total_count,
-          filtered: sources.length
+          total: this.roles.total_count,
+          filtered: this.roles.length
         })
       })
-      this.loadPermissions().then(() => {
-        this.permissions = this.getPermissions().items
-      })
+      await this.loadPermissions()
     },
     addItem() {
       this.formData = objectFromFormat(this.formFormat)
@@ -123,32 +116,38 @@ export default {
     },
     deleteItem(item) {
       if (!item.default) {
-        deleteRole(item).then(() => {
-          notifySuccess(`Successfully deleted ${item.name}`)
-          this.updateData()
-        }).catch(() => {
-          notifyFailure(`Failed to delete ${item.name}`)
-        })
+        deleteRole(item)
+          .then(() => {
+            notifySuccess(`Successfully deleted ${item.name}`)
+            this.updateData()
+          })
+          .catch(() => {
+            notifyFailure(`Failed to delete ${item.name}`)
+          })
       }
     },
     createItem(item) {
-      createRole(item).then(() => {
-        notifySuccess(`Successfully created ${item.name}`)
-        this.updateData()
-      }).catch(() => {
-        notifyFailure(`Failed to create ${item.name}`)
-      })
+      createRole(item)
+        .then(() => {
+          notifySuccess(`Successfully created ${item.name}`)
+          this.updateData()
+        })
+        .catch(() => {
+          notifyFailure(`Failed to create ${item.name}`)
+        })
     },
     updateItem(item) {
-      updateRole(item).then(() => {
-        notifySuccess(`Successfully updated ${item.name}`)
-        this.updateData()
-      }).catch(() => {
-        notifyFailure(`Failed to update ${item.name}`)
-      })
+      updateRole(item)
+        .then(() => {
+          notifySuccess(`Successfully updated ${item.name}`)
+          this.updateData()
+        })
+        .catch(() => {
+          notifyFailure(`Failed to update ${item.name}`)
+        })
     },
     selectionChange(selected) {
-      this.selected = selected.map(item => item.id)
+      this.selected = selected.map((item) => item.id)
     }
   },
   mounted() {

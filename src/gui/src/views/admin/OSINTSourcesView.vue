@@ -36,7 +36,7 @@ import {
   exportOSINTSources,
   importOSINTSources
 } from '@/api/config'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions as mapActionsVuex } from 'vuex'
 import {
   notifySuccess,
   objectFromFormat,
@@ -44,6 +44,8 @@ import {
   parseParameterValues,
   createParameterValues
 } from '@/utils/helpers'
+import { mapActions, mapState } from 'pinia'
+import { configStore } from '@/stores/ConfigStore'
 
 export default {
   name: 'OSINTSources',
@@ -61,6 +63,10 @@ export default {
     edit: false
   }),
   computed: {
+    ...mapState(configStore, {
+      store_collectors: 'collectors',
+      store_osint_sources: 'osint_sources'
+    }),
     formFormat() {
       const base = [
         {
@@ -95,12 +101,11 @@ export default {
     }
   },
   methods: {
-    ...mapActions('config', ['loadOSINTSources', 'loadCollectors']),
-    ...mapGetters('config', ['getOSINTSources', 'getCollectors']),
-    ...mapActions(['updateItemCount']),
+    ...mapActions(configStore, ['loadOSINTSources', 'loadCollectors']),
+    ...mapActionsVuex(['updateItemCount']),
     updateData() {
       this.loadOSINTSources().then(() => {
-        const sources = this.getOSINTSources()
+        const sources = this.store_osint_sources
         this.osint_sources = parseParameterValues(sources.items)
         this.updateItemCount({
           total: sources.total_count,
@@ -108,7 +113,7 @@ export default {
         })
       })
       this.loadCollectors().then(() => {
-        const collectors = this.getCollectors()
+        const collectors = this.store_collectors
         this.collectors = collectors.items.map((collector) => {
           this.parameters[collector.id] = collector.parameters.map(
             (parameter) => {

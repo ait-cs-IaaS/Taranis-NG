@@ -5,9 +5,14 @@
         {{ asset.name }}
       </v-card-title>
     </v-card>
-    <v-card v-for="asset_group in asset_groups" :key="asset_group.id" class="mt-3">
+    <v-card
+      v-for="asset_group in asset_groups"
+      :key="asset_group.id"
+      class="mt-3"
+    >
       <v-card-title>
-        {{ asset_group.name }} - {{ asset_group.id }} - {{ asset_group.description }}
+        {{ asset_group.name }} - {{ asset_group.id }} -
+        {{ asset_group.description }}
       </v-card-title>
     </v-card>
   </v-container>
@@ -19,8 +24,10 @@ import {
   // solveVulnerability,
   deleteAsset
 } from '@/api/assets'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions as mapActionsVuex } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
+import { assetsStore } from '@/stores/AssetsStore'
 
 export default {
   name: 'AssetsView',
@@ -37,13 +44,18 @@ export default {
       ]
     }
   },
+  computed: {
+    ...mapState(assetsStore, {
+      store_asset_groups: 'asset_groups',
+      store_assets: 'assets'
+    })
+  },
   methods: {
-    ...mapActions('assets', ['loadAssetGroups', 'loadAssets']),
-    ...mapGetters('assets', ['getAssetGroups', 'getAssets']),
-    ...mapActions(['updateItemCount']),
+    ...mapActions(assetsStore, ['loadAssetGroups', 'loadAssets']),
+    ...mapActionsVuex(['updateItemCount']),
     updateData() {
       this.loadAssets().then(() => {
-        const sources = this.getAssets()
+        const sources = this.store_assets
         this.assets = sources.items
         this.updateItemCount({
           total: sources.total_count,
@@ -51,7 +63,7 @@ export default {
         })
       })
       this.loadAssetGroups().then(() => {
-        this.asset_groups = this.getAssetGroups().items
+        this.asset_groups = this.store_asset_groups.items
       })
     },
     addAsset() {

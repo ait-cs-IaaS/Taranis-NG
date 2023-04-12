@@ -27,13 +27,13 @@
             <v-text-field
               v-model="edited_attribute.title"
               :label="$t('attribute.name')"
-              :spellcheck="$store.state.settings.spellcheck"
+              :spellcheck="spellcheck"
             ></v-text-field>
 
             <v-text-field
               v-model="edited_attribute.description"
               :label="$t('attribute.description')"
-              :spellcheck="$store.state.settings.spellcheck"
+              :spellcheck="spellcheck"
             ></v-text-field>
 
             <v-row>
@@ -94,7 +94,9 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapState } from 'pinia'
+import { settingsStore } from '@/stores/SettingsStore'
+import { configStore } from '@/stores/ConfigStore'
 
 export default {
   name: 'AttributeTable',
@@ -133,6 +135,8 @@ export default {
     }
   }),
   computed: {
+    ...mapState(settingsStore, ['spellcheck']),
+    ...mapState(configStore, { store_attributes: 'attributes' }),
     attribute_contents() {
       return this.attributes || []
     },
@@ -162,8 +166,7 @@ export default {
     }
   },
   methods: {
-    ...mapGetters('config', ['getAttributes']),
-    ...mapActions('config', ['loadAttributes']),
+    ...mapActions(configStore, ['loadAttributes']),
     close() {
       this.dialog = false
       this.$nextTick(() => {
@@ -206,7 +209,7 @@ export default {
   },
   mounted() {
     this.loadAttributes().then(() => {
-      this.attribute_templates = this.getAttributes().items
+      this.attribute_templates = this.store_attributes.items
     })
     this.edited_attribute.index = this.attribute_contents.length
   }

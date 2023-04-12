@@ -2,7 +2,7 @@
   <div>
     <DataTable
       :addButton="true"
-      :items.sync="word_lists"
+      :items.sync="word_lists.items"
       :headerFilter="['tag', 'name', 'description']"
       sortByItem="id"
       :actionColumn="true"
@@ -12,12 +12,9 @@
       @selection-change="selectionChange"
       @update-items="updateData"
     >
-    <template v-slot:titlebar>
-      <ImportExport
-        @import="importData"
-        @export="exportData"
-      ></ImportExport>
-    </template>
+      <template v-slot:titlebar>
+        <ImportExport @import="importData" @export="exportData"></ImportExport>
+      </template>
     </DataTable>
     <EditConfig
       v-if="formData && Object.keys(formData).length > 0"
@@ -38,8 +35,10 @@ import {
   exportWordList,
   importWordList
 } from '@/api/config'
-import { mapActions, mapGetters } from 'vuex'
 import { notifySuccess, emptyValues, notifyFailure } from '@/utils/helpers'
+import { mapActions, mapState } from 'pinia'
+import { configStore } from '@/stores/ConfigStore'
+import { mapActions as mapActionsVuex } from 'vuex'
 
 export default {
   name: 'WordLists',
@@ -49,27 +48,26 @@ export default {
     ImportExport
   },
   data: () => ({
-    word_lists: [],
     selected: [],
     formData: {},
     edit: false
   }),
+  computed: {
+    ...mapState(configStore, ['word_lists'])
+  },
   methods: {
-    ...mapActions('config', ['loadWordLists']),
-    ...mapGetters('config', ['getWordLists']),
-    ...mapActions(['updateItemCount']),
+    ...mapActions(configStore, ['loadWordLists']),
+    ...mapActionsVuex(['updateItemCount']),
     updateData() {
       this.loadWordLists().then(() => {
-        const sources = this.getWordLists()
-        this.word_lists = sources.items
         this.updateItemCount({
-          total: sources.total_count,
-          filtered: sources.length
+          total: this.word_lists.total_count,
+          filtered: this.word_lists.length
         })
       })
     },
     addItem() {
-      this.formData = emptyValues(this.word_lists[0])
+      this.formData = emptyValues(this.word_lists.items[0])
       this.edit = false
     },
     editItem(item) {
@@ -85,28 +83,34 @@ export default {
       }
     },
     deleteItem(item) {
-      deleteWordList(item).then(() => {
-        notifySuccess(`Successfully deleted ${item.name}`)
-        this.updateData()
-      }).catch(() => {
-        notifyFailure(`Failed to delete ${item.name}`)
-      })
+      deleteWordList(item)
+        .then(() => {
+          notifySuccess(`Successfully deleted ${item.name}`)
+          this.updateData()
+        })
+        .catch(() => {
+          notifyFailure(`Failed to delete ${item.name}`)
+        })
     },
     createItem(item) {
-      createWordList(item).then(() => {
-        notifySuccess(`Successfully created ${item.name}`)
-        this.updateData()
-      }).catch(() => {
-        notifyFailure(`Failed to create ${item.name}`)
-      })
+      createWordList(item)
+        .then(() => {
+          notifySuccess(`Successfully created ${item.name}`)
+          this.updateData()
+        })
+        .catch(() => {
+          notifyFailure(`Failed to create ${item.name}`)
+        })
     },
     updateItem(item) {
-      updateWordList(item).then(() => {
-        notifySuccess(`Successfully updated ${item.name}`)
-        this.updateData()
-      }).catch(() => {
-        notifyFailure(`Failed to update ${item.name}`)
-      })
+      updateWordList(item)
+        .then(() => {
+          notifySuccess(`Successfully updated ${item.name}`)
+          this.updateData()
+        })
+        .catch(() => {
+          notifyFailure(`Failed to update ${item.name}`)
+        })
     },
     importData(data) {
       importWordList(data)
@@ -115,7 +119,7 @@ export default {
       exportWordList(this.selected)
     },
     selectionChange(selected) {
-      this.selected = selected.map(item => item.id)
+      this.selected = selected.map((item) => item.id)
     }
   },
   mounted() {

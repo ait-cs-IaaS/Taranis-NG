@@ -2,7 +2,7 @@
   <div>
     <DataTable
       :addButton="true"
-      :items.sync="organizations"
+      :items.sync="organizations.items"
       :headerFilter="['tag', 'id', 'name', 'description']"
       sortByItem="id"
       :actionColumn="true"
@@ -27,8 +27,10 @@ import {
   createOrganization,
   updateOrganization
 } from '@/api/config'
-import { mapActions, mapGetters } from 'vuex'
 import { notifySuccess, emptyValues, notifyFailure } from '@/utils/helpers'
+import { mapActions, mapState } from 'pinia'
+import { configStore } from '@/stores/ConfigStore'
+import { mapActions as mapActionsVuex } from 'vuex'
 
 export default {
   name: 'Organizations',
@@ -37,26 +39,25 @@ export default {
     EditConfig
   },
   data: () => ({
-    organizations: [],
     formData: {},
     edit: false
   }),
+  computed: {
+    ...mapState(configStore, ['organizations'])
+  },
   methods: {
-    ...mapActions('config', ['loadOrganizations']),
-    ...mapGetters('config', ['getOrganizations']),
-    ...mapActions(['updateItemCount']),
+    ...mapActions(configStore, ['loadOrganizations']),
+    ...mapActionsVuex(['updateItemCount']),
     updateData() {
       this.loadOrganizations().then(() => {
-        const sources = this.getOrganizations()
-        this.organizations = sources.items
         this.updateItemCount({
-          total: sources.total_count,
-          filtered: sources.length
+          total: this.organizations.total_count,
+          filtered: this.organizations.length
         })
       })
     },
     addItem() {
-      this.formData = emptyValues(this.organizations[0])
+      this.formData = emptyValues(this.organizations.items[0])
       this.edit = false
     },
     editItem(item) {
@@ -73,29 +74,35 @@ export default {
     },
     deleteItem(item) {
       if (!item.default) {
-        deleteOrganization(item).then(() => {
-          notifySuccess(`Successfully deleted ${item.name}`)
-          this.updateData()
-        }).catch(() => {
-          notifyFailure(`Failed to delete ${item.name}`)
-        })
+        deleteOrganization(item)
+          .then(() => {
+            notifySuccess(`Successfully deleted ${item.name}`)
+            this.updateData()
+          })
+          .catch(() => {
+            notifyFailure(`Failed to delete ${item.name}`)
+          })
       }
     },
     createItem(item) {
-      createOrganization(item).then(() => {
-        notifySuccess(`Successfully created ${item.name}`)
-        this.updateData()
-      }).catch(() => {
-        notifyFailure(`Failed to create ${item.name}`)
-      })
+      createOrganization(item)
+        .then(() => {
+          notifySuccess(`Successfully created ${item.name}`)
+          this.updateData()
+        })
+        .catch(() => {
+          notifyFailure(`Failed to create ${item.name}`)
+        })
     },
     updateItem(item) {
-      updateOrganization(item).then(() => {
-        notifySuccess(`Successfully updated ${item.name}`)
-        this.updateData()
-      }).catch(() => {
-        notifyFailure(`Failed to update ${item.name}`)
-      })
+      updateOrganization(item)
+        .then(() => {
+          notifySuccess(`Successfully updated ${item.name}`)
+          this.updateData()
+        })
+        .catch(() => {
+          notifyFailure(`Failed to update ${item.name}`)
+        })
     }
   },
   mounted() {

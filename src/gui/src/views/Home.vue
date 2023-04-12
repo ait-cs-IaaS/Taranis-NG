@@ -62,8 +62,6 @@ export default {
     DashBoardCard,
     TrendingCard
   },
-  data: () => ({
-  }),
   computed: {
     totalItems() {
       return this.getItemCount().total
@@ -74,7 +72,6 @@ export default {
     ...mapActions(dashboardStore, ['loadDashboardData', 'loadClusters']),
     ...mapGetters(['getItemCount'])
   },
-  // TODO loadClusters() ?
   async mounted() {
     await this.loadDashboardData()
     await this.loadClusters()

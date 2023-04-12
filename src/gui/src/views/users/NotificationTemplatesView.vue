@@ -28,8 +28,10 @@ import {
   createNotificationTemplate,
   updateNotificationTemplate
 } from '@/api/assets'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions as mapActionsVuex } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import { notifySuccess, objectFromFormat, notifyFailure } from '@/utils/helpers'
+import { assetsStore } from '@/stores/AssetsStore'
 
 export default {
   name: 'Roles',
@@ -44,6 +46,7 @@ export default {
     permissions: []
   }),
   computed: {
+    ...mapState(assetsStore, ['notification_templates']),
     formFormat() {
       return [
         {
@@ -89,12 +92,11 @@ export default {
     }
   },
   methods: {
-    ...mapActions('assets', ['loadNotificationTemplates']),
-    ...mapGetters('assets', ['getNotificationTemplates']),
-    ...mapActions(['updateItemCount']),
+    ...mapActions(assetsStore, ['loadNotificationTemplates']),
+    ...mapActionsVuex(['updateItemCount']),
     updateData() {
       this.loadNotificationTemplates().then(() => {
-        const sources = this.getNotificationTemplates()
+        const sources = this.notification_templates
         this.roles = sources.items
         this.updateItemCount({
           total: sources.total_count,
@@ -120,29 +122,35 @@ export default {
     },
     deleteItem(item) {
       if (!item.default) {
-        deleteNotificationTemplate(item).then(() => {
-          notifySuccess(`Successfully deleted ${item.name}`)
-          this.updateData()
-        }).catch(() => {
-          notifyFailure(`Failed to delete ${item.name}`)
-        })
+        deleteNotificationTemplate(item)
+          .then(() => {
+            notifySuccess(`Successfully deleted ${item.name}`)
+            this.updateData()
+          })
+          .catch(() => {
+            notifyFailure(`Failed to delete ${item.name}`)
+          })
       }
     },
     createItem(item) {
-      createNotificationTemplate(item).then(() => {
-        notifySuccess(`Successfully created ${item.name}`)
-        this.updateData()
-      }).catch(() => {
-        notifyFailure(`Failed to create ${item.name}`)
-      })
+      createNotificationTemplate(item)
+        .then(() => {
+          notifySuccess(`Successfully created ${item.name}`)
+          this.updateData()
+        })
+        .catch(() => {
+          notifyFailure(`Failed to create ${item.name}`)
+        })
     },
     updateItem(item) {
-      updateNotificationTemplate(item).then(() => {
-        notifySuccess(`Successfully updated ${item.name}`)
-        this.updateData()
-      }).catch(() => {
-        notifyFailure(`Failed to update ${item.name}`)
-      })
+      updateNotificationTemplate(item)
+        .then(() => {
+          notifySuccess(`Successfully updated ${item.name}`)
+          this.updateData()
+        })
+        .catch(() => {
+          notifyFailure(`Failed to update ${item.name}`)
+        })
     }
   },
   mounted() {

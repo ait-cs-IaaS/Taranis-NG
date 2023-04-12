@@ -22,13 +22,6 @@ const actions = {
       })
   },
 
-  updateNewsItemsByGroup(context, newsItemsFilter) {
-    return getNewsItemsAggregates(newsItemsFilter)
-      .then(response => {
-        context.commit('UPDATE_NEWSITEMS', response.data)
-      })
-  },
-
   updateNewsItems(context) {
     return getNewsItemsAggregates(filter.state.newsItemsFilter)
       .then(response => {

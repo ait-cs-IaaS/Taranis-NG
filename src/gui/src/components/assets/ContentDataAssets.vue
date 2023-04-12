@@ -5,12 +5,15 @@
       v-for="collection in collections"
       :card="collection"
       :key="collection.id"
-    ></component>
+    >
+    </component>
   </v-container>
 </template>
 
 <script>
 import CardAsset from '@/components/assets/CardAsset'
+import { assetsStore } from '@/stores/AssetsStore'
+import { mapActions } from 'pinia'
 
 export default {
   name: 'ContentData',
@@ -31,6 +34,9 @@ export default {
       sort: 'ALPHABETICAL'
     }
   }),
+  computed: {
+    ...mapActions(assetsStore, ['assets'])
+  },
   methods: {
     updateData() {
       if (window.location.pathname.includes('/group/')) {
@@ -41,7 +47,7 @@ export default {
         this.$store
           .dispatch('getAllAssets', { group_id: group, filter: this.filter })
           .then(() => {
-            this.collections = this.$store.getters.getAssets.items
+            this.collections = this.assets.items
           })
       }
     },

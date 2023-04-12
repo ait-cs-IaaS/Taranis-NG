@@ -111,7 +111,8 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapState } from 'pinia'
+import { configStore } from '@/stores/ConfigStore'
 
 export default {
   name: 'ProductTypeHelp',
@@ -122,14 +123,14 @@ export default {
     report_types: [],
     dialog: false
   }),
-  computed: {},
+  computed: {
+    ...mapState(configStore, ['report_item_types_config'])
+  },
 
   methods: {
-    ...mapActions('config', [
+    ...mapActions(configStore, [
       'loadReportTypesConfig'
     ]),
-    ...mapGetters('config', ['getReportTypesConfig']),
-
     closeHelpDialog() {
       this.$emit('close')
     },
@@ -164,7 +165,7 @@ export default {
   },
   mounted() {
     this.loadReportTypesConfig().then(() => {
-      this.report_types = this.getReportTypesConfig().items
+      this.report_types = this.report_item_types_config.items
     })
   },
   beforeDestroy() {

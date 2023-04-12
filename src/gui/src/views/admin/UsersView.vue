@@ -2,7 +2,7 @@
   <div>
     <DataTable
       :addButton="true"
-      :items.sync="users"
+      :items.sync="users.items"
       :headerFilter="['tag', 'id', 'name', 'username']"
       sortByItem="id"
       :actionColumn="true"
@@ -11,10 +11,7 @@
       @add-item="addItem"
       @update-items="updateData"
     />
-    <UserForm
-      v-if="showForm"
-      :user_id.sync="userID"
-    ></UserForm>
+    <UserForm v-if="showForm" :user_id.sync="userID"></UserForm>
   </div>
 </template>
 
@@ -22,7 +19,9 @@
 import DataTable from '@/components/common/DataTable'
 import UserForm from '../../components/config/user/UserForm'
 import { deleteUser, createUser, updateUser } from '@/api/config'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions as mapActionsVuex } from 'vuex'
+import { mapActions, mapState } from 'pinia'
+import { configStore } from '@/stores/ConfigStore'
 
 export default {
   name: 'UsersView',
@@ -32,21 +31,20 @@ export default {
   },
   data: () => ({
     showForm: false,
-    users: [],
     selected: [],
     userID: null
   }),
+  computed: {
+    ...mapState(configStore, ['users'])
+  },
   methods: {
-    ...mapActions('config', ['loadUsers']),
-    ...mapGetters('config', ['getUsers']),
-    ...mapActions(['updateItemCount']),
+    ...mapActions(configStore, ['loadUsers']),
+    ...mapActionsVuex(['updateItemCount']),
     updateData() {
       this.loadUsers().then(() => {
-        const sources = this.getUsers()
-        this.users = sources.items
         this.updateItemCount({
-          total: sources.total_count,
-          filtered: sources.length
+          total: this.users.total_count,
+          filtered: this.users.length
         })
       })
     },
@@ -97,7 +95,7 @@ export default {
       })
     },
     selectionChange(selected) {
-      this.selected = selected.map(item => item.id)
+      this.selected = selected.map((item) => item.id)
     }
   },
   mounted() {

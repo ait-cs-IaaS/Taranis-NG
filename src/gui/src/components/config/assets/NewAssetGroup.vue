@@ -1,105 +1,112 @@
 <template>
-    <v-row v-bind="UI.DIALOG.ROW.WINDOW">
-        <v-btn v-bind="UI.BUTTON.ADD_NEW" @click="addGroup">
-            <v-icon left>{{ UI.ICON.PLUS }}</v-icon>
-            <span>{{$t('asset_group.add')}}</span>
-        </v-btn>
-        <v-dialog v-bind="UI.DIALOG.FULLSCREEN" v-model="visible">
-            <v-card v-bind="UI.DIALOG.BASEMENT">
-                <v-toolbar v-bind="UI.DIALOG.TOOLBAR">
-                    <v-btn v-bind="UI.BUTTON.CLOSE_ICON" @click="cancel">
-                        <v-icon>{{ UI.ICON.CLOSE }}</v-icon>
-                    </v-btn>
+  <v-row v-bind="UI.DIALOG.ROW.WINDOW">
+    <v-btn v-bind="UI.BUTTON.ADD_NEW" @click="addGroup">
+      <v-icon left>{{ UI.ICON.PLUS }}</v-icon>
+      <span>{{ $t('asset_group.add') }}</span>
+    </v-btn>
+    <v-dialog v-bind="UI.DIALOG.FULLSCREEN" v-model="visible">
+      <v-card v-bind="UI.DIALOG.BASEMENT">
+        <v-toolbar v-bind="UI.DIALOG.TOOLBAR">
+          <v-btn v-bind="UI.BUTTON.CLOSE_ICON" @click="cancel">
+            <v-icon>{{ UI.ICON.CLOSE }}</v-icon>
+          </v-btn>
 
-                    <v-toolbar-title>
-                        <span v-if="!edit">{{ $t('asset_group.add_new') }}</span>
-                        <span v-else>{{ $t('asset_group.edit') }}</span>
-                    </v-toolbar-title>
+          <v-toolbar-title>
+            <span v-if="!edit">{{ $t('asset_group.add_new') }}</span>
+            <span v-else>{{ $t('asset_group.edit') }}</span>
+          </v-toolbar-title>
 
-                    <v-spacer></v-spacer>
-                    <v-btn text type="submit" form="form">
-                        <v-icon left>mdi-content-save</v-icon>
-                        <span>{{$t('asset_group.save')}}</span>
-                    </v-btn>
-                </v-toolbar>
+          <v-spacer></v-spacer>
+          <v-btn text type="submit" form="form">
+            <v-icon left>mdi-content-save</v-icon>
+            <span>{{ $t('asset_group.save') }}</span>
+          </v-btn>
+        </v-toolbar>
 
-                <v-form @submit.prevent="add" id="form" ref="form" class="px-4">
-                    <v-row no-gutters>
-                        <v-col cols="12" class="pa-1">
-                            <v-text-field
-                                :label="$t('asset_group.name')"
-                                name="name"
-                                type="text"
-                                v-model="group.name"
-                                v-validate="'required'"
-                                data-vv-name="name"
-                                :error-messages="errors.collect('name')"
-                                :spellcheck="$store.state.settings.spellcheck"
-                            />
-                        </v-col>
-                        <v-col cols="12" class="pa-1">
-                            <v-textarea
-                                :label="$t('asset_group.description')"
-                                name="description"
-                                v-model="group.description"
-                                :spellcheck="$store.state.settings.spellcheck"
-                            />
-                        </v-col>
-                    </v-row>
-                    <v-row no-gutters>
-                        <v-col cols="12">
-                            <v-data-table
-                                v-model="selected_users"
-                                :headers="headers"
-                                :items="users"
-                                item-key="id"
-                                show-select
-                                class="elevation-1"
-                            >
-                                <template v-slot:top>
-                                    <v-toolbar flat color="white">
-                                        <v-toolbar-title>{{$t('asset_group.allowed_users')}}</v-toolbar-title>
-                                    </v-toolbar>
-                                </template>
-
-                            </v-data-table>
-                        </v-col>
-                        <v-col cols="12" class="pt-3">
-                            <v-data-table
-                                v-model="selected_templates"
-                                :headers="headers_template"
-                                :items="templates"
-                                item-key="id"
-                                show-select
-                                class="elevation-1"
-                            >
-                                <template v-slot:top>
-                                    <v-toolbar flat color="white">
-                                        <v-toolbar-title>{{$t('asset_group.notification_templates')}}</v-toolbar-title>
-                                    </v-toolbar>
-                                </template>
-
-                            </v-data-table>
-                        </v-col>
-                    </v-row>
-                    <v-row no-gutters class="pt-2">
-                        <v-col cols="12">
-                            <v-alert v-if="show_validation_error" dense type="error" text>
-                                {{$t('asset_group.validation_error')}}
-                            </v-alert>
-                            <v-alert v-if="show_error" dense type="error" text>
-                                {{$t('asset_group.error')}}
-                            </v-alert>
-                        </v-col>
-                    </v-row>
-                </v-form>
-            </v-card>
-        </v-dialog>
-    </v-row>
+        <v-form @submit.prevent="add" id="form" ref="form" class="px-4">
+          <v-row no-gutters>
+            <v-col cols="12" class="pa-1">
+              <v-text-field
+                :label="$t('asset_group.name')"
+                name="name"
+                type="text"
+                v-model="group.name"
+                v-validate="'required'"
+                data-vv-name="name"
+                :error-messages="errors.collect('name')"
+                :spellcheck="spellcheck"
+              />
+            </v-col>
+            <v-col cols="12" class="pa-1">
+              <v-textarea
+                :label="$t('asset_group.description')"
+                name="description"
+                v-model="group.description"
+                :spellcheck="spellcheck"
+              />
+            </v-col>
+          </v-row>
+          <v-row no-gutters>
+            <v-col cols="12">
+              <v-data-table
+                v-model="selected_users"
+                :headers="headers"
+                :items="users"
+                item-key="id"
+                show-select
+                class="elevation-1"
+              >
+                <template v-slot:top>
+                  <v-toolbar flat color="white">
+                    <v-toolbar-title>{{
+                      $t('asset_group.allowed_users')
+                    }}</v-toolbar-title>
+                  </v-toolbar>
+                </template>
+              </v-data-table>
+            </v-col>
+            <v-col cols="12" class="pt-3">
+              <v-data-table
+                v-model="selected_templates"
+                :headers="headers_template"
+                :items="templates"
+                item-key="id"
+                show-select
+                class="elevation-1"
+              >
+                <template v-slot:top>
+                  <v-toolbar flat color="white">
+                    <v-toolbar-title>{{
+                      $t('asset_group.notification_templates')
+                    }}</v-toolbar-title>
+                  </v-toolbar>
+                </template>
+              </v-data-table>
+            </v-col>
+          </v-row>
+          <v-row no-gutters class="pt-2">
+            <v-col cols="12">
+              <v-alert v-if="show_validation_error" dense type="error" text>
+                {{ $t('asset_group.validation_error') }}
+              </v-alert>
+              <v-alert v-if="show_error" dense type="error" text>
+                {{ $t('asset_group.error') }}
+              </v-alert>
+            </v-col>
+          </v-row>
+        </v-form>
+      </v-card>
+    </v-dialog>
+  </v-row>
 </template>
 
 <script>
 import { createAssetGroup, updateAssetGroup } from '@/api/assets'
+
+import { mapActions, mapState } from 'pinia'
+import { settingsStore } from '@/stores/SettingsStore'
+import { configStore } from '@/stores/ConfigStore'
+import { assetsStore } from '@/stores/AssetsStore'
 
 export default {
   name: 'NewAssetGroup',
@@ -123,7 +130,6 @@ export default {
       { text: 'Description', value: 'description' }
     ],
     selected_users: [],
-    users: [],
     templates: [],
     selected_templates: [],
     show_validation_error: false,
@@ -136,8 +142,17 @@ export default {
       templates: []
     }
   }),
+  computed: {
+    ...mapState(settingsStore, ['spellcheck']),
+    ...mapState(assetsStore, ['notification_templates']),
+    ...mapState(configStore, ['users'])
+  },
   methods: {
-    addGroup () {
+    ...mapActions(configStore, [
+      'getAllNotificationTemplates',
+      'getAllExternalUsers'
+    ]),
+    addGroup() {
       this.visible = true
       this.edit = false
       this.show_error = false
@@ -150,12 +165,12 @@ export default {
       this.$validator.reset()
     },
 
-    cancel () {
+    cancel() {
       this.$validator.reset()
       this.visible = false
     },
 
-    add () {
+    add() {
       this.$validator.validateAll().then(() => {
         if (!this.$validator.errors.any()) {
           this.show_validation_error = false
@@ -163,48 +178,44 @@ export default {
 
           this.group.users = []
           for (let i = 0; i < this.selected_users.length; i++) {
-            this.group.users.push(
-              {
-                id: this.selected_users[i].id
-              }
-            )
+            this.group.users.push({
+              id: this.selected_users[i].id
+            })
           }
 
           this.group.templates = []
           for (let i = 0; i < this.selected_templates.length; i++) {
-            this.group.templates.push(
-              {
-                id: this.selected_templates[i].id
-              }
-            )
+            this.group.templates.push({
+              id: this.selected_templates[i].id
+            })
           }
 
           if (this.edit) {
-            updateAssetGroup(this.group).then(() => {
-              this.$validator.reset()
-              this.visible = false
-              this.$root.$emit('notification',
-                {
+            updateAssetGroup(this.group)
+              .then(() => {
+                this.$validator.reset()
+                this.visible = false
+                this.$root.$emit('notification', {
                   type: 'success',
                   loc: 'asset_group.successful_edit'
-                }
-              )
-            }).catch(() => {
-              this.show_error = true
-            })
+                })
+              })
+              .catch(() => {
+                this.show_error = true
+              })
           } else {
-            createAssetGroup(this.group).then(() => {
-              this.$validator.reset()
-              this.visible = false
-              this.$root.$emit('notification',
-                {
+            createAssetGroup(this.group)
+              .then(() => {
+                this.$validator.reset()
+                this.visible = false
+                this.$root.$emit('notification', {
                   type: 'success',
                   loc: 'asset_group.successful'
-                }
-              )
-            }).catch(() => {
-              this.show_error = true
-            })
+                })
+              })
+              .catch(() => {
+                this.show_error = true
+              })
           }
         } else {
           this.show_validation_error = true
@@ -212,16 +223,12 @@ export default {
       })
     }
   },
-  mounted () {
-    this.$store.dispatch('config/getAllExternalUsers', { search: '' })
-      .then(() => {
-        this.users = this.$store.getters.getUsers.items
-      })
+  async mounted() {
+    await this.getAllExternalUsers({ search: '' })
 
-    this.$store.dispatch('config/getAllNotificationTemplates', { search: '' })
-      .then(() => {
-        this.templates = this.$store.getters.getNotificationTemplates.items
-      })
+    this.getAllNotificationTemplates({ search: '' }).then(() => {
+      this.templates = this.notification_templates.items
+    })
 
     this.$root.$on('show-edit', (data) => {
       this.visible = true
@@ -234,7 +241,7 @@ export default {
       this.selected_templates = data.templates
     })
   },
-  beforeDestroy () {
+  beforeDestroy() {
     this.$root.$off('show-edit')
   }
 }

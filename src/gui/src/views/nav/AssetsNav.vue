@@ -40,9 +40,16 @@
 </template>
 
 <script>
-import { mapState, mapGetters, mapActions } from 'vuex'
+import {
+  mapActions as mapActionsVuex,
+  mapState as mapStateVuex,
+  mapGetters
+} from 'vuex'
+import { mapActions } from 'pinia'
+
 import FilterNavigation from '@/components/common/FilterNavigation'
 import filterSortList from '@/components/assess/filter/filterSortList'
+import { assetsStore } from '@/stores/AssetsStore'
 
 export default {
   name: 'AssetsNav',
@@ -68,18 +75,18 @@ export default {
     ]
   }),
   computed: {
-    ...mapState('filter', {
+    ...mapStateVuex('filter', {
       filter: (state) => state.assetFilter
     }),
-    ...mapState(['drawerVisible']),
-    ...mapState('route', ['query']),
+    ...mapStateVuex(['drawerVisible']),
+    ...mapStateVuex('route', ['query']),
     limit: {
       get() {
         return this.filter.limit
       },
       set(value) {
         this.updateAssetFilter({ limit: value })
-        this.updateAssets()
+        this.updateFilteredAssets()
       }
     },
     sort: {
@@ -89,7 +96,7 @@ export default {
       },
       set(value) {
         this.updateAssetFilter({ sort: value })
-        this.updateAssets()
+        this.updateFilteredAssets()
       }
     },
     offset: {
@@ -98,7 +105,7 @@ export default {
       },
       set(value) {
         this.updateAssetFilter({ offset: value })
-        this.updateAssets()
+        this.updateFilteredAssets()
       }
     },
     search: {
@@ -109,7 +116,7 @@ export default {
         this.updateAssetFilter({ search: value })
         if (!this.awaitingSearch) {
           setTimeout(() => {
-            this.updateAssets()
+            this.updateFilteredAssets()
             this.awaitingSearch = false
           }, 500)
         }
@@ -140,8 +147,8 @@ export default {
   },
   methods: {
     ...mapGetters(['getItemCount']),
-    ...mapActions('assets', ['updateAssets']),
-    ...mapActions('filter', ['setAssetFilter', 'updateAssetFilter']),
+    ...mapActions(assetsStore, ['updateFilteredAssets']),
+    ...mapActionsVuex('filter', ['setAssetFilter', 'updateAssetFilter']),
     ...mapGetters('filter', ['getAssetFilter']),
     addAsset() {
       this.$router.push('/asset/0')
@@ -152,7 +159,7 @@ export default {
   },
   created() {
     const query = Object.fromEntries(
-      Object.entries(this.query).filter(([_, v]) => v != null)
+      Object.entries(this.$route.query).filter(([_, v]) => v != null)
     )
     this.updateAssetFilter(query)
     console.debug('loaded with query', query)

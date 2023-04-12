@@ -2,7 +2,7 @@
   <div>
     <DataTable
       :addButton="true"
-      :items.sync="nodes"
+      :items.sync="nodes.items"
       :headerFilter="['tag', 'name', 'description']"
       :actionColumn="true"
       @delete-item="deleteItem"
@@ -30,7 +30,9 @@
 import DataTable from '@/components/common/DataTable'
 import EditConfig from '../../components/config/EditConfig'
 import { deleteNode, createNode, updateNode, triggerNode } from '@/api/config'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapState } from 'pinia'
+import { configStore } from '@/stores/ConfigStore'
+import { mapActions as mapActionsVuex } from 'vuex'
 import { notifySuccess, notifyFailure, objectFromFormat } from '@/utils/helpers'
 
 export default {
@@ -40,13 +42,13 @@ export default {
     EditConfig
   },
   data: () => ({
-    nodes: [],
     formData: {},
     edit: false,
     selected: [],
     workers: []
   }),
   computed: {
+    ...mapState(configStore, ['nodes', 'collectors']),
     formFormat() {
       return [
         {
@@ -93,16 +95,13 @@ export default {
     }
   },
   methods: {
-    ...mapActions('config', ['loadNodes', 'loadCollectors']),
-    ...mapGetters('config', ['getNodes', 'getCollectors']),
-    ...mapActions(['updateItemCount']),
+    ...mapActions(configStore, ['loadNodes', 'loadCollectors']),
+    ...mapActionsVuex(['updateItemCount']),
     updateData() {
       this.loadNodes().then(() => {
-        const sources = this.getNodes()
-        this.nodes = sources.items
         this.updateItemCount({
-          total: sources.total_count,
-          filtered: sources.length
+          total: this.nodes.total_count,
+          filtered: this.nodes.length
         })
       })
     },
@@ -115,7 +114,7 @@ export default {
         this.workers = item.bots
       } else if (item.type === 'collector') {
         this.loadCollectors().then(() => {
-          this.workers = this.getCollectors().items
+          this.workers = this.collectors.items
         })
       } else {
         console.log('No workers found')

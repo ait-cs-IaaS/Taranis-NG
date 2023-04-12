@@ -30,7 +30,7 @@
           v-validate="'required'"
           data-vv-name="name"
           :error-messages="errors.collect('name')"
-          :spellcheck="$store.state.settings.spellcheck"
+          :spellcheck="spellcheck"
         />
       </v-col>
       <v-col cols="12">
@@ -40,7 +40,7 @@
           :label="$t('product_type.description')"
           name="description"
           v-model="product.description"
-          :spellcheck="$store.state.settings.spellcheck"
+          :spellcheck="spellcheck"
         />
       </v-col>
     </v-row>
@@ -80,6 +80,10 @@ import ProductTypeHelp from './ProductTypeHelp'
 import AuthMixin from '@/services/auth/auth_mixin'
 import Permissions from '@/services/auth/permissions'
 
+import { mapState } from 'pinia'
+import { settingsStore } from '@/stores/SettingsStore'
+import { configStore } from '@/stores/ConfigStore'
+
 export default {
   name: 'NewProductType',
   components: {
@@ -93,7 +97,6 @@ export default {
     show_error: false,
     selected_presenter: null,
     values: [],
-    presenters: ['PDF', 'HTML', 'TEXT', 'MISP'],
     product: {
       id: -1,
       title: '',
@@ -104,6 +107,8 @@ export default {
   }),
   mixins: [AuthMixin],
   computed: {
+    ...mapState(settingsStore, ['spellcheck']),
+    ...mapState(configStore, ['presenters']),
     canCreate() {
       return this.checkPermission(Permissions.CONFIG_PRODUCT_TYPE_CREATE)
     },
@@ -180,10 +185,8 @@ export default {
       })
     }
   },
-  mounted() {
-    this.loadPresenters().then(() => {
-      this.presenters = this.getPresenters()
-    })
+  async mounted() {
+    await this.loadPresenters()
 
     if (this.product_id) {
       this.edit = true

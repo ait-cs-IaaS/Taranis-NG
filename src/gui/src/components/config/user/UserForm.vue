@@ -57,7 +57,7 @@
             item-value="id"
             :hint="$t('user.organization')"
             :label="$t('user.organization')"
-            :items="organizations"
+            :items="organizations.items"
           >
           </v-select>
         </v-col>
@@ -66,10 +66,10 @@
             :disabled="!canUpdate"
             v-model="user.roles"
             :headers="headers"
-            :items="roles"
+            :items="roles.items"
             item-key="id"
             :show-select="canUpdate"
-            :hide-default-footer="roles.length < 10"
+            :hide-default-footer="roles.items.length < 10"
             class="elevation-1"
           >
             <template v-slot:top>
@@ -106,8 +106,9 @@
 import AuthMixin from '../../../services/auth/auth_mixin'
 import { createUser, updateUser } from '@/api/config'
 import Permissions from '@/services/auth/permissions'
-import { mapGetters, mapActions } from 'vuex'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
+import { mapActions, mapState } from 'pinia'
+import { configStore } from '@/stores/ConfigStore'
 
 export default {
   name: 'UserForm',
@@ -133,15 +134,19 @@ export default {
     selected_roles: [],
     selected_permissions: [],
     selected_organizations: [],
-    roles: [],
     permissions: [],
-    organizations: [],
     pwd: '',
     repwd: '',
     pwdvld: true,
     user: {}
   }),
   computed: {
+    ...mapState(configStore, { store_permissions: 'permissions' }), // needed because of AuthMixin
+    ...mapState(configStore, [
+      'organizations',
+      'roles',
+      'getUserByID'
+    ]),
     checkPassEdit() {
       if (this.edit) {
         return this.pwd !== '' || this.repwd !== ''
@@ -161,18 +166,11 @@ export default {
     }
   },
   methods: {
-    ...mapActions('config', [
+    ...mapActions(configStore, [
       'loadOrganizations',
       'loadRoles',
       'loadPermissions',
       'loadUsers'
-    ]),
-    ...mapGetters('config', [
-      'getUsers',
-      'getOrganizations',
-      'getRoles',
-      'getPermissions',
-      'getUserByID'
     ]),
     add() {
       this.$validator.validateAll().then(() => {
@@ -205,7 +203,7 @@ export default {
     loadUser() {
       if (this.user_id !== undefined && this.user_id !== null) {
         this.loadUsers().then(() => {
-          const stored_user = this.getUserByID()(this.user_id)
+          const stored_user = this.getUserByID(this.user_id)
           if (stored_user !== null) {
             this.user = stored_user
             this.edit = true
@@ -224,17 +222,12 @@ export default {
     }
   },
   mixins: [AuthMixin],
-  mounted() {
-    this.loadOrganizations().then(() => {
-      this.organizations = this.getOrganizations().items
-    })
-
-    this.loadRoles().then(() => {
-      this.roles = this.getRoles().items
-    })
+  async mounted() {
+    await this.loadOrganizations()
+    await this.loadRoles()
 
     this.loadPermissions().then(() => {
-      this.permissions = this.getPermissions().items
+      this.permissions = this.store_permissions.items
     })
 
     this.loadUser()

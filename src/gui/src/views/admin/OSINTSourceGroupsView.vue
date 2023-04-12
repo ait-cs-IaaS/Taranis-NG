@@ -2,7 +2,7 @@
   <div>
     <DataTable
       :addButton="true"
-      :items.sync="osint_source_groups"
+      :items.sync="osint_source_groups.items"
       :headerFilter="['tag', 'default', 'name', 'description']"
       sortByItem="id"
       :actionColumn="true"
@@ -30,8 +30,10 @@ import {
   deleteOSINTSourceGroup,
   updateOSINTSourceGroup
 } from '@/api/config'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions as mapActionsVuex } from 'vuex'
 import { notifySuccess, objectFromFormat, notifyFailure } from '@/utils/helpers'
+import { mapActions, mapState } from 'pinia'
+import { configStore } from '@/stores/ConfigStore'
 
 export default {
   name: 'OSINTSources',
@@ -40,13 +42,12 @@ export default {
     EditConfig
   },
   data: () => ({
-    osint_source_groups: [],
-    osint_sources: [],
     selected: [],
     formData: {},
     edit: false
   }),
   computed: {
+    ...mapState(configStore, ['osint_source_groups', 'osint_sources']),
     formFormat() {
       return [
         {
@@ -75,28 +76,22 @@ export default {
             { text: 'Name', value: 'name' },
             { text: 'Description', value: 'description' }
           ],
-          items: this.osint_sources
+          items: this.osint_sources.items
         }
       ]
     }
   },
   methods: {
-    ...mapActions('config', ['loadOSINTSourceGroups', 'loadOSINTSources']),
-    ...mapGetters('config', ['getOSINTSourceGroups', 'getOSINTSources']),
-
-    ...mapActions(['updateItemCount']),
-    updateData() {
+    ...mapActions(configStore, ['loadOSINTSourceGroups', 'loadOSINTSources']),
+    ...mapActionsVuex(['updateItemCount']),
+    async updateData() {
       this.loadOSINTSourceGroups().then(() => {
-        const sources = this.getOSINTSourceGroups()
-        this.osint_source_groups = sources.items
         this.updateItemCount({
-          total: sources.total_count,
-          filtered: sources.length
+          total: this.osint_source_groups.total_count,
+          filtered: this.osint_source_groups.length
         })
       })
-      this.loadOSINTSources().then(() => {
-        this.osint_sources = this.getOSINTSources().items
-      })
+      await this.loadOSINTSources()
     },
     addItem() {
       this.formData = objectFromFormat(this.formFormat)

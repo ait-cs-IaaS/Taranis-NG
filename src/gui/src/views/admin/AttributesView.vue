@@ -1,22 +1,10 @@
 <template>
   <div>
-    <DataTable
-      :addButton="true"
-      :items.sync="attributes"
-      :headerFilter="['tag', 'id', 'name', 'description']"
-      sortByItem="id"
-      :actionColumn="true"
-      @delete-item="deleteItem"
-      @edit-item="editItem"
-      @add-item="addItem"
-      @update-items="updateData"
-    />
-    <EditConfig
-      v-if="formData && Object.keys(formData).length > 0"
-      :configData="formData"
-      :formFormat="formFormat"
-      @submit="handleSubmit"
-    ></EditConfig>
+    <DataTable :addButton="true" :items.sync="attributes.items" :headerFilter="['tag', 'id', 'name', 'description']"
+      sortByItem="id" :actionColumn="true" @delete-item="deleteItem" @edit-item="editItem" @add-item="addItem"
+      @update-items="updateData" />
+    <EditConfig v-if="formData && Object.keys(formData).length > 0" :configData="formData" :formFormat="formFormat"
+      @submit="handleSubmit"></EditConfig>
   </div>
 </template>
 
@@ -28,7 +16,9 @@ import {
   createAttribute,
   updateAttribute
 } from '@/api/config'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapState } from 'pinia'
+import { configStore } from '@/stores/ConfigStore'
+import { mapActions as mapActionsVuex } from 'vuex'
 import { notifySuccess, emptyValues, notifyFailure } from '@/utils/helpers'
 
 export default {
@@ -38,7 +28,6 @@ export default {
     EditConfig
   },
   data: () => ({
-    attributes: [],
     formData: {},
     edit: false,
     formFormat: [
@@ -107,22 +96,21 @@ export default {
       }
     ]
   }),
+  computed: {
+    ...mapState(configStore, ['attributes'])
+  },
   methods: {
-    ...mapActions('config', ['loadAttributes']),
-    ...mapGetters('config', ['getAttributes']),
-    ...mapActions(['updateItemCount']),
-    updateData() {
-      this.loadAttributes().then(() => {
-        const sources = this.getAttributes()
-        this.attributes = sources.items
-        this.updateItemCount({
-          total: sources.total_count,
-          filtered: sources.length
-        })
+    ...mapActions(configStore, ['loadAttributes']),
+    ...mapActionsVuex(['updateItemCount']),
+    async updateData() {
+      await this.loadAttributes()
+      await this.updateItemCount({
+        total: this.attributes.total_count,
+        filtered: this.attributes.length
       })
     },
     addItem() {
-      this.formData = emptyValues(this.attributes[0])
+      this.formData = emptyValues(this.attributes.items[0])
       this.edit = false
     },
     editItem(item) {
@@ -167,6 +155,6 @@ export default {
   mounted() {
     this.updateData()
   },
-  beforeDestroy() {}
+  beforeDestroy() { }
 }
 </script>

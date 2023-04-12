@@ -28,8 +28,16 @@ import {
   createPublisherPreset,
   updatePublisherPreset
 } from '@/api/config'
-import { mapActions, mapGetters } from 'vuex'
-import { notifySuccess, parseParameterValues, createParameterValues, objectFromFormat, notifyFailure } from '@/utils/helpers'
+import { mapActions as mapActionsVuex } from 'vuex'
+import {
+  notifySuccess,
+  parseParameterValues,
+  createParameterValues,
+  objectFromFormat,
+  notifyFailure
+} from '@/utils/helpers'
+import { mapActions, mapState } from 'pinia'
+import { configStore } from '@/stores/ConfigStore'
 
 export default {
   name: 'presets',
@@ -45,6 +53,8 @@ export default {
     edit: false
   }),
   computed: {
+    ...mapState(configStore, ['publisher_presets']),
+    ...mapState(configStore, { store_publishers: 'publishers' }),
     formFormat() {
       const base = [
         {
@@ -81,28 +91,28 @@ export default {
     }
   },
   methods: {
-    ...mapActions('config', ['loadPublisherPresets', 'loadPublishers']),
-    ...mapGetters('config', ['getPublisherPresets', 'getPublishers']),
-    ...mapActions(['updateItemCount']),
+    ...mapActions(configStore, ['loadPublisherPresets', 'loadPublishers']),
+    ...mapActionsVuex(['updateItemCount']),
     updateData() {
       this.loadPublisherPresets().then(() => {
-        const sources = this.getPublisherPresets()
-        this.presets = parseParameterValues(sources.items)
+        this.presets = parseParameterValues(this.publisher_presets.items)
         this.updateItemCount({
-          total: sources.total_count,
-          filtered: sources.length
+          total: this.publisher_presets.total_count,
+          filtered: this.publisher_presets.length
         })
       })
       this.loadPublishers().then(() => {
-        const publishers = this.getPublishers()
-        this.publishers = publishers.items.map(publisher => {
-          this.parameters[publisher.id] = publisher.parameters.map(parameter => {
-            return {
-              name: parameter.key,
-              label: parameter.name,
-              type: 'text'
+        const publishers = this.store_publishers
+        this.publishers = publishers.items.map((publisher) => {
+          this.parameters[publisher.id] = publisher.parameters.map(
+            (parameter) => {
+              return {
+                name: parameter.key,
+                label: parameter.name,
+                type: 'text'
+              }
             }
-          })
+          )
           return {
             value: publisher.id,
             text: publisher.name
@@ -120,7 +130,9 @@ export default {
     },
     handleSubmit(submittedData) {
       delete submittedData.parameter_values
-      const parameter_list = this.parameters[this.formData.publisher_id].map(item => item.name)
+      const parameter_list = this.parameters[this.formData.publisher_id].map(
+        (item) => item.name
+      )
       const updateItem = createParameterValues(parameter_list, submittedData)
       if (this.edit) {
         this.updateItem(updateItem)
@@ -130,29 +142,35 @@ export default {
     },
     deleteItem(item) {
       if (!item.default) {
-        deletePublisherPreset(item).then(() => {
-          notifySuccess(`Successfully deleted ${item.name}`)
-          this.updateData()
-        }).catch(() => {
-          notifyFailure(`Failed to delete ${item.name}`)
-        })
+        deletePublisherPreset(item)
+          .then(() => {
+            notifySuccess(`Successfully deleted ${item.name}`)
+            this.updateData()
+          })
+          .catch(() => {
+            notifyFailure(`Failed to delete ${item.name}`)
+          })
       }
     },
     createItem(item) {
-      createPublisherPreset(item).then(() => {
-        notifySuccess(`Successfully created ${item.name}`)
-        this.updateData()
-      }).catch(() => {
-        notifyFailure(`Failed to create ${item.name}`)
-      })
+      createPublisherPreset(item)
+        .then(() => {
+          notifySuccess(`Successfully created ${item.name}`)
+          this.updateData()
+        })
+        .catch(() => {
+          notifyFailure(`Failed to create ${item.name}`)
+        })
     },
     updateItem(item) {
-      updatePublisherPreset(item).then(() => {
-        notifySuccess(`Successfully updated ${item.name}`)
-        this.updateData()
-      }).catch(() => {
-        notifyFailure(`Failed to update ${item.name}`)
-      })
+      updatePublisherPreset(item)
+        .then(() => {
+          notifySuccess(`Successfully updated ${item.name}`)
+          this.updateData()
+        })
+        .catch(() => {
+          notifyFailure(`Failed to update ${item.name}`)
+        })
     }
   },
   mounted() {

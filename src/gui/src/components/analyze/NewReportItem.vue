@@ -143,7 +143,7 @@
                     :label="$t('report_item.title_prefix')"
                     name="title_prefix"
                     v-model="report_item.title_prefix"
-                    :spellcheck="$store.state.settings.spellcheck"
+                    :spellcheck="spellcheck"
                   ></v-text-field>
                 </v-col>
                 <v-col cols="4" class="pr-3">
@@ -160,7 +160,7 @@
                     v-validate="'required'"
                     data-vv-name="title"
                     :error-messages="errors.collect('title')"
-                    :spellcheck="$store.state.settings.spellcheck"
+                    :spellcheck="spellcheck"
                   ></v-text-field>
                 </v-col>
               </v-row>
@@ -277,6 +277,9 @@ import CardStory from '@/components/assess/CardStory'
 import VueCsvImport from '@/components/common/ImportCSV'
 import { mapActions, mapGetters } from 'vuex'
 
+import { mapState } from 'pinia'
+import { settingsStore } from '@/stores/SettingsStore'
+
 export default {
   name: 'NewReportItem',
   props: {
@@ -350,7 +353,8 @@ export default {
     },
     expandPanelGroups() {
       return this.expand_groups()
-    }
+    },
+    ...mapState(settingsStore, ['spellcheck'])
   },
   methods: {
     ...mapGetters(['getUserId']),

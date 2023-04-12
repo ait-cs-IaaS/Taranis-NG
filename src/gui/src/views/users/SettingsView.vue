@@ -2,11 +2,11 @@
   <v-container>
     <v-card>
       <v-row class="pb-5">
-      <h1>{{ $t('settings.user_settings') }}</h1>
-      <v-btn color="success" @click="save()">
-        <v-icon left>mdi-content-save</v-icon>
-        <span>{{ $t('settings.save') }}</span>
-      </v-btn>
+        <h1>{{ $t('settings.user_settings') }}</h1>
+        <v-btn color="success" @click="save()">
+          <v-icon left>mdi-content-save</v-icon>
+          <span>{{ $t('settings.save') }}</span>
+        </v-btn>
       </v-row>
 
       <v-tabs dark centered grow height="32">
@@ -44,7 +44,7 @@
                 <v-autocomplete
                   v-model="browser_locale"
                   :items="locale_descriptions"
-                  :item-text="item => item.value + ' - ' + item.text"
+                  :item-text="(item) => item.value + ' - ' + item.text"
                   hint="Select your locale"
                   :label="$t('settings.locale')"
                   solo
@@ -61,7 +61,7 @@
             <v-data-table
               v-model="selected_word_lists"
               :headers="headers"
-              :items="word_lists"
+              :items="word_lists.items"
               item-key="id"
               show-select
               class="elevation-1"
@@ -117,7 +117,10 @@
 
 <script>
 import AuthMixin from '@/services/auth/auth_mixin'
-import { mapGetters, mapActions } from 'vuex'
+import { settingsStore } from '@/stores/SettingsStore'
+import { mapActions, mapState, mapStores } from 'pinia'
+
+import { configStore } from '@/stores/ConfigStore'
 
 export default {
   name: 'UserSettings',
@@ -138,50 +141,44 @@ export default {
       },
       { text: 'Description', value: 'description' }
     ],
-    word_lists: [],
     selected_word_lists: []
   }),
   computed: {
     browser_locale: {
       get() {
-        return this.getProfileBrowserLocale()
+        return this.settingsStore.getProfileBrowserLocale
       },
       set(value) {
         this.$i18n.locale = value
-        this.setLocale(value)
+        this.settingsStore.setLocale(value)
         console.warn('TODO: extend user profile to include locale')
         // TODO: extend user profile to include locale
         // this.saveUserProfile({ browser_locale: value })
       }
     },
-    locale_descriptions () {
+    locale_descriptions() {
       return [
         { value: 'en', text: 'English' },
         { value: 'de', text: 'Deutsch' },
         { value: 'sk', text: 'Slovensky' }
       ]
-    }
+    },
+    ...mapStores(settingsStore),
+    ...mapState(configStore, ['word_lists'])
   },
   methods: {
-    ...mapGetters('settings', [
-      'getProfileSpellcheck',
-      'getProfileDarkTheme',
-      'getProfileHotkeys',
-      'getProfileWordLists',
-      'getProfileBrowserLocale'
-    ]),
-    ...mapActions('settings', ['saveUserProfile', 'setLocale']),
-    ...mapActions('config', ['loadWordLists']),
-    ...mapGetters('config', ['getWordLists']),
+    ...mapActions(configStore, ['loadWordLists']),
     save() {
-      this.saveUserProfile({
-        spellcheck: this.spellcheck,
-        dark_theme: this.dark_theme,
-        hotkeys: this.shortcuts,
-        word_lists: this.selected_word_lists
-      }).then(() => {
-        this.visible = false
-      })
+      this.settingsStore
+        .saveUserProfile({
+          spellcheck: this.spellcheck,
+          dark_theme: this.dark_theme,
+          hotkeys: this.shortcuts,
+          word_lists: this.selected_word_lists
+        })
+        .then(() => {
+          this.visible = false
+        })
     },
 
     darkToggle() {
@@ -195,10 +192,8 @@ export default {
       this.hotkeyAlias = event
     },
 
-    loadWordList() {
-      this.loadWordLists().then(() => {
-        this.word_lists = this.getWordLists().items
-      })
+    async loadWordList() {
+      await this.loadWordLists()
     },
 
     pressKey(event) {
@@ -228,10 +223,10 @@ export default {
   },
   mounted() {
     this.visible = true
-    this.spellcheck = this.getProfileSpellcheck()
-    this.dark_theme = this.getProfileDarkTheme()
-    this.selected_word_lists = this.getProfileWordLists()
-    this.shortcuts = this.getProfileHotkeys()
+    this.spellcheck = this.settingsStore.spellcheck
+    this.dark_theme = this.settingsStore.dark_theme
+    this.selected_word_lists = this.settingsStore.word_lists
+    this.shortcuts = this.settingsStore.hotkeys
     this.loadWordList()
   }
 }

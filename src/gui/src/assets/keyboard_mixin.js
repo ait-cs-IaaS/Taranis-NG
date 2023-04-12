@@ -1,3 +1,4 @@
+import { configStore } from "@/stores/ConfigStore"
 
 const keyboardMixin = targetId => ({
 
