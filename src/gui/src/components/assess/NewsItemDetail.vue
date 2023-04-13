@@ -17,7 +17,6 @@
       </v-toolbar>
       <v-row justify="center" class="px-4 py-4">
         <v-row justify="center" class="subtitle-2 info--text pt-4 ma-0">
-          <v-flex>
             <v-row class="text-center">
               <v-col>
                 <span class="overline font-weight-bold">
@@ -62,7 +61,6 @@
                 </span>
               </v-col>
             </v-row>
-          </v-flex>
         </v-row>
         <hr style="width: calc(100%); border: 0px" />
         <v-row class="headline">

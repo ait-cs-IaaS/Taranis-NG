@@ -49,9 +49,9 @@
 </template>
 
 <script>
-import DashBoardCard from '@/components/common/DashBoardCard'
+import DashBoardCard from '@/components/common/DashBoardCard.vue'
 import { mapGetters, mapActions } from 'vuex'
-import TrendingCard from '@/components/common/TrendingCard'
+import TrendingCard from '@/components/common/TrendingCard.vue'
 
 export default {
   name: 'Home',

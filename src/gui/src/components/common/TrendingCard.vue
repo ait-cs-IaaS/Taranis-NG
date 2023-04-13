@@ -9,7 +9,7 @@
 </template>
 
 <script>
-import WeekChart from '@/components/assess/card/WeekChart'
+import WeekChart from '@/components/assess/card/WeekChart.vue'
 import { tagIconFromType, tagTextFromType } from '@/utils/helpers'
 
 export default {

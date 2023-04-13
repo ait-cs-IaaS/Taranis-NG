@@ -110,7 +110,6 @@
           <v-tab-item value="tab-1" class="px-5">
             <v-row justify="center" class="px-8">
               <v-row justify="center" class="subtitle-2 info--text pt-0 ma-0">
-                <v-flex>
                   <v-row class="text-center">
                     <v-col>
                       <span class="overline font-weight-bold">{{
@@ -149,7 +148,6 @@
                       }}</span>
                     </v-col>
                   </v-row>
-                </v-flex>
               </v-row>
               <hr style="width: calc(100%); border: 0px" />
               <v-row class="headline">

@@ -92,8 +92,8 @@
 </template>
 
 <script>
-import UserMenu from '../components/UserMenu'
-import AuthMixin from '../services/auth/auth_mixin'
+import UserMenu from './UserMenu.vue'
+import AuthMixin from '@/services/auth/auth_mixin.js'
 
 import { mapActions, mapGetters, mapState } from 'vuex'
 

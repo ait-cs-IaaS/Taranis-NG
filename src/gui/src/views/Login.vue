@@ -1,54 +1,48 @@
 <template>
-  <v-container class="login-screen pa-0 ma-0" fluid fill-height align-center justify-center>
-    <v-container style="background-color: #c7c7c7; text-align: center; position: relative;" fluid>
-      <img src="@/assets/taranis-logo-login.svg" alt="">
+  <v-container fluid class="login-screen" fill-height>
+      <img :width="400" src="@/assets/taranis-logo-login.svg" alt="taranis logo"/>
       <v-form @submit.prevent="authenticate" id="form" ref="form">
-        <table>
-          <tr>
-            <td>
-              <v-flex>
-                <v-text-field
-                  :placeholder="$t('login.username')"
-                  name="username"
-                  prepend-icon="person"
-                  type="text"
-                  v-model="username"
-                  :rules="[acceptUser]"
-                  required
-                />
-              </v-flex>
-            </td>
-            <td>
-              <v-flex>
-                <v-text-field
-                  :placeholder="$t('login.password')"
-                  name="password"
-                  prepend-icon="lock"
-                  type="password"
-                  v-model="password"
-                  :rules="[acceptPassword]"
-                  required
-                ></v-text-field>
-              </v-flex>
-            </td>
-            <td>
-              <v-btn text type="submit" form="form">
+              <v-text-field
+                :placeholder="$t('login.username')"
+                name="username"
+                prepend-icon="person"
+                type="text"
+                v-model="username"
+                :rules="[acceptUser]"
+                autocomplete="username"
+                required
+              />
+              <v-text-field
+                :placeholder="$t('login.password')"
+                name="password"
+                prepend-icon="lock"
+                type="password"
+                v-model="password"
+                :rules="[acceptPassword]"
+                autocomplete="password"
+                required
+              />
+              <v-btn text @click="authenticate">
                 <v-icon color="white" large>mdi-login-variant</v-icon>
               </v-btn>
-            </td>
-          </tr>
-        </table>
       </v-form>
-    </v-container>
     <v-alert v-if="login_error !== undefined" dense type="error" text>{{$t(login_error)}}</v-alert>
   </v-container>
 </template>
 
+<style scoped>
+  .v-container {
+    background-color: #c7c7c7; text-align: center;
+  }
+
+</style>
+
 <script>
 import AuthMixin from '@/services/auth/auth_mixin'
 import { mapActions } from 'vuex'
+import { defineComponent } from "vue";
 
-export default {
+export default defineComponent({
   name: 'Login',
   data: () => ({
     username: '',
@@ -87,5 +81,5 @@ export default {
         })
     }
   }
-}
+})
 </script>

@@ -356,7 +356,7 @@ export default {
         }
       }
 
-      this.preview_link = ((typeof (process.env.VUE_APP_TARANIS_NG_CORE_API) === 'undefined') ? '$VUE_APP_TARANIS_NG_CORE_API' : process.env.VUE_APP_TARANIS_NG_CORE_API) + '/publish/products/' + data.id + '/overview?jwt=' + this.$store.getters.getJWT
+      this.preview_link = (import.meta.env.VITE_TARANIS_NG_CORE_API) + '/publish/products/' + data.id + '/overview?jwt=' + this.$store.getters.getJWT
     })
   },
   beforeDestroy () {

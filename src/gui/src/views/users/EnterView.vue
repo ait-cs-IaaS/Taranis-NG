@@ -93,11 +93,6 @@ export default {
           )
 
           this.news_item.author = this.$store.getters.getUserName
-          this.news_item.language =
-            typeof process.env.VUE_APP_TARANIS_NG_LOCALE === 'undefined'
-              ? '$VUE_APP_TARANIS_NG_LOCALE'
-              : process.env.VUE_APP_TARANIS_NG_LOCALE
-
           const d = new Date()
           this.news_item.collected =
             this.appendLeadingZeroes(d.getDate()) +

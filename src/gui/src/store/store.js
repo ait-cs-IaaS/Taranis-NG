@@ -1,15 +1,15 @@
 import { createStore } from 'vuex'
 
-import { authenticator } from '@/store/authenticator'
-import { assess } from '@/store/assess'
-import { config } from '@/store/config'
-import { analyze } from '@/store/analyze'
-import { publish } from '@/store/publish'
-import { settings } from '@/store/settings'
-import { assets } from '@/store/assets'
-import { dashboard } from '@/store/dashboard'
-import { users } from '@/store/users'
-import { filter } from '@/store/filter'
+import { authenticator } from '@/store/authenticator.js'
+import { assess } from '@/store/assess.js'
+import { config } from '@/store/config.js'
+import { analyze } from '@/store/analyze.js'
+import { publish } from '@/store/publish.js'
+import { settings } from '@/store/settings.js'
+import { assets } from '@/store/assets.js'
+import { dashboard } from '@/store/dashboard.js'
+import { users } from '@/store/users.js'
+import { filter } from '@/store/filter.js'
 
 
 const state = {
@@ -23,7 +23,7 @@ const state = {
   itemCountTotal: 0,
   itemCountFiltered: 0,
   drawerVisible: true,
-  coreAPIURL: process.env.VUE_APP_TARANIS_NG_CORE_API
+  coreAPIURL: `${import.meta.env.BASE_URL}/api`,
 }
 
 const actions = {

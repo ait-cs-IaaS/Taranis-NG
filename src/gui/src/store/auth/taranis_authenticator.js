@@ -70,8 +70,8 @@ const mutations = {
       state.login_uri = '$VUE_APP_TARANIS_NG_LOGIN_URL'
       state.external_login_uri = true
     }
-    if (process.env.VUE_APP_TARANIS_NG_LOGIN_URL) {
-      state.login_uri = process.env.VUE_APP_TARANIS_NG_LOGIN_URL
+    if (import.meta.env.VITE_TARANIS_NG_LOGIN_URL) {
+      state.login_uri = import.meta.env.VITE_TARANIS_NG_LOGIN_URL
       state.external_login_uri = true
     }
   },
@@ -83,11 +83,9 @@ const mutations = {
       state.logout_uri = '$VUE_APP_TARANIS_NG_LOGOUT_URL'
       state.external_logout_uri = true
     } else if (
-      typeof process !== 'undefined' &&
-      typeof process.env !== 'undefined' &&
-      process.env.VUE_APP_TARANIS_NG_LOGOUT_URL != null
+      import.meta.env.VITE_TARANIS_NG_LOGOUT_URL != null
     ) {
-      state.logout_uri = process.env.VUE_APP_TARANIS_NG_LOGOUT_URL
+      state.logout_uri = import.meta.env.VITE_TARANIS_NG_LOGOUT_URL
       state.external_logout_uri = true
     }
   }

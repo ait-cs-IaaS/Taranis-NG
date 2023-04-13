@@ -1,5 +1,5 @@
 import { createWebHistory, createRouter } from "vue-router";
-import Home from './views/Home.vue'
+import Home from '@/views/Home.vue'
 import { store } from '@/store/store'
 import Permissions from '@/services/auth/permissions'
 
@@ -18,7 +18,7 @@ export const router = createRouter({
       components: {
         default: () =>
           import(
-            /* webpackChunkName: "common" */ './views/users/EnterView.vue'
+            '@/views/users/EnterView.vue'
           )
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.ASSESS_CREATE] }
@@ -29,7 +29,7 @@ export const router = createRouter({
       components: {
         default: () =>
           import(
-            /* webpackChunkName: "assess" */ './views/users/NewsItemView.vue'
+            /* webpackChunkName: "assess" */ '@/views/users/NewsItemView.vue'
           )
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.ASSESS_ACCESS] }
@@ -40,7 +40,7 @@ export const router = createRouter({
       components: {
         default: () =>
           import(
-            /* webpackChunkName: "assess" */ './views/users/StoryView.vue'
+            /* webpackChunkName: "assess" */ '@/views/users/StoryView.vue'
           )
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.ASSESS_ACCESS] }
@@ -51,10 +51,10 @@ export const router = createRouter({
       components: {
         default: () =>
           import(
-            /* webpackChunkName: "assess" */ './views/users/AssessView.vue'
+            /* webpackChunkName: "assess" */ '@/views/users/AssessView.vue'
           ),
         nav: () =>
-          import(/* webpackChunkName: "assess" */ './views/nav/AssessNav.vue')
+          import(/* webpackChunkName: "assess" */ '@/views/nav/AssessNav.vue')
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.ASSESS_ACCESS] }
     },
@@ -65,10 +65,10 @@ export const router = createRouter({
       components: {
         default: () =>
           import(
-            /* webpackChunkName: "analyze" */ './views/users/AnalyzeView.vue'
+            /* webpackChunkName: "analyze" */ '@/views/users/AnalyzeView.vue'
           ),
         nav: () =>
-          import(/* webpackChunkName: "analyze" */ './views/nav/AnalyzeNav.vue')
+          import(/* webpackChunkName: "analyze" */ '@/views/nav/AnalyzeNav.vue')
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.ANALYZE_ACCESS] }
     },
@@ -78,7 +78,7 @@ export const router = createRouter({
       components: {
         default: () =>
           import(
-            /* webpackChunkName: "analyze" */ './views/users/ReportView.vue'
+            /* webpackChunkName: "analyze" */ '@/views/users/ReportView.vue'
           )
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.ASSESS_ACCESS] }
@@ -90,10 +90,10 @@ export const router = createRouter({
       components: {
         default: () =>
           import(
-            /* webpackChunkName: "publish" */ './views/users/PublishView.vue'
+            /* webpackChunkName: "publish" */ '@/views/users/PublishView.vue'
           ),
         nav: () =>
-          import(/* webpackChunkName: "publish" */ './views/nav/PublishNav.vue')
+          import(/* webpackChunkName: "publish" */ '@/views/nav/PublishNav.vue')
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.PUBLISH_ACCESS] }
     },
@@ -103,7 +103,7 @@ export const router = createRouter({
       components: {
         default: () =>
           import(
-            /* webpackChunkName: "publish" */ './views/users/ProductView.vue'
+            /* webpackChunkName: "publish" */ '@/views/users/ProductView.vue'
           )
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.ASSESS_ACCESS] }
@@ -114,10 +114,10 @@ export const router = createRouter({
       components: {
         default: () =>
           import(
-            /* webpackChunkName: "assets" */ './views/users/AssetsView.vue'
+            /* webpackChunkName: "assets" */ '@/views/users/AssetsView.vue'
           ),
         nav: () =>
-          import(/* webpackChunkName: "assets" */ './views/nav/AssetsNav.vue')
+          import(/* webpackChunkName: "assets" */ '@/views/nav/AssetsNav.vue')
 
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.MY_ASSETS_ACCESS] }
@@ -128,7 +128,7 @@ export const router = createRouter({
       components: {
         default: () =>
           import(
-            /* webpackChunkName: "assets" */ './views/users/AssetView.vue'
+            /* webpackChunkName: "assets" */ '@/views/users/AssetView.vue'
           )
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.MY_ASSETS_ACCESS] }
@@ -139,7 +139,7 @@ export const router = createRouter({
       components: {
         default: () =>
           import(
-            /* webpackChunkName: "assets" */ './views/users/AssetGroupView.vue'
+            /* webpackChunkName: "assets" */ '@/views/users/AssetGroupView.vue'
           )
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.MY_ASSETS_ACCESS] }
@@ -149,9 +149,9 @@ export const router = createRouter({
       name: 'user',
       components: {
         default: () =>
-          import(/* webpackChunkName: "user" */ './views/users/UserView.vue'),
+          import(/* webpackChunkName: "user" */ '@/views/users/UserView.vue'),
         nav: () =>
-          import(/* webpackChunkName: "user" */ './views/nav/UserNav.vue')
+          import(/* webpackChunkName: "user" */ '@/views/nav/UserNav.vue')
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.MY_ASSETS_CONFIG] }
     },
@@ -161,10 +161,10 @@ export const router = createRouter({
       components: {
         default: () =>
           import(
-            /* webpackChunkName: "user" */ './views/users/SettingsView.vue'
+            /* webpackChunkName: "user" */ '@/views/users/SettingsView.vue'
           ),
         nav: () =>
-          import(/* webpackChunkName: "user" */ './views/nav/UserNav.vue')
+          import(/* webpackChunkName: "user" */ '@/views/nav/UserNav.vue')
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.MY_ASSETS_CONFIG] }
     },
@@ -174,10 +174,10 @@ export const router = createRouter({
       components: {
         default: () =>
           import(
-            /* webpackChunkName: "user" */ './views/users/NotificationTemplatesView.vue'
+            /* webpackChunkName: "user" */ '@/views/users/NotificationTemplatesView.vue'
           ),
         nav: () =>
-          import(/* webpackChunkName: "user" */ './views/nav/UserNav.vue')
+          import(/* webpackChunkName: "user" */ '@/views/nav/UserNav.vue')
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.MY_ASSETS_CONFIG] }
     },
@@ -188,10 +188,10 @@ export const router = createRouter({
       components: {
         default: () =>
           import(
-            /* webpackChunkName: "config" */ './views/admin/DashBoardConfigView.vue'
+            /* webpackChunkName: "config" */ '@/views/admin/DashBoardConfigView.vue'
           ),
         nav: () =>
-          import(/* webpackChunkName: "config" */ './views/nav/ConfigNav.vue')
+          import(/* webpackChunkName: "config" */ '@/views/nav/ConfigNav.vue')
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.CONFIG_ACCESS] }
     },
@@ -201,10 +201,10 @@ export const router = createRouter({
       components: {
         default: () =>
           import(
-            /* webpackChunkName: "config" */ './views/admin/OrganizationsView.vue'
+            /* webpackChunkName: "config" */ '@/views/admin/OrganizationsView.vue'
           ),
         nav: () =>
-          import(/* webpackChunkName: "config" */ './views/nav/ConfigNav.vue')
+          import(/* webpackChunkName: "config" */ '@/views/nav/ConfigNav.vue')
       },
       meta: {
         requiresAuth: true,
@@ -217,10 +217,10 @@ export const router = createRouter({
       components: {
         default: () =>
           import(
-            /* webpackChunkName: "config" */ './views/admin/RolesView.vue'
+            /* webpackChunkName: "config" */ '@/views/admin/RolesView.vue'
           ),
         nav: () =>
-          import(/* webpackChunkName: "config" */ './views/nav/ConfigNav.vue')
+          import(/* webpackChunkName: "config" */ '@/views/nav/ConfigNav.vue')
       },
       meta: {
         requiresAuth: true,
@@ -233,10 +233,10 @@ export const router = createRouter({
       components: {
         default: () =>
           import(
-            /* webpackChunkName: "config" */ './views/admin/ACLsView.vue'
+            /* webpackChunkName: "config" */ '@/views/admin/ACLsView.vue'
           ),
         nav: () =>
-          import(/* webpackChunkName: "config" */ './views/nav/ConfigNav.vue')
+          import(/* webpackChunkName: "config" */ '@/views/nav/ConfigNav.vue')
       },
       meta: {
         requiresAuth: true,
@@ -249,10 +249,10 @@ export const router = createRouter({
       components: {
         default: () =>
           import(
-            /* webpackChunkName: "config" */ './views/admin/UsersView.vue'
+            /* webpackChunkName: "config" */ '@/views/admin/UsersView.vue'
           ),
         nav: () =>
-          import(/* webpackChunkName: "config" */ './views/nav/ConfigNav.vue')
+          import(/* webpackChunkName: "config" */ '@/views/nav/ConfigNav.vue')
       },
       meta: {
         requiresAuth: true,
@@ -265,10 +265,10 @@ export const router = createRouter({
       components: {
         default: () =>
           import(
-            /* webpackChunkName: "config" */ './views/admin/NodesView.vue'
+            /* webpackChunkName: "config" */ '@/views/admin/NodesView.vue'
           ),
         nav: () =>
-          import(/* webpackChunkName: "config" */ './views/nav/ConfigNav.vue')
+          import(/* webpackChunkName: "config" */ '@/views/nav/ConfigNav.vue')
       },
       meta: {
         requiresAuth: true,
@@ -281,10 +281,10 @@ export const router = createRouter({
       components: {
         default: () =>
           import(
-            /* webpackChunkName: "config" */ './views/admin/OSINTSourcesView.vue'
+            /* webpackChunkName: "config" */ '@/views/admin/OSINTSourcesView.vue'
           ),
         nav: () =>
-          import(/* webpackChunkName: "config" */ './views/nav/ConfigNav.vue')
+          import(/* webpackChunkName: "config" */ '@/views/nav/ConfigNav.vue')
       },
       meta: {
         requiresAuth: true,
@@ -297,10 +297,10 @@ export const router = createRouter({
       components: {
         default: () =>
           import(
-            /* webpackChunkName: "config" */ './views/admin/OSINTSourceGroupsView.vue'
+            /* webpackChunkName: "config" */ '@/views/admin/OSINTSourceGroupsView.vue'
           ),
         nav: () =>
-          import(/* webpackChunkName: "config" */ './views/nav/ConfigNav.vue')
+          import(/* webpackChunkName: "config" */ '@/views/nav/ConfigNav.vue')
       },
       meta: {
         requiresAuth: true,
@@ -313,10 +313,10 @@ export const router = createRouter({
       components: {
         default: () =>
           import(
-            /* webpackChunkName: "config" */ './views/admin/PublisherPresetsView.vue'
+            /* webpackChunkName: "config" */ '@/views/admin/PublisherPresetsView.vue'
           ),
         nav: () =>
-          import(/* webpackChunkName: "config" */ './views/nav/ConfigNav.vue')
+          import(/* webpackChunkName: "config" */ '@/views/nav/ConfigNav.vue')
       },
       meta: {
         requiresAuth: true,
@@ -329,10 +329,10 @@ export const router = createRouter({
       components: {
         default: () =>
           import(
-            /* webpackChunkName: "config" */ './views/admin/RemoteAccessesView.vue'
+            /* webpackChunkName: "config" */ '@/views/admin/RemoteAccessesView.vue'
           ),
         nav: () =>
-          import(/* webpackChunkName: "config" */ './views/nav/ConfigNav.vue')
+          import(/* webpackChunkName: "config" */ '@/views/nav/ConfigNav.vue')
       },
       meta: {
         requiresAuth: true,
@@ -345,10 +345,10 @@ export const router = createRouter({
       components: {
         default: () =>
           import(
-            /* webpackChunkName: "config" */ './views/admin/RemoteNodesView.vue'
+            /* webpackChunkName: "config" */ '@/views/admin/RemoteNodesView.vue'
           ),
         nav: () =>
-          import(/* webpackChunkName: "config" */ './views/nav/ConfigNav.vue')
+          import(/* webpackChunkName: "config" */ '@/views/nav/ConfigNav.vue')
       },
       meta: {
         requiresAuth: true,
@@ -361,10 +361,10 @@ export const router = createRouter({
       components: {
         default: () =>
           import(
-            /* webpackChunkName: "config" */ './views/admin/ProductTypesView.vue'
+            /* webpackChunkName: "config" */ '@/views/admin/ProductTypesView.vue'
           ),
         nav: () =>
-          import(/* webpackChunkName: "config" */ './views/nav/ConfigNav.vue')
+          import(/* webpackChunkName: "config" */ '@/views/nav/ConfigNav.vue')
       },
       meta: {
         requiresAuth: true,
@@ -377,10 +377,10 @@ export const router = createRouter({
       components: {
         default: () =>
           import(
-            /* webpackChunkName: "config" */ './views/admin/AttributesView.vue'
+            /* webpackChunkName: "config" */ '@/views/admin/AttributesView.vue'
           ),
         nav: () =>
-          import(/* webpackChunkName: "config" */ './views/nav/ConfigNav.vue')
+          import(/* webpackChunkName: "config" */ '@/views/nav/ConfigNav.vue')
       },
       meta: {
         requiresAuth: true,
@@ -393,10 +393,10 @@ export const router = createRouter({
       components: {
         default: () =>
           import(
-            /* webpackChunkName: "config" */ './views/admin/ReportTypesView.vue'
+            /* webpackChunkName: "config" */ '@/views/admin/ReportTypesView.vue'
           ),
         nav: () =>
-          import(/* webpackChunkName: "config" */ './views/nav/ConfigNav.vue')
+          import(/* webpackChunkName: "config" */ '@/views/nav/ConfigNav.vue')
       },
       meta: {
         requiresAuth: true,
@@ -409,10 +409,10 @@ export const router = createRouter({
       components: {
         default: () =>
           import(
-            /* webpackChunkName: "config" */ './views/admin/WordListsView.vue'
+            /* webpackChunkName: "config" */ '@/views/admin/WordListsView.vue'
           ),
         nav: () =>
-          import(/* webpackChunkName: "config" */ './views/nav/ConfigNav.vue')
+          import(/* webpackChunkName: "config" */ '@/views/nav/ConfigNav.vue')
       },
       meta: {
         requiresAuth: true,
@@ -424,9 +424,9 @@ export const router = createRouter({
       name: 'bots',
       components: {
         default: () =>
-          import(/* webpackChunkName: "config" */ './views/admin/BotsView.vue'),
+          import(/* webpackChunkName: "config" */ '@/views/admin/BotsView.vue'),
         nav: () =>
-          import(/* webpackChunkName: "config" */ './views/nav/ConfigNav.vue')
+          import(/* webpackChunkName: "config" */ '@/views/nav/ConfigNav.vue')
       },
       meta: {
         requiresAuth: true,
@@ -438,9 +438,9 @@ export const router = createRouter({
       name: 'openapi',
       components: {
         default: () =>
-          import(/* webpackChunkName: "config" */ './views/admin/OpenAPI.vue'),
+          import(/* webpackChunkName: "config" */ '@/views/admin/OpenAPI.vue'),
         nav: () =>
-          import(/* webpackChunkName: "config" */ './views/nav/ConfigNav.vue')
+          import(/* webpackChunkName: "config" */ '@/views/nav/ConfigNav.vue')
       },
       meta: {
         requiresAuth: true
@@ -449,18 +449,17 @@ export const router = createRouter({
     {
       path: '/login',
       name: 'login',
-      component: () =>
-        import(/* webpackChunkName: "common" */ './views/Login.vue')
+      component: () => import('@/views/Login.vue')
     }
   ]
 })
 
-router.beforeEach(async (to, from, next) => {
+router.beforeEach((to, from) => {
   if (to.meta.requiresAuth && !store.getters.isAuthenticated) {
     if (store.getters.hasExternalLoginUrl) {
       window.location = encodeURI(store.getters.getLoginURL)
     }
-    next({ path: store.getters.getLoginURL, query: { redirect: to.path } })
+    return { name: "login" }
   }
-  next()
+  return true
 })

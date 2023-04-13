@@ -13,12 +13,14 @@
 </template>
 
 <script>
-import MainMenu from './components/MainMenu'
-import AuthMixin from './services/auth/auth_mixin'
-import Notification from './components/common/Notification'
+import MainMenu from '@/components/MainMenu.vue'
+import AuthMixin from '@/services/auth/auth_mixin'
+import Notification from '@/components/common/Notification.vue'
 import { mapActions, mapGetters } from 'vuex'
+import { useCookies } from "vue3-cookies"
+import { defineComponent } from "vue";
 
-export default {
+export default defineComponent({
   name: 'App',
   components: {
     MainMenu,
@@ -34,12 +36,11 @@ export default {
     ...mapGetters('settings', ['getProfileDarkTheme']),
 
     connectSSE() {
-      // TODO: unsubscribe
-      if (process.env.VUE_APP_TARANIS_NG_CORE_SSE === undefined) {
+      if (import.meta.env.VITE_TARANIS_NG_CORE_SSE === undefined) {
         return
       }
       this.$sse(
-        `${process.env.VUE_APP_TARANIS_NG_CORE_SSE}?jwt=${this.$store.getters.getJWT}`,
+        `${import.meta.env.VITE_TARANIS_NG_CORE_SSE}?jwt=${this.$store.getters.getJWT}`,
         { format: 'json' }
       ).then((sse) => {
         sse.subscribe('news-items-updated', (data) => {
@@ -71,11 +72,14 @@ export default {
   updated() {
     this.$root.$emit('app-updated')
   },
+  setup() {
+    const { cookies } = useCookies()
+    return { cookies }
+  },
   mounted() {
-    if (this.$cookies.isKey('jwt')) {
-      this.$store.dispatch('setToken', this.$cookies.get('jwt')).then(() => {
-        this.$cookies.remove('jwt')
-        this.connectSSE()
+    if (this.cookies.isKey('jwt')) {
+      this.$store.dispatch('setToken', this.cookies.get('jwt')).then(() => {
+        this.cookies.remove('jwt')
       })
     }
 
@@ -111,7 +115,7 @@ export default {
     )
   },
   created() {}
-}
+})
 </script>
 
 <style src="./assets/common.css"></style>
