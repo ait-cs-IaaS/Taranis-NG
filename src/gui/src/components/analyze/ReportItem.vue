@@ -114,8 +114,8 @@ import {
   //   getReportItemLocks
 } from '@/api/analyze'
 
-import AttributeItem from '@/components/analyze/AttributeItem'
-import CardStory from '@/components/assess/CardStory'
+import AttributeItem from '@/components/analyze/AttributeItem.vue'
+import CardStory from '@/components/assess/CardStory.vue'
 
 import { mapActions, mapGetters } from 'vuex'
 

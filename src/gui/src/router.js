@@ -46,7 +46,7 @@ export const router = createRouter({
       meta: { requiresAuth: true, requiresPerm: [Permissions.ASSESS_ACCESS] }
     },
     {
-      path: '/assess*',
+      path: '/assess',
       name: 'assess',
       components: {
         default: () =>

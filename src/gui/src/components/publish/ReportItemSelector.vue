@@ -55,10 +55,10 @@
 
 <script>
 import ContentDataAnalyze from '@/components/analyze/ContentDataAnalyze'
-import ToolbarFilter from '@/components/common/ToolbarFilter'
+import ToolbarFilter from '@/components/common/ToolbarFilter.vue'
 import CardAnalyze from '../analyze/CardAnalyze'
 import ToolbarFilterAnalyze from '@/components/analyze/ToolbarFilterAnalyze'
-import NewReportItem from '@/components/analyze/NewReportItem'
+import NewReportItem from '@/components/analyze/NewReportItem.vue'
 import AuthMixin from '@/services/auth/auth_mixin'
 import { mapGetters, mapActions } from 'vuex'
 

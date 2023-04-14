@@ -272,7 +272,7 @@ import {
   getReportItemLocks
 } from '@/api/analyze'
 
-import CardStory from '@/components/assess/CardStory'
+import CardStory from '@/components/assess/CardStory.vue'
 
 import VueCsvImport from '@/components/common/ImportCSV'
 import { mapActions, mapGetters } from 'vuex'

@@ -6,7 +6,7 @@
 
 <script>
 import { getReportItem } from '@/api/analyze'
-import ReportItem from '@/components/analyze/ReportItem'
+import ReportItem from '@/components/analyze/ReportItem.vue'
 import { notifySuccess } from '@/utils/helpers'
 
 export default {

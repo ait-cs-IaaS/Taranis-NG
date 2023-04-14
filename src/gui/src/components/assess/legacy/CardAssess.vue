@@ -121,7 +121,7 @@
 </template>
 
 <script>
-import CardAssessItem from '@/components/assess/legacy/CardAssessItem'
+import CardAssessItem from '@/components/assess/legacy/CardAssessItem.vue'
 import {
   deleteNewsItemAggregate,
   groupAction,

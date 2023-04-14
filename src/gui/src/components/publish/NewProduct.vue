@@ -113,7 +113,7 @@
 <script>
 import AuthMixin from '../../services/auth/auth_mixin'
 import { createProduct, publishProduct, updateProduct } from '@/api/publish'
-import ReportItemSelector from '@/components/publish/ReportItemSelector'
+import ReportItemSelector from '@/components/publish/ReportItemSelector.vue'
 import Permissions from '@/services/auth/permissions'
 import { mapActions, mapGetters } from 'vuex'
 

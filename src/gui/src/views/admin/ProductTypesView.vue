@@ -22,7 +22,7 @@
 
 <script>
 import DataTable from '@/components/common/DataTable'
-import EditConfig from '@/components/config/EditConfig'
+import EditConfig from '@/components/config/EditConfig.vue'
 import {
   deleteProductType,
   createProductType,

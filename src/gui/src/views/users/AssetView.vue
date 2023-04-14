@@ -12,7 +12,7 @@
 <script>
 import { getAsset } from '@/api/assets'
 import { notifySuccess } from '@/utils/helpers'
-import Asset from '@/components/assets/Asset'
+import Asset from '@/components/assets/Asset.vue'
 
 export default {
   name: 'AssetView',

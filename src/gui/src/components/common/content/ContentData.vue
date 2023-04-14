@@ -11,10 +11,10 @@
 </template>
 
 <script>
-import CardAssess from '@/components/assess/legacy/CardAssess'
+import CardAssess from '@/components/assess/legacy/CardAssess.vue'
 import CardAnalyze from '@/components/analyze/CardAnalyze'
-import CardProduct from '@/components/publish/CardProduct'
-import CardPreset from '@/components/common/card/CardPreset'
+import CardProduct from '@/components/publish/CardProduct.vue'
+import CardPreset from '@/components/common/card/CardPreset.vue'
 
 export default {
   name: 'ContentData',

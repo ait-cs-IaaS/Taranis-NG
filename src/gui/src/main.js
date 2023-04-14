@@ -14,7 +14,8 @@ import { configureCompat } from 'vue'
 // disable compat for certain features
 configureCompat({
   MODE: 3,
-  COMPONENT_ASYNC: false
+  COMPONENT_ASYNC: false,
+  INSTANCE_EVENT_EMITTER: true
 })
 
 export const app = createApp(App)
@@ -32,7 +33,6 @@ const i18n = createI18n({
 })
 
 app.use(i18n)
-
 
 const coreAPIURL =
   typeof import.meta.env.VITE_TARANIS_NG_CORE_API === 'undefined'

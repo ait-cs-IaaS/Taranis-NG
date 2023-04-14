@@ -47,9 +47,9 @@
 
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex'
-import FilterNavigation from '@/components/common/FilterNavigation'
-import filterSortList from '@/components/assess/filter/filterSortList'
-import dateChips from '@/components/assess/filter/dateChips'
+import FilterNavigation from '@/components/common/FilterNavigation.vue'
+import filterSortList from '@/components/assess/filter/filterSortList.vue'
+import dateChips from '@/components/assess/filter/dateChips.vue'
 
 export default {
   name: 'PublishNav',
@@ -74,7 +74,6 @@ export default {
       filter: (state) => state.productFilter
     }),
     ...mapState(['drawerVisible']),
-    ...mapState('route', ['query']),
     limit: {
       get() {
         return this.filter.limit
@@ -160,7 +159,7 @@ export default {
   },
   created() {
     const query = Object.fromEntries(
-      Object.entries(this.query).filter(([_, v]) => v != null)
+      Object.entries(this.$route.query).filter(([_, v]) => v != null)
     )
     this.updateProductFilter(query)
     console.debug('loaded with query', query)

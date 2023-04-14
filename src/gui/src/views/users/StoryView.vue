@@ -6,7 +6,7 @@
 
 <script>
 import { getNewsItemAggregate } from '@/api/assess'
-import CardStory from '@/components/assess/CardStory'
+import CardStory from '@/components/assess/CardStory.vue'
 
 export default {
   name: 'StoryView',

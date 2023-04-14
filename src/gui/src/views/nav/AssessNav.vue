@@ -103,11 +103,11 @@
 
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex'
-import dateChips from '@/components/assess/filter/dateChips'
-import tagFilter from '@/components/assess/filter/tagFilter'
-import filterSelectList from '@/components/assess/filter/filterSelectList'
-import filterSortList from '@/components/assess/filter/filterSortList'
-import FilterNavigation from '@/components/common/FilterNavigation'
+import dateChips from '@/components/assess/filter/dateChips.vue'
+import tagFilter from '@/components/assess/filter/tagFilter.vue'
+import filterSelectList from '@/components/assess/filter/filterSelectList.vue'
+import filterSortList from '@/components/assess/filter/filterSortList.vue'
+import FilterNavigation from '@/components/common/FilterNavigation.vue'
 
 export default {
   name: 'AssessNav',
@@ -159,7 +159,6 @@ export default {
       filter: (state) => state.newsItemsFilter
     }),
     ...mapState(['drawerVisible']),
-    ...mapState('route', ['query']),
     source: {
       get() {
         return this.filter.source
@@ -268,7 +267,7 @@ export default {
   },
   created() {
     const query = Object.fromEntries(
-      Object.entries(this.query).filter(([_, v]) => v != null)
+      Object.entries(this.$route.query).filter(([_, v]) => v != null)
     )
     this.updateFilter(query)
     console.debug('loaded with query', query)

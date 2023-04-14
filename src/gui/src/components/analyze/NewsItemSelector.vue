@@ -98,9 +98,9 @@
 import AuthMixin from '@/services/auth/auth_mixin'
 import Permissions from '@/services/auth/permissions'
 import AssessContent from '../../components/assess/AssessContent'
-import CardAssess from '@/components/assess/legacy/CardAssess'
-import NewsItemSingleDetail from '@/components/assess/NewsItemSingleDetail'
-import NewsItemDetail from '@/components/assess/NewsItemDetail'
+import CardAssess from '@/components/assess/legacy/CardAssess.vue'
+import NewsItemSingleDetail from '@/components/assess/NewsItemSingleDetail.vue'
+import NewsItemDetail from '@/components/assess/NewsItemDetail.vue'
 import { getReportItemData, updateReportItem } from '@/api/analyze'
 import { mapActions, mapGetters } from 'vuex'
 

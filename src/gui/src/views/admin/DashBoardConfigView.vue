@@ -73,7 +73,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import DashBoardCard from '@/components/common/DashBoardCard'
+import DashBoardCard from '@/components/common/DashBoardCard.vue'
 
 export default {
   name: 'DashBoardConfig',

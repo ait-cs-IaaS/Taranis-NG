@@ -145,12 +145,12 @@
 </template>
 
 <script>
-import newsItemAction from '@/components/_subcomponents/newsItemAction'
-import newsItemActionDialog from '@/components/_subcomponents/newsItemActionDialog'
-import PopupDeleteItem from '@/components/popups/PopupDeleteItem'
-import PopupShareItems from '@/components/popups/PopupShareItems'
-import metainfo from '@/components/assess/card/metainfo'
-import { notifySuccess, notifyFailure } from '@/utils/helpers'
+import newsItemAction from '@/components/_subcomponents/newsItemAction.vue'
+import newsItemActionDialog from '@/components/_subcomponents/newsItemActionDialog.vue'
+import PopupDeleteItem from '@/components/popups/PopupDeleteItem.vue'
+import PopupShareItems from '@/components/popups/PopupShareItems.vue'
+import metainfo from '@/components/assess/card/metainfo.vue'
+import { notifySuccess, notifyFailure } from '@/utils/helpers.js'
 
 import { mapGetters } from 'vuex'
 

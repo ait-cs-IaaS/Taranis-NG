@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import CardAsset from '@/components/assets/CardAsset'
+import CardAsset from '@/components/assets/CardAsset.vue'
 
 export default {
   name: 'ContentData',

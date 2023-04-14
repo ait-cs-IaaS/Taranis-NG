@@ -46,7 +46,7 @@
 
 <script>
 import { deleteNewsItemAggregate, groupAction } from '@/api/assess'
-import PopupShareItems from '@/components/popups/PopupShareItems'
+import PopupShareItems from '@/components/popups/PopupShareItems.vue'
 
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
 import { mapActions } from 'vuex'

@@ -114,7 +114,7 @@
 <script>
 import AuthMixin from '@/services/auth/auth_mixin'
 import Permissions from '@/services/auth/permissions'
-import EnumSelector from '@/components/common/EnumSelector'
+import EnumSelector from '@/components/common/EnumSelector.vue'
 import { findAttributeCPE } from '@/api/assets'
 
 import VueCsvImport from '@/components/common/ImportCSV'

@@ -3,6 +3,7 @@
   <v-tooltip bottom v-for="(tag, i) in tags.slice(0, limit)" :key="i">
     <template v-slot:activator="{ on, attrs }">
       <v-btn
+        v-bind="attrs"
         small
         text
         density="compact"
@@ -11,7 +12,6 @@
         :color="labelcolor(i)"
         @click.stop="updateTags(tag.name)"
         v-ripple="false"
-        v-bind="attrs"
         v-on="on"
       >
         <span class="text-decoration-underline">

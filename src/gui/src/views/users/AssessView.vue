@@ -54,9 +54,9 @@
 </template>
 
 <script>
-import KeyboardMixin from '../../assets/keyboard_mixin'
-import CardStory from '@/components/assess/CardStory'
-import AssessSelectionToolbar from '@/components/assess/AssessSelectionToolbar'
+import KeyboardMixin from '@/assets/keyboard_mixin.js'
+import CardStory from '@/components/assess/CardStory.vue'
+import AssessSelectionToolbar from '@/components/assess/AssessSelectionToolbar.vue'
 
 import { mapState, mapGetters, mapActions } from 'vuex'
 

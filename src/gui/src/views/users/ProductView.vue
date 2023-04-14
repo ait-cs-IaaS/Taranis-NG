@@ -6,7 +6,7 @@
 
 <script>
 import { getProduct } from '@/api/publish'
-import CardProduct from '@/components/publish/CardProduct'
+import CardProduct from '@/components/publish/CardProduct.vue'
 
 export default {
   name: 'ProductView',

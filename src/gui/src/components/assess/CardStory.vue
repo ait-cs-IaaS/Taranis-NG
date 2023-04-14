@@ -245,15 +245,15 @@
 </template>
 
 <script>
-import PopupDeleteItem from '@/components/popups/PopupDeleteItem'
-import PopupShareItems from '@/components/popups/PopupShareItems'
-import metainfo from '@/components/assess/card/metainfo'
-import votes from '@/components/assess/card/votes'
-import TagList from '@/components/assess/card/TagList'
-import SummarizedContent from '@/components/assess/card/SummarizedContent'
-import CardNewsItem from '@/components/assess/CardNewsItem'
-import WeekChart from '@/components/assess/card/WeekChart'
-import { notifySuccess } from '@/utils/helpers'
+import PopupDeleteItem from '@/components/popups/PopupDeleteItem.vue'
+import PopupShareItems from '@/components/popups/PopupShareItems.vue'
+import metainfo from '@/components/assess/card/metainfo.vue'
+import votes from '@/components/assess/card/votes.vue'
+import TagList from '@/components/assess/card/TagList.vue'
+import SummarizedContent from '@/components/assess/card/SummarizedContent.vue'
+import CardNewsItem from '@/components/assess/CardNewsItem.vue'
+import WeekChart from '@/components/assess/card/WeekChart.vue'
+import { notifySuccess } from '@/utils/helpers.js'
 
 import { mapGetters } from 'vuex'
 import {

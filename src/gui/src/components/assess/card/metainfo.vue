@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import { isValidUrl } from '@/utils/helpers'
+import { isValidUrl } from '@/utils/helpers.js'
 
 export default {
   name: 'metainfo',

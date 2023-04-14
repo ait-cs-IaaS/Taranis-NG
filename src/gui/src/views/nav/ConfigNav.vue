@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import IconNavigation from '@/components/common/IconNavigation'
+import IconNavigation from '@/components/common/IconNavigation.vue'
 
 export default {
   name: 'ConfigNav',
