@@ -13,9 +13,9 @@
     >
       <template v-slot:actionColumn>
         <v-tooltip left>
-          <template v-slot:activator="{ on }">
+          <template v-slot:activator="{ props }">
             <v-icon
-              v-on="on"
+              v-bind="props"
               color="secondary"
               @click.stop="createProduct(item)"
             >

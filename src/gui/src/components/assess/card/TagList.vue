@@ -1,18 +1,17 @@
 <template>
   <div>
   <v-tooltip bottom v-for="(tag, i) in tags.slice(0, limit)" :key="i">
-    <template v-slot:activator="{ on, attrs }">
+    <template v-slot:activator="{ props }">
       <v-btn
-        v-bind="attrs"
+        v-bind="props"
         small
-        text
+        variant="text"
         density="compact"
         height="auto"
         class="tag-button"
         :color="labelcolor(i)"
         @click.stop="updateTags(tag.name)"
         v-ripple="false"
-        v-on="on"
       >
         <span class="text-decoration-underline">
           {{ tag.name }}

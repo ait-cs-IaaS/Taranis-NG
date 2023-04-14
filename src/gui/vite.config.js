@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vuetify from 'vite-plugin-vuetify';
+import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
 import path from 'path'
 
 export default defineConfig({
@@ -10,20 +11,12 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      vue: '@vue/compat',
       '@': path.resolve(__dirname, './src'),
     }
   },
   plugins: [
-    vue({
-      template: {
-        compilerOptions: {
-          compatConfig: {
-            MODE: 2
-          }
-        }
-      }
-    }),
+    vue(),
+    VueI18nPlugin({}),
     vuetify({ autoImport: true })
   ],
   build: {

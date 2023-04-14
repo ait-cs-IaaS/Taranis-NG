@@ -2,27 +2,29 @@
   <div>
     <v-snackbar dark v-model="notification" :color="notify.type">
       <span>{{ $t(notify.loc) }}</span>
-      <v-btn text color="white--text" @click="notification = false">{{$t('notification.close')}}</v-btn>
+      <v-btn variant="text" color="white--text" @click="notification = false">{{$t('notification.close')}}</v-btn>
     </v-snackbar>
   </div>
 </template>
 
 <script>
-export default {
+import { defineComponent, computed } from "vue"
+// import { useNotificationStore } from '@/store/notification';
+
+export default defineComponent({
   name: 'Notification',
 
-  props: {},
-  data: () => ({
-    notification: false,
-    notify: Object
-  }),
+  setup() {
+    // const store = useNotificationStore();
 
-  mounted () {
-    this.$root.$on('notification', (message) => {
-      console.log(message)
-      this.notification = true
-      this.notify = message
-    })
+    // const notification = computed(() => store.notification);
+    // const notify = computed(() => store.notify);
+
+    // const closeNotification = () => {
+    //   store.closeNotification();
+    // };
+
+    // return { notification, notify, closeNotification };
   }
-}
+})
 </script>

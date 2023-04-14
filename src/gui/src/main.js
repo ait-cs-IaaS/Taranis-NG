@@ -9,14 +9,6 @@ import { messages } from '@/i18n/messages'
 import { dateTimeFormats } from '@/i18n/datetimeformat'
 import DatePicker from 'vue-datepicker-next'
 import { vuetify } from '@/plugins/vuetify'
-import { configureCompat } from 'vue'
-
-// disable compat for certain features
-configureCompat({
-  MODE: 3,
-  COMPONENT_ASYNC: false,
-  INSTANCE_EVENT_EMITTER: true
-})
 
 export const app = createApp(App)
 

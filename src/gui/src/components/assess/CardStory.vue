@@ -120,15 +120,13 @@
               <votes v-if="detailView" :story="story" />
 
               <v-menu bottom offset-y>
-                <template v-slot:activator="{ on, attrs }">
+                <template v-slot:activator="{ props }">
                   <v-btn
                     small
                     class="item-action-btn expandable"
                     outlined
-                    v-on:click.stop
                     v-ripple="false"
-                    v-bind="attrs"
-                    v-on="on"
+                    v-bind="props"
                   >
                     <v-icon>mdi-dots-vertical</v-icon>
                   </v-btn>

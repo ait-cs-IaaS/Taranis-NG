@@ -52,8 +52,9 @@
 import DashBoardCard from '@/components/common/DashBoardCard.vue'
 import { mapGetters, mapActions } from 'vuex'
 import TrendingCard from '@/components/common/TrendingCard.vue'
+import { defineComponent } from 'vue'
 
-export default {
+export default defineComponent({
   name: 'Home',
   components: {
     DashBoardCard,
@@ -81,5 +82,5 @@ export default {
       this.clusters = this.getClusters()
     })
   }
-}
+})
 </script>

@@ -1,9 +1,8 @@
 <template>
   <v-tooltip open-delay="1000" bottom :disabled="!tooltip">
-    <template v-slot:activator="{ on, attrs }">
+    <template v-slot:activator="{ props }">
       <v-btn
-        v-bind="attrs"
-        v-on="on"
+        v-bind="props"
         icon
         tile
         class="news-item-action"

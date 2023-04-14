@@ -89,8 +89,9 @@ import UserMenu from './UserMenu.vue'
 import AuthMixin from '@/services/auth/auth_mixin.js'
 
 import { mapActions, mapGetters, mapState } from 'vuex'
+import { defineComponent } from "vue";
 
-export default {
+export default defineComponent({
   components: { UserMenu },
   name: 'MainMenu',
   data: () => ({
@@ -176,5 +177,5 @@ export default {
     }
   },
   mounted() {}
-}
+})
 </script>

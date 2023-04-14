@@ -7,13 +7,13 @@
             offset-y
             width="290px"
     >
-        <template v-slot:activator="{ on }">
+        <template v-slot:activator="{ props }">
             <v-text-field
                     v-model="date.value"
                     :label="caption"
                     prepend-icon="event"
                     readonly
-                    v-on="on"
+                    v-bind="props">
                     style="width: 290px;"
             ></v-text-field>
             <!-- TODO: i18 > :label="caption" -->

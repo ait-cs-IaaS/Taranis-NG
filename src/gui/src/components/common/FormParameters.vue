@@ -30,12 +30,11 @@
                 />
 
                 <v-tooltip left>
-                  <template v-slot:activator="{ on, attrs }">
+                  <template v-slot:activator="{ props }">
                     <v-icon
                       color="primary"
                       dark
-                      v-bind="attrs"
-                      v-on="on"
+                      v-bind="props"
                       class="pr-2"
                     >
                       mdi-help-circle

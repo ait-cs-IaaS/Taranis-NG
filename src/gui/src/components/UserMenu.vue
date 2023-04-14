@@ -1,9 +1,9 @@
 <template>
   <div class="user-menu cx-user-menu">
     <v-menu close-on-click close-on-content-click offset-y st>
-      <template v-slot:activator="{ on }">
+      <template v-slot:activator="{ props }">
         <div class="user-menu-button pl-0 mr-0">
-          <v-btn depressed icon tile v-on="on">
+          <v-btn depressed icon tile v-bind="props">
             <v-icon color="dark-grey" medium>mdi-account</v-icon>
           </v-btn>
         </div>

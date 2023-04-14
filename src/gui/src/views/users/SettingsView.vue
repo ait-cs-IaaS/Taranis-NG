@@ -86,10 +86,10 @@
                 v-for="shortcut in shortcuts"
                 :key="shortcut.alias"
               >
-                <template v-slot:activator="{ on }">
+                <template v-slot:activator="{ props }">
                   <v-btn
                     :id="shortcut.alias"
-                    v-on="on"
+                    v-bind="props"
                     class="blue lighten-5 ma-1"
                     style="width: calc(100% / 3 - 8px)"
                     text

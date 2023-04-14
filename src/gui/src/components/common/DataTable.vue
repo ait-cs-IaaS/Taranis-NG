@@ -68,8 +68,8 @@
         <div class="d-inline-flex">
           <slot name="actionColumn"></slot>
           <v-tooltip left>
-            <template v-slot:activator="{ on }">
-              <v-icon v-on="on" color="red" @click.stop="deleteItem(item)">
+            <template v-slot:activator="{ props }">
+              <v-icon v-bind="props" color="red" @click.stop="deleteItem(item)">
                 mdi-delete
               </v-icon>
             </template>
