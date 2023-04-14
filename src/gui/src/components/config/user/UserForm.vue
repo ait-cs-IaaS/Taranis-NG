@@ -186,19 +186,23 @@ export default {
         }
 
         if (this.edit) {
-          updateUser(this.user).then(() => {
-            this.$validator.reset()
-            notifySuccess('user.successful_edit')
-          }).catch(() => {
-            notifyFailure('user.error')
-          })
+          updateUser(this.user)
+            .then(() => {
+              this.$validator.reset()
+              notifySuccess('user.successful_edit')
+            })
+            .catch(() => {
+              notifyFailure('user.error')
+            })
         } else {
-          createUser(this.user).then(() => {
-            this.$validator.reset()
-            notifySuccess('user.successful')
-          }).catch(() => {
-            notifyFailure('user.error')
-          })
+          createUser(this.user)
+            .then(() => {
+              this.$validator.reset()
+              notifySuccess('user.successful')
+            })
+            .catch(() => {
+              notifyFailure('user.error')
+            })
         }
       })
     },

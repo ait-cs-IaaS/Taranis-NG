@@ -2,7 +2,7 @@
 repos:
   - repo: https://github.com/psf/black
     rev: 23.3.0
-    files: '^src/core'
+    files: ^src/core
     hooks:
       - id: black
 
@@ -11,9 +11,10 @@ repos:
       - id: eslint
         name: lint
         language: node
-        entry: npm --prefix src/gui run lint
+        entry: npm --prefix src/gui run lint_and_format
         files: ^src/gui
-        types_or: [javascript, jsx, ts, tsx]
+        types_or: [javascript, jsx, ts, tsx, vue]
+        pass_filenames: false
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
