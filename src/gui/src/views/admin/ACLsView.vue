@@ -1,8 +1,16 @@
 <template>
   <div>
-    <DataTable :addButton="true" :items.sync="acls.items" :headerFilter="['tag', 'id', 'name', 'username']" sortByItem="id"
-      :actionColumn="true" @delete-item="deleteItem" @edit-item="editItem" @add-item="addItem"
-      @update-items="updateData" />
+    <DataTable
+      :addButton="true"
+      :items.sync="acls.items"
+      :headerFilter="['tag', 'id', 'name', 'username']"
+      sortByItem="id"
+      :actionColumn="true"
+      @delete-item="deleteItem"
+      @edit-item="editItem"
+      @add-item="addItem"
+      @update-items="updateData"
+    />
     <NewACL v-if="showForm" :user_id.sync="userID"></NewACL>
   </div>
 </template>
@@ -77,7 +85,6 @@ export default {
   mounted() {
     this.updateData()
   },
-  beforeDestroy() { }
+  beforeDestroy() {}
 }
-
 </script>

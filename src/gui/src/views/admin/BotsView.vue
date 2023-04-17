@@ -6,7 +6,6 @@
       :headerFilter="['name', 'description']"
       sortByItem="name"
       :actionColumn="false"
-      @delete-item="deleteItem"
       @edit-item="editItem"
       @add-item="addItem"
       @update-items="updateData"
@@ -133,12 +132,6 @@ export default {
       } else {
         this.createItem(updateItem)
       }
-    },
-    deleteItem(item) {
-      notifyFailure('Deleting Bots not supported')
-    },
-    createItem(item) {
-      notifyFailure('Creating Bots not supported')
     },
     updateItem(item) {
       updateBot(item)

@@ -48,15 +48,19 @@
           <v-divider inset></v-divider>
 
           <v-icon class="mr-2"> mdi-clock-check-outline </v-icon>
-          <span class="caption">Last successful run ended at
-            <b>{{ dashboard_data.latest_collected }}</b></span>
+          <span class="caption"
+            >Last successful run ended at
+            <b>{{ dashboard_data.latest_collected }}</b></span
+          >
         </template>
       </dash-board-card>
       <dash-board-card linkTo="#" linkText="Database">
         <template v-slot:content>
           <v-icon class="mr-2" color="blue"> mdi-database </v-icon>
-          <span class="caption">There are <b>{{ dashboard_data.total_database_items }}</b> live
-            items.</span>
+          <span class="caption"
+            >There are <b>{{ dashboard_data.total_database_items }}</b> live
+            items.</span
+          >
           <v-divider inset></v-divider>
 
           <v-icon class="mr-2"> mdi-database-check </v-icon>
@@ -77,7 +81,7 @@ import DashBoardCard from '@/components/common/DashBoardCard'
 export default {
   name: 'DashBoardConfig',
   components: { DashBoardCard },
-  data: () => ({ }),
+  data: () => ({}),
   computed: {
     totalItems() {
       return this.getItemCount().total

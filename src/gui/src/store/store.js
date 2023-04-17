@@ -29,7 +29,6 @@ const state = {
 }
 
 const actions = {
-
   setUser(context, userData) {
     context.commit('setUser', userData)
   },
@@ -64,7 +63,6 @@ const actions = {
 }
 
 const mutations = {
-
   setUser(state, userData) {
     state.user = userData
   },
@@ -93,7 +91,6 @@ const mutations = {
 }
 
 const getters = {
-
   getUserId(state) {
     return state.user.id
   },

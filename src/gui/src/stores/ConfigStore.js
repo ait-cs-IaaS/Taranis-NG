@@ -51,7 +51,7 @@ export const configStore = defineStore('config', {
     }
   },
   getters: {
-    getUserByID: (state, getters) => (user_id) => {
+    getUserByID: (state) => (user_id) => {
       for (const user of state.users.items) {
         if (user.id === user_id) {
           return user
