@@ -11,10 +11,7 @@
       @add-item="addItem"
       @update-items="updateData"
     />
-    <UserForm
-      v-if="showForm"
-      :user_id.sync="userID"
-    ></UserForm>
+    <UserForm v-if="showForm" :user_id.sync="userID"></UserForm>
   </div>
 </template>
 
@@ -97,7 +94,7 @@ export default {
       })
     },
     selectionChange(selected) {
-      this.selected = selected.map(item => item.id)
+      this.selected = selected.map((item) => item.id)
     }
   },
   mounted() {
