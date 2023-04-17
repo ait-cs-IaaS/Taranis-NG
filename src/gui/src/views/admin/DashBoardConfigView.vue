@@ -74,7 +74,7 @@
 <script>
 import { mapGetters } from 'vuex'
 import { mapActions, mapState } from 'pinia'
-import { dashboardStore } from '../../stores/DashboardStore'
+import { dashboardStore } from '@/stores/DashboardStore'
 
 import DashBoardCard from '@/components/common/DashBoardCard'
 

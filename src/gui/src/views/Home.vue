@@ -57,7 +57,7 @@ import DashBoardCard from '@/components/common/DashBoardCard'
 import { mapGetters } from 'vuex'
 import TrendingCard from '@/components/common/TrendingCard'
 import { mapActions, mapState } from 'pinia'
-import { dashboardStore } from '../stores/DashboardStore'
+import { dashboardStore } from '@/stores/DashboardStore'
 
 export default {
   name: 'Home',
