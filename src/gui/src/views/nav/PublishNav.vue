@@ -44,10 +44,14 @@
 </template>
 
 <script>
-import { mapState, mapGetters, mapActions } from 'vuex'
 import FilterNavigation from '@/components/common/FilterNavigation'
 import filterSortList from '@/components/assess/filter/filterSortList'
 import dateChips from '@/components/assess/filter/dateChips'
+import {
+  mapActions as mapActionsVuex,
+  mapGetters,
+  mapState as mapStateVuex
+} from 'vuex'
 
 export default {
   name: 'PublishNav',
@@ -68,10 +72,10 @@ export default {
     ]
   }),
   computed: {
-    ...mapState('filter', {
+    ...mapStateVuex('filter', {
       filter: (state) => state.productFilter
     }),
-    ...mapState(['drawerVisible']),
+    ...mapStateVuex(['drawerVisible']),
     limit: {
       get() {
         return this.filter.limit
@@ -148,8 +152,8 @@ export default {
   },
   methods: {
     ...mapGetters(['getItemCount']),
-    ...mapActions('analyze', ['updateProducts']),
-    ...mapActions('filter', ['setProductFilter', 'updateProductFilter']),
+    ...mapActionsVuex('analyze', ['updateProducts']),
+    ...mapActionsVuex('filter', ['setProductFilter', 'updateProductFilter']),
     ...mapGetters('filter', ['getProductFilter']),
     addReport() {
       this.$router.push('/product/0')

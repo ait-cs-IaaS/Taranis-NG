@@ -140,8 +140,8 @@ import ReportItemSelector from '@/components/publish/ReportItemSelector'
 import Permissions from '@/services/auth/permissions'
 import { mapActions, mapState } from 'pinia'
 import { configStore } from '@/stores/ConfigStore'
-import { mapActions as mapActionsVuex, mapGetters } from 'vuex'
 import { settingsStore } from '@/stores/SettingsStore'
+import { publishStore } from '@/stores/PublishStore'
 
 export default {
   name: 'NewProduct',
@@ -170,6 +170,7 @@ export default {
   computed: {
     ...mapState(settingsStore, ['spellcheck']),
     ...mapState(configStore, ['product_types']),
+    ...mapState(publishStore, ['products_publisher_presets']),
     canCreate() {
       return this.checkPermission(Permissions.PUBLISH_CREATE)
     },
@@ -193,8 +194,7 @@ export default {
   },
   methods: {
     ...mapActions(configStore, ['loadUserProductTypes']),
-    ...mapGetters('publish', ['getProductsPublisherPresets']),
-    ...mapActionsVuex('publish', ['loadUserPublishersPresets']),
+    ...mapActions(publishStore, ['loadUserPublishersPresets']),
 
     addProduct() {
       this.visible = true
@@ -361,7 +361,7 @@ export default {
     await this.loadUserProductTypes({ search: '' })
 
     this.loadUserPublishersPresets({ search: '' }).then(() => {
-      this.publisher_presets = this.getProductsPublisherPresets().items
+      this.publisher_presets = this.products_publisher_presets.items
       for (let i = 0; i < this.publisher_presets.length; i++) {
         this.publisher_presets.selected = false
       }

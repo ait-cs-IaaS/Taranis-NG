@@ -5,7 +5,7 @@ import { authenticator } from '@/store/authenticator'
 import { assess } from '@/store/assess'
 // import { config } from '@/store/config'
 import { analyze } from '@/store/analyze'
-import { publish } from '@/store/publish'
+// import { publish } from '@/store/publish'
 // import { settings } from '@/store/settings'
 // import { assets } from '@/store/assets'
 // import { dashboard } from '@/store/dashboard'
@@ -150,7 +150,7 @@ export const store = new Vuex.Store({
     assess,
     // config,
     analyze,
-    publish,
+    // publish,
     // settings,
     // assets,
     // dashboard,

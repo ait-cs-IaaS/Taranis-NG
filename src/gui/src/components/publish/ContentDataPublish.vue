@@ -10,8 +10,9 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import CardProduct from './CardProduct'
+import { publishStore } from '@/stores/PublishStore'
 
 export default {
   name: 'ContentDataPublish',
@@ -27,9 +28,11 @@ export default {
       sort: 'DATE_DESC'
     }
   }),
+  computed: {
+    ...mapState(publishStore, ['products'])
+  },
   methods: {
-    ...mapGetters('publish', ['getProducts']),
-    ...mapActions('publish', ['loadProducts']),
+    ...mapActions(publishStore, ['loadProducts']),
     infiniteScrolling(entries, observer, isIntersecting) {
       if (this.data_loaded && isIntersecting) {
         this.updateData(true, false)
@@ -57,7 +60,7 @@ export default {
         offset: offset,
         limit: limit
       }).then(() => {
-        this.collections = this.collections.concat(this.getProducts())
+        this.collections = this.collections.concat(this.products.items)
         console.log(this.collections)
         this.data_loaded = true
       })
