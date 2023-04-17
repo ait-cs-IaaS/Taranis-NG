@@ -17,7 +17,7 @@ import MainMenu from './components/MainMenu'
 import AuthMixin from './services/auth/auth_mixin'
 import Notification from './components/common/Notification'
 import { mapActions, mapState } from 'pinia'
-import { settingsStore } from './stores/SettingsStore'
+import { settingsStore } from '@/stores/SettingsStore'
 import { mapActions as mapActionsVuex } from 'vuex'
 
 export default {
@@ -31,9 +31,7 @@ export default {
   },
   mixins: [AuthMixin],
   methods: {
-    // ...mapActions('dashboard', ['updateStories']),
     ...mapActions(settingsStore, ['loadUserProfile']),
-    ...mapActionsVuex('users', ['updateUsers']),
     ...mapActionsVuex('assess', ['updateNewsItems']),
 
     connectSSE() {

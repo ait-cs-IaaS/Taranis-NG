@@ -9,7 +9,7 @@ import { publish } from '@/store/publish'
 // import { settings } from '@/store/settings'
 // import { assets } from '@/store/assets'
 // import { dashboard } from '@/store/dashboard'
-import { users } from '@/store/users'
+// import { users } from '@/store/users'
 import { filter } from '@/store/filter'
 
 Vue.use(Vuex)
@@ -154,7 +154,7 @@ export const store = new Vuex.Store({
     // settings,
     // assets,
     // dashboard,
-    users,
+    // users,
     filter
   }
 })

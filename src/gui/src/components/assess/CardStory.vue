@@ -259,7 +259,6 @@ import CardNewsItem from '@/components/assess/CardNewsItem'
 import WeekChart from '@/components/assess/card/WeekChart'
 import { notifySuccess } from '@/utils/helpers'
 
-import { mapGetters } from 'vuex'
 import {
   deleteNewsItemAggregate,
   importantNewsItemAggregate,
@@ -340,8 +339,6 @@ export default {
     }
   },
   methods: {
-    ...mapGetters('users', ['getUsernameById']),
-
     notify(text) {
       notifySuccess(text)
     },

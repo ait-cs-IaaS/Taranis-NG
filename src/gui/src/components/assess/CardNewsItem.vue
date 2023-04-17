@@ -152,8 +152,6 @@ import PopupShareItems from '@/components/popups/PopupShareItems'
 import metainfo from '@/components/assess/card/metainfo'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
 
-import { mapGetters } from 'vuex'
-
 import {
   deleteNewsItemAggregate,
   importantNewsItemAggregate,
@@ -194,8 +192,6 @@ export default {
     }
   },
   methods: {
-    ...mapGetters('users', ['getUsernameById']),
-
     toggleSelection() {
       alert('toggleSelection')
       this.$emit('selectItem', this.newsItem.id)
