@@ -62,16 +62,6 @@ export default {
           required: true
         },
         {
-          name: 'title',
-          label: 'Title',
-          type: 'text'
-        },
-        {
-          name: 'subtitle',
-          label: 'SubTitle',
-          type: 'text'
-        },
-        {
           name: 'permissions',
           label: 'Permissions',
           type: 'table',

@@ -52,7 +52,7 @@
         >
           <v-data-table
             :headers="item.headers"
-            :show-select="item['disabled']"
+            :show-select="!item['disabled']"
             :items="item.items"
             :item-key="item.headers[0].value"
             :hide-default-footer="item.items.length < 10"
@@ -82,7 +82,7 @@
                 <template v-slot:input>
                   <v-text-field
                     v-model="props.item[h.value]"
-                    :disabled="item['disabled'] !== undefined"
+                    :disabled="item['disabled'] === undefined"
                     :type="item.type ? item.type : 'text'"
                     label="Edit"
                     single-line
