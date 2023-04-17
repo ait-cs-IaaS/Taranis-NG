@@ -37,7 +37,7 @@
           v-model="news_item.link"
         ></v-text-field>
 
-        <quill-editor v-model:value="editorData" :editorOptions="editorOptions" />
+        <quill-editor v-model="editorData" :editorOptions="editorOptions" />
       </v-card-text>
     </v-card>
     <v-spacer class="pt-2"></v-spacer>
@@ -50,7 +50,7 @@ import { quillEditor } from 'vue3-quill'
 import { addNewsItem } from '@/api/assess'
 
 export default {
-  name: 'Enter',
+  name: 'EnterView',
   components: {
     quillEditor
   },
@@ -146,8 +146,6 @@ export default {
       }
       return n
     }
-  },
-
-  created() {}
+  }
 }
 </script>

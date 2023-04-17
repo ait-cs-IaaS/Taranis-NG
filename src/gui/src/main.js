@@ -28,7 +28,7 @@ app.use(i18n)
 
 const coreAPIURL =
   typeof import.meta.env.VITE_TARANIS_NG_CORE_API === 'undefined'
-    ? `${import.meta.env.BASE_URL}/api`
+    ? '/api'
     : import.meta.env.VITE_TARANIS_NG_CORE_API
 
 ApiService.init(coreAPIURL)

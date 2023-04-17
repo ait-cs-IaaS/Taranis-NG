@@ -82,9 +82,7 @@ const mutations = {
     ) {
       state.logout_uri = '$VUE_APP_TARANIS_NG_LOGOUT_URL'
       state.external_logout_uri = true
-    } else if (
-      import.meta.env.VITE_TARANIS_NG_LOGOUT_URL != null
-    ) {
+    } else if (import.meta.env.VITE_TARANIS_NG_LOGOUT_URL != null) {
       state.logout_uri = import.meta.env.VITE_TARANIS_NG_LOGOUT_URL
       state.external_logout_uri = true
     }
@@ -124,13 +122,13 @@ const getters = {
     return new Date(state.exp * 1000)
   },
 
-  isAuthenticated (state) {
+  isAuthenticated(state) {
     const exp = new Date(state.exp * 1000)
     const now = new Date()
     return now < exp
   },
 
-  needTokenRefresh (state) {
+  needTokenRefresh(state) {
     const exp = new Date((state - 300) * 1000)
     const now = new Date()
     return now > exp

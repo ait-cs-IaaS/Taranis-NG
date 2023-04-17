@@ -46,7 +46,7 @@ import {
 } from '@/utils/helpers'
 
 export default {
-  name: 'OSINTSources',
+  name: 'OSINTSourcesView',
   components: {
     DataTable,
     EditConfig,
@@ -200,7 +200,6 @@ export default {
   },
   mounted() {
     this.updateData()
-  },
-  beforeDestroy() {}
+  }
 }
 </script>

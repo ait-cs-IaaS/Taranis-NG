@@ -194,15 +194,19 @@
                             class="item-panel"
                           >
                             {{ attribute_item }}
-                            <br/>
+                            <br />
                             XXXX
-                            <br/>
+                            <br />
                             {{ attribute_item.attribute_group_item }}
                             <v-expansion-panel-header
                               class="pa-2 font-weight-bold primary--text rounded-0"
                             >
                               <v-row>
-                                <span> {{ attribute_item.attribute_group_item.title }}</span>
+                                <span>
+                                  {{
+                                    attribute_item.attribute_group_item.title
+                                  }}</span
+                                >
                               </v-row>
                             </v-expansion-panel-header>
                             <v-expansion-panel-content class="pt-0">
@@ -233,14 +237,12 @@
             style="height: calc(100vh - 3em); overflow-y: auto"
             class="pa-5 taranis-ng-vertical-view"
           >
-
-          <card-story
-            v-for="(newsItem, index) in news_item_aggregates"
-            :key="newsItem.id"
-            :newsItem="newsItem"
-            :position="index"
-          ></card-story>
-
+            <card-story
+              v-for="(newsItem, index) in news_item_aggregates"
+              :key="newsItem.id"
+              :newsItem="newsItem"
+              :position="index"
+            ></card-story>
           </v-col>
         </v-row>
       </v-card>
@@ -531,22 +533,18 @@ export default {
 
     onFocus(field_id) {
       if (this.edit === true) {
-        lockReportItem(this.report_item.id, { field_id: field_id }).then(
-          () => {}
-        )
+        lockReportItem(this.report_item.id, { field_id: field_id })
       }
     },
 
     onBlur(field_id) {
       if (this.edit === true) {
         this.onEdit(field_id)
-        unlockReportItem(this.report_item.id, { field_id: field_id }).then(
-          () => {}
-        )
+        unlockReportItem(this.report_item.id, { field_id: field_id })
       }
     },
 
-    onKeyUp(field_id) {
+    onKeyUp() {
       if (this.edit === true) {
         clearTimeout(this.key_timeout)
       }
@@ -564,7 +562,7 @@ export default {
           data.completed = this.report_item.completed
         }
 
-        updateReportItem(this.report_item.id, data).then(() => {})
+        updateReportItem(this.report_item.id, data)
       }
     },
 

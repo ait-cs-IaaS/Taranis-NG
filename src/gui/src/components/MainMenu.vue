@@ -8,20 +8,17 @@
     clipped-left
   >
     <template v-slot:prepend>
-    <v-btn
-      depressed
-      tile
-      color="primary"
-      class="burger-menu"
-      @click.stop="navClicked"
-    >
-      <v-icon
-        :class="[
-          'menu-icon',
-          { closed: !drawerVisible }
-        ]"
-        >mdi-menu-open</v-icon>
-    </v-btn>
+      <v-btn
+        depressed
+        tile
+        color="primary"
+        class="burger-menu"
+        @click.stop="navClicked"
+      >
+        <v-icon :class="['menu-icon', { closed: !drawerVisible }]"
+          >mdi-menu-open</v-icon
+        >
+      </v-btn>
     </template>
 
     <v-toolbar-title>
@@ -49,37 +46,27 @@
     </v-toolbar-title>
 
     <div class="item-count mr-10">
-        <span
-          >total items: <strong>{{ getItemCount.total }}</strong>
-        </span>
-        <span v-if="isFiltered">
-          / displayed items: <strong>{{ getItemCount.filtered }}</strong>
-        </span>
+      <span
+        >total items: <strong>{{ getItemCount.total }}</strong>
+      </span>
+      <span v-if="isFiltered">
+        / displayed items: <strong>{{ getItemCount.filtered }}</strong>
+      </span>
     </div>
 
     <template v-slot:append>
+      <v-toolbar dense flat color="transparent" class="justify-end mr-4">
+        <div v-for="button in getButtonList(permissions)" :key="button.route">
+          <v-btn variant="text" :ripple="false" :to="button.route">
+            <v-icon left>{{ button.icon }}</v-icon>
+            <span class="main-menu-item">
+              {{ $t(button.title) }}
+            </span>
+          </v-btn>
+        </div>
+      </v-toolbar>
 
-    <v-toolbar
-      dense
-      flat
-      color="transparent"
-      class="justify-end mr-4"
-    >
-      <div v-for="button in getButtonList(permissions)" :key="button.route">
-        <v-btn
-          variant='text'
-          :ripple="false"
-          :to="button.route"
-        >
-          <v-icon left>{{ button.icon }}</v-icon>
-          <span class="main-menu-item">
-            {{ $t(button.title) }}
-          </span>
-        </v-btn>
-      </div>
-    </v-toolbar>
-
-    <UserMenu></UserMenu>
+      <UserMenu></UserMenu>
     </template>
   </v-app-bar>
 </template>
@@ -89,7 +76,7 @@ import UserMenu from './UserMenu.vue'
 import AuthMixin from '@/services/auth/auth_mixin.js'
 
 import { mapActions, mapGetters, mapState } from 'vuex'
-import { defineComponent } from "vue";
+import { defineComponent } from 'vue'
 
 export default defineComponent({
   components: { UserMenu },
@@ -175,7 +162,6 @@ export default defineComponent({
         ? false
         : this.getItemCount.filtered !== this.getItemCount.total
     }
-  },
-  mounted() {}
+  }
 })
 </script>

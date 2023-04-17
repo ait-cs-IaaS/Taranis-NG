@@ -1,8 +1,8 @@
-import { createVuetify } from "vuetify";
+import { createVuetify } from 'vuetify'
 import 'vuetify/lib/styles/main.sass'
-import { aliases, mdi } from "vuetify/iconsets/mdi";
-import * as components from "vuetify/components";
-import * as directives from "vuetify/directives";
+import { aliases, mdi } from 'vuetify/iconsets/mdi'
+import * as components from 'vuetify/components'
+import * as directives from 'vuetify/directives'
 import { VDataTable } from 'vuetify/labs/VDataTable'
 
 const dark = {
@@ -65,7 +65,6 @@ const light = {
   }
 }
 
-
 const theme = {
   defaultTheme: 'light',
   themes: {
@@ -77,15 +76,15 @@ const theme = {
 export const vuetify = createVuetify({
   components: {
     ...components,
-    VDataTable,
+    VDataTable
   },
   directives,
   theme: theme,
   icons: {
-    defaultSet: "mdi",
+    defaultSet: 'mdi',
     aliases,
     sets: {
-      mdi,
-    },
-  },
-});
+      mdi
+    }
+  }
+})

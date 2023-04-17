@@ -1,10 +1,14 @@
 <template>
   <v-container fluid class="login-screen" fill-height>
     <v-row no-gutters justify="center" align-content="center">
-      <img :width="400" src="@/assets/taranis-logo-login.svg" alt="taranis logo"/>
+      <img
+        :width="400"
+        src="@/assets/taranis-logo-login.svg"
+        alt="taranis logo"
+      />
     </v-row>
-      <v-row no-gutters justify="center" align-content="center">
-        <v-col cols="3">
+    <v-row no-gutters justify="center" align-content="center">
+      <v-col cols="3">
         <v-text-field
           :placeholder="$t('login.username')"
           name="username"
@@ -29,20 +33,27 @@
         />
       </v-col>
       <v-col cols="1">
-        <v-btn icon="mdi-login-variant" color="primary" @click="authenticate" :disabled="loginButtonDisabled"/>
+        <v-btn
+          icon="mdi-login-variant"
+          color="primary"
+          @click="authenticate"
+          :disabled="loginButtonDisabled"
+        />
       </v-col>
-      </v-row>
-    <v-alert v-if="login_error !== undefined" dense type="error" text>{{$t(login_error)}}</v-alert>
+    </v-row>
+    <v-alert v-if="login_error !== undefined" dense type="error" text>{{
+      $t(login_error)
+    }}</v-alert>
   </v-container>
 </template>
 
 <script>
 import AuthMixin from '@/services/auth/auth_mixin'
 import { mapActions } from 'vuex'
-import { defineComponent } from "vue";
+import { defineComponent } from 'vue'
 
 export default defineComponent({
-  name: 'Login',
+  name: 'LoginView',
   data: () => ({
     username: '',
     password: '',
@@ -64,9 +75,9 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(['login']),
-    authenticate () {
-      this.login({ username: this.username, password: this.password })
-        .then((error) => {
+    authenticate() {
+      this.login({ username: this.username, password: this.password }).then(
+        (error) => {
           if (this.isAuthenticated()) {
             this.login_error = undefined
             this.$router.push('/')
@@ -79,7 +90,8 @@ export default defineComponent({
               this.login_error = 'login.error'
             }
           }
-        })
+        }
+      )
     }
   }
 })

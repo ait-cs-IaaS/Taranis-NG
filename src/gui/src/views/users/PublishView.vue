@@ -57,7 +57,6 @@ export default {
   },
   mounted() {
     this.updateData()
-  },
-  beforeDestroy() {}
+  }
 }
 </script>

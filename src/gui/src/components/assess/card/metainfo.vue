@@ -45,7 +45,7 @@
 import { isValidUrl } from '@/utils/helpers.js'
 
 export default {
-  name: 'metainfo',
+  name: 'MetaInfo',
   props: {
     newsItem: {
       type: Object,

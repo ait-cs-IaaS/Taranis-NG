@@ -11,7 +11,6 @@ import { dashboard } from '@/store/dashboard.js'
 import { users } from '@/store/users.js'
 import { filter } from '@/store/filter.js'
 
-
 const state = {
   user: {
     id: '',
@@ -23,11 +22,10 @@ const state = {
   itemCountTotal: 0,
   itemCountFiltered: 0,
   drawerVisible: true,
-  coreAPIURL: `${import.meta.env.BASE_URL}/api`,
+  coreAPIURL: `${import.meta.env.BASE_URL}/api`
 }
 
 const actions = {
-
   setUser(context, userData) {
     context.commit('setUser', userData)
   },
@@ -62,7 +60,6 @@ const actions = {
 }
 
 const mutations = {
-
   setUser(state, userData) {
     state.user = userData
   },
@@ -91,7 +88,6 @@ const mutations = {
 }
 
 const getters = {
-
   getUserId(state) {
     return state.user.id
   },
@@ -142,7 +138,6 @@ const getters = {
 }
 
 export const store = createStore({
-
   state,
   actions,
   mutations,

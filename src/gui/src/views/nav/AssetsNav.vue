@@ -151,7 +151,7 @@ export default {
   },
   created() {
     const query = Object.fromEntries(
-      Object.entries(this.$route.query).filter(([_, v]) => v != null)
+      Object.entries(this.$route.query).filter(([, v]) => v != null)
     )
     this.updateAssetFilter(query)
     console.debug('loaded with query', query)

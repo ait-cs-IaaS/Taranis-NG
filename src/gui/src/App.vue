@@ -17,8 +17,8 @@ import MainMenu from '@/components/MainMenu.vue'
 import AuthMixin from '@/services/auth/auth_mixin'
 import Notification from '@/components/common/Notification.vue'
 import { mapActions, mapGetters } from 'vuex'
-import { useCookies } from "vue3-cookies"
-import { defineComponent } from "vue";
+import { useCookies } from 'vue3-cookies'
+import { defineComponent } from 'vue'
 
 export default defineComponent({
   name: 'App',
@@ -113,8 +113,7 @@ export default defineComponent({
       }.bind(this),
       5000
     )
-  },
-  created() {}
+  }
 })
 </script>
 

@@ -10,50 +10,50 @@
       </v-toolbar>
       <v-row justify="center" class="px-4 py-4">
         <v-row justify="center" class="subtitle-2 info--text pt-4 ma-0">
-            <v-row class="text-center">
-              <v-col>
-                <span class="overline font-weight-bold">
-                  {{ $t('assess.collected') }}
-                </span>
-                <br />
-                <span class="caption">
-                  {{ $d(new Date(news_item.news_item_data.collected), 'long') }}
-                </span>
-              </v-col>
-              <v-col>
-                <span class="overline font-weight-bold">
-                  {{ $t('assess.published') }}
-                </span>
-                <br />
-                <span class="caption">
-                  {{ $d(new Date(news_item.news_item_data.published), 'long') }}
-                </span>
-              </v-col>
-              <v-col>
-                <span class="overline font-weight-bold">
-                  {{ $t('assess.source') }} </span
-                ><br />
-                <span class="caption">
-                  {{ news_item.news_item_data.source }}
-                </span>
-              </v-col>
-              <v-col>
-                <span class="overline font-weight-bold">
-                  {{ $t('assess.author') }}
-                </span>
-                <br />
-                <span class="caption">
-                  {{ news_item.news_item_data.author }}
-                </span>
-              </v-col>
-              <v-col>
-                <span class="overline font-weight-bold"> ID </span>
-                <br />
-                <span class="caption">
-                  {{ news_item.id }}
-                </span>
-              </v-col>
-            </v-row>
+          <v-row class="text-center">
+            <v-col>
+              <span class="overline font-weight-bold">
+                {{ $t('assess.collected') }}
+              </span>
+              <br />
+              <span class="caption">
+                {{ $d(new Date(news_item.news_item_data.collected), 'long') }}
+              </span>
+            </v-col>
+            <v-col>
+              <span class="overline font-weight-bold">
+                {{ $t('assess.published') }}
+              </span>
+              <br />
+              <span class="caption">
+                {{ $d(new Date(news_item.news_item_data.published), 'long') }}
+              </span>
+            </v-col>
+            <v-col>
+              <span class="overline font-weight-bold">
+                {{ $t('assess.source') }} </span
+              ><br />
+              <span class="caption">
+                {{ news_item.news_item_data.source }}
+              </span>
+            </v-col>
+            <v-col>
+              <span class="overline font-weight-bold">
+                {{ $t('assess.author') }}
+              </span>
+              <br />
+              <span class="caption">
+                {{ news_item.news_item_data.author }}
+              </span>
+            </v-col>
+            <v-col>
+              <span class="overline font-weight-bold"> ID </span>
+              <br />
+              <span class="caption">
+                {{ news_item.id }}
+              </span>
+            </v-col>
+          </v-row>
         </v-row>
         <hr style="width: calc(100%); border: 0px" />
         <v-row class="headline">

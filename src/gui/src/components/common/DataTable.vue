@@ -131,13 +131,13 @@ export default {
   }),
   computed: {
     headers() {
-      var actionHeader = {
+      const actionHeader = {
         text: 'Actions',
         value: 'actions',
         sortable: false,
         width: '30px'
       }
-      var headers = []
+      let headers = []
       if (this.headerFilter.length > 0) {
         if (typeof this.headerFilter[0] !== 'object') {
           headers = this.headerFilter.map((key) => this.headerTransform(key))

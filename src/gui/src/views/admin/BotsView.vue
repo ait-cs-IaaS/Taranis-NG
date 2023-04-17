@@ -6,7 +6,6 @@
       :headerFilter="['name', 'description']"
       sortByItem="name"
       :actionColumn="false"
-      @delete-item="deleteItem"
       @edit-item="editItem"
       @add-item="addItem"
       @update-items="updateData"
@@ -34,7 +33,7 @@ import {
 } from '@/utils/helpers'
 
 export default {
-  name: 'Bots',
+  name: 'BotsView',
   components: {
     DataTable,
     EditConfig
@@ -132,12 +131,6 @@ export default {
         this.createItem(updateItem)
       }
     },
-    deleteItem(item) {
-      notifyFailure('Deleting Bots not supported')
-    },
-    createItem(item) {
-      notifyFailure('Creating Bots not supported')
-    },
     updateItem(item) {
       updateBot(item)
         .then(() => {
@@ -151,7 +144,6 @@ export default {
   },
   mounted() {
     this.updateData()
-  },
-  beforeDestroy() {}
+  }
 }
 </script>

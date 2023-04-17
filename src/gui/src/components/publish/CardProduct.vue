@@ -80,7 +80,6 @@ export default {
     deleteClicked(data) {
       this.$root.$emit('delete-product', data)
     },
-    buttonClicked() {},
     cardItemToolbar(action) {
       switch (action) {
         case 'edit':

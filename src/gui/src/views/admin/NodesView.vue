@@ -34,7 +34,7 @@ import { mapActions, mapGetters } from 'vuex'
 import { notifySuccess, notifyFailure, objectFromFormat } from '@/utils/helpers'
 
 export default {
-  name: 'Nodes',
+  name: 'NodesView',
   components: {
     DataTable,
     EditConfig
@@ -171,7 +171,6 @@ export default {
   },
   mounted() {
     this.updateData()
-  },
-  beforeDestroy() {}
+  }
 }
 </script>

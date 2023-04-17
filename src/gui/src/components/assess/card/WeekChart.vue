@@ -39,8 +39,7 @@ export default {
   props: {
     story: {
       type: Object,
-      required: false,
-      default: () => {}
+      required: false
     },
     timespan: {
       type: Number,
@@ -49,8 +48,7 @@ export default {
     },
     dataPoints: {
       type: Array,
-      required: false,
-      default: () => []
+      required: false
     },
     threshold: {
       type: Number,
@@ -81,7 +79,6 @@ export default {
             display: false
           }
         }
-
       }
     }
   },
@@ -99,7 +96,7 @@ export default {
 
     data_point_items() {
       const dateCounts = {}
-      this.dataPoints.forEach(date => {
+      this.dataPoints.forEach((date) => {
         const day = new Date(date).toLocaleDateString(undefined, {
           day: '2-digit',
           month: '2-digit'
@@ -155,9 +152,6 @@ export default {
     threshold_line() {
       return Array(this.timespan).fill(this.threshold)
     }
-  },
-  updated() {
-    // console.log('card rendered!')
   },
   mounted() {
     if (!this.story && !this.dataPoints) {

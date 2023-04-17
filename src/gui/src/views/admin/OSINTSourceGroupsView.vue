@@ -34,7 +34,7 @@ import { mapActions, mapGetters } from 'vuex'
 import { notifySuccess, objectFromFormat, notifyFailure } from '@/utils/helpers'
 
 export default {
-  name: 'OSINTSources',
+  name: 'OSINTSourceGroupsView',
   components: {
     DataTable,
     EditConfig
@@ -116,36 +116,41 @@ export default {
       }
     },
     deleteItem(item) {
-      deleteOSINTSourceGroup(item).then(() => {
-        notifySuccess(`Successfully deleted ${item.name}`)
-        this.updateData()
-      }).catch(() => {
-        notifyFailure(`Failed to delete ${item.name}`)
-      })
+      deleteOSINTSourceGroup(item)
+        .then(() => {
+          notifySuccess(`Successfully deleted ${item.name}`)
+          this.updateData()
+        })
+        .catch(() => {
+          notifyFailure(`Failed to delete ${item.name}`)
+        })
     },
     createItem(item) {
-      createOSINTSourceGroup(item).then(() => {
-        notifySuccess(`Successfully created ${item.name}`)
-        this.updateData()
-      }).catch(() => {
-        notifyFailure(`Failed to create ${item.name}`)
-      })
+      createOSINTSourceGroup(item)
+        .then(() => {
+          notifySuccess(`Successfully created ${item.name}`)
+          this.updateData()
+        })
+        .catch(() => {
+          notifyFailure(`Failed to create ${item.name}`)
+        })
     },
     updateItem(item) {
-      updateOSINTSourceGroup(item).then(() => {
-        notifySuccess(`Successfully updated ${item.name}`)
-        this.updateData()
-      }).catch(() => {
-        notifyFailure(`Failed to update ${item.name}`)
-      })
+      updateOSINTSourceGroup(item)
+        .then(() => {
+          notifySuccess(`Successfully updated ${item.name}`)
+          this.updateData()
+        })
+        .catch(() => {
+          notifyFailure(`Failed to update ${item.name}`)
+        })
     },
     selectionChange(selected) {
-      this.selected = selected.map(item => item.id)
+      this.selected = selected.map((item) => item.id)
     }
   },
   mounted() {
     this.updateData()
-  },
-  beforeDestroy() {}
+  }
 }
 </script>

@@ -1,31 +1,31 @@
 <template>
-    <DataTable
-      :addButton="true"
-      :items.sync="report_items"
-      :headerFilter="['tag', 'title', 'created']"
-      sortByItem="id"
-      :actionColumn="true"
-      @delete-item="deleteItem"
-      @edit-item="editItem"
-      @add-item="addItem"
-      @update-items="updateData"
-      @selection-change="selectionChange"
-    >
-      <template v-slot:actionColumn>
-        <v-tooltip left>
-          <template v-slot:activator="{ props }">
-            <v-icon
-              v-bind="props"
-              color="secondary"
-              @click.stop="createProduct(item)"
-            >
-              mdi-file
-            </v-icon>
-          </template>
-          <span>Create Product</span>
-        </v-tooltip>
-      </template>
-    </DataTable>
+  <DataTable
+    :addButton="true"
+    :items.sync="report_items"
+    :headerFilter="['tag', 'title', 'created']"
+    sortByItem="id"
+    :actionColumn="true"
+    @delete-item="deleteItem"
+    @edit-item="editItem"
+    @add-item="addItem"
+    @update-items="updateData"
+    @selection-change="selectionChange"
+  >
+    <template v-slot:actionColumn>
+      <v-tooltip left>
+        <template v-slot:activator="{ props }">
+          <v-icon
+            v-bind="props"
+            color="secondary"
+            @click.stop="createProduct(item)"
+          >
+            mdi-file
+          </v-icon>
+        </template>
+        <span>Create Product</span>
+      </v-tooltip>
+    </template>
+  </DataTable>
 </template>
 
 <script>
@@ -39,7 +39,7 @@ import { mapActions, mapGetters } from 'vuex'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
 
 export default {
-  name: 'Analyze',
+  name: 'AnalyzeView',
   components: {
     DataTable
   },
@@ -118,7 +118,6 @@ export default {
   },
   mounted() {
     this.updateData()
-  },
-  beforeDestroy() {}
+  }
 }
 </script>

@@ -103,16 +103,7 @@
 </template>
 
 <script>
-import {
-  createReportItem,
-  updateReportItem
-  //   lockReportItem,
-  //   unlockReportItem,
-  //   holdLockReportItem,
-  //   getReportItem,
-  //   getReportItemData,
-  //   getReportItemLocks
-} from '@/api/analyze'
+import { createReportItem, updateReportItem } from '@/api/analyze'
 
 import AttributeItem from '@/components/analyze/AttributeItem.vue'
 import CardStory from '@/components/assess/CardStory.vue'
@@ -122,7 +113,7 @@ import { mapActions, mapGetters } from 'vuex'
 export default {
   name: 'ReportItem',
   props: {
-    report_item_prop: { type: Object, default: () => {}, required: true },
+    report_item_prop: { type: Object, required: true },
     edit: { type: Boolean, default: false }
   },
   emits: ['reportcreated'],
@@ -229,7 +220,6 @@ export default {
       this.report_types = this.getReportTypes().items
       this.report_type = this.report_item.report_item_type_id
     })
-  },
-  beforeDestroy() {}
+  }
 }
 </script>

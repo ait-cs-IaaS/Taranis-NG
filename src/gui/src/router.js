@@ -1,4 +1,4 @@
-import { createWebHistory, createRouter } from "vue-router";
+import { createWebHistory, createRouter } from 'vue-router'
 import Home from '@/views/Home.vue'
 import { store } from '@/store/store'
 import Permissions from '@/services/auth/permissions'
@@ -16,10 +16,7 @@ export const router = createRouter({
       path: '/enter',
       name: 'enter',
       components: {
-        default: () =>
-          import(
-            '@/views/users/EnterView.vue'
-          )
+        default: () => import('@/views/users/EnterView.vue')
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.ASSESS_CREATE] }
     },
@@ -39,9 +36,7 @@ export const router = createRouter({
       name: 'story',
       components: {
         default: () =>
-          import(
-            /* webpackChunkName: "assess" */ '@/views/users/StoryView.vue'
-          )
+          import(/* webpackChunkName: "assess" */ '@/views/users/StoryView.vue')
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.ASSESS_ACCESS] }
     },
@@ -118,7 +113,6 @@ export const router = createRouter({
           ),
         nav: () =>
           import(/* webpackChunkName: "assets" */ '@/views/nav/AssetsNav.vue')
-
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.MY_ASSETS_ACCESS] }
     },
@@ -127,9 +121,7 @@ export const router = createRouter({
       name: 'asset',
       components: {
         default: () =>
-          import(
-            /* webpackChunkName: "assets" */ '@/views/users/AssetView.vue'
-          )
+          import(/* webpackChunkName: "assets" */ '@/views/users/AssetView.vue')
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.MY_ASSETS_ACCESS] }
     },
@@ -232,9 +224,7 @@ export const router = createRouter({
       name: 'acls',
       components: {
         default: () =>
-          import(
-            /* webpackChunkName: "config" */ '@/views/admin/ACLsView.vue'
-          ),
+          import(/* webpackChunkName: "config" */ '@/views/admin/ACLsView.vue'),
         nav: () =>
           import(/* webpackChunkName: "config" */ '@/views/nav/ConfigNav.vue')
       },
@@ -454,12 +444,12 @@ export const router = createRouter({
   ]
 })
 
-router.beforeEach((to, from) => {
+router.beforeEach((to) => {
   if (to.meta.requiresAuth && !store.getters.isAuthenticated) {
     if (store.getters.hasExternalLoginUrl) {
       window.location = encodeURI(store.getters.getLoginURL)
     }
-    return { name: "login" }
+    return { name: 'login' }
   }
   return true
 })

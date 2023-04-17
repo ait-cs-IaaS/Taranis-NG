@@ -19,7 +19,7 @@
 import { voteNewsItemAggregate } from '@/api/assess'
 
 export default {
-  name: 'votes',
+  name: 'StoryVotes',
   props: {
     story: {
       type: Object,

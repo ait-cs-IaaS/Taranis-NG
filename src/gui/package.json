@@ -5,7 +5,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "eslint --ext .js,.vue --fix src",
+    "format": "prettier --write \"src/**/*.{js,vue}\"",
+    "lint_and_format": "npm run lint && npm run format",
+    "test": "npm run lint && npm run format"
   },
   "dependencies": {
     "@intlify/unplugin-vue-i18n": "^0.10.0",

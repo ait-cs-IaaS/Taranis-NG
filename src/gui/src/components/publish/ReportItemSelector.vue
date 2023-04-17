@@ -54,7 +54,6 @@
 </template>
 
 <script>
-import ContentDataAnalyze from '@/components/analyze/ContentDataAnalyze'
 import ToolbarFilter from '@/components/common/ToolbarFilter.vue'
 import CardAnalyze from '../analyze/CardAnalyze'
 import ToolbarFilterAnalyze from '@/components/analyze/ToolbarFilterAnalyze'
@@ -66,7 +65,6 @@ export default {
   name: 'ReportItemSelector',
   components: {
     ToolbarFilterAnalyze,
-    ContentDataAnalyze,
     ToolbarFilter,
     CardAnalyze,
     NewReportItem
@@ -84,7 +82,11 @@ export default {
   }),
   computed: {},
   methods: {
-    ...mapGetters('analyze', ['getCurrentReportItemGroup', 'getReportItems', 'getSelectionReport']),
+    ...mapGetters('analyze', [
+      'getCurrentReportItemGroup',
+      'getReportItems',
+      'getSelectionReport'
+    ]),
     ...mapActions('analyze', ['selectReport', 'multiSelectReport']),
     newDataLoaded(count) {
       this.$refs.toolbarFilter.updateDataCount(count)

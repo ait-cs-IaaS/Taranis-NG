@@ -11,7 +11,7 @@ export function xorConcat(array, element) {
 }
 
 export function isValidUrl(urlString) {
-  var urlPattern = new RegExp(
+  const urlPattern = new RegExp(
     '^(https?:\\/\\/)?' + // validate protocol
       '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // validate domain name
       '((\\d{1,3}\\.){3}\\d{1,3}))' + // validate OR ip (v4) address
@@ -61,7 +61,7 @@ export function emptyValues(obj) {
 }
 
 export function objectFromFormat(format) {
-  var newObject = {}
+  const newObject = {}
   format.map(function (item) {
     if (item === undefined) {
       return

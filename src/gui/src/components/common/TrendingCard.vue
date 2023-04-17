@@ -30,8 +30,6 @@ export default {
     tagText(tag_type) {
       return tagTextFromType(tag_type)
     }
-  },
-  computed: {},
-  mounted() {}
+  }
 }
 </script>

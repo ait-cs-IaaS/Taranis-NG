@@ -25,10 +25,7 @@
           </v-btn>
         </v-col>
 
-        <v-col
-          cols="1"
-          class="py-1 d-flex"
-        >
+        <v-col cols="1" class="py-1 d-flex">
           <span class="mr-2 my-auto selection-indicator">
             selected: <strong>{{ selection.length }}</strong>
           </span>
@@ -109,8 +106,6 @@ export default {
           })
       }
     }
-  },
-  computed: {},
-  mounted() {}
+  }
 }
 </script>

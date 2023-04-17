@@ -51,10 +51,9 @@ import { createAsset, updateAsset } from '@/api/assets'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
 
 export default {
-  name: 'Asset',
-  components: {},
+  name: 'AssetView',
   props: {
-    asset_prop: { type: Object, default: () => {}, required: true },
+    asset_prop: { type: Object, required: true },
     edit: { type: Boolean, default: false }
   },
   data: function () {
@@ -95,7 +94,6 @@ export default {
     update(cpes) {
       this.asset.asset_cpes = cpes
     }
-  },
-  mounted() {}
+  }
 }
 </script>
