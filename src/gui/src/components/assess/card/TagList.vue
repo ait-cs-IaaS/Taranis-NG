@@ -33,7 +33,10 @@ import { tagIconFromType } from '@/utils/helpers'
 export default {
   name: 'TagList',
   props: {
-    tags: [],
+    tags: {
+      type: Array,
+      required: true
+    },
     limit: {
       type: Number,
       default: 5

@@ -16,7 +16,7 @@ export default defineConfig({
   },
   plugins: [
     vue(),
-    VueI18nPlugin({}),
+    VueI18nPlugin(),
     vuetify({ autoImport: true })
   ],
   build: {

@@ -15,6 +15,7 @@
 <script>
 export default {
   name: 'switchField',
+  emits: ['input'],
   props: {
     label: String,
     color: String,

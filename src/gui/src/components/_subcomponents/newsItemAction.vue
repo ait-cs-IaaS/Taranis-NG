@@ -20,6 +20,7 @@
 <script>
 export default {
   name: 'newsItemAction',
+  emits: ['click'],
   props: {
     active: Boolean,
     icon: String,

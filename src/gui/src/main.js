@@ -6,7 +6,7 @@ import { store } from '@/store/store'
 import ApiService from '@/services/api_service'
 import { createI18n } from 'vue-i18n'
 import { messages } from '@/i18n/messages'
-import { dateTimeFormats } from '@/i18n/datetimeformat'
+import { datetimeFormats } from '@/i18n/datetimeformat'
 import DatePicker from 'vue-datepicker-next'
 import { vuetify } from '@/plugins/vuetify'
 
@@ -21,7 +21,7 @@ const i18n = createI18n({
       : import.meta.env.VITE_TARANIS_NG_LOCALE,
   fallbackLocale: 'en',
   messages,
-  dateTimeFormats
+  datetimeFormats
 })
 
 app.use(i18n)

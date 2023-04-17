@@ -200,58 +200,6 @@ svg.logo {
     right: 0;
 }
 
-/* --- NewReportItem.vue --- */
-.div-wrapper .theme--light.v-card {
-    border-left: 5px solid rgb(255, 172, 33);
-}
-
-.tabs [role='tablist'] {
-    background-color: #f5ebd5 !important;
-
-}
-
-.icon-field-offset {
-    margin-left: 8px;
-}
-
-.locked-style {
-    border-color: lightblue !important;
-    border-width: 1px;
-    border-style: dashed;
-}
-
-.attribute-card {
-    border-left: 4px solid #6abef2 !important;
-}
-
-.attribute-title {
-    background-color: #4694db30 !important;
-    border-radius: 0 4px 0 0 !important;
-}
-
-.vue-csv-uploader button.load {
-    margin: 10px 10px 10px 0;
-    padding: 4px 10px 4px 10px;
-    background-color: #4092dd;
-    border-radius: 4px;
-    color: white;
-}
-
-.vue-csv-uploader-part-two table {
-    width: 400px;
-}
-
-.vue-csv-uploader-part-two table thead {
-    text-align: left;
-}
-
-.vue-csv-uploader-part-two table select {
-    -webkit-appearance: auto;
-    -moz-appearance: auto;
-    border: 1px solid gray;
-    border-radius: 4px;
-}
-
 /* --- NewsItemSelector.vue --- */
 .row {
     margin-left: 0;

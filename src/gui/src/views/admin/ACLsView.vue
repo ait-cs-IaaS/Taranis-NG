@@ -11,7 +11,7 @@
       @add-item="addItem"
       @update-items="updateData"
     />
-    <NewACL v-if="showForm" :user_id.sync="userID"></NewACL>
+    <NewACL v-if="showForm" :user_id="userID"></NewACL>
   </div>
 </template>
 

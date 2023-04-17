@@ -20,6 +20,7 @@ import DataTable from '@/components/common/DataTable'
 import UserForm from '../../components/config/user/UserForm'
 import { deleteUser, createUser, updateUser } from '@/api/config'
 import { mapActions, mapGetters } from 'vuex'
+import { notifySuccess, notifyFailure } from '@/utils/helpers'
 
 export default {
   name: 'UsersView',
@@ -63,35 +64,34 @@ export default {
       }
     },
     deleteItem(item) {
-      if (!item.default) {
-        deleteUser(item).then(() => {
-          this.message = `Successfully deleted ${item.name}`
-          this.dialog = true
-          this.$root.$emit('notification', {
-            type: 'success',
-            loc: `Successfully deleted ${item.name}`
-          })
+      deleteUser(item)
+        .then(() => {
+          notifySuccess(`Successfully deleted ${item.name}`)
           this.updateData()
         })
-      }
+        .catch(() => {
+          notifyFailure(`Failed to delete ${item.name}`)
+        })
     },
     createItem(item) {
-      createUser(item).then(() => {
-        this.$root.$emit('notification', {
-          type: 'success',
-          loc: `Successfully added ${item.name}`
+      createUser(item)
+        .then(() => {
+          notifySuccess(`Successfully created ${item.name}`)
+          this.updateData()
         })
-        this.updateData()
-      })
+        .catch(() => {
+          notifyFailure(`Failed to created ${item.name}`)
+        })
     },
     updateItem(item) {
-      updateUser(item).then(() => {
-        this.$root.$emit('notification', {
-          type: 'success',
-          loc: `Successfully updated ${item.name}`
+      updateUser(item)
+        .then(() => {
+          notifySuccess(`Successfully updated ${item.name}`)
+          this.updateData()
         })
-        this.updateData()
-      })
+        .catch(() => {
+          notifyFailure(`Failed to update ${item.name}`)
+        })
     },
     selectionChange(selected) {
       this.selected = selected.map((item) => item.id)

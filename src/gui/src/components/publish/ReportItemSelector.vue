@@ -38,8 +38,6 @@
 
     <v-spacer style="height: 8px"></v-spacer>
 
-    <NewReportItem ref="reportItemDialog" />
-
     <component
       publish_selector
       class="item-selector"
@@ -57,7 +55,6 @@
 import ToolbarFilter from '@/components/common/ToolbarFilter.vue'
 import CardAnalyze from '../analyze/CardAnalyze'
 import ToolbarFilterAnalyze from '@/components/analyze/ToolbarFilterAnalyze'
-import NewReportItem from '@/components/analyze/NewReportItem.vue'
 import AuthMixin from '@/services/auth/auth_mixin'
 import { mapGetters, mapActions } from 'vuex'
 
@@ -66,8 +63,7 @@ export default {
   components: {
     ToolbarFilterAnalyze,
     ToolbarFilter,
-    CardAnalyze,
-    NewReportItem
+    CardAnalyze
   },
   mixins: [AuthMixin],
   props: {

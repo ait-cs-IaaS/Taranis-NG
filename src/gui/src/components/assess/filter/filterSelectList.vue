@@ -48,6 +48,7 @@
 <script>
 export default {
   name: 'filterSelectList',
+  emits: ['input'],
   props: {
     value: {
       type: Array,

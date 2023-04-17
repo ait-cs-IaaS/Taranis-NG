@@ -157,7 +157,6 @@ export default {
     cancel() {
       this.$validator.reset()
       this.visible = false
-      this.$root.$emit('update-data')
     },
 
     add() {

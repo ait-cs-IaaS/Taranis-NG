@@ -197,6 +197,7 @@
                   </v-col>
                   <v-col>
                     <tag-list
+                      v-if="story.tags"
                       :tags="story.tags"
                       :truncate="openSummary"
                       :limit="openSummary ? 20 : 5"

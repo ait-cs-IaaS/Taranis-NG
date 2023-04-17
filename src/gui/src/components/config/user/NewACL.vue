@@ -4,7 +4,6 @@
       <v-row no-gutters>
         <v-col cols="12" class="pa-1">
           <v-text-field
-            :disabled="!canUpdate"
             :label="$t('acl.name')"
             name="name"
             type="text"
@@ -12,12 +11,10 @@
             v-validate="'required'"
             data-vv-name="name"
             :error-messages="errors.collect('name')"
-            :spellcheck="$store.state.settings.spellcheck"
           />
         </v-col>
         <v-col cols="12" class="pa-1">
           <v-textarea
-            :disabled="!canUpdate"
             :label="$t('acl.description')"
             name="description"
             v-model="acl.description"
@@ -26,7 +23,6 @@
         </v-col>
         <v-col cols="6" class="pa-1">
           <v-combobox
-            :disabled="!canUpdate"
             v-model="selected_type"
             :items="types"
             item-text="title"
@@ -35,7 +31,6 @@
         </v-col>
         <v-col cols="6" class="pa-1">
           <v-text-field
-            :disabled="!canUpdate"
             :label="$t('acl.item_id')"
             name="item_id"
             type="text"
@@ -46,49 +41,40 @@
       <v-row no-gutters>
         <v-col cols="12" class="d-flex">
           <v-checkbox
-            :disabled="!canUpdate"
             class="pr-8"
             :label="$t('acl.see')"
             name="see"
             v-model="acl.see"
-            :spellcheck="$store.state.settings.spellcheck"
           />
           <v-checkbox
-            :disabled="!canUpdate"
             class="pr-8"
             :label="$t('acl.access')"
             name="access"
             v-model="acl.access"
-            :spellcheck="$store.state.settings.spellcheck"
           />
           <v-checkbox
-            :disabled="!canUpdate"
             class="pr-8"
             :label="$t('acl.modify')"
             name="modify"
             v-model="acl.modify"
-            :spellcheck="$store.state.settings.spellcheck"
           />
         </v-col>
       </v-row>
       <v-row no-gutters>
         <v-col cols="12">
           <v-checkbox
-            :disabled="!canUpdate"
             :label="$t('acl.everyone')"
             name="everyone"
             v-model="acl.everyone"
-            :spellcheck="$store.state.settings.spellcheck"
           />
         </v-col>
         <v-col cols="12">
           <v-data-table
-            :disabled="!canUpdate"
             v-model="selected_users"
             :headers="headers_user"
             :items="users"
             item-key="id"
-            :show-select="canUpdate"
+            :show-select="true"
             class="elevation-1"
           >
             <template v-slot:top>
@@ -100,12 +86,11 @@
         </v-col>
         <v-col cols="12" class="pt-2">
           <v-data-table
-            :disabled="!canUpdate"
             v-model="selected_roles"
             :headers="headers_role"
             :items="roles"
             item-key="id"
-            :show-select="canUpdate"
+            :show-select="true"
             class="elevation-1"
           >
             <template v-slot:top>
@@ -127,7 +112,7 @@
         </v-col>
       </v-row>
       <v-row>
-        <v-btn v-if="canUpdate" text dark type="submit" form="form">
+        <v-btn text dark type="submit" form="form">
           <v-icon left>mdi-content-save</v-icon>
           <span>{{ $t('acl.save') }}</span>
         </v-btn></v-row
@@ -137,16 +122,19 @@
 </template>
 
 <script>
-import AuthMixin from '../../../services/auth/auth_mixin'
 import { createACLEntry, updateACLEntry } from '@/api/config'
-
-import Permissions from '@/services/auth/permissions'
 import { mapActions, mapGetters } from 'vuex'
+import { notifySuccess, notifyFailure } from '@/utils/helpers'
 
 export default {
   name: 'NewACL',
   components: {},
-  props: { add_button: Boolean },
+  props: {
+    acl_id: {
+      type: Number,
+      required: false
+    }
+  },
   data: () => ({
     headers_user: [
       {
@@ -194,14 +182,6 @@ export default {
       roles: []
     }
   }),
-  computed: {
-    canCreate() {
-      return this.checkPermission(Permissions.CONFIG_ACL_CREATE)
-    },
-    canUpdate() {
-      return this.checkPermission(Permissions.CONFIG_ACL_UPDATE) || !this.edit
-    }
-  },
   methods: {
     ...mapActions('config', ['loadUsers', 'loadRoles']),
     ...mapGetters('config', ['getUsers', 'getRoles']),
@@ -260,13 +240,10 @@ export default {
               .then(() => {
                 this.$validator.reset()
                 this.visible = false
-
-                this.$root.$emit('notification', {
-                  type: 'success',
-                  loc: 'acl.successful_edit'
-                })
+                notifySuccess('acl.successful_edit')
               })
               .catch(() => {
+                notifyFailure('acl.error_edit')
                 this.show_error = true
               })
           } else {
@@ -274,13 +251,10 @@ export default {
               .then(() => {
                 this.$validator.reset()
                 this.visible = false
-
-                this.$root.$emit('notification', {
-                  type: 'success',
-                  loc: 'acl.successful'
-                })
+                notifySuccess('acl.successful')
               })
               .catch(() => {
+                notifyFailure('acl.error')
                 this.show_error = true
               })
           }
@@ -290,7 +264,6 @@ export default {
       })
     }
   },
-  mixins: [AuthMixin],
   mounted() {
     this.loadUsers().then(() => {
       this.users = this.getUsers().items
@@ -299,34 +272,6 @@ export default {
     this.loadRoles().then(() => {
       this.roles = this.getRoles().items
     })
-
-    this.$root.$on('show-edit', (data) => {
-      this.visible = true
-      this.edit = true
-      this.show_error = false
-
-      this.selected_users = data.users
-      this.selected_roles = data.roles
-
-      this.acl.id = data.id
-      this.acl.name = data.name
-      this.acl.description = data.description
-      this.acl.item_type = data.item_type
-      this.acl.item_id = data.item_id
-      this.acl.everyone = data.everyone
-      this.acl.see = data.see
-      this.acl.access = data.access
-      this.acl.modify = data.modify
-
-      for (let i = 0; i < this.types.length; i++) {
-        if (this.types[i].id === data.item_type) {
-          this.selected_type = this.types[i]
-        }
-      }
-    })
-  },
-  beforeDestroy() {
-    this.$root.$off('show-edit')
   }
 }
 </script>

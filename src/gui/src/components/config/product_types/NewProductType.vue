@@ -77,6 +77,7 @@ import FormParameters from '../../common/FormParameters'
 import ProductTypeHelp from './ProductTypeHelp'
 import AuthMixin from '@/services/auth/auth_mixin'
 import Permissions from '@/services/auth/permissions'
+import { notifySuccess } from '@/utils/helpers'
 
 export default {
   name: 'NewProductType',
@@ -151,10 +152,7 @@ export default {
               .then(() => {
                 this.$validator.reset()
                 this.visible = false
-                this.$root.$emit('notification', {
-                  type: 'success',
-                  loc: 'product_type.successful_edit'
-                })
+                notifySuccess('product_type.successful_edit')
               })
               .catch(() => {
                 this.show_error = true
@@ -163,10 +161,7 @@ export default {
             createProductType(this.product)
               .then(() => {
                 this.$validator.reset()
-                this.$root.$emit('notification', {
-                  type: 'success',
-                  loc: 'product_type.successful'
-                })
+                notifySuccess('product_type.successful')
               })
               .catch(() => {
                 this.show_error = true

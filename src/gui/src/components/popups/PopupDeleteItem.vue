@@ -40,6 +40,7 @@
 <script>
 export default {
   name: 'PopupDeleteItem',
+  emits: ['close', 'deleteItem'],
   props: {
     newsItem: {}
   },

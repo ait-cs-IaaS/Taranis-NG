@@ -69,9 +69,6 @@ export default defineComponent({
       this.connectSSE()
     }
   },
-  updated() {
-    this.$root.$emit('app-updated')
-  },
   setup() {
     const { cookies } = useCookies()
     return { cookies }

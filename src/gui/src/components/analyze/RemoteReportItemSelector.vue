@@ -167,8 +167,6 @@ export default {
         const i = this.values.indexOf(report_item)
         this.values.splice(i, 1)
       }
-
-      this.$emit('remote-report-items-changed', null)
     },
 
     cardLayout: function () {
@@ -214,9 +212,6 @@ export default {
           this.values.push(added_values[i])
         }
       }
-
-      this.$emit('remote-report-items-changed', null)
-
       this.close()
     },
 
@@ -248,8 +243,6 @@ export default {
               }
             }
           }
-
-          this.$emit('remote-report-items-changed', null)
         }
       }
     }

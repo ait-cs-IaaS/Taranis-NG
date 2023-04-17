@@ -351,14 +351,10 @@ const keyboardMixin = (targetId) => ({
 
             case 'enter_filter_mode':
               this.keyboard_state = 'FILTER'
-              this.$root.$emit('notification', {
-                type: 'success',
-                loc: 'assess.shortcuts.enter_filter_mode'
-              })
               break
 
             case 'reload':
-              this.$root.$emit('news-items-updated')
+              //this.$root.$emit('news-items-updated')
               break
           }
         } else if (
@@ -514,23 +510,6 @@ const keyboardMixin = (targetId) => ({
 
   created() {
     this.target = targetId
-    this.$root.$on('change-state', (_state) => {
-      this.keyboard_state = _state
-    })
-    this.$root.$on('key-remap', () => {
-      setTimeout(() => {
-        this.reindexCardItems()
-      }, 150)
-    })
-    this.$root.$on('update-pos', (_pos) => {
-      this.pos = _pos
-    })
-  },
-
-  beforeDestroy() {
-    this.$root.$off('change-state')
-    this.$root.$off('key-remap')
-    this.$root.$off('update-pos')
   }
 })
 

@@ -48,6 +48,7 @@
 <script>
 import { quillEditor } from 'vue3-quill'
 import { addNewsItem } from '@/api/assess'
+import { notifySuccess } from '@/utils/helpers'
 
 export default {
   name: 'EnterView',
@@ -126,10 +127,7 @@ export default {
 
               this.editorData = '<p></p>'
 
-              this.$root.$emit('notification', {
-                type: 'success',
-                loc: 'enter.successful'
-              })
+              notifySuccess('enter.successful')
             })
             .catch(() => {
               this.show_error = true

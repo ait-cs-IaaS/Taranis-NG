@@ -120,6 +120,7 @@ export default {
   components: {
     AttributeCVSS
   },
+  emits: ['input'],
   props: {
     value: {
       type: String,

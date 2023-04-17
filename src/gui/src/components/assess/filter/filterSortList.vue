@@ -51,6 +51,7 @@
 <script>
 export default {
   name: 'filterSortList',
+  emits: ['input'],
   props: {
     value: {},
     items: []

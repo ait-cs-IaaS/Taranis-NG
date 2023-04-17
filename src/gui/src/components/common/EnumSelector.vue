@@ -48,6 +48,7 @@ import { getCPEAttributeEnums } from '@/api/assets'
 
 export default {
   name: 'EnumSelector',
+  emits: ['enum-selected'],
   props: {
     attribute_id: Number,
     value_index: Number,
