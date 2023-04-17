@@ -52,7 +52,7 @@
         <v-col cols="6" class="pr-1">
           <v-select
             :disabled="!canUpdate"
-            v-model="user.organization"
+            v-model="user.organization.id"
             item-text="name"
             item-value="id"
             :hint="$t('user.organization')"
@@ -131,9 +131,6 @@ export default {
 
     visible: false,
     edit: false,
-    selected_roles: [],
-    selected_permissions: [],
-    selected_organizations: [],
     permissions: [],
     pwd: '',
     repwd: '',
@@ -142,11 +139,7 @@ export default {
   }),
   computed: {
     ...mapState(configStore, { store_permissions: 'permissions' }), // needed because of AuthMixin
-    ...mapState(configStore, [
-      'organizations',
-      'roles',
-      'getUserByID'
-    ]),
+    ...mapState(configStore, ['organizations', 'roles', 'getUserByID']),
     checkPassEdit() {
       if (this.edit) {
         return this.pwd !== '' || this.repwd !== ''
@@ -184,19 +177,23 @@ export default {
         }
 
         if (this.edit) {
-          updateUser(this.user).then(() => {
-            this.$validator.reset()
-            notifySuccess('user.successful_edit')
-          }).catch(() => {
-            notifyFailure('user.error')
-          })
+          updateUser(this.user)
+            .then(() => {
+              this.$validator.reset()
+              notifySuccess('user.successful_edit')
+            })
+            .catch(() => {
+              notifyFailure('user.error')
+            })
         } else {
-          createUser(this.user).then(() => {
-            this.$validator.reset()
-            notifySuccess('user.successful')
-          }).catch(() => {
-            notifyFailure('user.error')
-          })
+          createUser(this.user)
+            .then(() => {
+              this.$validator.reset()
+              notifySuccess('user.successful')
+            })
+            .catch(() => {
+              notifyFailure('user.error')
+            })
         }
       })
     },
@@ -214,9 +211,11 @@ export default {
           id: -1,
           username: '',
           name: '',
+          organization: {
+            id: 0
+          },
           roles: [],
-          permissions: [],
-          organizations: []
+          permissions: []
         }
       }
     }
