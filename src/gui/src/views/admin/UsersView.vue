@@ -11,7 +11,7 @@
       @add-item="addItem"
       @update-items="updateData"
     />
-    <UserForm v-if="showForm" :user_id.sync="userID"></UserForm>
+    <UserForm v-if="showForm" :user_id="userID"></UserForm>
   </div>
 </template>
 
@@ -31,7 +31,7 @@ export default {
     showForm: false,
     users: [],
     selected: [],
-    userID: null
+    userID: -1
   }),
   methods: {
     ...mapActions('config', ['loadUsers']),
@@ -48,7 +48,7 @@ export default {
       })
     },
     addItem() {
-      this.userID = null
+      this.userID = -1
       this.showForm = true
     },
     editItem(item) {
