@@ -47,11 +47,13 @@
 import FilterNavigation from '@/components/common/FilterNavigation'
 import filterSortList from '@/components/assess/filter/filterSortList'
 import dateChips from '@/components/assess/filter/dateChips'
+import { mapActions } from 'pinia'
 import {
   mapActions as mapActionsVuex,
   mapGetters,
   mapState as mapStateVuex
 } from 'vuex'
+import { publishStore } from '@/stores/PublishStore'
 
 export default {
   name: 'PublishNav',
@@ -152,7 +154,7 @@ export default {
   },
   methods: {
     ...mapGetters(['getItemCount']),
-    ...mapActionsVuex('analyze', ['updateProducts']),
+    ...mapActions(publishStore, ['updateProducts']),
     ...mapActionsVuex('filter', ['setProductFilter', 'updateProductFilter']),
     ...mapGetters('filter', ['getProductFilter']),
     addReport() {

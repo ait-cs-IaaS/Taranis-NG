@@ -275,7 +275,7 @@ export default {
             updateProduct(this.product).then(() => {
               this.$validator.reset()
               this.preview_link =
-                this.$store.getters.getCoreAPIURL +
+                this.$store.getters.getStoreAPIURL +
                 '/publish/products/' +
                 this.product.id +
                 '/overview?jwt=' +
@@ -287,7 +287,7 @@ export default {
               this.product.id = response.data
               this.$validator.reset()
               this.preview_link =
-                this.$store.getters.getCoreAPIURL +
+                this.$store.getters.getStoreAPIURL +
                 '/publish/products/' +
                 response.data +
                 '/overview?jwt=' +
