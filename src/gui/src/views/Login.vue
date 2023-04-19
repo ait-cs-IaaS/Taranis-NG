@@ -48,8 +48,7 @@
 </template>
 
 <script>
-import AuthMixin from '@/services/auth/auth_mixin'
-import { mapActions } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
@@ -59,7 +58,6 @@ export default defineComponent({
     password: '',
     login_error: undefined
   }),
-  mixins: [AuthMixin],
   computed: {
     acceptPassword() {
       return this.password.length > 0
@@ -75,6 +73,7 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(['login']),
+    ...mapGetters(['isAuthenticated']),
     authenticate() {
       this.login({ username: this.username, password: this.password }).then(
         (error) => {

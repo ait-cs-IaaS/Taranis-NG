@@ -1,11 +1,6 @@
-import Permissions from '@/services/auth/permissions'
 import { store } from '@/store/store'
 
 const AuthMixin = {
-  data: () => ({
-    permissions: Permissions
-  }),
-
   methods: {
     isAuthenticated() {
       return store.getters.isAuthenticated

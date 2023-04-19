@@ -14,7 +14,6 @@
 
 <script>
 import MainMenu from '@/components/MainMenu.vue'
-import AuthMixin from '@/services/auth/auth_mixin'
 import Notification from '@/components/common/Notification.vue'
 import { mapActions, mapGetters } from 'vuex'
 import { useCookies } from 'vue3-cookies'
@@ -27,13 +26,13 @@ export default defineComponent({
     Notification
   },
   computed: {},
-  mixins: [AuthMixin],
   methods: {
     ...mapActions('dashboard', ['updateStories']),
     ...mapActions('users', ['updateUsers']),
     ...mapActions('assess', ['updateNewsItems']),
     ...mapActions('settings', ['loadUserProfile']),
     ...mapGetters('settings', ['getProfileDarkTheme']),
+    ...mapGetters(['isAuthenticated', 'needTokenRefresh']),
 
     connectSSE() {
       if (import.meta.env.VITE_TARANIS_NG_CORE_SSE === undefined) {

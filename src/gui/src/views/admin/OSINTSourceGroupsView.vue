@@ -23,8 +23,8 @@
 </template>
 
 <script>
-import DataTable from '@/components/common/DataTable'
-import EditConfig from '../../components/config/EditConfig'
+import DataTable from '@/components/common/DataTable.vue'
+import EditConfig from '@/components/config/EditConfig.vue'
 import {
   createOSINTSourceGroup,
   deleteOSINTSourceGroup,

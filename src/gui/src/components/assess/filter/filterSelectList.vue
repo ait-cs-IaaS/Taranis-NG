@@ -15,25 +15,20 @@
           :ripple="false"
           :value="item.type"
         >
-          <template v-slot:default="{ active }">
-            <!-- Item -->
-            <v-list-item-icon class="mr-2">
-              <v-icon small color="grey" class="filter-icon mt-auto mb-auto">
-                {{ item.icon }}
-              </v-icon>
-            </v-list-item-icon>
+          <template v-slot:prepend>
+            <v-icon small color="grey" :icon="item.icon" />
+          </template>
 
-            <!-- Label -->
-            <v-list-item-content class="py-1 mt-auto mb-auto">
-              {{ item.label }}
-            </v-list-item-content>
+          <v-list-item-title class="py-1 mt-auto mb-auto">
+            {{ item.label }}
+          </v-list-item-title>
 
-            <!-- Checkmark -->
+          <template v-slot:append="{ isActive }">
             <v-list-item-action>
               <v-icon
-                v-if="active"
+                v-if="isActive"
                 small
-                class="mt-auto mb-auto dark-grey--text text--lighten-3"
+                class="mt-auto mb-auto dark-grey--text"
               >
                 mdi-check-bold
               </v-icon>

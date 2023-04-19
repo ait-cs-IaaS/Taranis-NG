@@ -54,7 +54,7 @@
 <script>
 import ToolbarFilter from '@/components/common/ToolbarFilter.vue'
 import CardAnalyze from '../analyze/CardAnalyze'
-import ToolbarFilterAnalyze from '@/components/analyze/ToolbarFilterAnalyze'
+import ToolbarFilterAnalyze from '@/components/analyze/ToolbarFilterAnalyze.vue'
 import AuthMixin from '@/services/auth/auth_mixin'
 import { mapGetters, mapActions } from 'vuex'
 

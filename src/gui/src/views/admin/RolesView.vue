@@ -21,8 +21,8 @@
 </template>
 
 <script>
-import DataTable from '@/components/common/DataTable'
-import EditConfig from '../../components/config/EditConfig'
+import DataTable from '@/components/common/DataTable.vue'
+import EditConfig from '@/components/config/EditConfig.vue'
 import { deleteRole, createRole, updateRole } from '@/api/config'
 import { mapActions, mapGetters } from 'vuex'
 import { notifySuccess, objectFromFormat, notifyFailure } from '@/utils/helpers'

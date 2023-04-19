@@ -85,10 +85,10 @@
 </template>
 
 <script>
-import ContentDataAnalyze from '@/components/analyze/ContentDataAnalyze'
+import ContentDataAnalyze from '@/components/analyze/ContentDataAnalyze.vue'
 import ToolbarFilter from '@/components/common/ToolbarFilter.vue'
 import CardAnalyze from '../analyze/CardAnalyze'
-import ToolbarFilterAnalyze from '@/components/analyze/ToolbarFilterAnalyze'
+import ToolbarFilterAnalyze from '@/components/analyze/ToolbarFilterAnalyze.vue'
 import RemoteReportItem from '@/components/analyze/RemoteReportItem.vue'
 import Permissions from '@/services/auth/permissions'
 import { getReportItemData, updateReportItem } from '@/api/analyze'

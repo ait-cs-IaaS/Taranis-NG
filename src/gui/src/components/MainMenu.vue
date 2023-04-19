@@ -55,8 +55,8 @@
     </div>
 
     <template v-slot:append>
-      <v-toolbar dense flat color="transparent" class="justify-end mr-4">
-        <div v-for="button in getButtonList(permissions)" :key="button.route">
+      <v-toolbar color="transparent">
+        <div v-for="button in getButtonList()" :key="button.route">
           <v-btn variant="text" :ripple="false" :to="button.route">
             <v-icon left>{{ button.icon }}</v-icon>
             <span class="main-menu-item">
@@ -64,16 +64,14 @@
             </span>
           </v-btn>
         </div>
+        <user-menu />
       </v-toolbar>
-
-      <UserMenu></UserMenu>
     </template>
   </v-app-bar>
 </template>
 
 <script>
-import UserMenu from './UserMenu.vue'
-import AuthMixin from '@/services/auth/auth_mixin.js'
+import UserMenu from '@/components/UserMenu.vue'
 
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { defineComponent } from 'vue'
@@ -135,9 +133,9 @@ export default defineComponent({
     ],
     darkTheme: false
   }),
-  mixins: [AuthMixin],
   methods: {
     ...mapActions(['toggleDrawer']),
+    ...mapGetters(['getPermissions']),
 
     navClicked() {
       this.toggleDrawer()
@@ -147,10 +145,10 @@ export default defineComponent({
       this.$vuetify.theme.dark = this.darkTheme
     },
 
-    getButtonList(permissions) {
+    getButtonList() {
       return this.buttons.filter(
         (button) =>
-          this.checkPermission(permissions[button.permission]) && button.show
+          this.getPermissions().includes(button.permission) && button.show
       )
     }
   },

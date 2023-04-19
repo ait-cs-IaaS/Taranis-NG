@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import DataTable from '@/components/common/DataTable'
+import DataTable from '@/components/common/DataTable.vue'
 import {
   deleteReportItem,
   createReportItem,

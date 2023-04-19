@@ -19,8 +19,8 @@
 </template>
 
 <script>
-import DataTable from '@/components/common/DataTable'
-import ReportTypeForm from '../../components/config/ReportTypeForm'
+import DataTable from '@/components/common/DataTable.vue'
+import ReportTypeForm from '@/components/config/ReportTypeForm.vue'
 import { deleteReportItemType } from '@/api/config'
 import { mapActions, mapGetters } from 'vuex'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'

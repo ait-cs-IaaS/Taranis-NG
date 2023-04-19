@@ -21,7 +21,7 @@
 </template>
 
 <script>
-import DataTable from '@/components/common/DataTable'
+import DataTable from '@/components/common/DataTable.vue'
 import EditConfig from '@/components/config/EditConfig.vue'
 import {
   deleteProductType,

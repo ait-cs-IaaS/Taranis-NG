@@ -162,37 +162,6 @@ svg.logo {
     height: 18px;
 }
 
-/* --- UserMenu.vue --- */
-.user-menu {
-    display: inherit;
-}
-
-.user-menu-button {
-    margin-right: 0;
-    margin-left: 0;
-    /*height: 46px !important;*/
-}
-
-.user-menu .v-badge__badge {
-    height: 18px;
-    min-width: 18px;
-    top: 2px;
-    right: 2px;
-}
-
-.dark-mode-switch .v-list-item__icon {
-    margin-right: 8px !important;
-    margin-bottom: 8px;
-    margin-top: 0;
-    height: 54px;
-}
-
-/* --- UserSettings.vue --- */
-.row.text-center.shortcut {
-    width: calc(100% / 3 + 24px);
-    float: left;
-}
-
 /* --- AnalyzeFilter.vue --- */
 .toolbar-buttons-right {
     padding-top: 4px;
@@ -365,51 +334,6 @@ html,
 tbody tr {
     user-select: none !important;
     cursor: pointer;
-}
-
-/* --- Navigation.vue --- */
-.navigation .v-list-item--active:not(.theme--dark) {
-    background-color: rgba(255, 255, 255, 0.3);
-}
-
-.navigation .section-icon,
-.navigation .section-divider {
-    opacity: 0.2;
-}
-
-nav .v-list-item__title {
-    text-align: center;
-    white-space: unset;
-    /*font-size: 1vh;*/
-}
-
-.navigation .navigation-list div.v-list-item:not(.section-icon) {
-    min-height: 10px;
-}
-
-/* --- QuickChat.vue --- scoped */
-.taranis-chat {
-    position: fixed;
-    top: 72px;
-    right: 32px;
-    width: 350px;
-}
-
-.chatEnv {
-    position: relative;
-
-    z-index: 20;
-}
-
-.chatButton {
-    /*position: relative;
-    left: 0.5em;*/
-}
-
-.taranis-chat .quick-chat-container {
-    height: 512px;
-    border: 1px solid #faa;
-    box-shadow: 0 0 20px 6px rgba(0, 0, 0, 0.2);
 }
 
 /* --- CardSource.vue --- */

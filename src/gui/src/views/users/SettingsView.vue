@@ -116,13 +116,11 @@
 </template>
 
 <script>
-import AuthMixin from '@/services/auth/auth_mixin'
 import { mapGetters, mapActions } from 'vuex'
 
 export default {
   name: 'UserSettings',
   components: {},
-  mixins: [AuthMixin],
   data: () => ({
     visible: false,
     dark_theme: false,

@@ -16,8 +16,8 @@
 </template>
 
 <script>
-import DataTable from '@/components/common/DataTable'
-import NewACL from '../../components/config/user/NewACL'
+import DataTable from '@/components/common/DataTable.vue'
+import NewACL from '@/components/config/user/NewACL.vue'
 import { deleteACLEntry, createACLEntry, updateACLEntry } from '@/api/config'
 import { notifySuccess } from '@/utils/helpers'
 import { mapActions, mapGetters } from 'vuex'

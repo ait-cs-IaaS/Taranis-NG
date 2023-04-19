@@ -1,5 +1,5 @@
 <template>
-  <icon-navigation :links="links" icon="mdi-ballot-outline" />
+  <icon-navigation :links="links" />
 </template>
 
 <script>

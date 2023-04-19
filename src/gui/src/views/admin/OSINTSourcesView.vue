@@ -26,9 +26,9 @@
 </template>
 
 <script>
-import DataTable from '@/components/common/DataTable'
-import EditConfig from '../../components/config/EditConfig'
-import ImportExport from '../../components/config/ImportExport'
+import DataTable from '@/components/common/DataTable.vue'
+import EditConfig from '@/components/config/EditConfig.vue'
+import ImportExport from '@/components/config/ImportExport.vue'
 import {
   deleteOSINTSource,
   createOSINTSource,

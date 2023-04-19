@@ -16,8 +16,8 @@
 </template>
 
 <script>
-import DataTable from '@/components/common/DataTable'
-import UserForm from '../../components/config/user/UserForm'
+import DataTable from '@/components/common/DataTable.vue'
+import UserForm from '@/components/config/user/UserForm.vue'
 import { deleteUser, createUser, updateUser } from '@/api/config'
 import { mapActions, mapGetters } from 'vuex'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'

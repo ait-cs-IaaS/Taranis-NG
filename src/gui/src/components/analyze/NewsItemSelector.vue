@@ -36,13 +36,12 @@
               align="center"
               :class="link.id === selected_group_id ? 'active' : ''"
             >
-              <v-list-item-content class="">
-                <v-icon>{{ link.icon }}</v-icon>
-                <v-list-item-title
-                  style="white-space: unset; font-size: 0.7em"
-                  >{{ $t(link.title) }}</v-list-item-title
-                >
-              </v-list-item-content>
+              <template v-slot:prepend>
+                <v-icon :icon="link.icon" />
+              </template>
+              <v-list-item-title style="white-space: unset; font-size: 0.7em">{{
+                $t(link.title)
+              }}</v-list-item-title>
             </v-list-item>
           </v-list>
         </v-container>
@@ -97,7 +96,7 @@
 <script>
 import AuthMixin from '@/services/auth/auth_mixin'
 import Permissions from '@/services/auth/permissions'
-import AssessContent from '../../components/assess/AssessContent'
+import AssessContent from '@/components/assess/AssessContent.vue'
 import CardAssess from '@/components/assess/legacy/CardAssess.vue'
 import NewsItemSingleDetail from '@/components/assess/NewsItemSingleDetail.vue'
 import NewsItemDetail from '@/components/assess/NewsItemDetail.vue'

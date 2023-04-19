@@ -12,7 +12,7 @@
 
 <script>
 import CardAssess from '@/components/assess/legacy/CardAssess.vue'
-import CardAnalyze from '@/components/analyze/CardAnalyze'
+import CardAnalyze from '@/components/analyze/CardAnalyze.vue'
 import CardProduct from '@/components/publish/CardProduct.vue'
 
 export default {

@@ -123,7 +123,7 @@ import Permissions from '@/services/auth/permissions'
 import EnumSelector from '@/components/common/EnumSelector.vue'
 import { findAttributeCPE } from '@/api/assets'
 
-import VueCsvImport from '@/components/common/ImportCSV'
+import VueCsvImport from '@/components/common/ImportCSV.vue'
 
 export default {
   name: 'CPETable',

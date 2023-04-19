@@ -107,7 +107,7 @@
 <script>
 import { createAsset, updateAsset } from '@/api/assets'
 
-import CPETable from '@/components/assets/CPETable'
+import CPETable from '@/components/assets/CPETable.vue'
 import CardVulnerability from '@/components/assets/CardVulnerability.vue'
 import AuthMixin from '@/services/auth/auth_mixin'
 import Permissions from '@/services/auth/permissions'
