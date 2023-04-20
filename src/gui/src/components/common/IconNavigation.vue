@@ -1,13 +1,12 @@
 <template>
   <v-navigation-drawer
     v-if="filteredLinks.length > 0 && drawerVisible"
-    clipped
-    app
     color="cx-drawer-bg"
     class="sidebar"
     :width="width"
+    :permanent="true"
   >
-    <v-list>
+    <v-list nav>
       <v-list-item
         v-for="link in filteredLinks"
         :key="link.route"

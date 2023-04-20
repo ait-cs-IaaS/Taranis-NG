@@ -29,7 +29,7 @@
     "vue2-dropzone-vue3": "^1.1.0",
     "vue3-cookies": "^1.0.6",
     "vue3-quill": "^0.3.0",
-    "vuetify": "^3.1.11",
+    "vuetify": "^3.1.15",
     "vuex": "^4.0.2",
     "vuex-persist": "^3.1.3"
   },

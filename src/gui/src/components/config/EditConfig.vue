@@ -58,7 +58,7 @@
             :hide-default-footer="item.items.length < 10"
             v-model="formData[item.name]"
           >
-            <template v-slot:[`top`]>
+            <template v-slot:top>
               <v-row justify="space-between">
                 <v-col md="4">
                   <h2 class="ml-4">{{ item.label }}</h2>
@@ -74,10 +74,7 @@
               v-for="h in item.headers"
               v-slot:[`item.${h.value}`]="props"
             >
-              <v-edit-dialog
-                :key="h.value"
-                :return-value.sync="props.item[h.value]"
-              >
+              <v-dialog :key="h.value" :return-value.sync="props.item[h.value]">
                 {{ props.item[h.value] }}
                 <template v-slot:input>
                   <v-text-field
@@ -88,7 +85,7 @@
                     single-line
                   ></v-text-field>
                 </template>
-              </v-edit-dialog>
+              </v-dialog>
             </template>
           </v-data-table>
         </v-col>

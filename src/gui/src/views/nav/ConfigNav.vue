@@ -1,9 +1,5 @@
 <template>
-  <icon-navigation
-    v-if="links.length > 0"
-    :links="links"
-    icon="mdi-ballot-outline"
-  />
+  <icon-navigation :links="links" />
 </template>
 
 <script>
@@ -13,11 +9,6 @@ export default {
   name: 'ConfigNav',
   components: {
     IconNavigation
-  },
-  computed: {
-    l() {
-      return this.links
-    }
   },
   data: () => ({
     links: [

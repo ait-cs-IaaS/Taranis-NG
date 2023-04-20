@@ -81,7 +81,7 @@
       :items="attribute_contents"
       :hide-default-footer="attribute_contents.length < 10"
     >
-      <template v-slot:[`item.actions`]="{ item }">
+      <template v-slot:item.actions="{ item }">
         <v-icon v-if="!disabled" small class="mr-2" @click="editItem(item)">
           edit
         </v-icon>
