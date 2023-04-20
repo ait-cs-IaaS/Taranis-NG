@@ -22,7 +22,7 @@ const state = {
   itemCountTotal: 0,
   itemCountFiltered: 0,
   drawerVisible: true,
-  coreAPIURL: `${import.meta.env.BASE_URL}/api`
+  coreAPIURL: '/api'
 }
 
 const actions = {
@@ -56,10 +56,18 @@ const actions = {
 
   setVerticalView(context, data) {
     context.commit('setVerticalView', data)
+  },
+
+  setCoreAPIURL(context, url) {
+    context.commit('setCoreAPIURL', url)
   }
 }
 
 const mutations = {
+  setCoreAPIURL(state, url) {
+    state.coreAPIURL = url
+  },
+
   setUser(state, userData) {
     state.user = userData
   },

@@ -46,8 +46,8 @@
         </v-card>
       </template>
       <template v-slot:item.default="{ item }">
-        <v-chip :color="getDefaultColor(item.default)" dark>
-          {{ item.default }}
+        <v-chip :color="getDefaultColor(item.raw.default)" variant="outlined">
+          {{ item.raw.default }}
         </v-chip>
       </template>
 

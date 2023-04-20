@@ -25,7 +25,7 @@
           <v-combobox
             v-model="selected_type"
             :items="types"
-            item-text="title"
+            item-title="title"
             :label="$t('acl.item_type')"
           />
         </v-col>

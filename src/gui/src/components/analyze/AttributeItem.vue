@@ -22,7 +22,7 @@
       v-if="attribute_item.type === 'ENUM'"
       :readonly="read_only"
       v-model="input"
-      item-text="value"
+      item-title="value"
       item-value="id"
       :items="attribute_item.attribute_enums"
       :label="attribute_item.title"

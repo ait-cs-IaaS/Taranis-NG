@@ -36,7 +36,7 @@
                 :disabled="!canModify"
                 v-model="selected_type"
                 :items="product_types"
-                item-text="title"
+                item-title="title"
                 :label="$t('product.report_type')"
               />
             </v-col>

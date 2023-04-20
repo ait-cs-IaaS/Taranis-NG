@@ -44,7 +44,7 @@
                 <v-autocomplete
                   v-model="browser_locale"
                   :items="locale_descriptions"
-                  :item-text="(item) => item.value + ' - ' + item.text"
+                  :item-title="(item) => item.value + ' - ' + item.text"
                   hint="Select your locale"
                   :label="$t('settings.locale')"
                   solo

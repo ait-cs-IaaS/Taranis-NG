@@ -31,7 +31,7 @@
               <v-select
                 :disabled="edit"
                 v-model="report_type"
-                item-text="title"
+                item-title="title"
                 item-value="id"
                 :rules="required"
                 :items="report_types"

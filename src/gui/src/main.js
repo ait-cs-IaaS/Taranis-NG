@@ -32,6 +32,8 @@ const coreAPIURL =
     : import.meta.env.VITE_TARANIS_NG_CORE_API
 
 ApiService.init(coreAPIURL)
+app.provide('$coreAPIURL', coreAPIURL)
+store.dispatch('setCoreAPIURL', coreAPIURL)
 
 if (localStorage.ACCESS_TOKEN) {
   store.dispatch('setToken', localStorage.ACCESS_TOKEN).then()

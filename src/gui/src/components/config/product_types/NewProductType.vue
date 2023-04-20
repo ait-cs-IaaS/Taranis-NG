@@ -10,7 +10,7 @@
             :disabled="edit"
             v-model="selected_presenter"
             :items="presenters"
-            item-text="name"
+            item-title="name"
             :label="$t('product_type.presenter')"
           />
         </v-col>

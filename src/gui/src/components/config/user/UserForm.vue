@@ -11,6 +11,7 @@
             name="username"
             type="text"
             v-model="user.username"
+            autocomplete="username"
             :rules="[rules.required]"
           />
         </v-col>
@@ -27,6 +28,7 @@
             type="password"
             v-model="pwd"
             :rules="passwordRules"
+            autocomplete="new-password"
             :label="$t('user.password')"
           />
         </v-col>
@@ -35,6 +37,7 @@
             v-model="repwd"
             type="password"
             :rules="passwordRules"
+            autocomplete="new-password"
             :label="$t('user.password_check')"
           />
         </v-col>
@@ -44,7 +47,7 @@
         <v-col cols="6" class="pr-1">
           <v-select
             v-model="user.organization.id"
-            item-text="name"
+            item-title="name"
             item-value="id"
             :hint="$t('user.organization')"
             :label="$t('user.organization')"
@@ -57,9 +60,8 @@
             v-model="user.roles"
             :headers="headers"
             :items="roles"
-            item-key="id"
+            item-value="id"
             :show-select="true"
-            :hide-default-footer="roles.length < 10"
             class="elevation-1"
           >
             <template v-slot:top>
@@ -67,6 +69,7 @@
                 <v-toolbar-title>{{ $t('user.roles') }}</v-toolbar-title>
               </v-toolbar>
             </template>
+            <template v-slot:bottom v-if="roles.length < 10" />
           </v-data-table>
         </v-col>
         <v-col cols="12" class="pt-2">
@@ -74,9 +77,8 @@
             v-model="user.permissions"
             :headers="headers"
             :items="permissions"
-            item-key="id"
+            item-value="id"
             :show-select="true"
-            :hide-default-footer="permissions.length < 10"
             class="elevation-1"
           >
             <template v-slot:top>
@@ -84,6 +86,7 @@
                 <v-toolbar-title>{{ $t('user.permissions') }}</v-toolbar-title>
               </v-toolbar>
             </template>
+            <template v-slot:bottom v-if="permissions.length < 10" />
           </v-data-table>
         </v-col>
       </v-row>
@@ -161,6 +164,12 @@ export default {
       if (user_id !== undefined && user_id !== null) {
         this.loadUsers().then(() => {
           const stored_user = this.getUserByID()(this.user_id)
+          const roles = stored_user.roles.map((role) => role.id)
+          const permissions = stored_user.permissions.map(
+            (permission) => permission.id
+          )
+          stored_user.roles = roles
+          stored_user.permissions = permissions
           if (stored_user !== null) {
             this.user = stored_user
             this.edit = true
@@ -187,7 +196,13 @@ export default {
     })
 
     this.loadRoles().then(() => {
-      this.roles = this.getRoles().items
+      this.roles = this.getRoles().items.map((role) => {
+        return {
+          id: role.id,
+          name: role.name,
+          description: role.description
+        }
+      })
     })
 
     this.loadPermissions().then(() => {
