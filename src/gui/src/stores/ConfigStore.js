@@ -26,30 +26,28 @@ import {
 import { getAllUserProductTypes, getAllUserWordLists } from '@/api/user'
 
 export const configStore = defineStore('config', {
-  state: () => {
-    return {
-      acls: { total_count: 0, items: [] },
-      attributes: { total_count: 0, items: [] },
-      bots: { total_count: 0, items: [] },
-      collectors: { total_count: 0, items: [] },
-      nodes: { total_count: 0, items: [] },
-      organizations: { total_count: 0, items: [] },
-      osint_sources: { total_count: 0, items: [] },
-      osint_source_groups: { total_count: 0, items: [] },
-      parameters: { total_count: 0, items: [] },
-      permissions: { total_count: 0, items: [] },
-      product_types: { total_count: 0, items: [] },
-      publisher_presets: { total_count: 0, items: [] },
-      presenters: { total_count: 0, items: [] },
-      publishers: { total_count: 0, items: [] },
-      remote_access: { total_count: 0, items: [] },
-      remote_nodes: { total_count: 0, items: [] },
-      report_item_types_config: { total_count: 0, items: [] },
-      roles: { total_count: 0, items: [] },
-      users: { total_count: 0, items: [] },
-      word_lists: { total_count: 0, items: [] }
-    }
-  },
+  state: () => ({
+    acls: { total_count: 0, items: [] },
+    attributes: { total_count: 0, items: [] },
+    bots: { total_count: 0, items: [] },
+    collectors: { total_count: 0, items: [] },
+    nodes: { total_count: 0, items: [] },
+    organizations: { total_count: 0, items: [] },
+    osint_sources: { total_count: 0, items: [] },
+    osint_source_groups: { total_count: 0, items: [] },
+    parameters: { total_count: 0, items: [] },
+    permissions: { total_count: 0, items: [] },
+    product_types: { total_count: 0, items: [] },
+    publisher_presets: { total_count: 0, items: [] },
+    presenters: { total_count: 0, items: [] },
+    publishers: { total_count: 0, items: [] },
+    remote_access: { total_count: 0, items: [] },
+    remote_nodes: { total_count: 0, items: [] },
+    report_item_types_config: { total_count: 0, items: [] },
+    roles: { total_count: 0, items: [] },
+    users: { total_count: 0, items: [] },
+    word_lists: { total_count: 0, items: [] }
+  }),
   getters: {
     getUserByID: (state) => (user_id) => {
       for (const user of state.users.items) {

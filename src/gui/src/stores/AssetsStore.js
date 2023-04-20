@@ -7,13 +7,11 @@ import { defineStore } from 'pinia'
 import { filter } from '@/store/filter'
 
 export const assetsStore = defineStore('assets', {
-  state: () => {
-    return {
-      asset_groups: { total_count: 0, items: [] },
-      notification_templates: { total_count: 0, items: [] },
-      assets: { total_count: 0, items: [] }
-    }
-  },
+  state: () => ({
+    asset_groups: { total_count: 0, items: [] },
+    notification_templates: { total_count: 0, items: [] },
+    assets: { total_count: 0, items: [] }
+  }),
   actions: {
     loadAssetGroups(data) {
       return getAllAssetGroups(data).then((response) => {
