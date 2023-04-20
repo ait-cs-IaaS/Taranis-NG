@@ -17,7 +17,7 @@
         <v-col cols="12" class="pt-0">
           <v-select
             v-model="group"
-            :items="getOSINTSourceGroupsList()"
+            :items="getOSINTSourceGroupsList"
             prepent-icon="mdi-format-list-numbered"
             item-text="title"
             item-value="id"
@@ -32,7 +32,7 @@
         <v-col cols="12" class="pt-0">
           <v-select
             v-model="source"
-            :items="getOSINTSourcesList()"
+            :items="getOSINTSourcesList"
             prepent-icon="mdi-format-list-numbered"
             item-text="title"
             item-value="id"
@@ -102,12 +102,18 @@
 </template>
 
 <script>
-import { mapState, mapGetters, mapActions } from 'vuex'
+import {
+  mapActions as mapActionsVuex,
+  mapGetters,
+  mapState as mapStateVuex
+} from 'vuex'
 import dateChips from '@/components/assess/filter/dateChips'
 import tagFilter from '@/components/assess/filter/tagFilter'
 import filterSelectList from '@/components/assess/filter/filterSelectList'
 import filterSortList from '@/components/assess/filter/filterSortList'
 import FilterNavigation from '@/components/common/FilterNavigation'
+import { assessStore } from '@/stores/AssessStore'
+import { mapActions, mapState } from 'pinia'
 
 export default {
   name: 'AssessNav',
@@ -155,10 +161,10 @@ export default {
     ]
   }),
   computed: {
-    ...mapState('filter', {
+    ...mapStateVuex('filter', {
       filter: (state) => state.newsItemsFilter
     }),
-    ...mapState(['drawerVisible']),
+    ...mapStateVuex(['drawerVisible']),
     source: {
       get() {
         return this.filter.source
@@ -246,16 +252,16 @@ export default {
 
         this.awaitingSearch = true
       }
-    }
+    },
+    ...mapState(assessStore, [
+      'getOSINTSourceGroupsList',
+      'getOSINTSourcesList'
+    ])
   },
   methods: {
     ...mapGetters(['getItemCount']),
-    ...mapGetters('assess', [
-      'getOSINTSourceGroupsList',
-      'getOSINTSourcesList'
-    ]),
-    ...mapActions('assess', ['updateNewsItems']),
-    ...mapActions('filter', [
+    ...mapActions(assessStore, ['updateNewsItems']),
+    ...mapActionsVuex('filter', [
       'setScope',
       'setFilter',
       'setSort',

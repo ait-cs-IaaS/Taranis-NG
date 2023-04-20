@@ -234,6 +234,8 @@ import {
 
 import AuthMixin from '@/services/auth/auth_mixin'
 import Permissions from '@/services/auth/permissions'
+import { assessStore } from '@/stores/AssessStore'
+import { mapActions, mapState } from 'pinia'
 
 export default {
   name: 'CardAssess',
@@ -266,6 +268,7 @@ export default {
     }
   },
   computed: {
+    ...mapState(assessStore, ['getMultiSelect']),
     canAccess() {
       return this.checkPermission(Permissions.ASSESS_ACCESS)
     },
@@ -283,7 +286,7 @@ export default {
     },
 
     multiSelectActive() {
-      return this.$store.getters.getMultiSelect
+      return this.getMultiSelect
     },
     selectedColor() {
       return this.selected || this.preselected ? 'orange lighten-4' : ''
@@ -322,6 +325,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions(assessStore, ['select', 'deselect']),
     highlight(content) {
       if (this.word_list_regex) {
         return this.wordCheck(content)
@@ -371,13 +375,13 @@ export default {
     },
     selectionChanged() {
       if (this.selected === true) {
-        this.$store.dispatch('select', {
+        this.select({
           type: 'AGGREGATE',
           id: this.card.id,
           item: this.card
         })
       } else {
-        this.$store.dispatch('deselect', {
+        this.deselect({
           type: 'AGGREGATE',
           id: this.card.id,
           item: this.card

@@ -16,8 +16,10 @@
 </template>
 
 <script>
+import { mapState } from 'pinia'
 import CardAnalyze from './CardAnalyze'
 import { mapActions, mapGetters } from 'vuex'
+import { assessStore } from '@/stores/AssessStore'
 
 export default {
   name: 'ContentDataAnalyze',
@@ -123,8 +125,9 @@ export default {
     }
   },
   computed: {
+    ...mapState(assessStore, ['getMultiSelect']),
     multiSelectActive() {
-      return this.$store.getters.getMultiSelect
+      return this.getMultiSelect
     }
   },
 

@@ -40,7 +40,7 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapActions as mapActionsVuex, mapGetters } from 'vuex'
 import { addAggregatesToReportItem } from '@/api/analyze'
 
 export default {
@@ -56,9 +56,8 @@ export default {
     reportItemSelection: {}
   }),
   methods: {
-    ...mapGetters('assess', ['getNewsItemById']),
     ...mapGetters('analyze', ['getReportItems']),
-    ...mapActions('analyze', ['loadReportItems']),
+    ...mapActionsVuex('analyze', ['loadReportItems']),
 
     share() {
       addAggregatesToReportItem(this.reportItemSelection, this.item_ids)

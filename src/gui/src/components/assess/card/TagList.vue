@@ -28,8 +28,11 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import { mapActions as mapActionsVuex } from 'vuex'
+import { mapActions } from 'pinia'
+
 import { tagIconFromType } from '@/utils/helpers'
+import { assessStore } from '@/stores/AssessStore'
 
 export default {
   name: 'TagList',
@@ -61,8 +64,8 @@ export default {
     colorStart: Math.floor(Math.random() * 9)
   }),
   methods: {
-    ...mapActions('assess', ['updateNewsItems']),
-    ...mapActions('filter', ['appendTag']),
+    ...mapActions(assessStore, ['updateNewsItems']),
+    ...mapActionsVuex('filter', ['appendTag']),
 
     updateTags(tag) {
       this.appendTag(tag)

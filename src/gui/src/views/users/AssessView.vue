@@ -24,7 +24,7 @@
             v-for="newsItem in items"
             :key="newsItem.id"
             :story="newsItem"
-            :selected="getNewsItemsSelection().includes(newsItem.id)"
+            :selected="newsItemsSelection.includes(newsItem.id)"
             @deleteItem="removeAndDeleteNewsItem(newsItem.id)"
             @selectItem="selectNewsItem(newsItem.id)"
           ></card-story>
@@ -47,7 +47,7 @@
       <assess-selection-toolbar
         class="px-1 pt-2 pb-3"
         v-if="activeSelection"
-        :selection="getNewsItemsSelection()"
+        :selection="newsItemsSelection"
       ></assess-selection-toolbar>
     </v-expand-transition>
   </div>
@@ -57,8 +57,9 @@
 import KeyboardMixin from '../../assets/keyboard_mixin'
 import CardStory from '@/components/assess/CardStory'
 import AssessSelectionToolbar from '@/components/assess/AssessSelectionToolbar'
-
-import { mapState, mapGetters, mapActions } from 'vuex'
+import { mapActions as mapActionsVuex, mapState as mapStateVuex } from 'vuex'
+import { mapActions, mapState, mapStores } from 'pinia'
+import { assessStore } from '@/stores/AssessStore'
 
 export default {
   name: 'Assess',
@@ -72,22 +73,14 @@ export default {
     items: []
   }),
   methods: {
-    ...mapActions(['updateItemCountTotal', 'updateItemCountFiltered']),
-    ...mapActions('assess', [
+    ...mapActionsVuex(['updateItemCountTotal', 'updateItemCountFiltered']),
+    ...mapActions(assessStore, [
       'updateNewsItems',
       'updateOSINTSourceGroupsList',
       'updateOSINTSources',
-      'selectNewsItem',
-      'removeStoryFromNewsItem'
+      'selectNewsItem'
     ]),
-    ...mapGetters('assess', [
-      'getNewsItems',
-      'getNewsItemList',
-      'getNewsItemById',
-      'getNewsItemsSelection',
-      'getOSINTSourceGroupList'
-    ]),
-    ...mapActions('filter', ['resetNewsItemsFilter', 'nextPage']),
+    ...mapActionsVuex('filter', ['resetNewsItemsFilter', 'nextPage']),
 
     removeAndDeleteNewsItem(id) {
       this.items = this.items.filter((x) => x.id !== id)
@@ -101,14 +94,16 @@ export default {
     // TODO: Call API via Store
     // + pass filter parameter for presorting
     getNewsItemsFromStore() {
-      this.items = this.getNewsItems().items
-      this.updateItemCountTotal(this.getNewsItems().total_count)
+      this.items = this.newsItems.items
+      this.updateItemCountTotal(this.newsItems.total_count)
       this.updateItemCountFiltered(this.items.length)
-      console.debug('number of newsitems: ' + this.getNewsItems().total_count)
+      console.debug('number of newsitems: ' + this.newsItems.total_count)
     }
   },
   computed: {
-    ...mapState('filter', {
+    ...mapStores(assessStore),
+    ...mapState(assessStore, ['newsItems', 'newsItemsSelection']),
+    ...mapStateVuex('filter', {
       scope: (state) => state.newsItemsFilter.scope,
       filter: (state) => state.newsItemsFilter
     }),
@@ -116,11 +111,11 @@ export default {
     moreToLoad() {
       const offset = this.filter.offset ? parseInt(this.filter.offset) : 0
       const length = offset + this.items.length
-      return length < this.getNewsItems().total_count
+      return length < this.newsItems.total_count
     },
 
     activeSelection() {
-      return this.getNewsItemsSelection().length > 0
+      return this.newsItemsSelection.length > 0
     }
   },
 
@@ -129,11 +124,15 @@ export default {
     this.updateOSINTSources()
     this.updateNewsItems()
 
-    this.unsubscribe = this.$store.subscribe((mutation) => {
-      if (mutation.type === 'assess/UPDATE_NEWSITEMS') {
-        this.getNewsItemsFromStore()
-      }
+    this.unsubscribe = this.assessStore.$subscribe(() => {
+      this.getNewsItemsFromStore()
     })
+
+    // this.unsubscribe = this.$store.subscribe((mutation) => {
+    //   if (mutation.type === 'assess/UPDATE_NEWSITEMS') {
+    //     this.getNewsItemsFromStore()
+    //   }
+    // })
   },
   beforeDestroy() {
     this.unsubscribe()

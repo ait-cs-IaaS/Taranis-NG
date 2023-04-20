@@ -18,7 +18,6 @@ import AuthMixin from './services/auth/auth_mixin'
 import Notification from './components/common/Notification'
 import { mapActions, mapState } from 'pinia'
 import { settingsStore } from '@/stores/SettingsStore'
-import { mapActions as mapActionsVuex } from 'vuex'
 
 export default {
   name: 'App',
@@ -32,7 +31,6 @@ export default {
   mixins: [AuthMixin],
   methods: {
     ...mapActions(settingsStore, ['loadUserProfile']),
-    ...mapActionsVuex('assess', ['updateNewsItems']),
 
     connectSSE() {
       // TODO: unsubscribe

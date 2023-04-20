@@ -223,6 +223,8 @@ import {
 
 import AuthMixin from '@/services/auth/auth_mixin'
 import Permissions from '@/services/auth/permissions'
+import { assessStore } from '@/stores/AssessStore'
+import { mapState } from 'pinia'
 
 import { VueEditor } from 'vue2-editor'
 
@@ -256,6 +258,7 @@ export default {
     attach: undefined
   },
   computed: {
+    ...mapState(assessStore, ['getMultiSelect']),
     canAccess() {
       return (
         this.checkPermission(Permissions.ASSESS_ACCESS) && this.access === true
@@ -279,7 +282,7 @@ export default {
     },
 
     multiSelectActive() {
-      return this.$store.getters.getMultiSelect
+      return this.getMultiSelect
     }
   },
   data: () => ({

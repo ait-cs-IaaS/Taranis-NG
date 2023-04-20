@@ -32,8 +32,10 @@
 
 <script>
 import { getTags } from '@/api/assess'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions as mapActionsVuex, mapGetters } from 'vuex'
+import { mapActions } from 'pinia'
 import { tagIconFromType } from '@/utils/helpers'
+import { assessStore } from '@/stores/AssessStore'
 
 export default {
   name: 'tagFilter',
@@ -62,8 +64,8 @@ export default {
   },
   methods: {
     ...mapGetters('filter', ['getFilterTags']),
-    ...mapActions('filter', ['setTags']),
-    ...mapActions('assess', ['updateNewsItems']),
+    ...mapActionsVuex('filter', ['setTags']),
+    ...mapActions(assessStore, ['updateNewsItems']),
     shortText(item) {
       return item.length > 20 ? item.substring(0, 20) + '...' : item
     },

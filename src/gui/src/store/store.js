@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 
 import { authenticator } from '@/store/authenticator'
-import { assess } from '@/store/assess'
+// import { assess } from '@/store/assess'
 // import { config } from '@/store/config'
 import { analyze } from '@/store/analyze'
 // import { publish } from '@/store/publish'
@@ -123,10 +123,6 @@ const getters = {
     return state.user.permissions
   },
 
-  getSelection(state) {
-    return state.selection
-  },
-
   getLoadingState(state) {
     return state.loading
   },
@@ -147,7 +143,7 @@ export const store = new Vuex.Store({
   getters,
   modules: {
     authenticator,
-    assess,
+    // assess,
     // config,
     analyze,
     // publish,

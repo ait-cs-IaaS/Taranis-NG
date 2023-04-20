@@ -104,6 +104,7 @@ import NewsItemDetail from '@/components/assess/NewsItemDetail'
 import { getReportItemData, updateReportItem } from '@/api/analyze'
 import { mapActions, mapState } from 'pinia'
 import { configStore } from '@/stores/ConfigStore'
+import { assessStore } from '@/stores/AssessStore'
 
 export default {
   name: 'NewsItemSelector',
@@ -137,10 +138,12 @@ export default {
           this.modify === true)
       )
     },
-    ...mapState(configStore, ['osint_source_groups'])
+    ...mapState(configStore, ['osint_source_groups']),
+    ...mapState(assessStore, ['getSelection'])
   },
   methods: {
     ...mapActions(configStore, ['loadOSINTSourceGroups']),
+    ...mapActions(assessStore, ['multiSelect']),
     cardLayout: function () {
       return 'CardAssess'
     },
@@ -151,12 +154,12 @@ export default {
 
     openSelector() {
       this.selected_group_id = this.groups[0].id
-      this.$store.dispatch('multiSelect', true)
+      this.multiSelect(true)
       this.dialog = true
     },
 
     add() {
-      const selection = this.$store.getters.getSelection
+      const selection = this.getSelection
       const added_values = []
       const data = {}
       data.add = true
@@ -195,7 +198,7 @@ export default {
     },
 
     close() {
-      this.$store.dispatch('multiSelect', false)
+      this.multiSelect(false)
       this.dialog = false
     },
 

@@ -56,6 +56,8 @@ import {
 
 import AuthMixin from '@/services/auth/auth_mixin'
 import Permissions from '@/services/auth/permissions'
+import { assessStore } from '@/stores/AssessStore'
+import { mapActions, mapState } from 'pinia'
 
 export default {
   name: 'CardAssessItem',
@@ -69,8 +71,9 @@ export default {
     selected: false
   }),
   computed: {
+    ...mapState(assessStore, ['getMultiSelect']),
     multiSelectActive() {
-      return this.$store.getters.getMultiSelect
+      return this.getMultiSelect
     },
     selectedColor() {
       if (this.selected === true) {
@@ -90,6 +93,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions(assessStore, ['select']),
     itemClicked(data) {
       if (
         this.checkPermission(Permissions.ASSESS_ACCESS) &&
@@ -101,13 +105,13 @@ export default {
     },
     selectionChanged() {
       if (this.selected === true) {
-        this.$store.dispatch('select', {
+        this.select({
           type: 'ITEM',
           id: this.news_item.id,
           item: this.news_item
         })
       } else {
-        this.$store.dispatch('deselect', {
+        this.deselect({
           type: 'ITEM',
           id: this.news_item.id,
           item: this.news_item

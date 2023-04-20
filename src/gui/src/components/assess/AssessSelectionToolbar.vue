@@ -44,9 +44,10 @@
 <script>
 import { deleteNewsItemAggregate, groupAction } from '@/api/assess'
 import PopupShareItems from '@/components/popups/PopupShareItems'
+import { assessStore } from '@/stores/AssessStore'
 
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
-import { mapActions } from 'vuex'
+import { mapActions } from 'pinia'
 
 export default {
   name: 'AssessSelectionToolbar',
@@ -77,7 +78,7 @@ export default {
     sharingDialog: false
   }),
   methods: {
-    ...mapActions('assess', ['clearNewsItemSelection', 'updateNewsItems']),
+    ...mapActions(assessStore, ['clearNewsItemSelection', 'updateNewsItems']),
 
     actionClicked(action) {
       if (action === 'merge') {
