@@ -116,8 +116,10 @@ import {
 
 import AttributeItem from '@/components/analyze/AttributeItem'
 import CardStory from '@/components/assess/CardStory'
+import { analyzeStore } from '@/stores/AnalyzeStore'
+import { mapActions, mapState } from 'pinia'
 
-import { mapActions, mapGetters } from 'vuex'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'ReportItem',
@@ -144,6 +146,7 @@ export default {
     }
   },
   computed: {
+    ...mapState(analyzeStore, ['report_item_types']),
     attribute_values() {
       return this.report_item.attributes.reduce((acc, attr) => {
         acc[attr.attribute_group_item_id] = attr.value
@@ -183,8 +186,7 @@ export default {
   },
   methods: {
     ...mapGetters(['getUserId']),
-    ...mapGetters('analyze', ['getReportTypes']),
-    ...mapActions('analyze', ['loadReportTypes']),
+    ...mapActions(analyzeStore, ['loadReportTypes']),
 
     extractAttributes(attribute_groups) {
       const result = {}
@@ -226,7 +228,7 @@ export default {
     console.debug(`Loaded REPORT ITEM ${this.report_item.id}`)
 
     this.loadReportTypes().then(() => {
-      this.report_types = this.getReportTypes().items
+      this.report_types = this.report_item_types.items
       this.report_type = this.report_item.report_item_type_id
     })
   },

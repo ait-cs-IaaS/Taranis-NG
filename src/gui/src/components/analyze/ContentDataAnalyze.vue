@@ -16,10 +16,10 @@
 </template>
 
 <script>
-import { mapState } from 'pinia'
 import CardAnalyze from './CardAnalyze'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import { assessStore } from '@/stores/AssessStore'
+import { analyzeStore } from '@/stores/AnalyzeStore'
 
 export default {
   name: 'ContentDataAnalyze',
@@ -43,8 +43,7 @@ export default {
     }
   }),
   methods: {
-    ...mapGetters('analyze', ['getCurrentReportItemGroup', 'getReportItems']),
-    ...mapActions('analyze', ['loadReportItems']),
+    ...mapActions(analyzeStore, ['loadReportItems']),
 
     showReportItemDetail(report_item) {
       this.$emit('show-report-item-detail', report_item)
@@ -95,7 +94,7 @@ export default {
 
       let group = ''
       if (this.publish_selector) {
-        group = this.getCurrentReportItemGroup()
+        group = this.current_report_item_group_id
       } else if (window.location.pathname.includes('/group/')) {
         const i = window.location.pathname.indexOf('/group/')
         const len = window.location.pathname.length
@@ -110,7 +109,7 @@ export default {
         offset: offset,
         limit: limit
       }).then(() => {
-        this.collections = this.collections.concat(this.getReportItems())
+        this.collections = this.collections.concat(this.report_items.items)
         this.data_loaded = true
       })
     },
@@ -125,6 +124,7 @@ export default {
     }
   },
   computed: {
+    ...mapState(analyzeStore, ['current_report_item_group_id', 'report_items']),
     ...mapState(assessStore, ['getMultiSelect']),
     multiSelectActive() {
       return this.getMultiSelect

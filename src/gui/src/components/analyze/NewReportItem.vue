@@ -277,10 +277,11 @@ import {
 import CardStory from '@/components/assess/CardStory'
 
 import VueCsvImport from '@/components/common/ImportCSV'
-import { mapActions, mapGetters } from 'vuex'
+import { mapGetters } from 'vuex'
 
-import { mapState } from 'pinia'
+import { mapState, mapActions } from 'pinia'
 import { settingsStore } from '@/stores/SettingsStore'
+import { analyzeStore } from '@/stores/AnalyzeStore'
 
 export default {
   name: 'NewReportItem',
@@ -339,6 +340,7 @@ export default {
     }
   }),
   computed: {
+    ...mapState(analyzeStore, ['report_item_types']),
     canCreate() {
       return (
         this.checkPermission(Permissions.ANALYZE_CREATE) &&
@@ -360,8 +362,7 @@ export default {
   },
   methods: {
     ...mapGetters(['getUserId']),
-    ...mapGetters('analyze', ['getReportTypes']),
-    ...mapActions('analyze', ['loadReportTypes']),
+    ...mapActions(analyzeStore, ['loadReportTypes']),
     addReportItem() {
       this.visible = true
       this.modify = true
@@ -943,7 +944,7 @@ export default {
     this.local_reports = !window.location.pathname.includes('/group/')
 
     this.loadReportTypes().then(() => {
-      this.report_types = this.getReportTypes().items
+      this.report_types = this.report_item_types.items
     })
 
     this.$root.$on('new-report', (data) => {

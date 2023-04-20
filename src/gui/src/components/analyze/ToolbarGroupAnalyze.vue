@@ -39,6 +39,8 @@
 import AuthMixin from '../../services/auth/auth_mixin'
 import { deleteReportItem } from '@/api/analyze'
 import Permissions from '@/services/auth/permissions'
+import { analyzeStore } from '@/stores/AnalyzeStore'
+import { mapActions, mapState } from 'pinia'
 
 export default {
   name: 'ToolbarGroupAnalyze',
@@ -47,6 +49,7 @@ export default {
   }),
   mixins: [AuthMixin],
   computed: {
+    ...mapState(analyzeStore, ['selection_report']),
     canDelete() {
       return this.checkPermission(Permissions.ANALYZE_DELETE)
     },
@@ -76,23 +79,24 @@ export default {
     }
   },
   methods: {
+    ...mapActions(analyzeStore, ['setMultiSelectReport']),
     multiSelect() {
       this.multi_select = !this.multi_select
-      this.$store.dispatch('multiSelectReport', this.multi_select)
+      this.setMultiSelectReport(this.multi_select)
       if (this.multi_select === false) {
         this.$root.$emit('multi-select-off')
       }
     },
 
     analyze() {
-      const selection = this.$store.getters.getSelectionReport
+      const selection = this.selection_report
       const items = []
       for (let i = 0; i < selection.length; i++) {
         items.push(selection[i].item)
       }
       if (items.length > 0) {
         this.multi_select = false
-        this.$store.dispatch('multiSelectReport', this.multi_select)
+        this.setMultiSelectReport(this.multi_select)
         this.$root.$emit('multi-select-off')
         this.$root.$emit('new-product', items)
       }
@@ -102,7 +106,7 @@ export default {
       if (type === 'ANALYZE') {
         this.analyze()
       } else {
-        const selection = this.$store.getters.getSelectionReport
+        const selection = this.selection_report
         const items = []
         for (let i = 0; i < selection.length; i++) {
           items.push({

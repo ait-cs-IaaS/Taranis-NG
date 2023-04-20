@@ -40,8 +40,9 @@
 </template>
 
 <script>
-import { mapActions as mapActionsVuex, mapGetters } from 'vuex'
 import { addAggregatesToReportItem } from '@/api/analyze'
+import { analyzeStore } from '@/stores/AnalyzeStore'
+import { mapActions, mapState } from 'pinia'
 
 export default {
   name: 'PopupShareItems',
@@ -55,10 +56,11 @@ export default {
     reportItems: [],
     reportItemSelection: {}
   }),
+  computed: {
+    ...mapState(analyzeStore, ['report_items'])
+  },
   methods: {
-    ...mapGetters('analyze', ['getReportItems']),
-    ...mapActionsVuex('analyze', ['loadReportItems']),
-
+    ...mapActions(analyzeStore, ['loadReportItems']),
     share() {
       addAggregatesToReportItem(this.reportItemSelection, this.item_ids)
       this.close()
@@ -71,7 +73,7 @@ export default {
     console.debug('PopupShareItems mounted')
     console.debug(this.item_ids)
     this.loadReportItems().then(() => {
-      this.reportItems = this.getReportItems().map((item) => {
+      this.reportItems = this.report_items.items.map((item) => {
         return {
           text: item.title,
           value: item.id

@@ -51,11 +51,13 @@
 </template>
 
 <script>
-import { mapState, mapGetters, mapActions } from 'vuex'
+import { mapState, mapGetters, mapActions as mapActionsVuex } from 'vuex'
 import FilterNavigation from '@/components/common/FilterNavigation'
 import filterSortList from '@/components/assess/filter/filterSortList'
 import dateChips from '@/components/assess/filter/dateChips'
 import filterSelectList from '@/components/assess/filter/filterSelectList'
+import { mapActions } from 'pinia'
+import { analyzeStore } from '@/stores/AnalyzeStore'
 
 export default {
   name: 'AnalyzeNav',
@@ -179,8 +181,8 @@ export default {
   },
   methods: {
     ...mapGetters(['getItemCount']),
-    ...mapActions('analyze', ['updateReportItems']),
-    ...mapActions('filter', ['setReportFilter', 'updateReportFilter']),
+    ...mapActions(analyzeStore, ['updateReportItems']),
+    ...mapActionsVuex('filter', ['setReportFilter', 'updateReportFilter']),
     ...mapGetters('filter', ['getReportFilter']),
     addReport() {
       this.$router.push('/report/0')

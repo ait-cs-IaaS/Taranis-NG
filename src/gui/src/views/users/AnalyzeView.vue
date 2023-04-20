@@ -1,7 +1,7 @@
 <template>
   <DataTable
     :addButton="true"
-    :items.sync="report_items"
+    :items.sync="report_items.items"
     :headerFilter="['tag', 'title', 'created']"
     sortByItem="id"
     :actionColumn="true"
@@ -31,8 +31,10 @@ import {
   createReportItem,
   updateReportItem
 } from '@/api/analyze'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions as mapActionsVuex } from 'vuex'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
+import { mapActions, mapState } from 'pinia'
+import { analyzeStore } from '@/stores/AnalyzeStore'
 
 export default {
   name: 'Analyze',
@@ -40,7 +42,6 @@ export default {
     DataTable
   },
   data: () => ({
-    report_items: [],
     report_types: {},
     selected: [],
     report_item: {
@@ -49,21 +50,21 @@ export default {
       title: ''
     }
   }),
+  computed: {
+    ...mapState(analyzeStore, ['report_items', 'report_item_types'])
+  },
   methods: {
-    ...mapActions('analyze', ['loadReportItems', 'loadReportTypes']),
-    ...mapGetters('analyze', ['getReportItems', 'getReportTypes']),
-    ...mapActions(['updateItemCount']),
+    ...mapActions(analyzeStore, ['loadReportItems', 'loadReportTypes']),
+    ...mapActionsVuex(['updateItemCount']),
     updateData() {
       this.loadReportItems().then(() => {
-        const sources = this.getReportItems()
-        this.report_items = sources
         this.updateItemCount({
-          total: sources.length,
-          filtered: sources.length
+          total: this.report_items.items.length,
+          filtered: this.report_items.items.length
         })
       })
       this.loadReportTypes().then(() => {
-        this.report_types = this.getReportTypes().items
+        this.report_types = this.report_item_types.items
       })
     },
     addItem() {

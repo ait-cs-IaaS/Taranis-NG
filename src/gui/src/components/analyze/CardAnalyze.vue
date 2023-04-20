@@ -89,6 +89,9 @@
 
 <script>
 import AuthMixin from '@/services/auth/auth_mixin'
+import { analyzeStore } from '@/stores/AnalyzeStore'
+import { mapActions } from 'pinia'
+import { mapState } from 'vuex'
 
 export default {
   name: 'CardAnalyze',
@@ -104,8 +107,9 @@ export default {
     status: 'in_progress'
   }),
   computed: {
+    ...mapState(analyzeStore, ['multi_select_report']),
     multiSelectActive() {
-      return this.$store.getters.getMultiSelectReport
+      return this.multi_select_report
     },
 
     selectedColor() {
@@ -119,14 +123,18 @@ export default {
     }
   },
   methods: {
+    ...mapActions(analyzeStore, [
+      'addSelectionReport',
+      'removeSelectionReport'
+    ]),
     selectionChanged() {
       if (this.selected === true) {
-        this.$store.dispatch('selectReport', {
+        this.addSelectionReport({
           id: this.card.id,
           item: this.card
         })
       } else {
-        this.$store.dispatch('deselectReport', {
+        this.removeSelectionReport({
           id: this.card.id,
           item: this.card
         })
