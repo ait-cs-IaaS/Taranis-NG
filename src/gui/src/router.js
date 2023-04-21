@@ -119,7 +119,7 @@ export const router = createRouter({
       path: '/user/settings',
       name: 'user-settings',
       components: {
-        default: () => import('@/views/users/SettingsView.vue'),
+        default: () => import('@/views/users/UserSettings.vue'),
         nav: () => import('@/views/nav/UserNav.vue')
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.MY_ASSETS_CONFIG] }

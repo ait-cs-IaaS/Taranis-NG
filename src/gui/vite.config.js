@@ -44,7 +44,7 @@ export default defineConfig({
           user: (id) =>
             id.includes('@/views/users/UserView.vue') ||
             id.includes('@/views/nav/UserNav.vue') ||
-            id.includes('@/views/users/SettingsView.vue') ||
+            id.includes('@/views/users/UserSettings.vue') ||
             id.includes('@/views/users/NotificationTemplatesView.vue'),
           config: (id) =>
             id.includes('@/views/admin/') ||

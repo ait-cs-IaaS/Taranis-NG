@@ -1,29 +1,28 @@
 <template>
-  <v-container>
-    <v-card>
-      <v-row class="pb-5">
+  <v-container fluid>
+    <v-card variant="outlined">
+      <v-card-item>
         <h1>{{ $t('settings.user_settings') }}</h1>
+        <v-spacer></v-spacer>
         <v-btn color="success" @click="save()">
           <v-icon left>mdi-content-save</v-icon>
           <span>{{ $t('settings.save') }}</span>
         </v-btn>
-      </v-row>
-
-      <v-tabs dark centered grow height="32">
-        <!-- TABS -->
-        <v-tab href="#tab-1">
-          <span>{{ $t('settings.tab_general') }}</span>
-        </v-tab>
-        <v-tab href="#tab-2" @click="loadWordList()">
-          <span>{{ $t('settings.tab_wordlists') }}</span>
-        </v-tab>
-        <v-tab href="#tab-3">
-          <span>{{ $t('settings.tab_hotkeys') }}</span>
-        </v-tab>
-
-        <!-- #tab-1 -->
-        <v-tab-item value="tab-1" class="pa-0">
-          <v-container fluid>
+      </v-card-item>
+      <v-card-text>
+        <v-tabs fixed-tabs density="compact" v-model="tab">
+          <v-tab value="general">
+            <span>{{ $t('settings.tab_general') }}</span>
+          </v-tab>
+          <v-tab value="wordlist">
+            <span>{{ $t('settings.tab_wordlists') }}</span>
+          </v-tab>
+          <v-tab value="hotkeys">
+            <span>{{ $t('settings.tab_hotkeys') }}</span>
+          </v-tab>
+        </v-tabs>
+        <v-window v-model="tab">
+          <v-window-item value="general">
             <v-row justify="center" align="center">
               <v-col>
                 <v-switch
@@ -52,19 +51,14 @@
                 ></v-autocomplete>
               </v-col>
             </v-row>
-          </v-container>
-        </v-tab-item>
-
-        <!-- #tab-2 -->
-        <v-tab-item value="tab-2" class="pa-0">
-          <v-container fluid>
+          </v-window-item>
+          <v-window-item value="wordlist">
             <v-data-table
               v-model="selected_word_lists"
               :headers="headers"
               :items="word_lists"
-              item-key="id"
+              item-value="id"
               show-select
-              class="elevation-1"
             >
               <template v-slot:top>
                 <v-toolbar flat color="white">
@@ -74,12 +68,8 @@
                 </v-toolbar>
               </template>
             </v-data-table>
-          </v-container>
-        </v-tab-item>
-
-        <!-- #tab-3 -->
-        <v-tab-item value="tab-3" class="pa-0">
-          <v-container fluid>
+          </v-window-item>
+          <v-window-item value="hotkeys">
             <v-row no-gutters class="ma-0">
               <v-tooltip
                 top
@@ -108,9 +98,9 @@
                 </span>
               </v-tooltip>
             </v-row>
-          </v-container>
-        </v-tab-item>
-      </v-tabs>
+          </v-window-item>
+        </v-window>
+      </v-card-text>
     </v-card>
   </v-container>
 </template>
@@ -120,13 +110,12 @@ import { mapGetters, mapActions } from 'vuex'
 
 export default {
   name: 'UserSettings',
-  components: {},
   data: () => ({
-    visible: false,
     dark_theme: false,
     spellcheck: null,
     pressKeyVisible: false,
     shortcuts: [],
+    tab: 'general',
     hotkeyAlias: String,
     headers: [
       {
@@ -177,8 +166,6 @@ export default {
         dark_theme: this.dark_theme,
         hotkeys: this.shortcuts,
         word_lists: this.selected_word_lists
-      }).then(() => {
-        this.visible = false
       })
     },
 
@@ -225,7 +212,6 @@ export default {
     }
   },
   mounted() {
-    this.visible = true
     this.spellcheck = this.getProfileSpellcheck()
     this.dark_theme = this.getProfileDarkTheme()
     this.selected_word_lists = this.getProfileWordLists()
