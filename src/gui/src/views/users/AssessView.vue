@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-container fluid style="min-height: 40vh">
+    <v-container fluid class="flex-column">
       <transition name="empty-list-transition" mode="out-in">
         <v-row v-if="!items">
           <v-col cols="12" class="empty-list-notification">
@@ -13,10 +13,11 @@
           </v-col>
         </v-row>
 
+        <!-- class="row d-flex align-stretch row--dense stories-grid-container" -->
         <transition-group
           name="news-items-grid"
           tag="div"
-          class="row d-flex align-stretch row--dense stories-grid-container"
+          class="row d-flex align-stretch row--dense flex-column"
           v-else
           appear
         >
