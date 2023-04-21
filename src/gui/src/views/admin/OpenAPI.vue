@@ -1,15 +1,18 @@
 <template>
   <v-container fluid>
-    <iframe src="/api/doc" title="OpenAPI" class="openapi"></iframe>
+    <iframe :src="iframeSrc" title="OpenAPI" class="openapi"></iframe>
   </v-container>
 </template>
 
 <script>
+import { useStore } from 'vuex'
+
 export default {
   name: 'OpenAPI',
-  components: {},
-  data: () => ({
-    ui: null
-  })
+  setup() {
+    const store = useStore()
+    const iframeSrc = store.state.coreAPIURL + '/doc'
+    return { iframeSrc }
+  }
 }
 </script>

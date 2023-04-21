@@ -54,8 +54,7 @@
             :headers="item.headers"
             :show-select="!item['disabled']"
             :items="item.items"
-            :item-key="item.headers[0].value"
-            :hide-default-footer="item.items.length < 10"
+            :item-value="item.headers[0].value"
             v-model="formData[item.name]"
           >
             <template v-slot:top>
@@ -87,6 +86,7 @@
                 </template>
               </v-dialog>
             </template>
+            <template v-slot:bottom v-if="item.items.length < 10" />
           </v-data-table>
         </v-col>
       </v-row>

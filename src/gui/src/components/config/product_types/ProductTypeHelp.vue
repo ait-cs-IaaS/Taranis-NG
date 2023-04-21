@@ -17,7 +17,7 @@
         <v-combobox
           v-model="selected_type"
           :items="report_types"
-          item-text="title"
+          item-title="title"
           :label="$t('product_type.choose_report_type')"
         />
       </v-card-title>

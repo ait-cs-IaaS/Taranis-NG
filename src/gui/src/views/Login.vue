@@ -52,28 +52,34 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
-import { defineComponent } from 'vue'
+import { defineComponent, ref, computed, inject } from 'vue'
 
 export default defineComponent({
   name: 'LoginView',
-  data: () => ({
-    username: '',
-    password: '',
-    login_error: undefined
-  }),
-  computed: {
-    acceptPassword() {
-      return this.password.length > 0
-    },
 
-    acceptUser() {
-      return this.username.length > 0
-    },
+  setup() {
+    const username = ref('')
+    const password = ref('')
+    const login_error = ref(undefined)
+    const coreAPIURL = inject('$coreAPIURL')
+    console.debug('coreAPIURL', coreAPIURL)
 
-    loginButtonDisabled() {
-      return !this.acceptPassword || !this.acceptUser
+    const acceptPassword = computed(() => password.value.length > 0)
+    const acceptUser = computed(() => username.value.length > 0)
+    const loginButtonDisabled = computed(
+      () => !acceptPassword.value || !acceptUser.value
+    )
+
+    return {
+      username,
+      password,
+      login_error,
+      acceptPassword,
+      acceptUser,
+      loginButtonDisabled
     }
   },
+
   methods: {
     ...mapActions(['login']),
     ...mapGetters(['isAuthenticated']),

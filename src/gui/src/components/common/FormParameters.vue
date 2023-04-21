@@ -19,7 +19,7 @@
           v-else-if="ui === 'combobox'"
           :label="$t(parameter.name)"
           :items="[]"
-          item-text="name"
+          item-title="name"
         />
 
         <v-select v-else-if="ui === 'select'" :label="$t(parameter.name)" />

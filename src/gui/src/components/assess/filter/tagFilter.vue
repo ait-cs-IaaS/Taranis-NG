@@ -11,7 +11,7 @@
     flat
     no-data-text="No tags found"
     item-value="name"
-    item-text="name"
+    item-title="name"
     hide-details
     cache-items
     label="Tags"

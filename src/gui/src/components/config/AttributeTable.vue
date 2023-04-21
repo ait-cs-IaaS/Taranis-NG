@@ -20,7 +20,7 @@
             <v-combobox
               v-model="attribute_type"
               :items="attribute_templates"
-              item-text="name"
+              item-title="name"
               :label="$t('attribute.attribute')"
             ></v-combobox>
 
