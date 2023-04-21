@@ -42,7 +42,7 @@ const light = {
     secondary: '#34a5e8',
     accent: '#cfcde5',
     info: '#2196F3',
-    error: '#FF5252',
+    error: '#ba3b3b',
     success: '#4CAF50',
     warning: '#FFC107',
     grey: '#C9C9C9',

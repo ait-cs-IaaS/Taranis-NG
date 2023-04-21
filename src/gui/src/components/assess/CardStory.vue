@@ -20,16 +20,14 @@
         <v-card
           tile
           elevation="3"
-          outlined
-          class="container no-gutters"
+          rounded="0"
+          class="no-gutters align-self-stretch pl-5 pb-5 pr-3 pt-3"
           :class="[
-            'pl-5',
-            'align-self-stretch',
-            'news-item',
             {
               selected: selected
             }
           ]"
+          v-ripple="false"
           @click="toggleSelection"
         >
           <v-row>
@@ -38,15 +36,10 @@
               cols="12"
               sm="12"
               lg="6"
-              class="d-flex flex-grow-1 mt-3 px-5 py-2"
+              class="d-flex flex-grow-1 mt-3 px-5 py-3 order-1"
               align-self="center"
-              order="1"
-              order-sm="1"
             >
-              <v-icon
-                v-if="story_in_report"
-                class="flipped-icon mr-2 ml-n4 mt-n5"
-              >
+              <v-icon v-if="story_in_report" class="mr-2 my-auto">
                 mdi-share
               </v-icon>
               <h2 class="news-item-title">
@@ -56,44 +49,44 @@
 
             <!-- STORY ACTIONS -->
             <v-col
-              order="3"
-              order-sm="2"
-              class="d-flex flex-row flex-grow-1 mt-3 px-5 py-2 item-action-container"
               cols="12"
               sm="12"
               lg="6"
+              class="d-flex flex-row flex-grow-1 mt-3 px-5 py-2 order-md-2 order-sm-3"
               style="justify-content: space-evenly"
             >
               <v-btn
                 v-if="!detailView"
-                small
+                size="small"
                 class="item-action-btn"
-                outlined
+                variant="tonal"
                 :to="'/story/' + story.id"
                 v-on:click.stop
                 v-ripple="false"
               >
                 <span>Details</span>
-                <v-icon right>mdi-text-box-search-outline</v-icon>
+                <v-icon right class="ml-2">mdi-text-box-search-outline</v-icon>
               </v-btn>
 
               <v-btn
-                small
+                size="small"
                 class="item-action-btn"
-                outlined
+                variant="tonal"
                 v-on:click.stop="sharingDialog = true"
                 v-ripple="false"
               >
                 <span>Add to Report</span>
-                <v-icon right>mdi-google-circles-communities</v-icon>
+                <v-icon right class="ml-2"
+                  >mdi-google-circles-communities</v-icon
+                >
               </v-btn>
 
               <v-btn
                 v-if="!detailView"
-                small
+                size="small"
                 class="item-action-btn open-close-btn"
                 :class="openSummary ? 'opened' : 'closed'"
-                outlined
+                variant="tonal"
                 v-on:click.stop
                 v-ripple="false"
                 :style="{ minWidth: minButtonWidth }"
@@ -103,18 +96,18 @@
                 <span v-if="news_item_length > 1" class="primary--text"
                   >&nbsp;[{{ news_item_length }}]</span
                 >
-                <v-icon right>mdi-chevron-down</v-icon>
+                <v-icon right class="ml-2">mdi-chevron-down</v-icon>
               </v-btn>
 
               <v-btn
-                small
+                size="small"
                 class="item-action-btn"
-                outlined
+                variant="tonal"
                 v-on:click.stop="markAsRead()"
                 v-ripple="false"
               >
                 <span>mark as read</span>
-                <v-icon right>mdi-eye-outline</v-icon>
+                <v-icon right class="ml-2" c>mdi-eye-outline</v-icon>
               </v-btn>
 
               <votes v-if="detailView" :story="story" />
@@ -122,9 +115,9 @@
               <v-menu bottom offset-y>
                 <template v-slot:activator="{ props }">
                   <v-btn
-                    small
+                    size="small"
                     class="item-action-btn expandable"
-                    outlined
+                    variant="tonal"
                     v-ripple="false"
                     v-bind="props"
                   >
@@ -137,62 +130,64 @@
                     @click.stop="markAsRead()"
                     class="hidden-xl-only"
                   >
-                    <v-icon left>mdi-eye-outline</v-icon>mark as read
+                    <v-icon left size="small" class="mr-2"
+                      >mdi-eye-outline</v-icon
+                    >mark as read
                   </v-list-item>
                   <v-list-item @click.stop="markAsImportant()">
-                    <v-icon left>mdi-star-outline</v-icon>mark as important
+                    <v-icon left size="small" class="mr-2"
+                      >mdi-star-outline</v-icon
+                    >mark as important
                   </v-list-item>
                   <v-list-item @click.stop>
-                    <v-icon left>mdi-bookmark-outline</v-icon>mark as trusted
-                    author
+                    <v-icon left size="small" class="mr-2"
+                      >mdi-bookmark-outline</v-icon
+                    >mark as trusted author
                   </v-list-item>
                   <v-list-item @click.stop="deleteDialog = true">
-                    <v-icon left>mdi-delete-outline</v-icon>delete
+                    <v-icon left size="small" class="mr-2"
+                      >mdi-delete-outline</v-icon
+                    >delete
                   </v-list-item>
                 </v-list>
               </v-menu>
             </v-col>
+            <!-- DESCRIPTION -->
             <v-col
               cols="12"
               sm="12"
-              class="px-5"
-              order="2"
-              order-sm="3"
               lg="6"
+              class="px-5 order-md-3 order-sm-2"
               align-self="stretch"
             >
-              <!-- DESCRIPTION -->
               <summarized-content
                 :open="openSummary"
                 :is_summarized="is_summarized"
                 :content="getDescription()"
               />
             </v-col>
-            <v-col
-              class="item-meta-info px-5 pt-2 pb-3"
-              order="4"
-              order-sm="4"
-              cols="12"
-              sm="12"
-              lg="6"
-            >
+            <!-- META INFO -->
+            <v-col class="px-5 pt-2 pb-3 order-4" cols="12" sm="12" lg="6">
               <v-container column class="pa-0 pb-3">
-                <!-- META INFO -->
-                <v-row class="news-item-meta-infos">
-                  <v-col class="news-item-meta-infos-label">
+                <v-row no-gutters class="my-1">
+                  <v-col cols="2">
                     <strong>{{ $t('assess.published') }}:</strong>
                   </v-col>
                   <v-col>
-                    <span :class="published_date_outdated ? 'red--text' : ''">
+                    <span :class="published_date_outdated ? 'error--text' : ''">
                       {{ getPublishedDate() }}
                     </span>
-                    <v-icon v-if="published_date_outdated" small color="red"
+                    <v-icon
+                      v-if="published_date_outdated"
+                      class="ml-3"
+                      size="small"
+                      color="error"
                       >mdi-alert</v-icon
                     >
                   </v-col>
                 </v-row>
-                <v-row class="news-item-meta-infos">
-                  <v-col class="news-item-meta-infos-label d-flex align-center">
+                <v-row no-gutters class="my-1">
+                  <v-col cols="2" class="d-flex align-center">
                     <strong>Tags:</strong>
                   </v-col>
                   <v-col>
@@ -206,7 +201,8 @@
                   </v-col>
                 </v-row>
                 <v-row
-                  class="news-item-meta-infos"
+                  no-gutters
+                  class="my-1"
                   v-if="openSummary && !published_date_outdated"
                 >
                   <v-col>
