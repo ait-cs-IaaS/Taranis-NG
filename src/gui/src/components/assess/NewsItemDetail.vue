@@ -2,7 +2,7 @@
   <v-dialog v-model="view_details" fullscreen hide-overlay @keydown.esc="close">
     <v-card>
       <v-toolbar dark color="secondary">
-        <v-btn icon dark @click.native="close">
+        <v-btn icon dark @click="close">
           <v-icon>close</v-icon>
         </v-btn>
         <v-toolbar-title>{{ news_item.news_item_data.title }}</v-toolbar-title>
@@ -89,11 +89,11 @@
 export default {
   name: 'NewsItemDetail',
   components: {},
-  emits: ['view'],
   props: {
     news_item_prop: {},
     view_details_prop: { type: Boolean, default: false }
   },
+  emits: ['view'],
   data: () => ({}),
   computed: {
     news_item() {

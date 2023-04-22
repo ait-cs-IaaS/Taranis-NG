@@ -1,11 +1,11 @@
 <template>
   <div>
     <DataTable
-      :addButton="true"
-      :items.sync="osint_source_groups"
-      :headerFilter="['tag', 'default', 'name', 'description']"
-      sortByItem="id"
-      :actionColumn="true"
+      v-model:items="osint_source_groups"
+      :add-button="true"
+      :header-filter="['tag', 'default', 'name', 'description']"
+      sort-by-item="id"
+      :action-column="true"
       @delete-item="deleteItem"
       @edit-item="editItem"
       @add-item="addItem"
@@ -15,8 +15,8 @@
     </DataTable>
     <EditConfig
       v-if="formData && Object.keys(formData).length > 0"
-      :configData="formData"
-      :formFormat="formFormat"
+      :config-data="formData"
+      :form-format="formFormat"
       @submit="handleSubmit"
     ></EditConfig>
   </div>

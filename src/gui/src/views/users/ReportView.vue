@@ -16,6 +16,9 @@ import { notifySuccess } from '@/utils/helpers'
 
 export default {
   name: 'ReportView',
+  components: {
+    ReportItem
+  },
   data: () => ({
     default_report_item: {
       id: null,
@@ -31,9 +34,6 @@ export default {
     report_item: undefined,
     edit: true
   }),
-  components: {
-    ReportItem
-  },
   async created() {
     this.report_item = await this.loadReportItem()
   },

@@ -1,32 +1,32 @@
 <template>
   <v-container fluid class="ma-5 mt-5 pa-5 pt-0">
-    <v-form @submit.prevent="add" id="form" ref="form">
+    <v-form id="form" ref="form" @submit.prevent="add">
       <v-row no-gutters>
         <v-btn type="submit" color="success" class="mr-4"> Submit </v-btn>
       </v-row>
       <v-row no-gutters>
         <v-col cols="6" class="pa-1">
           <v-text-field
+            v-model="user.username"
             :label="$t('user.username')"
             name="username"
             type="text"
-            v-model="user.username"
             autocomplete="username"
             :rules="[rules.required]"
           />
         </v-col>
         <v-col cols="6" class="pa-1">
           <v-text-field
+            v-model="user.name"
             :label="$t('user.name')"
             name="name"
-            v-model="user.name"
           />
         </v-col>
         <v-col cols="6" class="pa-1">
           <v-text-field
             ref="password"
-            type="password"
             v-model="pwd"
+            type="password"
             :rules="passwordRules"
             autocomplete="new-password"
             :label="$t('user.password')"
@@ -64,12 +64,12 @@
             :show-select="true"
             class="elevation-1"
           >
-            <template v-slot:top>
+            <template #top>
               <v-toolbar flat color="white">
                 <v-toolbar-title>{{ $t('user.roles') }}</v-toolbar-title>
               </v-toolbar>
             </template>
-            <template v-slot:bottom v-if="roles.length < 10" />
+            <template v-if="roles.length < 10" #bottom />
           </v-data-table>
         </v-col>
         <v-col cols="12" class="pt-2">
@@ -81,12 +81,12 @@
             :show-select="true"
             class="elevation-1"
           >
-            <template v-slot:top>
+            <template #top>
               <v-toolbar flat color="white">
                 <v-toolbar-title>{{ $t('user.permissions') }}</v-toolbar-title>
               </v-toolbar>
             </template>
-            <template v-slot:bottom v-if="permissions.length < 10" />
+            <template v-if="permissions.length < 10" #bottom />
           </v-data-table>
         </v-col>
       </v-row>

@@ -1,8 +1,9 @@
 <template>
   <div>
-    <v-tooltip bottom v-for="(tag, i) in tags.slice(0, limit)" :key="i">
-      <template v-slot:activator="{ props }">
+    <v-tooltip v-for="(tag, i) in tags.slice(0, limit)" :key="i" bottom>
+      <template #activator="{ props }">
         <v-btn
+          v-ripple="false"
           v-bind="props"
           small
           variant="text"
@@ -11,7 +12,6 @@
           class="tag-button"
           :color="labelcolor(i)"
           @click.stop="updateTags(tag.name)"
-          v-ripple="false"
         >
           <span class="text-decoration-underline">
             {{ tag.name }}
@@ -50,6 +50,9 @@ export default {
       default: true
     }
   },
+  data: () => ({
+    colorStart: Math.floor(Math.random() * 9)
+  }),
   computed: {
     getChipClass() {
       const c = 'mr-1 mb-1 story-label'
@@ -59,9 +62,6 @@ export default {
       return this.truncate ? 'text-truncate' : ''
     }
   },
-  data: () => ({
-    colorStart: Math.floor(Math.random() * 9)
-  }),
   methods: {
     ...mapActions('assess', ['updateNewsItems']),
     ...mapActions('filter', ['appendTag']),

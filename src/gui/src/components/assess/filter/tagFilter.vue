@@ -1,31 +1,32 @@
 <template>
   <v-autocomplete
     v-model="selected"
+    v-model:search="search"
     :loading="loading"
     :items="available_tags"
     chips
-    dense
+    density="compact"
     deletable-chips
-    :search-input.sync="search"
     clearable
-    flat
     no-data-text="No tags found"
     item-value="name"
     item-title="name"
-    hide-details
-    cache-items
     label="Tags"
     multiple
   >
-    <template v-slot:item="{ item }">
-      <v-icon left>{{ tagIcon(item.tag_type) }}</v-icon
-      >{{ shortText(item.name) }}
+    <template #item="{ props, item }">
+      <v-list-item
+        v-bind="props"
+        :prepend-icon="tagIcon(item.raw.tag_type)"
+        :text="shortText(item.raw.name)"
+      />
     </template>
-    <template v-slot:selection="{ item }">
-      <v-chip>
-        <v-icon left>{{ tagIcon(item.tag_type) }}</v-icon
-        >{{ shortText(item.name) }}
-      </v-chip>
+    <template #chip="{ props, item }">
+      <v-chip
+        :prepend-icon="tagIcon(item.raw.tag_type)"
+        v-bind="props"
+        :text="shortText(item.raw.name)"
+      />
     </template>
   </v-autocomplete>
 </template>
@@ -36,14 +37,14 @@ import { mapActions, mapGetters } from 'vuex'
 import { tagIconFromType } from '@/utils/helpers'
 
 export default {
-  name: 'tagFilter',
+  name: 'TagFilter',
+  props: {},
   data: () => ({
     loading: false,
     available_tags: [],
     selected_tags: [],
     search: ''
   }),
-  props: {},
   computed: {
     selected: {
       get() {
@@ -60,12 +61,17 @@ export default {
       val && this.querySelections({ search: val })
     }
   },
+  async mounted() {
+    this.selected_tags = this.loadFilterTags()
+    await this.querySelections()
+  },
   methods: {
     ...mapGetters('filter', ['getFilterTags']),
     ...mapActions('filter', ['setTags']),
     ...mapActions('assess', ['updateNewsItems']),
     shortText(item) {
-      return item.length > 20 ? item.substring(0, 20) + '...' : item
+      console.debug('shortText', item)
+      return item.length > 15 ? item.substring(0, 15) + '...' : item
     },
     tagIcon(tag_type) {
       return tagIconFromType(tag_type)
@@ -91,10 +97,6 @@ export default {
         return { name: tag }
       })
     }
-  },
-  async mounted() {
-    this.selected_tags = this.loadFilterTags()
-    await this.querySelections()
   }
 }
 </script>

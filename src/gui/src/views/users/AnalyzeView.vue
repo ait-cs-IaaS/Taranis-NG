@@ -1,19 +1,20 @@
 <template>
   <DataTable
-    :addButton="true"
-    :items.sync="report_items"
-    :headerFilter="['tag', 'title', 'created']"
-    sortByItem="id"
-    :actionColumn="true"
+    v-model:items="report_items"
+    :add-button="false"
+    :search-bar="false"
+    :header-filter="['tag', 'title', 'created']"
+    sort-by-item="id"
+    :action-column="true"
     @delete-item="deleteItem"
     @edit-item="editItem"
     @add-item="addItem"
     @update-items="updateData"
     @selection-change="selectionChange"
   >
-    <template v-slot:actionColumn>
+    <template #actionColumn>
       <v-tooltip left>
-        <template v-slot:activator="{ props }">
+        <template #activator="{ props }">
           <v-icon
             v-bind="props"
             color="secondary"
@@ -53,6 +54,9 @@ export default {
       title: ''
     }
   }),
+  mounted() {
+    this.updateData()
+  },
   methods: {
     ...mapActions('analyze', ['loadReportItems', 'loadReportTypes']),
     ...mapGetters('analyze', ['getReportItems', 'getReportTypes']),
@@ -115,9 +119,6 @@ export default {
     selectionChange(selected) {
       this.selected = selected.map((item) => item.id)
     }
-  },
-  mounted() {
-    this.updateData()
   }
 }
 </script>

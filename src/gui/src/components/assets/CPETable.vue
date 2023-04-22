@@ -5,13 +5,13 @@
     sort-by="value"
     class="elevation-1"
   >
-    <template v-slot:top>
+    <template #top>
       <v-toolbar flat color="white">
         <v-toolbar-title>{{ $t('asset.cpes') }}</v-toolbar-title>
         <v-divider class="mx-4" inset vertical></v-divider>
         <v-spacer></v-spacer>
         <v-dialog v-model="dialog" max-width="700px">
-          <template v-if="editAllowed()" v-slot:activator="{ on }">
+          <template v-if="editAllowed()" #activator="{ on }">
             <v-btn color="primary" dark class="mb-2" v-on="on">
               <v-icon left>mdi-plus</v-icon>
               <span>{{ $t('asset.new_cpe') }}</span>
@@ -56,7 +56,7 @@
         </v-dialog>
 
         <v-dialog v-model="dialog_csv" max-width="500px">
-          <template v-if="editAllowed()" v-slot:activator="{ on }">
+          <template v-if="editAllowed()" #activator="{ on }">
             <v-btn color="primary" dark class="mb-2 ml-1" v-on="on">
               <v-icon left>mdi-upload</v-icon>
               <span>{{ $t('asset.import_csv') }}</span>
@@ -72,11 +72,11 @@
                 v-model="csv"
                 :map-fields="['value', 'description']"
               >
-                <template slot="hasHeaders" slot-scope="{ headers, toggle }">
+                <template #hasHeaders="{ headers, toggle }">
                   <label>
                     <input
-                      type="checkbox"
                       id="hasHeaders"
+                      type="checkbox"
                       :value="headers"
                       @change="toggle"
                     />
@@ -84,7 +84,7 @@
                   </label>
                 </template>
 
-                <template slot="next" slot-scope="{ load }">
+                <template #next="{ load }">
                   <button class="load" @click.prevent="load">
                     {{ $t('asset.load_csv_file') }}
                   </button>
@@ -110,7 +110,7 @@
         </v-dialog>
       </v-toolbar>
     </template>
-    <template v-if="editAllowed()" v-slot:item.action="{ item }">
+    <template v-if="editAllowed()" #item.action="{ item }">
       <v-icon small class="mr-2" @click="editItem(item)"> edit </v-icon>
       <v-icon small @click="deleteItem(item)"> delete </v-icon>
     </template>
@@ -131,6 +131,7 @@ export default {
     VueCsvImport,
     EnumSelector
   },
+  mixins: [AuthMixin],
   props: {
     asset_cpes: Array
   },
@@ -156,7 +157,6 @@ export default {
       value: ''
     }
   }),
-  mixins: [AuthMixin],
   computed: {
     formTitle() {
       return this.edited_index === -1 ? 'Add CPE Code' : 'Edit CPE Code'
@@ -166,6 +166,11 @@ export default {
     dialog(val) {
       val || this.close()
     }
+  },
+  mounted() {
+    findAttributeCPE().then((response) => {
+      this.cpe_attribute_id = response.data
+    })
   },
   methods: {
     enumSelected(data) {
@@ -242,11 +247,6 @@ export default {
       const index = this.cpes.indexOf(item)
       this.cpes.splice(index, 1)
     }
-  },
-  mounted() {
-    findAttributeCPE().then((response) => {
-      this.cpe_attribute_id = response.data
-    })
   }
 }
 </script>

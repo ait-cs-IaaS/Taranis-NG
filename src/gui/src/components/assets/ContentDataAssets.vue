@@ -1,10 +1,10 @@
 <template>
   <v-container id="selector">
     <component
-      v-bind:is="cardLayout()"
+      :is="cardLayout()"
       v-for="collection in collections"
-      :card="collection"
       :key="collection.id"
+      :card="collection"
     ></component>
   </v-container>
 </template>
@@ -31,24 +31,6 @@ export default {
       sort: 'ALPHABETICAL'
     }
   }),
-  methods: {
-    updateData() {
-      if (window.location.pathname.includes('/group/')) {
-        const i = window.location.pathname.indexOf('/group/')
-        const len = window.location.pathname.length
-        const group = window.location.pathname.substring(i + 7, len)
-
-        this.$store
-          .dispatch('getAllAssets', { group_id: group, filter: this.filter })
-          .then(() => {
-            this.collections = this.$store.getters.getAssets.items
-          })
-      }
-    },
-    cardLayout: function () {
-      return this.cardItem
-    }
-  },
   watch: {
     $route() {
       this.updateData()
@@ -66,6 +48,24 @@ export default {
       this.filter = filter
       this.updateData()
     })
+  },
+  methods: {
+    updateData() {
+      if (window.location.pathname.includes('/group/')) {
+        const i = window.location.pathname.indexOf('/group/')
+        const len = window.location.pathname.length
+        const group = window.location.pathname.substring(i + 7, len)
+
+        this.$store
+          .dispatch('getAllAssets', { group_id: group, filter: this.filter })
+          .then(() => {
+            this.collections = this.$store.getters.getAssets.items
+          })
+      }
+    },
+    cardLayout: function () {
+      return this.cardItem
+    }
   }
 }
 </script>

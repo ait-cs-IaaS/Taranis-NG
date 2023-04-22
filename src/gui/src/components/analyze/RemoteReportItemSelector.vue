@@ -29,11 +29,11 @@
         <v-row class="cs-inside">
           <v-col class="cs-panel">
             <v-list-item
-              dense
               v-for="link in links"
               :key="link.id"
-              @click="changeGroup($event, link.id)"
+              dense
               :class="link.id === selected_group_id ? 'active' : ''"
+              @click="changeGroup($event, link.id)"
             >
               <v-list-item-content v-if="!link.separator">
                 <v-icon regular color="cx-drawer-text">{{ link.icon }}</v-icon>
@@ -41,24 +41,24 @@
                   >{{ $t(link.title) }}
                 </v-list-item-title>
               </v-list-item-content>
-              <v-list-item-content class="separator" v-else>
+              <v-list-item-content v-else class="separator">
                 <v-divider class="section-divider" color="white"></v-divider>
               </v-list-item-content>
             </v-list-item>
           </v-col>
           <v-col class="cs-content">
             <ToolbarFilterAnalyze
+              ref="toolbarFilter"
               publish_selector
               total_count_title="analyze.total_count"
               @update-report-items-filter="updateFilter"
-              ref="toolbarFilter"
             ></ToolbarFilterAnalyze>
             <ContentDataAnalyze
+              ref="contentData"
               publish_selector
               :selection="values"
               class="item-selector"
               card-item="CardAnalyze"
-              ref="contentData"
               @show-remote-report-item-detail="showReportItemDetail"
               @new-data-loaded="newDataLoaded"
             />
@@ -72,12 +72,12 @@
     <RemoteReportItem ref="remoteReportItemDialog" />
 
     <component
+      :is="cardLayout()"
+      v-for="value in values"
+      :key="value.id"
       publish_selector
       class="item-selector ml-4"
-      v-bind:is="cardLayout()"
-      v-for="value in values"
       :card="value"
-      :key="value.id"
       @show-remote-report-item-detail="showReportItemDetail"
       @remove-report-item-from-selector="removeReportItemFromSelector"
     />
@@ -272,7 +272,7 @@ export default {
     this.$root.$on('report-item-updated', this.report_item_updated)
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     this.$root.$off('report-item-updated', this.report_item_updated)
   }
 }

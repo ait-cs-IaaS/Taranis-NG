@@ -12,25 +12,25 @@
     <v-row no-gutters>
       <v-col cols="6">
         <v-text-field
-          :label="$t('form.name')"
           v-model="asset.name"
+          :label="$t('form.name')"
           :rules="required"
         />
       </v-col>
       <v-col cols="6">
-        <v-text-field :label="$t('asset.serial')" v-model="asset.serial" />
+        <v-text-field v-model="asset.serial" :label="$t('asset.serial')" />
       </v-col>
       <v-col cols="12">
         <v-textarea
-          :label="$t('asset.description')"
           v-model="asset.description"
+          :label="$t('asset.description')"
           :spellcheck="$store.state.settings.spellcheck"
         />
       </v-col>
       <v-col cols="12">
         <v-select
-          :label="$t('asset.group')"
           v-model="asset.group"
+          :label="$t('asset.group')"
           :items="['foo', 'bar', 'fizz', 'buzz']"
         />
       </v-col>

@@ -16,9 +16,9 @@
             v-for="button in actionButtons"
             :key="button.label"
             :ripple="false"
-            @click.stop="actionClicked(button.action)"
             text
             class="text-lowercase selection-toolbar-btn mr-1 mt-1"
+            @click.stop="actionClicked(button.action)"
           >
             <v-icon left>{{ button.icon }}</v-icon>
             {{ button.label }}

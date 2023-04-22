@@ -2,8 +2,8 @@
   <v-container id="selector_publish">
     <CardProduct
       v-for="collection in collections"
-      :card="collection"
       :key="collection.id"
+      :card="collection"
     ></CardProduct>
     <v-card v-intersect.quiet="infiniteScrolling"></v-card>
   </v-container>

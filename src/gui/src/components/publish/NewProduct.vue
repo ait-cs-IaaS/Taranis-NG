@@ -1,8 +1,8 @@
 <template>
   <v-row v-bind="UI.DIALOG.ROW.WINDOW">
     <v-btn
-      v-bind="UI.BUTTON.ADD_NEW"
       v-if="add_button && canCreate"
+      v-bind="UI.BUTTON.ADD_NEW"
       @click="addProduct"
     >
       <v-icon left>{{ UI.ICON.PLUS }}</v-icon>
@@ -28,26 +28,26 @@
           </v-btn>
         </v-toolbar>
 
-        <v-form @submit.prevent="add" id="form" ref="form" class="px-4">
+        <v-form id="form" ref="form" class="px-4" @submit.prevent="add">
           <v-row no-gutters>
             <v-col cols="6" class="pr-3">
               <v-combobox
-                v-on:change="productSelected"
-                :disabled="!canModify"
                 v-model="selected_type"
+                :disabled="!canModify"
                 :items="product_types"
                 item-title="title"
                 :label="$t('product.report_type')"
+                @change="productSelected"
               />
             </v-col>
             <v-col cols="6" class="pr-3">
               <v-text-field
+                v-model="product.title"
+                v-validate="'required'"
                 :disabled="!canModify"
                 :label="$t('product.title')"
                 name="title"
                 type="text"
-                v-model="product.title"
-                v-validate="'required'"
                 data-vv-name="title"
                 :error-messages="errors.collect('title')"
                 :spellcheck="$store.state.settings.spellcheck"
@@ -55,10 +55,10 @@
             </v-col>
             <v-col cols="12" class="pr-3">
               <v-textarea
+                v-model="product.description"
                 :disabled="!canModify"
                 :label="$t('product.description')"
                 name="description"
-                v-model="product.description"
                 :spellcheck="$store.state.settings.spellcheck"
               />
             </v-col>
@@ -66,8 +66,8 @@
           <v-row no-gutters>
             <v-col cols="12" class="mb-2">
               <v-btn
-                v-bind="UI.BUTTON.ADD_NEW_IN"
                 v-if="canModify"
+                v-bind="UI.BUTTON.ADD_NEW_IN"
                 @click="$refs.report_item_selector.openSelector()"
               >
                 <v-icon left>{{ UI.ICON.PLUS }}</v-icon>
@@ -88,9 +88,9 @@
               <v-checkbox
                 v-for="preset in publisher_presets"
                 :key="preset.id"
+                v-model="preset.selected"
                 :label="preset.name"
                 :disabled="!canModify"
-                v-model="preset.selected"
               >
               </v-checkbox>
             </v-col>
@@ -98,10 +98,10 @@
           <v-row no-gutters class="pt-4">
             <v-col cols="6">
               <v-btn
+                ref="previewBtn"
                 :href="preview_link"
                 style="display: none"
                 target="_blank"
-                ref="previewBtn"
               >
               </v-btn>
               <v-btn depressed small @click="previewProduct">
@@ -143,6 +143,7 @@ import { mapActions, mapGetters } from 'vuex'
 export default {
   name: 'NewProduct',
   components: { ReportItemSelector },
+  mixins: [AuthMixin],
   props: { add_button: Boolean },
   data: () => ({
     visible: false,
@@ -164,7 +165,6 @@ export default {
       report_items: []
     }
   }),
-  mixins: [AuthMixin],
   computed: {
     canCreate() {
       return this.checkPermission(Permissions.PUBLISH_CREATE)
@@ -393,7 +393,7 @@ export default {
         this.$store.getters.getJWT
     })
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.$root.$off('new-product')
     this.$root.$off('show-product-edit')
   }

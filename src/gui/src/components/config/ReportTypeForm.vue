@@ -1,30 +1,30 @@
 <template>
   <v-container fluid class="ma-5 mt-5 pa-5 pt-0">
-    <v-form @submit.prevent="add" id="form" ref="form">
+    <v-form id="form" ref="form" @submit.prevent="add">
       <v-row no-gutters>
         <v-btn type="submit" color="success" class="mr-4"> Submit </v-btn>
       </v-row>
       <v-row no-gutters>
-        <v-col cols="12" class="cation grey--text" v-if="edit">
+        <v-col v-if="edit" cols="12" class="cation grey--text">
           ID:{{ report_type.id }}
         </v-col>
         <v-col cols="12">
           <v-text-field
+            v-model="report_type.title"
+            v-validate="'required'"
             :disabled="!canUpdate"
             :label="$t('report_type.name')"
             name="name"
-            v-model="report_type.title"
-            v-validate="'required'"
             data-vv-name="name"
             :error-messages="errors.collect('name')"
           />
         </v-col>
         <v-col cols="12">
           <v-textarea
+            v-model="report_type.description"
             :disabled="!canUpdate"
             :label="$t('report_type.description')"
             name="description"
-            v-model="report_type.description"
           />
         </v-col>
       </v-row>
@@ -38,9 +38,9 @@
         </v-col>
         <v-col cols="12">
           <v-card
-            style="margin-top: 8px"
             v-for="(group, index) in report_type.attribute_groups"
             :key="group.id"
+            style="margin-top: 8px"
           >
             <v-toolbar dark height="32px">
               <v-spacer></v-spacer>
@@ -58,33 +58,33 @@
 
             <v-card-text>
               <v-text-field
+                v-model="group.title"
                 :disabled="!canUpdate"
                 :label="$t('report_type.name')"
                 name="name"
                 type="text"
-                v-model="group.title"
                 :spellcheck="$store.state.settings.spellcheck"
               ></v-text-field>
               <v-textarea
+                v-model="group.description"
                 :disabled="!canUpdate"
                 :label="$t('report_type.description')"
                 name="description"
-                v-model="group.description"
                 :spellcheck="$store.state.settings.spellcheck"
               ></v-textarea>
               <v-text-field
+                v-model="group.section_title"
                 :disabled="!canUpdate"
                 :label="$t('report_type.section_title')"
                 name="section_title"
-                v-model="group.section_title"
                 :spellcheck="$store.state.settings.spellcheck"
               ></v-text-field>
               <AttributeTable
-                :attributes.sync="
+                v-model:attributes="
                   report_type.attribute_groups[index].attribute_group_items
                 "
-                @update="(items) => updateAttributeGroupItems(index, items)"
                 :disabled="!canUpdate"
+                @update="(items) => updateAttributeGroupItems(index, items)"
               />
             </v-card-text>
           </v-card>
@@ -106,6 +106,10 @@ export default {
   components: {
     AttributeTable
   },
+  mixins: [AuthMixin],
+  props: {
+    report_type_data: Object
+  },
   data: () => ({
     edit: false,
     report_type: {
@@ -115,10 +119,6 @@ export default {
       attribute_groups: []
     }
   }),
-  props: {
-    report_type_data: Object
-  },
-  mixins: [AuthMixin],
   computed: {
     canCreate() {
       return this.checkPermission(Permissions.CONFIG_REPORT_TYPE_CREATE)
@@ -128,6 +128,12 @@ export default {
         this.checkPermission(Permissions.CONFIG_REPORT_TYPE_UPDATE) ||
         !this.edit
       )
+    }
+  },
+  mounted() {
+    if (this.report_type_data) {
+      this.edit = true
+      this.report_type = this.report_type_data
     }
   },
   methods: {
@@ -230,12 +236,6 @@ export default {
           notifyFailure('report_type.validation_error')
         }
       })
-    }
-  },
-  mounted() {
-    if (this.report_type_data) {
-      this.edit = true
-      this.report_type = this.report_type_data
     }
   }
 }

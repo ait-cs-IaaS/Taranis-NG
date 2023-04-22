@@ -1,16 +1,16 @@
 <template>
   <filter-navigation
     :search="filter.search"
-    @update:search="(value) => (search = value)"
     :limit="limit"
-    @update:limit="(value) => (limit = value)"
     :offsest="offset"
+    @update:search="(value) => (search = value)"
+    @update:limit="(value) => (limit = value)"
     @update:offset="(value) => (offset = value)"
   >
     <template #navdrawer>
       <v-row class="my-2 mr-0 px-2 pb-5">
         <v-col cols="12" align-self="center" class="py-1">
-          <v-btn @click="addReport()" color="primary" block>
+          <v-btn color="primary" block @click="addReport()">
             <v-icon left dark> mdi-file-document-plus-outline </v-icon>
             New Report
           </v-btn>

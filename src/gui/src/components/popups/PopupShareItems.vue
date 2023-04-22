@@ -6,10 +6,10 @@
     <v-card-text>
       Select a report to share the item with:
       <v-select
+        v-model="reportItemSelection"
         solo
         single-line
         label="Select Report"
-        v-model="reportItemSelection"
         no-data-text="No reports found"
         :items="reportItems"
       />
@@ -18,8 +18,8 @@
       <v-btn
         color="awake-red-color darken-1"
         outlined
-        @click="close()"
         class="text-lowercase pr-4"
+        @click="close()"
       >
         <v-icon left class="red-icon">mdi-close</v-icon>
         abort
@@ -29,8 +29,8 @@
         color="primary"
         dark
         depressed
-        @click="share()"
         class="text-lowercase selection-toolbar-btn pr-4"
+        @click="share()"
       >
         <v-icon left>mdi-share-outline</v-icon>
         share

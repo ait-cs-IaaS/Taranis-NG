@@ -1,5 +1,5 @@
 <template>
-  <v-snackbar dark v-model="notification" :color="notify.type">
+  <v-snackbar v-model="notification" dark :color="notify.type">
     <span>{{ $t(notify.loc) }}</span>
     <v-btn variant="text" color="white--text" @click="notification = false">{{
       $t('notification.close')

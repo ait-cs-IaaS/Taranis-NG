@@ -31,12 +31,12 @@
             <v-list-item
               v-for="link in links"
               :key="link.id"
-              @click="changeGroup($event, link.id)"
               class="px-0"
               align="center"
               :class="link.id === selected_group_id ? 'active' : ''"
+              @click="changeGroup($event, link.id)"
             >
-              <template v-slot:prepend>
+              <template #prepend>
                 <v-icon :icon="link.icon" />
               </template>
               <v-list-item-title style="white-space: unset; font-size: 0.7em">{{
@@ -56,7 +56,7 @@
             :selection="values"
             class="item-selector"
             card-item="CardAssess"
-            selfID="selector_assess_analyze"
+            self-i-d="selector_assess_analyze"
             data_set="assess_news_item"
             @new-data-loaded="newDataLoaded"
           />
@@ -66,19 +66,19 @@
 
     <v-row>
       <v-col
-        cols="12"
-        :class="UI.CLASS.card_offset"
         v-for="value in values"
         :key="value.id"
+        cols="12"
+        :class="UI.CLASS.card_offset"
       >
         <component
+          :is="cardLayout()"
           analyze_selector
           compact_mode
           class="item-selector"
-          v-bind:is="cardLayout()"
           :analyze_can_modify="canModify"
           :card="value"
-          :showToolbar="true"
+          :show-toolbar="true"
           data_set="assess_report_item"
           @remove-item-from-selector="removeFromSelector"
           @show-single-aggregate-detail="showSingleAggregateDetail(value)"
@@ -111,6 +111,7 @@ export default {
     NewsItemSingleDetail,
     NewsItemDetail
   },
+  mixins: [AuthMixin],
   props: {
     item_values: Array,
     analyze_selector: Boolean,
@@ -126,7 +127,6 @@ export default {
     groups: [],
     selected_group_id: ''
   }),
-  mixins: [AuthMixin],
   computed: {
     canModify() {
       return (
@@ -267,7 +267,7 @@ export default {
     this.$root.$on('report-item-updated', this.report_item_updated)
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     this.$root.$off('report-item-updated', this.report_item_updated)
   }
 }

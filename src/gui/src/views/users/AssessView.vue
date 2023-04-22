@@ -15,10 +15,10 @@
 
         <!-- class="row d-flex align-stretch row--dense stories-grid-container" -->
         <transition-group
+          v-else
           name="news-items-grid"
           tag="div"
           class="row d-flex align-stretch row--dense flex-column"
-          v-else
           appear
         >
           <card-story
@@ -46,8 +46,8 @@
 
     <v-expand-transition>
       <assess-selection-toolbar
-        class="px-1 pt-2 pb-3"
         v-if="activeSelection"
+        class="px-1 pt-2 pb-3"
         :selection="getNewsItemsSelection()"
       ></assess-selection-toolbar>
     </v-expand-transition>
@@ -136,7 +136,7 @@ export default {
       }
     })
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.unsubscribe()
   }
 }

@@ -7,7 +7,7 @@
     offset-y
     width="290px"
   >
-    <template v-slot:activator="{ props }">
+    <template #activator="{ props }">
       <v-text-field
         v-model="date.value"
         :label="caption"
@@ -21,8 +21,8 @@
     </template>
     <v-date-picker
       v-model="date.value"
-      @input="menu = false"
       style=""
+      @input="menu = false"
     ></v-date-picker>
   </v-menu>
 </template>

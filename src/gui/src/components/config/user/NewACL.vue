@@ -1,23 +1,23 @@
 <template>
   <v-container fluid class="ma-5 mt-5 pa-5 pt-0">
-    <v-form @submit.prevent="add" id="form" ref="form" class="px-4">
+    <v-form id="form" ref="form" class="px-4" @submit.prevent="add">
       <v-row no-gutters>
         <v-col cols="12" class="pa-1">
           <v-text-field
+            v-model="acl.name"
+            v-validate="'required'"
             :label="$t('acl.name')"
             name="name"
             type="text"
-            v-model="acl.name"
-            v-validate="'required'"
             data-vv-name="name"
             :error-messages="errors.collect('name')"
           />
         </v-col>
         <v-col cols="12" class="pa-1">
           <v-textarea
+            v-model="acl.description"
             :label="$t('acl.description')"
             name="description"
-            v-model="acl.description"
             :spellcheck="$store.state.settings.spellcheck"
           />
         </v-col>
@@ -31,41 +31,41 @@
         </v-col>
         <v-col cols="6" class="pa-1">
           <v-text-field
+            v-model="acl.item_id"
             :label="$t('acl.item_id')"
             name="item_id"
             type="text"
-            v-model="acl.item_id"
           />
         </v-col>
       </v-row>
       <v-row no-gutters>
         <v-col cols="12" class="d-flex">
           <v-checkbox
+            v-model="acl.see"
             class="pr-8"
             :label="$t('acl.see')"
             name="see"
-            v-model="acl.see"
           />
           <v-checkbox
+            v-model="acl.access"
             class="pr-8"
             :label="$t('acl.access')"
             name="access"
-            v-model="acl.access"
           />
           <v-checkbox
+            v-model="acl.modify"
             class="pr-8"
             :label="$t('acl.modify')"
             name="modify"
-            v-model="acl.modify"
           />
         </v-col>
       </v-row>
       <v-row no-gutters>
         <v-col cols="12">
           <v-checkbox
+            v-model="acl.everyone"
             :label="$t('acl.everyone')"
             name="everyone"
-            v-model="acl.everyone"
           />
         </v-col>
         <v-col cols="12">
@@ -77,7 +77,7 @@
             :show-select="true"
             class="elevation-1"
           >
-            <template v-slot:top>
+            <template #top>
               <v-toolbar flat color="white">
                 <v-toolbar-title>{{ $t('acl.users') }}</v-toolbar-title>
               </v-toolbar>
@@ -93,7 +93,7 @@
             :show-select="true"
             class="elevation-1"
           >
-            <template v-slot:top>
+            <template #top>
               <v-toolbar flat color="white">
                 <v-toolbar-title>{{ $t('acl.roles') }}</v-toolbar-title>
               </v-toolbar>

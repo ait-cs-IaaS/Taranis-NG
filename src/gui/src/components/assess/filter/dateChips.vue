@@ -1,31 +1,40 @@
 <template>
-  <v-chip-group
-    :value="defaultValue"
-    @change="setValue"
-    active-class="selected"
-    class="date-filter-group d-flex"
+  <v-btn-toggle
+    v-model="modelValue"
+    variant="outlined"
+    density="compact"
+    divided
+    selected-class="text-primary"
   >
-    <v-chip label outlined dark color="black" value="all">all</v-chip>
-    <v-chip label outlined dark color="black" value="today">today</v-chip>
-    <v-chip label outlined dark color="black" value="week">one week</v-chip>
-  </v-chip-group>
+    <v-btn variant="text" value="all">all</v-btn>
+    <v-btn variant="text" value="today">today</v-btn>
+    <v-btn variant="text" value="week">one week</v-btn>
+  </v-btn-toggle>
 </template>
 
 <script>
 export default {
-  name: 'dateChips',
+  name: 'DateChips',
   props: {
-    value: String
+    value: {
+      type: String,
+      default: 'all'
+    }
+  },
+  computed: {
+    modelValue: {
+      get() {
+        return this.value
+      },
+      set(newValue) {
+        this.setValue(newValue)
+      }
+    }
   },
   methods: {
     setValue(newValue) {
       console.debug('dateChips.setValue', newValue)
       this.$emit('input', newValue)
-    }
-  },
-  computed: {
-    defaultValue() {
-      return this.value ? this.value : 'all'
     }
   }
 }

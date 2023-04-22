@@ -2,7 +2,7 @@
   <v-container fluid style="min-height: 100vh">
     <v-card>
       <v-toolbar dark color="secondary">
-        <v-btn icon dark @click.native="close">
+        <v-btn icon dark @click="close">
           <v-icon>close</v-icon>
         </v-btn>
         <v-toolbar-title>{{ news_item.news_item_data.title }}</v-toolbar-title>

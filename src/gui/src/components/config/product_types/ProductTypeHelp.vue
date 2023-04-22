@@ -1,6 +1,6 @@
 <template>
   <v-dialog v-model="dialog">
-    <template v-slot:activator="{ on }">
+    <template #activator="{ on }">
       <v-btn color="primary" dark v-on="on">
         <v-icon left>{{ UI.ICON.HELP }}</v-icon>
         <span>{{ $t('product_type.help') }}</span>
@@ -82,9 +82,9 @@
           </v-card>
 
           <v-card
-            style="margin-bottom: 8px"
             v-for="attribute_group in selected_type.attribute_groups"
             :key="attribute_group.id"
+            style="margin-bottom: 8px"
           >
             <v-card-title>{{ attribute_group.title }}</v-card-title>
             <v-card-text>
@@ -116,8 +116,8 @@ import { mapActions, mapGetters } from 'vuex'
 
 export default {
   name: 'ProductTypeHelp',
-  emits: ['close'],
   components: {},
+  emits: ['close'],
   data: () => ({
     selected_type: null,
     report_types: [],
@@ -170,7 +170,7 @@ export default {
       this.report_types = this.getReportTypesConfig().items
     })
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.$emit('close')
   }
 }

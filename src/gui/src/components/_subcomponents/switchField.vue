@@ -4,33 +4,33 @@
       v-model="localValue"
       :label="label ? label : ''"
       :color="color ? color : 'success'"
-      @change="setValue"
       inset
       dense
       hide-details
+      @change="setValue"
     ></v-switch>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'switchField',
-  emits: ['input'],
+  name: 'SwitchField',
   props: {
     label: String,
     color: String,
     value: Boolean
   },
+  emits: ['input'],
   data: () => ({
     localValue: false
   }),
+  mounted() {
+    this.localValue = this.value
+  },
   methods: {
     setValue() {
       this.$emit('input', this.localValue)
     }
-  },
-  mounted() {
-    this.localValue = this.value
   }
 }
 </script>

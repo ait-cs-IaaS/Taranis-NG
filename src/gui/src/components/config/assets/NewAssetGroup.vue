@@ -23,15 +23,15 @@
           </v-btn>
         </v-toolbar>
 
-        <v-form @submit.prevent="add" id="form" ref="form" class="px-4">
+        <v-form id="form" ref="form" class="px-4" @submit.prevent="add">
           <v-row no-gutters>
             <v-col cols="12" class="pa-1">
               <v-text-field
+                v-model="group.name"
+                v-validate="'required'"
                 :label="$t('asset_group.name')"
                 name="name"
                 type="text"
-                v-model="group.name"
-                v-validate="'required'"
                 data-vv-name="name"
                 :error-messages="errors.collect('name')"
                 :spellcheck="$store.state.settings.spellcheck"
@@ -39,9 +39,9 @@
             </v-col>
             <v-col cols="12" class="pa-1">
               <v-textarea
+                v-model="group.description"
                 :label="$t('asset_group.description')"
                 name="description"
-                v-model="group.description"
                 :spellcheck="$store.state.settings.spellcheck"
               />
             </v-col>
@@ -56,7 +56,7 @@
                 show-select
                 class="elevation-1"
               >
-                <template v-slot:top>
+                <template #top>
                   <v-toolbar flat color="white">
                     <v-toolbar-title>{{
                       $t('asset_group.allowed_users')
@@ -74,7 +74,7 @@
                 show-select
                 class="elevation-1"
               >
-                <template v-slot:top>
+                <template #top>
                   <v-toolbar flat color="white">
                     <v-toolbar-title>{{
                       $t('asset_group.notification_templates')
@@ -138,6 +138,33 @@ export default {
       templates: []
     }
   }),
+  mounted() {
+    this.$store
+      .dispatch('config/getAllExternalUsers', { search: '' })
+      .then(() => {
+        this.users = this.$store.getters.getUsers.items
+      })
+
+    this.$store
+      .dispatch('config/getAllNotificationTemplates', { search: '' })
+      .then(() => {
+        this.templates = this.$store.getters.getNotificationTemplates.items
+      })
+
+    this.$root.$on('show-edit', (data) => {
+      this.visible = true
+      this.edit = true
+      this.show_error = false
+      this.group.id = data.id
+      this.group.name = data.name
+      this.group.description = data.description
+      this.selected_users = data.users
+      this.selected_templates = data.templates
+    })
+  },
+  beforeUnmount() {
+    this.$root.$off('show-edit')
+  },
   methods: {
     addGroup() {
       this.visible = true
@@ -201,33 +228,6 @@ export default {
         }
       })
     }
-  },
-  mounted() {
-    this.$store
-      .dispatch('config/getAllExternalUsers', { search: '' })
-      .then(() => {
-        this.users = this.$store.getters.getUsers.items
-      })
-
-    this.$store
-      .dispatch('config/getAllNotificationTemplates', { search: '' })
-      .then(() => {
-        this.templates = this.$store.getters.getNotificationTemplates.items
-      })
-
-    this.$root.$on('show-edit', (data) => {
-      this.visible = true
-      this.edit = true
-      this.show_error = false
-      this.group.id = data.id
-      this.group.name = data.name
-      this.group.description = data.description
-      this.selected_users = data.users
-      this.selected_templates = data.templates
-    })
-  },
-  beforeDestroy() {
-    this.$root.$off('show-edit')
   }
 }
 </script>

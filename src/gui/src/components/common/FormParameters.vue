@@ -5,11 +5,11 @@
       <v-row>
         <v-text-field
           v-if="ui === 'text'"
+          v-model="value[index]"
+          v-validate="'required'"
           :label="parameter.name"
           :name="'parameter' + index"
           type="text"
-          v-model="value[index]"
-          v-validate="'required'"
           :data-vv-name="'parameter' + index"
           :disabled="disabled"
           :error-messages="errors.collect('parameter' + index)"
@@ -31,7 +31,7 @@
         />
 
         <v-tooltip left>
-          <template v-slot:activator="{ props }">
+          <template #activator="{ props }">
             <v-icon color="primary" dark v-bind="props" class="pr-2">
               mdi-help-circle
             </v-icon>

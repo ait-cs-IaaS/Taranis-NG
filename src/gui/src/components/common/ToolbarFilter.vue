@@ -9,7 +9,7 @@
           v-bind="UI.ELEMENT.SEARCH"
           v-model="filter.search"
           :placeholder="$t('toolbar_filter.search')"
-          v-on:keyup="filterSearch"
+          @keyup="filterSearch"
         />
       </v-col>
       <v-col v-bind="UI.TOOLBAR.COL.RIGHT">
@@ -34,16 +34,12 @@ import { mapGetters } from 'vuex'
 
 export default {
   name: 'ToolbarFilter',
+  mixins: [AuthMixin],
   props: {
     title: String,
     dialog: String,
     total_count_title: String,
     total_count_getter: String
-  },
-  computed: {
-    totalCount() {
-      return this.getNodes().total_count
-    }
   },
   data: () => ({
     filter: {
@@ -51,7 +47,11 @@ export default {
     },
     timeout: null
   }),
-  mixins: [AuthMixin],
+  computed: {
+    totalCount() {
+      return this.getNodes().total_count
+    }
+  },
   methods: {
     ...mapGetters('config', ['getNodes']),
     changeTheme() {

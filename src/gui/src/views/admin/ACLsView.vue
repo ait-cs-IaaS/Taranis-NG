@@ -1,11 +1,11 @@
 <template>
   <div>
     <DataTable
-      :addButton="true"
-      :items.sync="acls"
-      :headerFilter="['tag', 'id', 'name', 'username']"
-      sortByItem="id"
-      :actionColumn="true"
+      v-model:items="acls"
+      :add-button="true"
+      :header-filter="['tag', 'id', 'name', 'username']"
+      sort-by-item="id"
+      :action-column="true"
       @delete-item="deleteItem"
       @edit-item="editItem"
       @add-item="addItem"

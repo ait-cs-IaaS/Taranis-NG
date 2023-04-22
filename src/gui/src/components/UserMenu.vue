@@ -1,20 +1,20 @@
 <template>
   <v-menu close-on-back close-on-content-click>
-    <template v-slot:activator="{ props }">
+    <template #activator="{ props }">
       <v-btn icon="mdi-account" v-bind="props" />
     </template>
     <v-list>
-      <v-list-item @click="userview" prepend-icon="mdi-account">
+      <v-list-item prepend-icon="mdi-account" @click="userview">
         <v-list-item-title>{{ username }}</v-list-item-title>
         <v-list-item-subtitle>{{ organizationName }}</v-list-item-subtitle>
       </v-list-item>
       <v-divider></v-divider>
 
-      <v-list-item @click="settings" prepend-icon="mdi-cog-outline">
+      <v-list-item prepend-icon="mdi-cog-outline" @click="settings">
         <v-list-item-title> {{ $t('user_menu.settings') }}</v-list-item-title>
       </v-list-item>
 
-      <v-list-item @click="logout" prepend-icon="mdi-logout">
+      <v-list-item prepend-icon="mdi-logout" @click="logout">
         <v-list-item-title> {{ $t('user_menu.logout') }}</v-list-item-title>
       </v-list-item>
     </v-list>

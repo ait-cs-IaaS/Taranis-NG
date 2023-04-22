@@ -1,8 +1,8 @@
 <template>
   <v-container fluid>
     <v-row no-gutters>
-      <dash-board-card linkTo="/assess" linkText="Assess" cols="6">
-        <template v-slot:content>
+      <dash-board-card link-to="/assess" link-text="Assess" cols="6">
+        <template #content>
           <v-icon class="mr-2"> mdi-email-multiple </v-icon>
           <span class="caption">
             There are
@@ -11,8 +11,8 @@
           </span>
         </template>
       </dash-board-card>
-      <dash-board-card linkTo="/publish" linkText="Publish" cols="6">
-        <template v-slot:content>
+      <dash-board-card link-to="/publish" link-text="Publish" cols="6">
+        <template #content>
           <v-icon class="mr-2" color="orange"> mdi-email-check-outline </v-icon>
           <span class="caption">
             There are <b>{{ dashboardData.total_products }}</b> products ready
@@ -22,8 +22,8 @@
       </dash-board-card>
     </v-row>
     <v-row no-gutters>
-      <dash-board-card linkTo="/analyze" linkText="Analyze">
-        <template v-slot:content>
+      <dash-board-card link-to="/analyze" link-text="Analyze">
+        <template #content>
           <v-icon class="mr-2"> mdi-account </v-icon>
           <span class="caption">
             There are <b>{{ dashboardData.report_items_completed }}</b>
@@ -39,8 +39,8 @@
           </span>
         </template>
       </dash-board-card>
-      <dash-board-card linkTo="/config/nodes" linkText="Nodes">
-        <template v-slot:content>
+      <dash-board-card link-to="/config/nodes" link-text="Nodes">
+        <template #content>
           <v-icon class="mr-2" color="green">
             mdi-lightbulb-off-outline
           </v-icon>
@@ -54,8 +54,8 @@
           >
         </template>
       </dash-board-card>
-      <dash-board-card linkTo="#" linkText="Database">
-        <template v-slot:content>
+      <dash-board-card link-to="#" link-text="Database">
+        <template #content>
           <v-icon class="mr-2" color="blue"> mdi-database </v-icon>
           <span class="caption"
             >There are <b>{{ dashboardData.total_database_items }}</b> live

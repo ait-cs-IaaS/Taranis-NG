@@ -1,19 +1,19 @@
 <template>
   <div>
     <DataTable
-      :addButton="false"
-      :items.sync="bots"
-      :headerFilter="['name', 'description']"
-      sortByItem="name"
-      :actionColumn="false"
+      v-model:items="bots"
+      :add-button="false"
+      :header-filter="['name', 'description']"
+      sort-by-item="name"
+      :action-column="false"
       @edit-item="editItem"
       @add-item="addItem"
       @update-items="updateData"
     />
     <EditConfig
       v-if="formData && Object.keys(formData).length > 0"
-      :configData="formData"
-      :formFormat="formFormat"
+      :config-data="formData"
+      :form-format="formFormat"
       @submit="handleSubmit"
     ></EditConfig>
   </div>

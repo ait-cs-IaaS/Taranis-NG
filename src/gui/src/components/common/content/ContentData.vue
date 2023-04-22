@@ -1,11 +1,11 @@
 <template>
   <v-container id="selector">
     <component
-      v-bind:is="cardLayout()"
+      :is="cardLayout()"
       v-for="collection in collections"
-      :card="collection"
       :key="collection.id"
-      :deletePermission="deletePermission"
+      :card="collection"
+      :delete-permission="deletePermission"
     ></component>
   </v-container>
 </template>
@@ -35,16 +35,6 @@ export default {
       search: ''
     }
   }),
-  methods: {
-    updateData() {
-      this.$store.dispatch(this.action, this.filter).then(() => {
-        this.collections = this.$store.getters[this.getter].items
-      })
-    },
-    cardLayout: function () {
-      return this.cardItem
-    }
-  },
   mounted() {
     this.updateData()
     this.$root.$on('notification', () => {
@@ -58,10 +48,20 @@ export default {
       this.updateData()
     })
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.$root.$off('notification')
     this.$root.$off('update-data')
     this.$root.$off('update-items-filter')
+  },
+  methods: {
+    updateData() {
+      this.$store.dispatch(this.action, this.filter).then(() => {
+        this.collections = this.$store.getters[this.getter].items
+      })
+    },
+    cardLayout: function () {
+      return this.cardItem
+    }
   }
 }
 </script>

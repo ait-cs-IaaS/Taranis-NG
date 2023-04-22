@@ -1,17 +1,17 @@
 <template>
   <div>
     <DataTable
-      :addButton="true"
-      :items.sync="nodes"
-      :headerFilter="['tag', 'name', 'description']"
-      :actionColumn="true"
+      v-model:items="nodes"
+      :add-button="true"
+      :header-filter="['tag', 'name', 'description']"
+      :action-column="true"
       @delete-item="deleteItem"
       @edit-item="editItem"
       @add-item="addItem"
       @update-items="updateData"
       @selection-change="selectionChange"
     >
-      <template v-slot:titlebar>
+      <template #titlebar>
         <v-btn color="blue-grey" dark class="ml-4" @click="triggerWorkers">
           <v-icon>mdi-run</v-icon>Trigger Workers
         </v-btn>
@@ -19,8 +19,8 @@
     </DataTable>
     <EditConfig
       v-if="formData && Object.keys(formData).length > 0"
-      :configData="formData"
-      :formFormat="formFormat"
+      :config-data="formData"
+      :form-format="formFormat"
       @submit="handleSubmit"
     ></EditConfig>
   </div>

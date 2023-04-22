@@ -1,10 +1,10 @@
 <template>
   <filter-navigation
     :search="filter.search"
-    @update:search="(value) => (search = value)"
     :limit="limit"
-    @update:limit="(value) => (limit = value)"
     :offsest="offset"
+    @update:search="(value) => (search = value)"
+    @update:limit="(value) => (limit = value)"
     @update:offset="(value) => (offset = value)"
   >
     <template #navdrawer>
@@ -18,14 +18,13 @@
           <v-select
             v-model="group"
             :items="getOSINTSourceGroupsList()"
-            prepent-icon="mdi-format-list-numbered"
             item-title="title"
             item-value="id"
             label="Source Group"
             :hide-details="true"
-            solo
+            variant="solo"
             clearable
-            dense
+            density="compact"
           ></v-select>
         </v-col>
 
@@ -33,14 +32,13 @@
           <v-select
             v-model="source"
             :items="getOSINTSourcesList()"
-            prepent-icon="mdi-format-list-numbered"
             item-title="title"
             item-value="id"
             label="Source"
             :hide-details="true"
-            solo
+            variant="solo"
             clearable
-            dense
+            density="compact"
           ></v-select>
         </v-col>
       </v-row>
@@ -91,7 +89,7 @@
 
       <v-row class="my-2 mr-0 px-2 pb-5">
         <v-col cols="12" class="py-0">
-          <v-btn @click="updateNewsItems()" color="primary" block>
+          <v-btn color="primary" block @click="updateNewsItems()">
             Reload
             <v-icon right dark> mdi-reload </v-icon>
           </v-btn>

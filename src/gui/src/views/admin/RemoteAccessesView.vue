@@ -1,10 +1,10 @@
 <template>
   <div>
     <DataTable
-      :addButton="true"
-      :items.sync="RemoteAccess"
-      :headerFilter="['tag', 'name', 'title', 'description']"
-      :actionColumn="true"
+      v-model:items="RemoteAccess"
+      :add-button="true"
+      :header-filter="['tag', 'name', 'title', 'description']"
+      :action-column="true"
       @delete-item="deleteItem"
       @edit-item="editItem"
       @add-item="addItem"
@@ -12,8 +12,8 @@
     />
     <EditConfig
       v-if="formData && Object.keys(formData).length > 0"
-      :configData="formData"
-      :formFormat="formFormat"
+      :config-data="formData"
+      :form-format="formFormat"
       @submit="handleSubmit"
     ></EditConfig>
   </div>

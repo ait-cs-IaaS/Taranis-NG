@@ -1,36 +1,37 @@
 <template>
-  <v-container>
-    <v-app-bar :elevation="2" app class="mt-12">
+  <v-card>
+    <v-toolbar density="compact">
       <v-toolbar-title>{{ container_title }}</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-switch v-model="verticalView" label="Side-by-side view"></v-switch>
-      <div v-if="edit">
-        <v-switch
-          v-if="edit"
-          v-model="report_item.completed"
-          label="Completed"
-        ></v-switch>
-      </div>
-      <v-btn color="success" class="mr-2" @click="saveReportItem">
-        <v-icon left>mdi-content-save</v-icon>
+      <v-switch
+        v-if="edit"
+        v-model="report_item.completed"
+        label="Completed"
+      ></v-switch>
+      <v-btn
+        prepend-icon="mdi-content-save"
+        color="success"
+        class="mr-2"
+        @click="saveReportItem"
+      >
         <span>{{ $t('button.save') }}</span>
       </v-btn>
-    </v-app-bar>
-
-    <v-card>
+    </v-toolbar>
+    <v-card-text>
       <v-row>
         <v-col
           :cols="verticalView ? 6 : 12"
           :class="verticalView ? 'taranis-ng-vertical-view' : ''"
         >
           <v-row no-gutters>
-            <v-col cols="12" v-if="edit">
+            <v-col v-if="edit" cols="12">
               <span class="caption">ID: {{ report_item.uuid }}</span>
             </v-col>
             <v-col cols="4" class="pr-3">
               <v-select
-                :disabled="edit"
                 v-model="report_type"
+                :disabled="edit"
                 item-title="title"
                 item-value="id"
                 :rules="required"
@@ -40,28 +41,27 @@
             </v-col>
             <v-col cols="4" class="pr-3">
               <v-text-field
+                v-model="report_item.title_prefix"
                 :label="$t('report_item.title_prefix')"
                 name="title_prefix"
-                v-model="report_item.title_prefix"
               ></v-text-field>
             </v-col>
             <v-col cols="4" class="pr-3">
               <v-text-field
+                v-model="report_item.title"
                 :label="$t('report_item.title')"
                 name="title"
                 type="text"
-                v-model="report_item.title"
                 :rules="required"
-                :error-messages="errors.collect('title')"
               ></v-text-field>
             </v-col>
           </v-row>
           <v-row>
-            <v-col cols="12" class="pa-0 ma-0" v-if="report_type">
+            <v-col v-if="report_type" cols="12" class="pa-0 ma-0">
               <v-expansion-panels
-                class="mb-1"
                 v-for="attribute_group in report_type.attribute_groups"
                 :key="attribute_group.id"
+                class="mb-1"
                 multiple
               >
                 <v-expansion-panel>
@@ -73,14 +73,13 @@
                   </v-expansion-panel-header>
                   <v-expansion-panel-content>
                     <attribute-item
-                      :read_only="!edit"
                       v-for="attribute_item in attributes[attribute_group.id]"
-                      :attribute_item="attribute_item"
                       :key="attribute_item.id"
+                      :read_only="!edit"
+                      :attribute_item="attribute_item"
                       :value="attribute_values[attribute_item.id]"
                       @input="updateAttributeValues(attribute_item.id, $event)"
                     />
-                    <!-- v-model="report_item.attributes.find(attr => attr.attribute_group_item_id === attribute_item.id).value" -->
                   </v-expansion-panel-content>
                 </v-expansion-panel>
               </v-expansion-panels>
@@ -98,8 +97,8 @@
           ></card-story>
         </v-col>
       </v-row>
-    </v-card>
-  </v-container>
+    </v-card-text>
+  </v-card>
 </template>
 
 <script>
@@ -112,15 +111,15 @@ import { mapActions, mapGetters } from 'vuex'
 
 export default {
   name: 'ReportItem',
+  components: {
+    AttributeItem,
+    CardStory
+  },
   props: {
     report_item_prop: { type: Object, required: true },
     edit: { type: Boolean, default: false }
   },
   emits: ['reportcreated'],
-  components: {
-    AttributeItem,
-    CardStory
-  },
   data: function () {
     return {
       verticalView: true,
@@ -218,8 +217,10 @@ export default {
 
     this.loadReportTypes().then(() => {
       this.report_types = this.getReportTypes().items
-      this.report_type = this.report_item.report_item_type_id
     })
+    if (this.report_item.report_item_type_id) {
+      this.report_type = this.report_item.report_item_type_id
+    }
   }
 }
 </script>

@@ -1,24 +1,24 @@
 <template>
   <div>
     <DataTable
-      :addButton="true"
-      :items.sync="word_lists"
-      :headerFilter="['tag', 'name', 'description']"
-      sortByItem="id"
-      :actionColumn="true"
+      v-model:items="word_lists"
+      :add-button="true"
+      :header-filter="['tag', 'name', 'description']"
+      sort-by-item="id"
+      :action-column="true"
       @delete-item="deleteItem"
       @edit-item="editItem"
       @add-item="addItem"
       @selection-change="selectionChange"
       @update-items="updateData"
     >
-      <template v-slot:titlebar>
+      <template #titlebar>
         <ImportExport @import="importData" @export="exportData"></ImportExport>
       </template>
     </DataTable>
     <EditConfig
       v-if="formData && Object.keys(formData).length > 0"
-      :configData="formData"
+      :config-data="formData"
       @submit="handleSubmit"
     ></EditConfig>
   </div>

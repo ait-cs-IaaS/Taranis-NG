@@ -7,15 +7,15 @@
         alt="taranis logo"
       />
     </v-row>
-    <v-form @submit.prevent="authenticate" id="form" ref="form">
+    <v-form id="form" ref="form" @submit.prevent="authenticate">
       <v-row no-gutters justify="center" align-content="center">
         <v-col cols="3">
           <v-text-field
+            v-model="username"
             :placeholder="$t('login.username')"
             name="username"
             prepend-icon="person"
             type="text"
-            v-model="username"
             :rules="[acceptUser]"
             autocomplete="username"
             required
@@ -23,11 +23,11 @@
         </v-col>
         <v-col cols="3">
           <v-text-field
+            v-model="password"
             :placeholder="$t('login.password')"
             name="password"
             prepend-icon="lock"
             type="password"
-            v-model="password"
             :rules="[acceptPassword]"
             autocomplete="password"
             required
@@ -38,8 +38,8 @@
             icon="mdi-login-variant"
             type="submit"
             color="primary"
-            @click="authenticate"
             :disabled="loginButtonDisabled"
+            @click="authenticate"
           />
         </v-col>
       </v-row>

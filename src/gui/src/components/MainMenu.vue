@@ -7,7 +7,7 @@
     app
     clipped-left
   >
-    <template v-slot:prepend>
+    <template #prepend>
       <v-btn
         depressed
         tile
@@ -54,7 +54,7 @@
       </span>
     </div>
 
-    <template v-slot:append>
+    <template #append>
       <v-toolbar color="transparent">
         <div v-for="button in getButtonList()" :key="button.route">
           <v-btn variant="text" :ripple="false" :to="button.route">
@@ -77,8 +77,8 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
-  components: { UserMenu },
   name: 'MainMenu',
+  components: { UserMenu },
   data: () => ({
     buttons: [
       {

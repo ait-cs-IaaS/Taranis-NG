@@ -1,11 +1,11 @@
 <template>
   <div>
     <DataTable
-      :addButton="true"
-      :items.sync="roles"
-      sortByItem="id"
-      :headerFilter="['tag', 'id', 'name', 'description']"
-      :actionColumn="true"
+      v-model:items="roles"
+      :add-button="true"
+      sort-by-item="id"
+      :header-filter="['tag', 'id', 'name', 'description']"
+      :action-column="true"
       @delete-item="deleteItem"
       @edit-item="editItem"
       @add-item="addItem"
@@ -13,8 +13,8 @@
 
     <EditConfig
       v-if="formData && Object.keys(formData).length > 0"
-      :configData="formData"
-      :formFormat="formFormat"
+      :config-data="formData"
+      :form-format="formFormat"
       @submit="handleSubmit"
     ></EditConfig>
   </div>

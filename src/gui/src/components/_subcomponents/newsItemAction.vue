@@ -1,13 +1,13 @@
 <template>
   <v-tooltip open-delay="1000" bottom :disabled="!tooltip">
-    <template v-slot:activator="{ props }">
+    <template #activator="{ props }">
       <v-btn
         v-bind="props"
         icon
         tile
         class="news-item-action"
         :class="[{ active: active ? active : false }, extraClass]"
-        @click.native.capture="execute($event)"
+        @click.capture="execute($event)"
       >
         <v-icon color="black">{{ icon }}</v-icon>
         {{ buttonText }}
@@ -19,8 +19,7 @@
 
 <script>
 export default {
-  name: 'newsItemAction',
-  emits: ['click'],
+  name: 'NewsItemAction',
   props: {
     active: Boolean,
     icon: String,
@@ -28,6 +27,7 @@ export default {
     tooltip: String,
     buttonText: { type: String, default: '' }
   },
+  emits: ['click'],
   methods: {
     execute(event) {
       event.stopPropagation()

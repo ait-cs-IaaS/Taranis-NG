@@ -1,6 +1,6 @@
 <template>
   <v-row v-bind="UI.DIALOG.ROW.WINDOW">
-    <v-btn v-bind="UI.BUTTON.ADD_NEW" v-if="editAllowed()" @click="addAsset">
+    <v-btn v-if="editAllowed()" v-bind="UI.BUTTON.ADD_NEW" @click="addAsset">
       <v-icon left>{{ UI.ICON.PLUS }}</v-icon>
       <span>{{ $t('asset.add_new') }}</span>
     </v-btn>
@@ -23,16 +23,16 @@
           </v-btn>
         </v-toolbar>
 
-        <v-form @submit.prevent="add" id="form" ref="form" class="px-4">
+        <v-form id="form" ref="form" class="px-4" @submit.prevent="add">
           <v-row no-gutters>
             <v-col cols="6" class="pr-3">
               <v-text-field
+                v-model="asset.name"
+                v-validate="'required'"
                 :disabled="!editAllowed()"
                 :label="$t('asset.name')"
                 name="name"
                 type="text"
-                v-model="asset.name"
-                v-validate="'required'"
                 data-vv-name="name"
                 :error-messages="errors.collect('name')"
                 :spellcheck="$store.state.settings.spellcheck"
@@ -40,20 +40,20 @@
             </v-col>
             <v-col cols="6" class="pr-3">
               <v-text-field
+                v-model="asset.serial"
                 :disabled="!editAllowed()"
                 :label="$t('asset.serial')"
                 name="serial"
                 type="text"
-                v-model="asset.serial"
                 :spellcheck="$store.state.settings.spellcheck"
               />
             </v-col>
             <v-col cols="12" class="pr-3">
               <v-textarea
+                v-model="asset.description"
                 :disabled="!editAllowed()"
                 :label="$t('asset.description')"
                 name="description"
-                v-model="asset.description"
                 :spellcheck="$store.state.settings.spellcheck"
               />
             </v-col>
@@ -64,9 +64,9 @@
             </v-col>
           </v-row>
           <v-row
+            v-if="edit"
             no-gutters
             class="mt-4 px-3 grey lighten-4 rounded"
-            v-if="edit"
           >
             <v-col cols="12">
               <span
@@ -76,13 +76,13 @@
             </v-col>
             <v-col cols="12">
               <component
-                class="item-selector"
-                v-bind:is="cardLayout()"
+                :is="cardLayout()"
                 v-for="vulnerability in vulnerabilities"
-                :card="vulnerability"
                 :key="vulnerability.id"
+                class="item-selector"
+                :card="vulnerability"
                 :asset="asset"
-                :showToolbar="true"
+                :show-toolbar="true"
               >
               </component>
             </v-col>
@@ -114,11 +114,11 @@ import Permissions from '@/services/auth/permissions'
 
 export default {
   name: 'NewAsset',
-  mixins: [AuthMixin],
   components: {
     CPETable,
     CardVulnerability
   },
+  mixins: [AuthMixin],
   data: () => ({
     visible: false,
     edit: false,
@@ -134,6 +134,31 @@ export default {
       asset_group_id: ''
     }
   }),
+  mounted() {
+    this.$root.$on('show-edit', (data) => {
+      this.visible = true
+      this.edit = true
+      this.show_error = false
+
+      this.asset.id = data.id
+      this.asset.name = data.name
+      this.asset.serial = data.serial
+      this.asset.description = data.description
+      this.asset.asset_group_id = data.group_id
+
+      this.asset.asset_cpes = []
+      for (let i = 0; i < data.asset_cpes.length; i++) {
+        this.asset.asset_cpes.push({
+          value: data.asset_cpes[i].value.replace('%', '*')
+        })
+      }
+
+      this.vulnerabilities = data.vulnerabilities
+    })
+  },
+  beforeUnmount() {
+    this.$root.$off('show-edit')
+  },
   methods: {
     editAllowed() {
       return this.checkPermission(Permissions.MY_ASSETS_CREATE)
@@ -216,31 +241,6 @@ export default {
     update(cpes) {
       this.asset.asset_cpes = cpes
     }
-  },
-  mounted() {
-    this.$root.$on('show-edit', (data) => {
-      this.visible = true
-      this.edit = true
-      this.show_error = false
-
-      this.asset.id = data.id
-      this.asset.name = data.name
-      this.asset.serial = data.serial
-      this.asset.description = data.description
-      this.asset.asset_group_id = data.group_id
-
-      this.asset.asset_cpes = []
-      for (let i = 0; i < data.asset_cpes.length; i++) {
-        this.asset.asset_cpes.push({
-          value: data.asset_cpes[i].value.replace('%', '*')
-        })
-      }
-
-      this.vulnerabilities = data.vulnerabilities
-    })
-  },
-  beforeDestroy() {
-    this.$root.$off('show-edit')
   }
 }
 </script>

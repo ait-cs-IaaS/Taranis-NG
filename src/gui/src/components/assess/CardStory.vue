@@ -4,8 +4,8 @@
       <!-- DIALOGS -->
       <v-dialog :value="deleteDialog" width="auto">
         <popup-delete-item
-          :newsItem="story"
-          @deleteItem="deleteNewsItem()"
+          :news-item="story"
+          @delete-item="deleteNewsItem()"
           @close="deleteDialog = false"
         />
       </v-dialog>
@@ -18,6 +18,7 @@
 
       <v-col cols="12" class="pb-0">
         <v-card
+          v-ripple="false"
           tile
           elevation="3"
           rounded="0"
@@ -27,7 +28,6 @@
               selected: selected
             }
           ]"
-          v-ripple="false"
           @click="toggleSelection"
         >
           <v-row>
@@ -57,23 +57,23 @@
             >
               <v-btn
                 v-if="!detailView"
+                v-ripple="false"
                 size="small"
                 class="item-action-btn"
                 variant="tonal"
                 :to="'/story/' + story.id"
-                v-on:click.stop
-                v-ripple="false"
+                @click.stop
               >
                 <span>Details</span>
                 <v-icon right class="ml-2">mdi-text-box-search-outline</v-icon>
               </v-btn>
 
               <v-btn
+                v-ripple="false"
                 size="small"
                 class="item-action-btn"
                 variant="tonal"
-                v-on:click.stop="sharingDialog = true"
-                v-ripple="false"
+                @click.stop="sharingDialog = true"
               >
                 <span>Add to Report</span>
                 <v-icon right class="ml-2"
@@ -83,12 +83,11 @@
 
               <v-btn
                 v-if="!detailView"
+                v-ripple="false"
                 size="small"
                 class="item-action-btn open-close-btn"
                 :class="openSummary ? 'opened' : 'closed'"
                 variant="tonal"
-                v-on:click.stop
-                v-ripple="false"
                 :style="{ minWidth: minButtonWidth }"
                 @click.stop="openSummary = !openSummary"
               >
@@ -100,11 +99,11 @@
               </v-btn>
 
               <v-btn
+                v-ripple="false"
                 size="small"
                 class="item-action-btn"
                 variant="tonal"
-                v-on:click.stop="markAsRead()"
-                v-ripple="false"
+                @click.stop="markAsRead()"
               >
                 <span>mark as read</span>
                 <v-icon right class="ml-2" c>mdi-eye-outline</v-icon>
@@ -113,12 +112,12 @@
               <votes v-if="detailView" :story="story" />
 
               <v-menu bottom offset-y>
-                <template v-slot:activator="{ props }">
+                <template #activator="{ props }">
                   <v-btn
+                    v-ripple="false"
                     size="small"
                     class="item-action-btn expandable"
                     variant="tonal"
-                    v-ripple="false"
                     v-bind="props"
                   >
                     <v-icon>mdi-dots-vertical</v-icon>
@@ -127,8 +126,8 @@
 
                 <v-list class="extraActionsList" dense>
                   <v-list-item
-                    @click.stop="markAsRead()"
                     class="hidden-xl-only"
+                    @click.stop="markAsRead()"
                   >
                     <v-icon left size="small" class="mr-2"
                       >mdi-eye-outline</v-icon
@@ -201,9 +200,9 @@
                   </v-col>
                 </v-row>
                 <v-row
+                  v-if="openSummary && !published_date_outdated"
                   no-gutters
                   class="my-1"
-                  v-if="openSummary && !published_date_outdated"
                 >
                   <v-col>
                     <week-chart :story="story" />
@@ -212,7 +211,7 @@
 
                 <metainfo
                   v-if="openSummary && news_item_length == 1"
-                  :newsItem="story.news_items[0]"
+                  :news-item="story.news_items[0]"
                 />
               </v-container>
             </v-col>
@@ -221,9 +220,9 @@
       </v-col>
     </v-row>
     <v-row
+      v-if="openSummary && news_item_length > 1"
       dense
       class="ma-0 py-0 px-5"
-      v-if="openSummary && news_item_length > 1"
     >
       <v-col cols="11" offset="1">
         <transition-group
@@ -234,7 +233,7 @@
           <card-news-item
             v-for="item in story.news_items"
             :key="item.id"
-            :newsItem="item"
+            :news-item="item"
             class="mt-3"
           />
         </transition-group>
@@ -273,7 +272,6 @@ export default {
     WeekChart,
     SummarizedContent
   },
-  emits: ['selectItem', 'deleteItem'],
   props: {
     story: {
       type: Object,
@@ -282,6 +280,7 @@ export default {
     selected: { type: Boolean, default: false },
     detailView: { type: Boolean, default: false }
   },
+  emits: ['selectItem', 'deleteItem'],
   data: function () {
     return {
       viewDetails: false,

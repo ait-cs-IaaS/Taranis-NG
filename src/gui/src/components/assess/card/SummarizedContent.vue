@@ -1,8 +1,8 @@
 <template>
   <p :class="news_item_summary_class">
-    <v-tooltip top v-if="is_summarized">
-      <template v-slot:activator="{ on, attrs }">
-        <v-icon v-on="on" v-bind="attrs">mdi-text-short</v-icon>
+    <v-tooltip v-if="is_summarized" top>
+      <template #activator="{ on, attrs }">
+        <v-icon v-bind="attrs" v-on="on">mdi-text-short</v-icon>
       </template>
       <span>This text is Summarized</span>
     </v-tooltip>
@@ -27,14 +27,14 @@ export default {
       default: false
     }
   },
+  data: () => ({
+    colorStart: Math.floor(Math.random() * 9)
+  }),
   computed: {
     news_item_summary_class() {
       return this.open ? 'news-item-summary-no-clip' : 'news-item-summary'
     }
   },
-  data: () => ({
-    colorStart: Math.floor(Math.random() * 9)
-  }),
   methods: {}
 }
 </script>

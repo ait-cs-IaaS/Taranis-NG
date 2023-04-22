@@ -1,14 +1,14 @@
 <template>
   <v-dialog v-model="dialog" width="600">
-    <template v-slot:activator="{ on: dialog }">
+    <template #activator="{ on: dialog }">
       <v-tooltip open-delay="1000" bottom :disabled="!tooltip">
-        <template v-slot:activator="{ on: tooltip }">
+        <template #activator="{ on: tooltip }">
           <v-btn
-            v-on="{ ...tooltip, ...dialog }"
             icon
             tile
             class="item-action-btn"
             :class="[{ active: active ? active : false }, extraClass]"
+            v-on="{ ...tooltip, ...dialog }"
           >
             <v-icon color="black">{{ icon }}</v-icon>
             <span v-if="buttonText">{{ buttonText }}</span>
@@ -23,9 +23,7 @@
 
 <script>
 export default {
-  name: 'newsItemActionDialog',
-  emits: ['open', 'close'],
-  data: () => ({}),
+  name: 'NewsItemActionDialog',
   props: {
     showDialog: { type: Boolean, default: false },
     active: Boolean,
@@ -34,6 +32,8 @@ export default {
     tooltip: String,
     buttonText: { type: String, default: '' }
   },
+  emits: ['open', 'close'],
+  data: () => ({}),
   computed: {
     dialog: {
       get() {

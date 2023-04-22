@@ -19,13 +19,13 @@
       <news-item-action-dialog
         icon="mdi-delete"
         tooltip="remove item"
-        :showDialog="deleteDialog"
+        :show-dialog="deleteDialog"
         @close="deleteDialog = false"
         @open="deleteDialog = true"
       >
         <popup-delete-item
           v-if="deleteDialog"
-          :newsItem="newsItem"
+          :news-item="newsItem"
           @deleteItem="deleteNewsItem()"
           @close="deleteDialog = false"
         />
@@ -34,28 +34,28 @@
       <news-item-action
         :active="newsItem.read"
         icon="mdi-email-mark-as-unread"
-        @click="markAsRead()"
         tooltip="mark as read/unread"
+        @click="markAsRead()"
       />
 
       <news-item-action
         :active="newsItem.important"
         icon="mdi-exclamation"
-        @click="markAsImportant()"
         tooltip="mark as important"
+        @click="markAsImportant()"
       />
 
       <news-item-action
         :active="newsItem.decorateSource"
         icon="mdi-seal"
-        @click="decorateSource()"
         tooltip="emphasise originator"
+        @click="decorateSource()"
       />
 
       <news-item-action-dialog
         icon="mdi-google-circles-communities"
         tooltip="add to report"
-        :showDialog="sharingDialog"
+        :show-dialog="sharingDialog"
         @close="sharingDialog = false"
         @open="sharingDialog = true"
       >
@@ -117,11 +117,11 @@
                   <span>add to report</span>
                 </v-btn>
                 <v-btn
+                  v-ripple="false"
                   class="mr-1 mt-1"
                   outlined
                   :to="'/newsitem/' + newsItem.id"
-                  v-on:click.stop
-                  v-ripple="false"
+                  @click.stop
                 >
                   <v-icon>mdi-eye</v-icon>
                   <span>view Details</span>
@@ -136,7 +136,7 @@
                 </v-btn>
               </v-col>
             </v-row>
-            <metainfo :newsItem="newsItem" />
+            <metainfo :news-item="newsItem" />
           </v-container>
         </v-col>
       </v-row>
@@ -170,12 +170,12 @@ export default {
     PopupDeleteItem,
     PopupShareItems
   },
-  emits: ['selectItem', 'deleteItem'],
   props: {
     newsItem: {},
     selected: Boolean,
     storyView: Boolean
   },
+  emits: ['selectItem', 'deleteItem'],
   data: () => ({
     viewDetails: false,
     sharingDialog: false,

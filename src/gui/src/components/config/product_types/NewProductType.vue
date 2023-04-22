@@ -1,14 +1,14 @@
 <template>
   <v-container fluid class="ma-5 mt-5 pa-5 pt-0">
-    <v-form @submit.prevent="add" id="form" ref="form" class="px-4">
+    <v-form id="form" ref="form" class="px-4" @submit.prevent="add">
       <v-row no-gutters>
-        <v-col cols="12" class="caption grey--text" v-if="edit"
+        <v-col v-if="edit" cols="12" class="caption grey--text"
           >ID: {{ product.id }}</v-col
         >
         <v-col cols="12">
           <v-combobox
-            :disabled="edit"
             v-model="selected_presenter"
+            :disabled="edit"
             :items="presenters"
             item-title="name"
             :label="$t('product_type.presenter')"
@@ -20,12 +20,12 @@
         <v-col cols="12">
           <v-text-field
             v-if="selected_presenter"
+            v-model="product.title"
+            v-validate="'required'"
             :disabled="!canUpdate"
             :label="$t('product_type.name')"
             name="name"
             type="text"
-            v-model="product.title"
-            v-validate="'required'"
             data-vv-name="name"
             :error-messages="errors.collect('name')"
             :spellcheck="$store.state.settings.spellcheck"
@@ -34,10 +34,10 @@
         <v-col cols="12">
           <v-textarea
             v-if="selected_presenter"
+            v-model="product.description"
             :disabled="!canUpdate"
             :label="$t('product_type.description')"
             name="description"
-            v-model="product.description"
             :spellcheck="$store.state.settings.spellcheck"
           />
         </v-col>
@@ -85,6 +85,7 @@ export default {
     FormParameters,
     ProductTypeHelp
   },
+  mixins: [AuthMixin],
   data: () => ({
     edit: false,
     selected_type: null,
@@ -101,7 +102,6 @@ export default {
       parameter_values: []
     }
   }),
-  mixins: [AuthMixin],
   computed: {
     canCreate() {
       return this.checkPermission(Permissions.CONFIG_PRODUCT_TYPE_CREATE)
@@ -112,6 +112,26 @@ export default {
         !this.edit
       )
     }
+  },
+  mounted() {
+    this.loadPresenters().then(() => {
+      this.presenters = this.getPresenters()
+    })
+
+    if (this.product_id) {
+      this.edit = true
+      this.show_error = false
+
+      // this.product.id = data.id
+      // this.product.title = data.title
+      // this.product.description = data.description
+      // this.product.presenter_id = data.presenter_id
+
+      this.product.parameter_values = []
+    }
+  },
+  beforeUnmount() {
+    this.$root.$off('show-edit')
   },
 
   methods: {
@@ -172,26 +192,6 @@ export default {
         }
       })
     }
-  },
-  mounted() {
-    this.loadPresenters().then(() => {
-      this.presenters = this.getPresenters()
-    })
-
-    if (this.product_id) {
-      this.edit = true
-      this.show_error = false
-
-      // this.product.id = data.id
-      // this.product.title = data.title
-      // this.product.description = data.description
-      // this.product.presenter_id = data.presenter_id
-
-      this.product.parameter_values = []
-    }
-  },
-  beforeDestroy() {
-    this.$root.$off('show-edit')
   }
 }
 </script>

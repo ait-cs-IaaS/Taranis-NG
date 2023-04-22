@@ -25,14 +25,14 @@
         </a>
       </v-col>
     </v-row>
-    <v-row class="news-item-meta-infos" v-if="getAuthor()">
+    <v-row v-if="getAuthor()" class="news-item-meta-infos">
       <v-col class="news-item-meta-infos-label">
         <strong>{{ $t('assess.author') }}:</strong>
       </v-col>
       <v-col>
         <span :class="[{ decorateSource: newsItem.decorateSource }]">
           {{ getAuthor() }}
-          <v-icon right small v-if="newsItem.decorateSource" class="ml-0"
+          <v-icon v-if="newsItem.decorateSource" right small class="ml-0"
             >mdi-seal</v-icon
           >
         </span>

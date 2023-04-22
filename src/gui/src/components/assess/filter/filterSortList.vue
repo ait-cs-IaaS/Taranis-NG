@@ -12,9 +12,9 @@
         class="extra-dense"
         :ripple="false"
         :value="item.type + '_' + item.direction"
-        @click.native.capture="changeDirection($event, item)"
+        @click.capture="changeDirection($event, item)"
       >
-        <template v-slot:prepend>
+        <template #prepend>
           <v-icon small color="grey" :icon="item.icon" />
         </template>
 
@@ -22,7 +22,7 @@
           {{ item.label }}
         </v-list-item-title>
 
-        <template v-slot:append="{ isActive }">
+        <template #append="{ isActive }">
           <v-list-item-action>
             <v-icon
               v-if="isActive"
@@ -48,12 +48,12 @@
 
 <script>
 export default {
-  name: 'filterSortList',
-  emits: ['input'],
+  name: 'FilterSortList',
   props: {
     value: {},
     items: []
   },
+  emits: ['input'],
   data: function () {
     return {
       orderOptions: this.items

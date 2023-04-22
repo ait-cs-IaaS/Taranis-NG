@@ -3,7 +3,7 @@
     "node": true
   },
   "extends": [
-    "plugin:vue/essential",
+    "plugin:vue/vue3-recommended",
     "eslint:recommended",
     "@vue/prettier",
     "@vue/eslint-config-prettier",

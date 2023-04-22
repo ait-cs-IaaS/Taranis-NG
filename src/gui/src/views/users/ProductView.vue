@@ -10,12 +10,12 @@ import CardProduct from '@/components/publish/CardProduct.vue'
 
 export default {
   name: 'ProductView',
-  data: () => ({
-    product: {}
-  }),
   components: {
     CardProduct
   },
+  data: () => ({
+    product: {}
+  }),
   async created() {
     this.products = await this.loadProducts()
   },

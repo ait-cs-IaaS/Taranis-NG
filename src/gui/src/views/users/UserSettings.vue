@@ -10,7 +10,7 @@
         </v-btn>
       </v-card-item>
       <v-card-text>
-        <v-tabs fixed-tabs density="compact" v-model="tab">
+        <v-tabs v-model="tab" fixed-tabs density="compact">
           <v-tab value="general">
             <span>{{ $t('settings.tab_general') }}</span>
           </v-tab>
@@ -33,8 +33,8 @@
               <v-col>
                 <v-switch
                   v-model="dark_theme"
-                  @change="darkToggle"
                   :label="$t('settings.dark_theme')"
+                  @change="darkToggle"
                 ></v-switch>
               </v-col>
             </v-row>
@@ -60,7 +60,7 @@
               item-value="id"
               show-select
             >
-              <template v-slot:top>
+              <template #top>
                 <v-toolbar flat color="white">
                   <v-toolbar-title>
                     {{ $t('osint_source.word_lists') }}
@@ -72,11 +72,11 @@
           <v-window-item value="hotkeys">
             <v-row no-gutters class="ma-0">
               <v-tooltip
-                top
                 v-for="shortcut in shortcuts"
                 :key="shortcut.alias"
+                top
               >
-                <template v-slot:activator="{ props }">
+                <template #activator="{ props }">
                   <v-btn
                     :id="shortcut.alias"
                     v-bind="props"
@@ -149,6 +149,13 @@ export default {
       ]
     }
   },
+  mounted() {
+    this.spellcheck = this.getProfileSpellcheck()
+    this.dark_theme = this.getProfileDarkTheme()
+    this.selected_word_lists = this.getProfileWordLists()
+    this.shortcuts = this.getProfileHotkeys()
+    this.loadWordList()
+  },
   methods: {
     ...mapGetters('settings', [
       'getProfileSpellcheck',
@@ -210,13 +217,6 @@ export default {
       this.shortcuts[hotkeyIndex].key_code = key.keyCode
       this.shortcuts[hotkeyIndex].key = key.code
     }
-  },
-  mounted() {
-    this.spellcheck = this.getProfileSpellcheck()
-    this.dark_theme = this.getProfileDarkTheme()
-    this.selected_word_lists = this.getProfileWordLists()
-    this.shortcuts = this.getProfileHotkeys()
-    this.loadWordList()
   }
 }
 </script>

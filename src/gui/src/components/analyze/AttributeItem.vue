@@ -2,26 +2,26 @@
   <div>
     <v-textarea
       v-if="attribute_item.type === 'TEXT'"
-      :readonly="read_only"
       v-model="input"
+      :readonly="read_only"
       :label="attribute_item.title"
     ></v-textarea>
     <v-text-field
       v-if="attribute_item.type === 'STRING'"
-      :readonly="read_only"
       v-model="input"
+      :readonly="read_only"
       :label="attribute_item.title"
     ></v-text-field>
     <v-checkbox
       v-if="attribute_item.type === 'BOOLEAN'"
-      :readonly="read_only"
       v-model="input"
+      :readonly="read_only"
       :label="attribute_item.title"
     />
     <v-select
       v-if="attribute_item.type === 'ENUM'"
-      :readonly="read_only"
       v-model="input"
+      :readonly="read_only"
       item-title="value"
       item-value="id"
       :items="attribute_item.attribute_enums"
@@ -29,9 +29,9 @@
     />
     <v-radio-group
       v-if="attribute_item.type === 'RADIO'"
+      v-model="input"
       :disabled="read_only"
       row
-      v-model="input"
     >
       <v-radio
         v-for="attr_enum in attribute_item.attribute_enums"
@@ -42,17 +42,17 @@
     </v-radio-group>
     <vue-editor
       v-if="attribute_item.type === 'RICH_TEXT'"
-      :disabled="read_only"
       v-model="input"
-      :editorOptions="{
+      :disabled="read_only"
+      :editor-options="{
         height: 300
       }"
     />
     <v-radio-group
       v-if="attribute_item.type === 'TLP'"
+      v-model="input"
       :disabled="read_only"
       row
-      v-model="input"
       :label="attribute_item.title"
     >
       <v-radio
@@ -78,35 +78,35 @@
     </v-radio-group>
     <date-picker
       v-if="attribute_item.type === 'DATE'"
+      v-model="input"
       :placeholder="attribute_item.title"
       :disabled="read_only"
-      v-model="input"
     />
     <date-picker
       v-if="attribute_item.type === 'DATE_TIME'"
+      v-model="input"
       :placeholder="attribute_item.title"
       type="datetime"
       :disabled="read_only"
-      v-model="input"
     />
     <date-picker
       v-if="attribute_item.type === 'TIME'"
+      v-model="input"
       :placeholder="attribute_item.title"
       type="time"
       :show-second="false"
       :disabled="read_only"
-      v-model="input"
     />
     <v-autocomplete
       v-if="attribute_item.type === 'CPE' || attribute_item.type === 'CVE'"
-      :readonly="read_only"
       v-model="input"
+      :readonly="read_only"
       :label="attribute_item.title"
       :items="attribute_item.attribute_enums"
     >
       <!-- TODO: Use MyAssets for Autocomplete -->
     </v-autocomplete>
-    <AttributeCVSS v-model="input" v-if="attribute_item.type === 'CVSS'" />
+    <AttributeCVSS v-if="attribute_item.type === 'CVSS'" v-model="input" />
   </div>
 </template>
 
@@ -120,7 +120,6 @@ export default {
   components: {
     AttributeCVSS
   },
-  emits: ['input'],
   props: {
     value: {
       type: String,
@@ -133,6 +132,7 @@ export default {
     },
     read_only: { type: Boolean, default: false }
   },
+  emits: ['input'],
   computed: {
     input: {
       get() {

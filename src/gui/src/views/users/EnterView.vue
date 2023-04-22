@@ -1,43 +1,43 @@
 <template>
   <v-form
-    @submit.prevent="add"
     id="form"
     ref="form"
     style="width: 100%; padding: 8px"
+    @submit.prevent="add"
   >
     <v-card>
       <v-card-text>
         <v-text-field
+          v-model="news_item.title"
+          v-validate="'required'"
           :label="$t('enter.title')"
           name="title"
           type="text"
-          v-model="news_item.title"
-          v-validate="'required'"
           data-vv-name="title"
           :error-messages="errors.collect('title')"
         ></v-text-field>
 
         <v-textarea
+          v-model="news_item.review"
           :label="$t('enter.review')"
           name="review"
-          v-model="news_item.review"
         ></v-textarea>
 
         <v-text-field
+          v-model="news_item.source"
           :label="$t('enter.source')"
           name="source"
           type="text"
-          v-model="news_item.source"
         ></v-text-field>
 
         <v-text-field
+          v-model="news_item.link"
           :label="$t('enter.link')"
           name="link"
           type="text"
-          v-model="news_item.link"
         ></v-text-field>
 
-        <quill-editor v-model="editorData" :editorOptions="editorOptions" />
+        <quill-editor v-model="editorData" :editor-options="editorOptions" />
       </v-card-text>
     </v-card>
     <v-spacer class="pt-2"></v-spacer>

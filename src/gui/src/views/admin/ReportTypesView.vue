@@ -1,11 +1,11 @@
 <template>
   <div>
     <data-table
-      :addButton="true"
-      :items.sync="report_types"
-      :headerFilter="['tag', 'id', 'title', 'description']"
-      sortByItem="id"
-      :actionColumn="true"
+      v-model:items="report_types"
+      :add-button="true"
+      :header-filter="['tag', 'id', 'title', 'description']"
+      sort-by-item="id"
+      :action-column="true"
       @delete-item="deleteItem"
       @edit-item="editItem"
       @add-item="addItem"
@@ -13,7 +13,7 @@
     />
     <report-type-form
       v-if="newItem || (formData && Object.keys(formData).length > 0)"
-      :report_type_data.sync="formData"
+      v-model:report_type_data="formData"
     />
   </div>
 </template>

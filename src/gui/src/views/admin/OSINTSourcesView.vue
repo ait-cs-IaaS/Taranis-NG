@@ -1,25 +1,25 @@
 <template>
   <div>
     <DataTable
-      :addButton="true"
-      :items.sync="osint_sources"
-      :headerFilter="['tag', 'name', 'description', 'FEED_URL']"
-      sortByItem="id"
-      :actionColumn="true"
+      v-model:items="osint_sources"
+      :add-button="true"
+      :header-filter="['tag', 'name', 'description', 'FEED_URL']"
+      sort-by-item="id"
+      :action-column="true"
       @delete-item="deleteItem"
       @edit-item="editItem"
       @add-item="addItem"
       @update-items="updateData"
       @selection-change="selectionChange"
     >
-      <template v-slot:titlebar>
+      <template #titlebar>
         <ImportExport @import="importData" @export="exportData"></ImportExport>
       </template>
     </DataTable>
     <EditConfig
       v-if="formData && Object.keys(formData).length > 0"
-      :configData.sync="formData"
-      :formFormat.sync="formFormat"
+      v-model:config-data="formData"
+      v-model:form-format="formFormat"
       @submit="handleSubmit"
     ></EditConfig>
   </div>

@@ -3,8 +3,8 @@
     <v-btn
       text
       small
-      @click="show"
       :title="$t('report_item.tooltip.enum_selector')"
+      @click="show"
     >
       <v-icon>mdi-feature-search-outline</v-icon>
     </v-btn>
@@ -20,19 +20,19 @@
         <v-card>
           <v-card-text>
             <v-data-table
+              v-model:page="current_page"
               :headers="headers"
               :items="attribute_enums"
               :server-items-length="attribute_enums_total_count"
-              @update:options="updateOptions"
               :items-per-page="25"
               class="elevation-1 enum_selector"
-              :page.sync="current_page"
-              @click:row="clickRow"
               :footer-props="{
                 showFirstLastPage: true,
                 itemsPerPageOptions: [25, 50, 100],
                 showCurrentPage: true
               }"
+              @update:options="updateOptions"
+              @click:row="clickRow"
             >
             </v-data-table>
           </v-card-text>
@@ -48,12 +48,12 @@ import { getCPEAttributeEnums } from '@/api/assets'
 
 export default {
   name: 'EnumSelector',
-  emits: ['enum-selected'],
   props: {
     attribute_id: Number,
     value_index: Number,
     cpe_only: Boolean
   },
+  emits: ['enum-selected'],
   data: () => ({
     visible: false,
     search: '',

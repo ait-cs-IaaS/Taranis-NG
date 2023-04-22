@@ -12,10 +12,11 @@
       @click:row="rowClick"
       @update:modelValue="emitFilterChange"
     >
-      <template v-slot:top>
+      <template #top>
         <v-card>
           <v-card-title>
             <v-text-field
+              v-if="searchBar"
               v-model="search"
               append-icon="mdi-magnify"
               label="Search"
@@ -24,20 +25,20 @@
               hide-details
             ></v-text-field>
             <v-btn
+              v-if="selected.length > 0"
               color="error"
               dark
               class="ml-8"
               @click="deleteItems(selected)"
-              v-if="selected.length > 0"
             >
               Delete {{ selected.length }}
             </v-btn>
             <v-btn
+              v-if="addButton"
               color="primary"
               dark
               class="ml-8"
               @click="addItem"
-              v-if="addButton"
             >
               New Item
             </v-btn>
@@ -45,21 +46,21 @@
           </v-card-title>
         </v-card>
       </template>
-      <template v-slot:item.default="{ item }">
+      <template #item.default="{ item }">
         <v-chip :color="getDefaultColor(item.raw.default)" variant="outlined">
           {{ item.raw.default }}
         </v-chip>
       </template>
 
-      <template v-slot:item.tag="{ item }">
+      <template #item.tag="{ item }">
         <v-icon small class="mr-1" :icon="item.raw.tag" />
       </template>
 
-      <template v-slot:item.actions="{ item }">
+      <template #item.actions="{ item }">
         <div class="d-inline-flex">
           <slot name="actionColumn"></slot>
           <v-tooltip left>
-            <template v-slot:activator="{ props }">
+            <template #activator="{ props }">
               <v-icon v-bind="props" color="red" @click.stop="deleteItem(item)">
                 mdi-delete
               </v-icon>
@@ -68,8 +69,8 @@
           </v-tooltip>
         </div>
       </template>
-      <template v-slot:bottom v-if="items.length < 10" />
-      <template v-slot:no-data>
+      <template v-if="items.length < 10" #bottom />
+      <template #no-data>
         <v-btn color="primary" @click.stop="updateItems()">
           <v-icon class="mr-1">mdi-refresh</v-icon>
           Refresh
@@ -86,7 +87,6 @@ import { defineComponent, toRaw } from 'vue'
 export default defineComponent({
   name: 'DataTable',
   components: {},
-  emits: ['delete-item', 'edit-item', 'add-item', 'selection-change'],
   props: {
     items: {
       type: Array,
@@ -106,8 +106,13 @@ export default defineComponent({
     actionColumn: {
       type: Boolean,
       default: false
+    },
+    searchBar: {
+      type: Boolean,
+      default: true
     }
   },
+  emits: ['delete-item', 'edit-item', 'add-item', 'selection-change'],
   data: () => ({
     search: '',
     selected: []

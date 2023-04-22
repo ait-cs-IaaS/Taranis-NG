@@ -16,19 +16,19 @@
         <v-container fluid class="pa-0 ma-0">
           <div :style="UI.STYLE.sticky_filter_toolbar">
             <ToolbarFilterAnalyze
+              ref="toolbarFilter"
               publish_selector
               total_count_title="analyze.total_count"
               @update-report-items-filter="updateFilter"
-              ref="toolbarFilter"
             />
           </div>
 
           <ContentDataAnalyze
+            ref="contentData"
             publish_selector
             :selection="selector_values"
             class="item-selector"
             card-item="CardAnalyze"
-            ref="contentData"
             @show-report-item-detail="showReportItemDetail"
             @new-data-loaded="newDataLoaded"
           />
@@ -39,12 +39,12 @@
     <v-spacer style="height: 8px"></v-spacer>
 
     <component
+      :is="cardLayout()"
+      v-for="value in selector_values"
+      :key="value.id"
       publish_selector
       class="item-selector"
-      v-bind:is="cardLayout()"
-      v-for="value in selector_values"
       :card="value"
-      :key="value.id"
       @show-report-item-detail="showReportItemDetail"
       @remove-report-item-from-selector="removeReportItemFromSelector"
     />

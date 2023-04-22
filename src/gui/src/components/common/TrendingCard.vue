@@ -4,7 +4,7 @@
     {{ tagText(cluster.tag_type) }}
     <span class="ml-4"> SIZE: {{ cluster.size }}</span>
     <v-divider class="mt-2 mb-2" />
-    <week-chart :dataPoints="cluster.published" :timespan="10" />
+    <week-chart :data-points="cluster.published" :timespan="10" />
   </div>
 </template>
 
@@ -14,11 +14,11 @@ import { tagIconFromType, tagTextFromType } from '@/utils/helpers'
 
 export default {
   name: 'TrendingCard',
-  props: {
-    cluster: { type: Object, required: true }
-  },
   components: {
     WeekChart
+  },
+  props: {
+    cluster: { type: Object, required: true }
   },
   data: function () {
     return {}
