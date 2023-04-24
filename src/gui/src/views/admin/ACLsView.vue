@@ -33,6 +33,9 @@ export default {
     showForm: false,
     edit: false
   }),
+  mounted() {
+    this.updateData()
+  },
   methods: {
     ...mapActions('config', ['loadACLEntries']),
     ...mapGetters('config', ['getACLEntries']),
@@ -80,9 +83,6 @@ export default {
         this.updateData()
       })
     }
-  },
-  mounted() {
-    this.updateData()
   }
 }
 </script>

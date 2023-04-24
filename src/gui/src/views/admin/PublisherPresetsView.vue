@@ -86,6 +86,9 @@ export default {
       return base
     }
   },
+  mounted() {
+    this.updateData()
+  },
   methods: {
     ...mapActions('config', ['loadPublisherPresets', 'loadPublishers']),
     ...mapGetters('config', ['getPublisherPresets', 'getPublishers']),
@@ -170,9 +173,6 @@ export default {
           notifyFailure(`Failed to update ${item.name}`)
         })
     }
-  },
-  mounted() {
-    this.updateData()
   }
 }
 </script>

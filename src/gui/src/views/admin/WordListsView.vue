@@ -51,6 +51,9 @@ export default {
     formData: {},
     edit: false
   }),
+  mounted() {
+    this.updateData()
+  },
   methods: {
     ...mapActions('config', ['loadWordLists']),
     ...mapGetters('config', ['getWordLists']),
@@ -120,9 +123,6 @@ export default {
     selectionChange(selected) {
       this.selected = selected.map((item) => item.id)
     }
-  },
-  mounted() {
-    this.updateData()
   }
 }
 </script>

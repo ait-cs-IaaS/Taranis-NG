@@ -27,9 +27,9 @@ export default {
   props: {
     showDialog: { type: Boolean, default: false },
     active: Boolean,
-    icon: String,
-    extraClass: String,
-    tooltip: String,
+    icon: { type: String, default: 'mdi-pencil' },
+    extraClass: { type: String, default: '' },
+    tooltip: { type: String, default: '' },
     buttonText: { type: String, default: '' }
   },
   emits: ['open', 'close'],

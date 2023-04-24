@@ -47,10 +47,22 @@
 export default {
   name: 'FormParameters',
   props: {
-    ui: String,
-    sources: Array,
-    values: Array,
-    disabled: Boolean
+    ui: {
+      type: String,
+      default: 'text'
+    },
+    sources: {
+      type: Array,
+      default: () => []
+    },
+    values: {
+      type: Array,
+      default: () => []
+    },
+    disabled: {
+      type: Boolean,
+      default: false
+    }
   },
   data: () => ({
     value: this.values

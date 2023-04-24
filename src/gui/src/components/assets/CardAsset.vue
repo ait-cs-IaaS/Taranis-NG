@@ -83,7 +83,10 @@ export default {
   name: 'CardAsset',
   mixins: [AuthMixin],
   props: {
-    card: Object
+    card: {
+      type: Object,
+      required: true
+    }
   },
 
   data: () => ({

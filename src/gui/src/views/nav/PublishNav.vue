@@ -146,6 +146,13 @@ export default {
       return this.showOmniSearch ? 'mt-12' : ''
     }
   },
+  created() {
+    const query = Object.fromEntries(
+      Object.entries(this.$route.query).filter(([, v]) => v != null)
+    )
+    this.updateProductFilter(query)
+    console.debug('loaded with query', query)
+  },
   methods: {
     ...mapGetters(['getItemCount']),
     ...mapActions('analyze', ['updateProducts']),
@@ -154,13 +161,6 @@ export default {
     addReport() {
       this.$router.push('/product/0')
     }
-  },
-  created() {
-    const query = Object.fromEntries(
-      Object.entries(this.$route.query).filter(([, v]) => v != null)
-    )
-    this.updateProductFilter(query)
-    console.debug('loaded with query', query)
   }
 }
 </script>

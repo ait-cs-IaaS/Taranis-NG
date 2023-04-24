@@ -17,7 +17,7 @@
         <v-col cols="12" class="pt-0">
           <v-select
             v-model="group"
-            :items="getOSINTSourceGroupsList()"
+            :items="getOSINTSourceGroupsList"
             item-title="title"
             item-value="id"
             label="Source Group"
@@ -31,7 +31,7 @@
         <v-col cols="12" class="pt-0">
           <v-select
             v-model="source"
-            :items="getOSINTSourcesList()"
+            :items="getOSINTSourcesList"
             item-title="title"
             item-value="id"
             label="Source"
@@ -51,14 +51,14 @@
           <h4>filter results</h4>
         </v-col>
 
-        <!-- time tags -->
+        <!-- time range -->
         <v-col cols="12" class="pb-0">
           <date-chips v-model="range" />
         </v-col>
 
         <!-- tags -->
         <v-col cols="12" class="pr-0">
-          <tag-filter />
+          <tag-filter v-model="tags" />
         </v-col>
       </v-row>
 
@@ -100,12 +100,15 @@
 </template>
 
 <script>
-import { mapState, mapGetters, mapActions } from 'vuex'
+import { useStore } from 'vuex'
 import dateChips from '@/components/assess/filter/dateChips.vue'
 import tagFilter from '@/components/assess/filter/tagFilter.vue'
 import filterSelectList from '@/components/assess/filter/filterSelectList.vue'
 import filterSortList from '@/components/assess/filter/filterSortList.vue'
 import FilterNavigation from '@/components/common/FilterNavigation.vue'
+import { ref, computed } from 'vue'
+import { onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 
 export default {
   name: 'AssessNav',
@@ -116,10 +119,12 @@ export default {
     filterSortList,
     FilterNavigation
   },
-  data: () => ({
-    awaitingSearch: false,
-    filterAttributeSelections: [],
-    filterAttributeOptions: [
+  setup() {
+    const store = useStore()
+    const route = useRoute()
+    const awaitingSearch = ref(false)
+    const filterAttributeSelections = ref([])
+    const filterAttributeOptions = [
       { type: 'read', label: 'read', icon: 'mdi-email-mark-as-unread' },
       {
         type: 'important',
@@ -136,8 +141,8 @@ export default {
         label: 'relevant',
         icon: 'mdi-bullhorn-outline'
       }
-    ],
-    orderOptions: [
+    ]
+    const orderOptions = [
       {
         label: 'published date',
         icon: 'mdi-calendar-range-outline',
@@ -151,124 +156,205 @@ export default {
         direction: 'DESC'
       }
     ]
-  }),
-  computed: {
-    ...mapState('filter', {
-      filter: (state) => state.newsItemsFilter
-    }),
-    ...mapState(['drawerVisible']),
-    source: {
-      get() {
-        return this.filter.source
-      },
-      set(value) {
-        this.updateFilter({ source: value })
-        this.updateNewsItems()
-      }
-    },
-    group: {
-      get() {
-        return this.filter.group
-      },
-      set(value) {
-        this.updateFilter({ group: value })
-        this.updateNewsItems()
-      }
-    },
-    limit: {
-      get() {
-        return this.filter.limit
-      },
-      set(value) {
-        this.setLimit(value)
-        this.updateNewsItems()
-      }
-    },
-    sort: {
-      get() {
-        if (!this.filter.order) return 'DATE_DESC'
-        return this.filter.order
-      },
-      set(value) {
-        this.setSort(value)
-        this.updateNewsItems()
-      }
-    },
-    offset: {
-      get() {
-        return this.filter.offset
-      },
-      set(value) {
-        this.setOffset(value)
-        this.updateNewsItems()
-      }
-    },
-    range: {
-      get() {
-        return this.filter.range
-      },
-      set(value) {
-        this.updateFilter({ range: value })
-        this.updateNewsItems()
-      }
-    },
-    filterAttribute: {
-      get() {
-        return this.filterAttributeSelections
-      },
-      set(value) {
-        this.filterAttributeSelections = value
 
-        const filterUpdate = this.filterAttributeOptions.reduce((obj, item) => {
+    const filter = computed(() => {
+      return store.state.filter.newsItemsFilter
+    })
+
+    const drawerVisible = computed(() => {
+      return store.state.drawerVisible
+    })
+
+    const source = computed({
+      get() {
+        return filter.value.source
+      },
+      set(value) {
+        store.dispatch('filter/setFilter', { source: value })
+        updateNewsItems()
+      }
+    })
+
+    const group = computed({
+      get() {
+        return filter.value.group
+      },
+      set(value) {
+        store.dispatch('filter/setFilter', { group: value })
+        updateNewsItems()
+      }
+    })
+
+    const limit = computed({
+      get() {
+        return filter.value.limit
+      },
+      set(value) {
+        store.dispatch('filter/setLimit', value)
+        updateNewsItems()
+      }
+    })
+
+    const sort = computed({
+      get() {
+        if (!filter.value.order) return 'DATE_DESC'
+        return filter.value.order
+      },
+      set(value) {
+        store.dispatch('filter/setSort', value)
+        updateNewsItems()
+      }
+    })
+
+    const offset = computed({
+      get() {
+        return filter.value.offset
+      },
+      set(value) {
+        store.dispatch('filter/setOffset', value)
+        updateNewsItems()
+      }
+    })
+
+    const tags = computed({
+      get() {
+        const tags = filter.value.tags || []
+        console.debug('tags', tags)
+        return tags.map((tag) => {
+          return { name: tag }
+        })
+      },
+      set(value) {
+        store.dispatch('filter/setFilter', { tags: value })
+        updateNewsItems()
+      }
+    })
+
+    const range = computed({
+      get() {
+        return filter.value.range
+      },
+      set(value) {
+        store.dispatch('filter/setFilter', { range: value })
+        updateNewsItems()
+      }
+    })
+
+    const filterAttribute = computed({
+      get() {
+        return filterAttributeSelections.value
+      },
+      set(value) {
+        filterAttributeSelections.value = value
+
+        const filterUpdate = filterAttributeOptions.reduce((obj, item) => {
           obj[item.type] = value.includes(item.type) ? 'true' : undefined
           return obj
         }, {})
 
         console.debug('filterAttributeSelections', filterUpdate)
-        this.updateFilter(filterUpdate)
-        this.updateNewsItems()
+        store.dispatch('filter/setFilter', filterUpdate)
+        updateNewsItems()
       }
-    },
-    search: {
+    })
+
+    const search = computed({
       get() {
-        return this.filter.search
+        return filter.value.search
       },
       set(value) {
-        this.updateFilter({ search: value })
-        if (!this.awaitingSearch) {
+        store.dispatch('filter/setFilter', { search: value })
+        if (!awaitingSearch.value) {
           setTimeout(() => {
-            this.updateNewsItems()
-            this.awaitingSearch = false
+            updateNewsItems()
+            awaitingSearch.value = false
           }, 500)
         }
 
-        this.awaitingSearch = true
+        awaitingSearch.value = true
       }
+    })
+
+    const getItemCount = computed(() => {
+      return store.getters.getItemCount
+    })
+
+    const getOSINTSourceGroupsList = computed(() => {
+      return store.getters['assess/getOSINTSourceGroupsList']
+    })
+
+    const getOSINTSourcesList = computed(() => {
+      return store.getters['assess/getOSINTSourcesList']
+    })
+
+    const setScope = (value) => {
+      store.dispatch('filter/setScope', value)
     }
-  },
-  methods: {
-    ...mapGetters(['getItemCount']),
-    ...mapGetters('assess', [
-      'getOSINTSourceGroupsList',
-      'getOSINTSourcesList'
-    ]),
-    ...mapActions('assess', ['updateNewsItems']),
-    ...mapActions('filter', [
-      'setScope',
-      'setFilter',
-      'setSort',
-      'setLimit',
-      'setOffset',
-      'updateFilter'
-    ]),
-    ...mapGetters('filter', ['getNewsItemsFilter'])
-  },
-  created() {
-    const query = Object.fromEntries(
-      Object.entries(this.$route.query).filter(([, v]) => v != null)
-    )
-    this.updateFilter(query)
-    console.debug('loaded with query', query)
+
+    const setFilter = (value) => {
+      store.dispatch('filter/setFilter', value)
+    }
+
+    const setSort = (value) => {
+      store.dispatch('filter/setSort', value)
+    }
+
+    const setLimit = (value) => {
+      store.dispatch('filter/setLimit', value)
+    }
+
+    const setOffset = (value) => {
+      store.dispatch('filter/setOffset', value)
+    }
+
+    const updateFilter = (value) => {
+      store.dispatch('filter/updateFilter', value)
+    }
+
+    const getNewsItemsFilter = computed(() => {
+      return store.getters['filter/getNewsItemsFilter']
+    })
+
+    const updateNewsItems = () => {
+      store.dispatch('assess/updateNewsItems')
+    }
+
+    onMounted(() => {
+      const query = Object.fromEntries(
+        Object.entries(route.query).filter(([, v]) => v != null)
+      )
+      updateFilter(query)
+      console.debug('loaded with query', query)
+    })
+
+    return {
+      awaitingSearch,
+      filterAttributeSelections,
+      filterAttributeOptions,
+      orderOptions,
+      filter,
+      drawerVisible,
+      source,
+      group,
+      limit,
+      sort,
+      offset,
+      tags,
+      range,
+      filterAttribute,
+      search,
+      getItemCount,
+      getOSINTSourceGroupsList,
+      getOSINTSourcesList,
+      setScope,
+      setFilter,
+      setSort,
+      setLimit,
+      setOffset,
+      updateFilter,
+      getNewsItemsFilter,
+      updateNewsItems
+    }
   }
 }
 </script>

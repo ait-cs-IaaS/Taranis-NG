@@ -14,8 +14,8 @@
 export default {
   name: 'DashBoardCard',
   props: {
-    linkTo: { type: String },
-    linkText: { type: String },
+    linkTo: { type: String, default: '/' },
+    linkText: { type: String, default: '/' },
     cols: { type: String, default: '4' }
   }
 }

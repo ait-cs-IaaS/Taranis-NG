@@ -53,14 +53,14 @@ import { notifySuccess, notifyFailure } from '@/utils/helpers'
 export default {
   name: 'AssetView',
   props: {
-    asset_prop: { type: Object, required: true },
+    assetProp: { type: Object, required: true },
     edit: { type: Boolean, default: false }
   },
   data: function () {
     return {
       required: [(v) => !!v || 'Required'],
       vulnerabilities: [],
-      asset: this.asset_prop
+      asset: this.assetProp
     }
   },
   computed: {

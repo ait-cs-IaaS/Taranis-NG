@@ -92,6 +92,9 @@ export default {
       ]
     }
   },
+  mounted() {
+    this.updateData()
+  },
   methods: {
     ...mapActions('config', ['loadNodes', 'loadCollectors']),
     ...mapGetters('config', ['getNodes', 'getCollectors']),
@@ -168,9 +171,6 @@ export default {
         notifySuccess('Node run triggerd')
       })
     }
-  },
-  mounted() {
-    this.updateData()
   }
 }
 </script>

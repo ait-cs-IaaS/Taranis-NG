@@ -33,26 +33,29 @@
 
 <script>
 import { getTags } from '@/api/assess'
-import { mapActions, mapGetters } from 'vuex'
 import { tagIconFromType } from '@/utils/helpers'
 
 export default {
   name: 'TagFilter',
-  props: {},
+  props: {
+    value: {
+      type: Array,
+      default: () => []
+    }
+  },
+  emits: ['update:modelValue'],
   data: () => ({
     loading: false,
     available_tags: [],
-    selected_tags: [],
     search: ''
   }),
   computed: {
     selected: {
       get() {
-        return this.selected_tags
+        return this.value
       },
       set(val) {
-        this.setTags(val)
-        this.updateNewsItems()
+        this.$emit('update:modelValue', val)
       }
     }
   },
@@ -62,15 +65,11 @@ export default {
     }
   },
   async mounted() {
-    this.selected_tags = this.loadFilterTags()
     await this.querySelections()
+    console.debug('mounted', this.selected)
   },
   methods: {
-    ...mapGetters('filter', ['getFilterTags']),
-    ...mapActions('filter', ['setTags']),
-    ...mapActions('assess', ['updateNewsItems']),
     shortText(item) {
-      console.debug('shortText', item)
       return item.length > 15 ? item.substring(0, 15) + '...' : item
     },
     tagIcon(tag_type) {
@@ -80,21 +79,12 @@ export default {
       this.loading = true
       await getTags(filter).then((res) => {
         this.available_tags = res.data
-        this.selected_tags.forEach((tag) => {
+        this.selected.forEach((tag) => {
           if (!this.available_tags.includes(tag)) {
             this.available_tags.unshift(tag)
           }
         })
         this.loading = false
-      })
-    },
-    loadFilterTags() {
-      const tags = this.getFilterTags()
-      if (!tags) {
-        return []
-      }
-      return tags.map((tag) => {
-        return { name: tag }
       })
     }
   }

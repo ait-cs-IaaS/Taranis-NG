@@ -54,7 +54,8 @@
 
 <script>
 import DashBoardCard from '@/components/common/DashBoardCard.vue'
-import { mapGetters, mapActions } from 'vuex'
+import { ref, onMounted } from 'vue'
+import { useStore } from 'vuex'
 import TrendingCard from '@/components/common/TrendingCard.vue'
 import { defineComponent } from 'vue'
 
@@ -64,27 +65,32 @@ export default defineComponent({
     DashBoardCard,
     TrendingCard
   },
-  data: () => ({
-    dashboardData: {},
-    clusters: []
-  }),
-  computed: {
-    totalItems() {
-      return this.getItemCount().total
+  setup() {
+    const store = useStore()
+    const dashboardData = ref({})
+    const clusters = ref([])
+
+    const totalItems = () => store.getters['getItemCount'].total
+
+    const loadDashboardData = () =>
+      store.dispatch('dashboard/loadDashboardData')
+    const loadClusters = () => store.dispatch('dashboard/loadClusters')
+    const getDashboardData = () => store.getters['dashboard/getDashboardData']
+    const getClusters = () => store.getters['dashboard/getClusters']
+
+    onMounted(async () => {
+      await loadDashboardData()
+      dashboardData.value = getDashboardData()
+
+      await loadClusters()
+      clusters.value = getClusters()
+    })
+
+    return {
+      dashboardData,
+      clusters,
+      totalItems
     }
-  },
-  methods: {
-    ...mapActions('dashboard', ['loadDashboardData', 'loadClusters']),
-    ...mapGetters('dashboard', ['getDashboardData', 'getClusters']),
-    ...mapGetters(['getItemCount'])
-  },
-  mounted() {
-    this.loadDashboardData().then(() => {
-      this.dashboardData = this.getDashboardData()
-    })
-    this.loadClusters().then(() => {
-      this.clusters = this.getClusters()
-    })
   }
 })
 </script>

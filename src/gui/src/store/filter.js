@@ -186,7 +186,11 @@ const mutations = {
     state.newsItemsFilter.offset = offset
   },
   SET_TAGS(state, tags) {
-    state.newsItemsFilter.tags = tags
+    if (typeof tags === 'string') {
+      state.newsItemsFilter.tags = [tags]
+    } else {
+      state.newsItemsFilter.tags = tags
+    }
   },
   APPEND_TAG(state, tag) {
     if (state.newsItemsFilter.tags) {

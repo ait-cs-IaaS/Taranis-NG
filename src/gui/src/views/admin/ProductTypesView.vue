@@ -87,6 +87,9 @@ export default {
       return base
     }
   },
+  mounted() {
+    this.updateData()
+  },
   methods: {
     ...mapActions('config', ['loadProductTypes', 'loadPresenters']),
     ...mapGetters('config', ['getProductTypes', 'getPresenters']),
@@ -171,9 +174,6 @@ export default {
           notifyFailure(`Failed to update ${item.name}`)
         })
     }
-  },
-  mounted() {
-    this.updateData()
   }
 }
 </script>

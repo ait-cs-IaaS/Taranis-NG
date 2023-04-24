@@ -130,9 +130,17 @@ export default defineComponent({
         route: '/assets',
         show: true
       }
-    ],
-    darkTheme: false
+    ]
   }),
+  computed: {
+    ...mapState(['drawerVisible']),
+    ...mapGetters(['getItemCount']),
+    isFiltered() {
+      return this.getItemCount.filtered === undefined
+        ? false
+        : this.getItemCount.filtered !== this.getItemCount.total
+    }
+  },
   methods: {
     ...mapActions(['toggleDrawer']),
     ...mapGetters(['getPermissions']),
@@ -141,24 +149,11 @@ export default defineComponent({
       this.toggleDrawer()
     },
 
-    darkToggle() {
-      this.$vuetify.theme.dark = this.darkTheme
-    },
-
     getButtonList() {
       return this.buttons.filter(
         (button) =>
           this.getPermissions().includes(button.permission) && button.show
       )
-    }
-  },
-  computed: {
-    ...mapState(['drawerVisible']),
-    ...mapGetters(['getItemCount']),
-    isFiltered() {
-      return this.getItemCount.filtered === undefined
-        ? false
-        : this.getItemCount.filtered !== this.getItemCount.total
     }
   }
 })

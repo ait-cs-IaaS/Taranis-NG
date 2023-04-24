@@ -26,8 +26,8 @@
             :key="newsItem.id"
             :story="newsItem"
             :selected="getNewsItemsSelection().includes(newsItem.id)"
-            @deleteItem="removeAndDeleteNewsItem(newsItem.id)"
-            @selectItem="selectNewsItem(newsItem.id)"
+            @delete-item="removeAndDeleteNewsItem(newsItem.id)"
+            @select-item="selectNewsItem(newsItem.id)"
           ></card-story>
         </transition-group>
       </transition>
@@ -63,15 +63,46 @@ import { mapState, mapGetters, mapActions } from 'vuex'
 
 export default {
   name: 'AssessView',
-  mixins: [KeyboardMixin('assess')],
   components: {
     CardStory,
     AssessSelectionToolbar
   },
+  mixins: [KeyboardMixin('assess')],
   data: () => ({
     reloading: false,
     items: []
   }),
+  computed: {
+    ...mapState('filter', {
+      scope: (state) => state.newsItemsFilter.scope,
+      filter: (state) => state.newsItemsFilter
+    }),
+
+    moreToLoad() {
+      const offset = this.filter.offset ? parseInt(this.filter.offset) : 0
+      const length = offset + this.items.length
+      return length < this.getNewsItems().total_count
+    },
+
+    activeSelection() {
+      return this.getNewsItemsSelection().length > 0
+    }
+  },
+
+  created() {
+    this.updateOSINTSourceGroupsList()
+    this.updateOSINTSources()
+    this.updateNewsItems()
+
+    this.unsubscribe = this.$store.subscribe((mutation) => {
+      if (mutation.type === 'assess/UPDATE_NEWSITEMS') {
+        this.getNewsItemsFromStore()
+      }
+    })
+  },
+  beforeUnmount() {
+    this.unsubscribe()
+  },
   methods: {
     ...mapActions(['updateItemCountTotal', 'updateItemCountFiltered']),
     ...mapActions('assess', [
@@ -107,37 +138,6 @@ export default {
       this.updateItemCountFiltered(this.items.length)
       console.debug('number of newsitems: ' + this.getNewsItems().total_count)
     }
-  },
-  computed: {
-    ...mapState('filter', {
-      scope: (state) => state.newsItemsFilter.scope,
-      filter: (state) => state.newsItemsFilter
-    }),
-
-    moreToLoad() {
-      const offset = this.filter.offset ? parseInt(this.filter.offset) : 0
-      const length = offset + this.items.length
-      return length < this.getNewsItems().total_count
-    },
-
-    activeSelection() {
-      return this.getNewsItemsSelection().length > 0
-    }
-  },
-
-  created() {
-    this.updateOSINTSourceGroupsList()
-    this.updateOSINTSources()
-    this.updateNewsItems()
-
-    this.unsubscribe = this.$store.subscribe((mutation) => {
-      if (mutation.type === 'assess/UPDATE_NEWSITEMS') {
-        this.getNewsItemsFromStore()
-      }
-    })
-  },
-  beforeUnmount() {
-    this.unsubscribe()
   }
 }
 </script>

@@ -97,6 +97,9 @@ export default {
       }
     ]
   }),
+  mounted() {
+    this.updateData()
+  },
   methods: {
     ...mapActions('config', ['loadAttributes']),
     ...mapGetters('config', ['getAttributes']),
@@ -159,9 +162,6 @@ export default {
           notifyFailure(`Failed to update ${item.name}`)
         })
     }
-  },
-  mounted() {
-    this.updateData()
   }
 }
 </script>

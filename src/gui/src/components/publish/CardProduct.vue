@@ -1,5 +1,5 @@
 <template>
-  <v-container v-bind="UI.CARD.CONTAINER">
+  <v-container>
     <v-row>
       <v-col :class="UI.CLASS.card_offset">
         <v-hover v-slot="{ hover }">
@@ -31,7 +31,12 @@
 <script>
 export default {
   name: 'CardProduct',
-  props: ['card'],
+  props: {
+    card: {
+      type: Object,
+      required: true
+    }
+  },
   data: () => ({
     toolbar: false
   }),

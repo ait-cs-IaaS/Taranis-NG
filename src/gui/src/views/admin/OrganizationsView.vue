@@ -27,8 +27,9 @@ import {
   createOrganization,
   updateOrganization
 } from '@/api/config'
-import { mapActions, mapGetters } from 'vuex'
+import { useStore } from 'vuex'
 import { notifySuccess, emptyValues, notifyFailure } from '@/utils/helpers'
+import { ref, onMounted } from 'vue'
 
 export default {
   name: 'OrganizationsView',
@@ -36,76 +37,94 @@ export default {
     DataTable,
     EditConfig
   },
-  data: () => ({
-    organizations: [],
-    formData: {},
-    edit: false
-  }),
-  methods: {
-    ...mapActions('config', ['loadOrganizations']),
-    ...mapGetters('config', ['getOrganizations']),
-    ...mapActions(['updateItemCount']),
-    updateData() {
-      this.loadOrganizations().then(() => {
-        const sources = this.getOrganizations()
-        this.organizations = sources.items
-        this.updateItemCount({
+  setup() {
+    const store = useStore()
+    const organizations = ref([])
+    const formData = ref({})
+    const edit = ref(false)
+
+    const loadOrganizations = () => store.dispatch('config/loadOrganizations')
+    const getOrganizations = () => store.getters['config/getOrganizations']
+    const updateItemCount = (count) => store.dispatch('updateItemCount', count)
+
+    const updateData = () => {
+      loadOrganizations().then(() => {
+        const sources = getOrganizations()
+        organizations.value = sources.items
+        updateItemCount({
           total: sources.total_count,
           filtered: sources.length
         })
       })
-    },
-    addItem() {
-      this.formData = emptyValues(this.organizations[0])
-      this.edit = false
-    },
-    editItem(item) {
-      this.formData = item
-      this.edit = true
-    },
-    handleSubmit(submittedData) {
+    }
+
+    const addItem = () => {
+      formData.value = emptyValues(organizations.value[0])
+      edit.value = false
+    }
+
+    const editItem = (item) => {
+      formData.value = item
+      edit.value = true
+    }
+
+    const handleSubmit = (submittedData) => {
       console.log(submittedData)
-      if (this.edit) {
-        this.updateItem(submittedData)
+      if (edit.value) {
+        updateItem(submittedData)
       } else {
-        this.createItem(submittedData)
+        createItem(submittedData)
       }
-    },
-    deleteItem(item) {
+    }
+
+    const deleteItem = (item) => {
       if (!item.default) {
         deleteOrganization(item)
           .then(() => {
             notifySuccess(`Successfully deleted ${item.name}`)
-            this.updateData()
+            updateData()
           })
           .catch(() => {
             notifyFailure(`Failed to delete ${item.name}`)
           })
       }
-    },
-    createItem(item) {
+    }
+
+    const createItem = (item) => {
       createOrganization(item)
         .then(() => {
           notifySuccess(`Successfully created ${item.name}`)
-          this.updateData()
+          updateData()
         })
         .catch(() => {
           notifyFailure(`Failed to create ${item.name}`)
         })
-    },
-    updateItem(item) {
+    }
+
+    const updateItem = (item) => {
       updateOrganization(item)
         .then(() => {
           notifySuccess(`Successfully updated ${item.name}`)
-          this.updateData()
+          updateData()
         })
         .catch(() => {
           notifyFailure(`Failed to update ${item.name}`)
         })
     }
-  },
-  mounted() {
-    this.updateData()
+
+    onMounted(updateData)
+
+    return {
+      organizations,
+      formData,
+      edit,
+      addItem,
+      editItem,
+      handleSubmit,
+      deleteItem,
+      createItem,
+      updateItem
+    }
   }
 }
 </script>

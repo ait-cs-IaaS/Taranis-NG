@@ -171,7 +171,10 @@ export default {
     PopupShareItems
   },
   props: {
-    newsItem: {},
+    newsItem: {
+      type: Object,
+      required: true
+    },
     selected: Boolean,
     storyView: Boolean
   },

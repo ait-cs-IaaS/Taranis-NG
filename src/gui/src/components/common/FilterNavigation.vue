@@ -94,13 +94,16 @@ export default {
   name: 'FilterNavigation',
   props: {
     search: {
-      type: String
+      type: String,
+      default: ''
     },
     limit: {
-      type: Number
+      type: Number,
+      default: 20
     },
     offset: {
-      type: Number
+      type: Number,
+      default: 0
     }
   },
   emits: ['update:search', 'update:limit', 'update:offset'],

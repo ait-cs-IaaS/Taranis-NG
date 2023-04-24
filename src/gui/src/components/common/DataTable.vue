@@ -10,7 +10,7 @@
       show-select
       :custom-filter="customFilter"
       @click:row="rowClick"
-      @update:modelValue="emitFilterChange"
+      @update:model-value="emitFilterChange"
     >
       <template #top>
         <v-card>
@@ -101,7 +101,8 @@ export default defineComponent({
       default: null
     },
     headerFilter: {
-      type: Array
+      type: Array,
+      default: () => []
     },
     actionColumn: {
       type: Boolean,
@@ -112,7 +113,13 @@ export default defineComponent({
       default: true
     }
   },
-  emits: ['delete-item', 'edit-item', 'add-item', 'selection-change'],
+  emits: [
+    'delete-item',
+    'edit-item',
+    'add-item',
+    'selection-change',
+    'update-items'
+  ],
   data: () => ({
     search: '',
     selected: []

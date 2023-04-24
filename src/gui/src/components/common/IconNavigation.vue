@@ -32,7 +32,10 @@ import { mapState, mapGetters } from 'vuex'
 export default {
   name: 'IconNavigation',
   props: {
-    links: Array,
+    links: {
+      type: Array,
+      default: () => []
+    },
     width: {
       type: Number,
       default: 142

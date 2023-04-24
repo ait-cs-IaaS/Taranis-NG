@@ -24,7 +24,8 @@
 import DataTable from '@/components/common/DataTable.vue'
 import EditConfig from '@/components/config/EditConfig.vue'
 import { deleteRole, createRole, updateRole } from '@/api/config'
-import { mapActions, mapGetters } from 'vuex'
+import { ref, onMounted, computed } from 'vue'
+import { useStore } from 'vuex'
 import { notifySuccess, objectFromFormat, notifyFailure } from '@/utils/helpers'
 
 export default {
@@ -33,118 +34,138 @@ export default {
     DataTable,
     EditConfig
   },
-  data: () => ({
-    roles: [],
-    formData: {},
-    selected: [],
-    edit: false,
-    permissions: []
-  }),
-  computed: {
-    formFormat() {
-      return [
-        {
-          name: 'id',
-          label: 'ID',
-          type: 'text',
-          disabled: true
-        },
-        {
-          name: 'name',
-          label: 'Name',
-          type: 'text',
-          required: true
-        },
-        {
-          name: 'description',
-          label: 'Description',
-          type: 'textarea',
-          required: true
-        },
-        {
-          name: 'permissions',
-          label: 'Permissions',
-          type: 'table',
-          headers: [
-            { text: 'Name', value: 'name' },
-            { text: 'Description', value: 'description' }
-          ],
-          items: this.permissions
-        }
-      ]
-    }
-  },
-  methods: {
-    ...mapActions('config', ['loadRoles', 'loadPermissions']),
-    ...mapGetters('config', ['getRoles', 'getPermissions']),
-    ...mapActions(['updateItemCount']),
-    updateData() {
-      this.loadRoles().then(() => {
-        const sources = this.getRoles()
-        this.roles = sources.items
-        this.updateItemCount({
+  setup() {
+    const store = useStore()
+    const roles = ref([])
+    const formData = ref({})
+    const selected = ref([])
+    const edit = ref(false)
+    const permissions = ref([])
+
+    const formFormat = computed(() => [
+      {
+        name: 'id',
+        label: 'ID',
+        type: 'text',
+        disabled: true
+      },
+      {
+        name: 'name',
+        label: 'Name',
+        type: 'text',
+        required: true
+      },
+      {
+        name: 'description',
+        label: 'Description',
+        type: 'textarea',
+        required: true
+      },
+      {
+        name: 'permissions',
+        label: 'Permissions',
+        type: 'table',
+        headers: [
+          { text: 'Name', value: 'name' },
+          { text: 'Description', value: 'description' }
+        ],
+        items: permissions.value
+      }
+    ])
+
+    const loadRoles = () => store.dispatch('config/loadRoles')
+    const loadPermissions = () => store.dispatch('config/loadPermissions')
+    const getRoles = () => store.getters['config/getRoles']
+    const getPermissions = () => store.getters['config/getPermissions']
+    const updateItemCount = (count) => store.dispatch('updateItemCount', count)
+    const updateData = () => {
+      loadRoles().then(() => {
+        const sources = getRoles()
+        roles.value = sources.items
+        updateItemCount({
           total: sources.total_count,
           filtered: sources.length
         })
       })
-      this.loadPermissions().then(() => {
-        this.permissions = this.getPermissions().items
+      loadPermissions().then(() => {
+        permissions.value = getPermissions().items
       })
-    },
-    addItem() {
-      this.formData = objectFromFormat(this.formFormat)
-      this.edit = false
-    },
-    editItem(item) {
-      this.formData = item
-      this.edit = true
-    },
-    handleSubmit(submittedData) {
+    }
+
+    const addItem = () => {
+      formData.value = objectFromFormat(formFormat.value)
+      edit.value = false
+    }
+
+    const editItem = (item) => {
+      formData.value = item
+      edit.value = true
+    }
+
+    const handleSubmit = (submittedData) => {
       console.log(submittedData)
-      if (this.edit) {
-        this.updateItem(submittedData)
+      if (edit.value) {
+        updateItem(submittedData)
       } else {
-        this.createItem(submittedData)
+        createItem(submittedData)
       }
-    },
-    deleteItem(item) {
+    }
+
+    const deleteItem = (item) => {
       if (!item.default) {
         deleteRole(item)
           .then(() => {
             notifySuccess(`Successfully deleted ${item.name}`)
-            this.updateData()
+            updateData()
           })
           .catch(() => {
             notifyFailure(`Failed to delete ${item.name}`)
           })
       }
-    },
-    createItem(item) {
+    }
+
+    const createItem = (item) => {
       createRole(item)
         .then(() => {
           notifySuccess(`Successfully created ${item.name}`)
-          this.updateData()
+          updateData()
         })
         .catch(() => {
           notifyFailure(`Failed to create ${item.name}`)
         })
-    },
-    updateItem(item) {
+    }
+
+    const updateItem = (item) => {
       updateRole(item)
         .then(() => {
           notifySuccess(`Successfully updated ${item.name}`)
-          this.updateData()
+          updateData()
         })
         .catch(() => {
           notifyFailure(`Failed to update ${item.name}`)
         })
-    },
-    selectionChange(selected) {
-      this.selected = selected.map((item) => item.id)
     }
-  },
-  mounted() {
-    this.updateData()
+
+    const selectionChange = (selectedItems) => {
+      selected.value = selectedItems.map((item) => item.id)
+    }
+
+    onMounted(updateData)
+
+    return {
+      roles,
+      formData,
+      selected,
+      edit,
+      permissions,
+      formFormat,
+      addItem,
+      editItem,
+      handleSubmit,
+      deleteItem,
+      selectionChange,
+      updateData
+    }
   }
 }
 </script>

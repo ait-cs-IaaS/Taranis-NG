@@ -15,9 +15,10 @@
 <script>
 import MainMenu from '@/components/MainMenu.vue'
 import Notification from '@/components/common/Notification.vue'
-import { mapActions, mapGetters } from 'vuex'
 import { useCookies } from 'vue3-cookies'
-import { defineComponent } from 'vue'
+import { defineComponent, onMounted } from 'vue'
+import { useStore } from 'vuex'
+import { connectSSE, reconnectSSE } from '@/utils/sse'
 
 export default defineComponent({
   name: 'App',
@@ -25,90 +26,52 @@ export default defineComponent({
     MainMenu,
     Notification
   },
-  computed: {},
-  methods: {
-    ...mapActions('dashboard', ['updateStories']),
-    ...mapActions('users', ['updateUsers']),
-    ...mapActions('assess', ['updateNewsItems']),
-    ...mapActions('settings', ['loadUserProfile']),
-    ...mapGetters('settings', ['getProfileDarkTheme']),
-    ...mapGetters(['isAuthenticated', 'needTokenRefresh']),
-
-    connectSSE() {
-      if (import.meta.env.VITE_TARANIS_NG_CORE_SSE === undefined) {
-        return
-      }
-      // this.$sse(
-      //   `${import.meta.env.VITE_TARANIS_NG_CORE_SSE}?jwt=${this.$store.getters.getJWT}`,
-      //   { format: 'json' }
-      // ).then((sse) => {
-      //   sse.subscribe('news-items-updated', (data) => {
-      //     this.$root.$emit('news-items-updated', data)
-      //   })
-      //   sse.subscribe('report-items-updated', (data) => {
-      //     this.$root.$emit('report-items-updated', data)
-      //   })
-      //   sse.subscribe('report-item-updated', (data) => {
-      //     this.$root.$emit('report-item-updated', data)
-      //   })
-      //   sse.subscribe('report-item-locked', (data) => {
-      //     this.$root.$emit('report-item-locked', data)
-      //   })
-      //   sse.subscribe('report-item-unlocked', (data) => {
-      //     this.$root.$emit('report-item-unlocked', data)
-      //   })
-      // })
-    },
-
-    reconnectSSE() {
-      if (this.sseConnection !== null) {
-        this.sseConnection.close()
-        this.sseConnection = null
-      }
-      this.connectSSE()
-    }
-  },
   setup() {
+    const store = useStore()
     const { cookies } = useCookies()
-    return { cookies }
-  },
-  mounted() {
-    if (this.cookies.isKey('jwt')) {
-      this.$store.dispatch('setToken', this.cookies.get('jwt')).then(() => {
-        this.cookies.remove('jwt')
-      })
-    }
 
-    if (localStorage.ACCESS_TOKEN) {
-      if (this.isAuthenticated()) {
-        this.$store.dispatch('setAuthURLs')
-        this.loadUserProfile().then(() => {
-          this.$vuetify.theme.dark = this.getProfileDarkTheme()
+    const loadUserProfile = () => store.dispatch('settings/loadUserProfile')
+    const isAuthenticated = () => store.getters['isAuthenticated']
+    const needTokenRefresh = () => store.getters['needTokenRefresh']
+
+    onMounted(() => {
+      if (cookies.isKey('jwt')) {
+        store.dispatch('setToken', cookies.get('jwt')).then(() => {
+          cookies.remove('jwt')
         })
-        this.connectSSE()
-      } else {
-        if (this.$store.getters.getJWT) {
-          this.$store.dispatch('logout')
+      }
+
+      if (localStorage.ACCESS_TOKEN) {
+        if (isAuthenticated()) {
+          store.dispatch('setAuthURLs')
+          loadUserProfile()
+          connectSSE()
+        } else {
+          if (store.getters.getJWT) {
+            store.dispatch('logout')
+          }
         }
       }
-    }
-    setInterval(
-      function () {
-        if (this.isAuthenticated()) {
-          if (this.needTokenRefresh() === true) {
-            this.$store.dispatch('refresh').then(() => {
-              console.debug('Token refreshed')
-              // this.reconnectSSE()
-            })
+      setInterval(
+        function () {
+          if (isAuthenticated()) {
+            if (needTokenRefresh() === true) {
+              store.dispatch('refresh').then(() => {
+                console.debug('Token refreshed')
+                reconnectSSE()
+              })
+            }
+          } else {
+            if (store.getters.getJWT) {
+              store.dispatch('logout')
+            }
           }
-        } else {
-          if (this.$store.getters.getJWT) {
-            this.$store.dispatch('logout')
-          }
-        }
-      }.bind(this),
-      5000
-    )
+        }.bind(this),
+        5000
+      )
+    })
+
+    return { cookies }
   }
 })
 </script>

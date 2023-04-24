@@ -19,7 +19,8 @@
 import DataTable from '@/components/common/DataTable.vue'
 import UserForm from '@/components/config/user/UserForm.vue'
 import { deleteUser, createUser, updateUser } from '@/api/config'
-import { mapActions, mapGetters } from 'vuex'
+import { ref, onMounted } from 'vue'
+import { useStore } from 'vuex'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
 
 export default {
@@ -28,77 +29,98 @@ export default {
     DataTable,
     UserForm
   },
-  data: () => ({
-    showForm: false,
-    users: [],
-    selected: [],
-    userID: -1
-  }),
-  methods: {
-    ...mapActions('config', ['loadUsers']),
-    ...mapGetters('config', ['getUsers']),
-    ...mapActions(['updateItemCount']),
-    updateData() {
-      this.loadUsers().then(() => {
-        const sources = this.getUsers()
-        this.users = sources.items
-        this.updateItemCount({
+  setup() {
+    const store = useStore()
+    const showForm = ref(false)
+    const users = ref([])
+    const selected = ref([])
+    const userID = ref(-1)
+
+    const loadUsers = () => store.dispatch('config/loadUsers')
+    const getUsers = () => store.getters['config/getUsers']
+    const updateItemCount = (count) => store.dispatch('updateItemCount', count)
+
+    const updateData = () => {
+      loadUsers().then(() => {
+        const sources = getUsers()
+        users.value = sources.items
+        updateItemCount({
           total: sources.total_count,
           filtered: sources.length
         })
       })
-    },
-    addItem() {
-      this.userID = -1
-      this.showForm = true
-    },
-    editItem(item) {
-      this.userID = item.id
-      this.showForm = true
-    },
-    handleSubmit(submittedData) {
-      if (this.showForm) {
-        this.updateItem(submittedData)
+    }
+
+    const addItem = () => {
+      userID.value = -1
+      showForm.value = true
+    }
+
+    const editItem = (item) => {
+      userID.value = item.id
+      showForm.value = true
+    }
+
+    const handleSubmit = (submittedData) => {
+      if (showForm.value) {
+        updateItem(submittedData)
       } else {
-        this.createItem(submittedData)
+        createItem(submittedData)
       }
-    },
-    deleteItem(item) {
+    }
+
+    const deleteItem = (item) => {
       deleteUser(item)
         .then(() => {
           notifySuccess(`Successfully deleted ${item.name}`)
-          this.updateData()
+          updateData()
         })
         .catch(() => {
           notifyFailure(`Failed to delete ${item.name}`)
         })
-    },
-    createItem(item) {
+    }
+
+    const createItem = (item) => {
       createUser(item)
         .then(() => {
           notifySuccess(`Successfully created ${item.name}`)
-          this.updateData()
+          updateData()
         })
         .catch(() => {
-          notifyFailure(`Failed to created ${item.name}`)
+          notifyFailure(`Failed to create ${item.name}`)
         })
-    },
-    updateItem(item) {
+    }
+
+    const updateItem = (item) => {
       updateUser(item)
         .then(() => {
           notifySuccess(`Successfully updated ${item.name}`)
-          this.updateData()
+          updateData()
         })
         .catch(() => {
           notifyFailure(`Failed to update ${item.name}`)
         })
-    },
-    selectionChange(selected) {
-      this.selected = selected.map((item) => item.id)
     }
-  },
-  mounted() {
-    this.updateData()
+
+    const selectionChange = (selectedItems) => {
+      selected.value = selectedItems.map((item) => item.id)
+    }
+
+    onMounted(updateData)
+
+    return {
+      showForm,
+      users,
+      selected,
+      userID,
+      addItem,
+      editItem,
+      handleSubmit,
+      deleteItem,
+      createItem,
+      updateItem,
+      selectionChange
+    }
   }
 }
 </script>

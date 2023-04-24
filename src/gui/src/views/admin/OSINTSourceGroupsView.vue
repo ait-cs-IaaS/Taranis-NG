@@ -30,7 +30,8 @@ import {
   deleteOSINTSourceGroup,
   updateOSINTSourceGroup
 } from '@/api/config'
-import { mapActions, mapGetters } from 'vuex'
+import { ref, computed, onMounted } from 'vue'
+import { useStore } from 'vuex'
 import { notifySuccess, objectFromFormat, notifyFailure } from '@/utils/helpers'
 
 export default {
@@ -39,118 +40,141 @@ export default {
     DataTable,
     EditConfig
   },
-  data: () => ({
-    osint_source_groups: [],
-    osint_sources: [],
-    selected: [],
-    formData: {},
-    edit: false
-  }),
-  computed: {
-    formFormat() {
-      return [
-        {
-          name: 'id',
-          label: 'ID',
-          type: 'text',
-          disabled: true
-        },
-        {
-          name: 'name',
-          label: 'Name',
-          type: 'text',
-          required: true
-        },
-        {
-          name: 'description',
-          label: 'Description',
-          type: 'textarea',
-          required: true
-        },
-        {
-          name: 'osint_sources',
-          label: 'Sources',
-          type: 'table',
-          headers: [
-            { text: 'Name', value: 'name' },
-            { text: 'Description', value: 'description' }
-          ],
-          items: this.osint_sources
-        }
-      ]
-    }
-  },
-  methods: {
-    ...mapActions('config', ['loadOSINTSourceGroups', 'loadOSINTSources']),
-    ...mapGetters('config', ['getOSINTSourceGroups', 'getOSINTSources']),
+  setup() {
+    const store = useStore()
+    const osint_source_groups = ref([])
+    const osint_sources = ref([])
+    const selected = ref([])
+    const formData = ref({})
+    const edit = ref(false)
 
-    ...mapActions(['updateItemCount']),
-    updateData() {
-      this.loadOSINTSourceGroups().then(() => {
-        const sources = this.getOSINTSourceGroups()
-        this.osint_source_groups = sources.items
-        this.updateItemCount({
+    const loadOSINTSourceGroups = () =>
+      store.dispatch('config/loadOSINTSourceGroups')
+    const getOSINTSourceGroups = () =>
+      store.getters['config/getOSINTSourceGroups']
+    const loadOSINTSources = () => store.dispatch('config/loadOSINTSources')
+    const getOSINTSources = () => store.getters['config/getOSINTSources']
+    const updateItemCount = (count) => store.dispatch('updateItemCount', count)
+
+    const formFormat = computed(() => [
+      {
+        name: 'id',
+        label: 'ID',
+        type: 'text',
+        disabled: true
+      },
+      {
+        name: 'name',
+        label: 'Name',
+        type: 'text',
+        required: true
+      },
+      {
+        name: 'description',
+        label: 'Description',
+        type: 'textarea',
+        required: true
+      },
+      {
+        name: 'osint_sources',
+        label: 'Sources',
+        type: 'table',
+        headers: [
+          { text: 'Name', value: 'name' },
+          { text: 'Description', value: 'description' }
+        ],
+        items: osint_sources.value
+      }
+    ])
+
+    const updateData = () => {
+      loadOSINTSourceGroups().then(() => {
+        const sources = getOSINTSourceGroups()
+        osint_source_groups.value = sources.items
+        updateItemCount({
           total: sources.total_count,
           filtered: sources.length
         })
       })
-      this.loadOSINTSources().then(() => {
-        this.osint_sources = this.getOSINTSources().items
+      loadOSINTSources().then(() => {
+        osint_sources.value = getOSINTSources().items
       })
-    },
-    addItem() {
-      this.formData = objectFromFormat(this.formFormat)
-      this.edit = false
-    },
-    editItem(item) {
-      this.formData = item
-      this.edit = true
-    },
-    handleSubmit(submittedData) {
-      if (this.edit) {
+    }
+
+    const addItem = () => {
+      formData.value = objectFromFormat(formFormat.value)
+      edit.value = false
+    }
+
+    const editItem = (item) => {
+      formData.value = item
+      edit.value = true
+    }
+
+    const handleSubmit = (submittedData) => {
+      if (edit.value) {
         console.debug(`Update: ${submittedData}`)
-        this.updateItem(submittedData)
+        updateItem(submittedData)
       } else {
         console.debug(`Create: ${submittedData}`)
-        this.createItem(submittedData)
+        createItem(submittedData)
       }
-    },
-    deleteItem(item) {
+    }
+
+    const deleteItem = (item) => {
       deleteOSINTSourceGroup(item)
         .then(() => {
           notifySuccess(`Successfully deleted ${item.name}`)
-          this.updateData()
+          updateData()
         })
         .catch(() => {
           notifyFailure(`Failed to delete ${item.name}`)
         })
-    },
-    createItem(item) {
+    }
+
+    const createItem = (item) => {
       createOSINTSourceGroup(item)
         .then(() => {
           notifySuccess(`Successfully created ${item.name}`)
-          this.updateData()
+          updateData()
         })
         .catch(() => {
           notifyFailure(`Failed to create ${item.name}`)
         })
-    },
-    updateItem(item) {
+    }
+
+    const updateItem = (item) => {
       updateOSINTSourceGroup(item)
         .then(() => {
           notifySuccess(`Successfully updated ${item.name}`)
-          this.updateData()
+          updateData()
         })
         .catch(() => {
           notifyFailure(`Failed to update ${item.name}`)
         })
-    },
-    selectionChange(selected) {
-      this.selected = selected.map((item) => item.id)
     }
-  },
-  mounted() {
-    this.updateData()
+
+    const selectionChange = (selectedItems) => {
+      selected.value = selectedItems.map((item) => item.id)
+    }
+
+    onMounted(updateData)
+
+    return {
+      osint_source_groups,
+      osint_sources,
+      selected,
+      formData,
+      edit,
+      formFormat,
+      addItem,
+      editItem,
+      handleSubmit,
+      deleteItem,
+      createItem,
+      updateItem,
+      selectionChange
+    }
   }
 }
 </script>

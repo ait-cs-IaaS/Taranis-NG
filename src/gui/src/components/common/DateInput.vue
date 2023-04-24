@@ -31,7 +31,10 @@
 export default {
   name: 'DateInput',
   props: {
-    caption: String
+    caption: {
+      type: String,
+      default: ''
+    }
   },
   data: () => ({
     menu: false,

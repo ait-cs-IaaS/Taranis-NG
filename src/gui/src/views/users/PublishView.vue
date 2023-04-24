@@ -24,6 +24,9 @@ export default {
     }
   },
   computed: {},
+  mounted() {
+    this.updateData()
+  },
   methods: {
     ...mapActions('publish', ['loadProducts']),
     ...mapGetters('publish', ['getProducts']),
@@ -54,9 +57,6 @@ export default {
     selectionChange(selected) {
       this.selected = selected.map((item) => item.id)
     }
-  },
-  mounted() {
-    this.updateData()
   }
 }
 </script>

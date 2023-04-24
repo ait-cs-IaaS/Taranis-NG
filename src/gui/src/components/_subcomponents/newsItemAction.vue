@@ -22,9 +22,9 @@ export default {
   name: 'NewsItemAction',
   props: {
     active: Boolean,
-    icon: String,
-    extraClass: String,
-    tooltip: String,
+    icon: { type: String, default: 'mdi-pencil' },
+    extraClass: { type: String, default: '' },
+    tooltip: { type: String, default: '' },
     buttonText: { type: String, default: '' }
   },
   emits: ['click'],

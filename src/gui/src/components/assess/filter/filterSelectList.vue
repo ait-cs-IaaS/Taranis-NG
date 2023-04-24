@@ -22,6 +22,7 @@
         <v-list-item-action>
           <v-checkbox-btn
             :model-value="isActive"
+            density="compact"
             false-icon=""
             true-icon="mdi-check-bold"
           />

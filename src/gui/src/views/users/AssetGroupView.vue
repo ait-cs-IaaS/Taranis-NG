@@ -3,7 +3,7 @@
     <asset
       v-if="asset"
       v-model:edit="edit"
-      :asset_prop="asset"
+      :asset-prop="asset"
       @assetcreated="assetcreated"
     />
   </v-container>

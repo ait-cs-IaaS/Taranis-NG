@@ -3,42 +3,25 @@
     <v-list-item-group
       v-model="selected"
       active-class="selected"
-      class="filter-list"
+      density="compact"
       mandatory
     >
       <v-list-item
         v-for="item in orderOptions"
         :key="item.title"
-        class="extra-dense"
+        density="compact"
         :ripple="false"
         :value="item.type + '_' + item.direction"
+        :prepend-icon="item.icon"
         @click.capture="changeDirection($event, item)"
       >
-        <template #prepend>
-          <v-icon small color="grey" :icon="item.icon" />
-        </template>
-
         <v-list-item-title class="py-1 mt-auto mb-auto">
           {{ item.label }}
         </v-list-item-title>
 
         <template #append="{ isActive }">
           <v-list-item-action>
-            <v-icon
-              v-if="isActive"
-              :class="[
-                'mt-auto',
-                'mb-auto',
-                'dark-grey--text',
-                'text--lighten-3',
-                {
-                  asc: item.direction === 'ASC',
-                  desc: item.direction === 'DESC'
-                }
-              ]"
-            >
-              mdi-chevron-up
-            </v-icon>
+            <v-icon v-if="isActive" :icon="activeIcon(item)" />
           </v-list-item-action>
         </template>
       </v-list-item>
@@ -50,8 +33,14 @@
 export default {
   name: 'FilterSortList',
   props: {
-    value: {},
-    items: []
+    value: {
+      type: Object,
+      default: () => ({})
+    },
+    items: {
+      type: Array,
+      default: () => []
+    }
   },
   emits: ['input'],
   data: function () {
@@ -70,6 +59,10 @@ export default {
     }
   },
   methods: {
+    activeIcon(item) {
+      return item.direction === 'ASC' ? 'mdi-chevron-up' : 'mdi-chevron-down'
+    },
+
     changeDirection(event, item) {
       event.preventDefault()
       this.orderOptions.forEach((option) => {

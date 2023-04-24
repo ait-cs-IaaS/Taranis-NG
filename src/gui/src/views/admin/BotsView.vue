@@ -82,6 +82,9 @@ export default {
       return base
     }
   },
+  mounted() {
+    this.updateData()
+  },
   methods: {
     ...mapActions('config', ['loadBots', 'loadParameters']),
     ...mapGetters('config', ['getBots', 'getParameters']),
@@ -141,9 +144,6 @@ export default {
           notifyFailure(`Failed to update ${item.id}`)
         })
     }
-  },
-  mounted() {
-    this.updateData()
   }
 }
 </script>

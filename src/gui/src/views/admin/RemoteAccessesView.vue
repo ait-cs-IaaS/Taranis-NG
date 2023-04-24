@@ -75,6 +75,9 @@ export default {
       ]
     }
   },
+  mounted() {
+    this.updateData()
+  },
   methods: {
     ...mapActions('config', ['loadRemoteAccesses']),
     ...mapGetters('config', ['getRemoteAccesses']),
@@ -136,9 +139,6 @@ export default {
           notifyFailure(`Failed to update ${item.name}`)
         })
     }
-  },
-  mounted() {
-    this.updateData()
   }
 }
 </script>

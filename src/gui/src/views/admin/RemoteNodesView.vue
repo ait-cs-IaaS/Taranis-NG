@@ -72,6 +72,9 @@ export default {
       ]
     }
   },
+  mounted() {
+    this.updateData()
+  },
   methods: {
     ...mapActions('config', ['loadRemoteNodes']),
     ...mapGetters('config', ['getRemoteNodes']),
@@ -143,9 +146,6 @@ export default {
     selectionChange(selected) {
       this.selected = selected.map((item) => item.id)
     }
-  },
-  mounted() {
-    this.updateData()
   }
 }
 </script>

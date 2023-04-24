@@ -21,6 +21,7 @@ export default {
       default: 'all'
     }
   },
+  emits: ['update:modelValue'],
   computed: {
     modelValue: {
       get() {
@@ -34,7 +35,7 @@ export default {
   methods: {
     setValue(newValue) {
       console.debug('dateChips.setValue', newValue)
-      this.$emit('input', newValue)
+      this.$emit('update:modelValue', newValue)
     }
   }
 }

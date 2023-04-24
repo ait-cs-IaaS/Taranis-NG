@@ -72,29 +72,37 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { ref, onMounted } from 'vue'
+import { useStore } from 'vuex'
 import DashBoardCard from '@/components/common/DashBoardCard.vue'
 
 export default {
   name: 'DashBoardConfig',
   components: { DashBoardCard },
-  data: () => ({
-    dashboardData: {}
-  }),
-  computed: {
-    totalItems() {
-      return this.getItemCount().total
+  setup() {
+    const store = useStore()
+    const dashboardData = ref({})
+
+    const loadDashboardData = () =>
+      store.dispatch('dashboard/loadDashboardData')
+    const getDashboardData = () => store.getters['dashboard/getDashboardData']
+    const getItemCount = () => store.getters['getItemCount']
+
+    const totalItems = ref(0)
+
+    const updateDashboardData = () => {
+      loadDashboardData().then(() => {
+        dashboardData.value = getDashboardData()
+        totalItems.value = getItemCount().total
+      })
     }
-  },
-  methods: {
-    ...mapActions('dashboard', ['loadDashboardData']),
-    ...mapGetters('dashboard', ['getDashboardData']),
-    ...mapGetters(['getItemCount'])
-  },
-  mounted() {
-    this.loadDashboardData().then(() => {
-      this.dashboardData = this.getDashboardData()
-    })
+
+    onMounted(updateDashboardData)
+
+    return {
+      dashboardData,
+      totalItems
+    }
   }
 }
 </script>

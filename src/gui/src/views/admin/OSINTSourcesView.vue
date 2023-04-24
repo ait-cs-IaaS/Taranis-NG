@@ -94,6 +94,9 @@ export default {
       return base
     }
   },
+  mounted() {
+    this.updateData()
+  },
   methods: {
     ...mapActions('config', ['loadOSINTSources', 'loadCollectors']),
     ...mapGetters('config', ['getOSINTSources', 'getCollectors']),
@@ -197,9 +200,6 @@ export default {
     selectionChange(selected) {
       this.selected = selected.map((item) => item.id)
     }
-  },
-  mounted() {
-    this.updateData()
   }
 }
 </script>

@@ -38,8 +38,9 @@ export default {
   },
   props: {
     story: {
-      type: Object,
-      required: false
+      type: Object || null,
+      required: false,
+      default: null
     },
     timespan: {
       type: Number,
@@ -47,8 +48,9 @@ export default {
       default: 7
     },
     dataPoints: {
-      type: Array,
-      required: false
+      type: Array || null,
+      required: false,
+      default: null
     },
     threshold: {
       type: Number,

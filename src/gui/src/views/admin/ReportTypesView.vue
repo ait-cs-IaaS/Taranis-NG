@@ -38,6 +38,9 @@ export default {
     newItem: false
   }),
   computed: {},
+  mounted() {
+    this.updateData()
+  },
   methods: {
     ...mapActions('config', ['loadReportTypesConfig']),
     ...mapGetters('config', ['getReportTypesConfig']),
@@ -75,9 +78,6 @@ export default {
     selectionChange(selected) {
       this.selected = selected.map((item) => item.id)
     }
-  },
-  mounted() {
-    this.updateData()
   }
 }
 </script>

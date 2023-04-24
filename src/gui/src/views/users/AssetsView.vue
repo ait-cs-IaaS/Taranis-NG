@@ -42,6 +42,9 @@ export default {
       ]
     }
   },
+  mounted() {
+    this.updateData()
+  },
   methods: {
     ...mapActions('assets', ['loadAssetGroups', 'loadAssets']),
     ...mapGetters('assets', ['getAssetGroups', 'getAssets']),
@@ -94,9 +97,6 @@ export default {
     selectionChange(selected) {
       this.selected = selected.map((item) => item.id)
     }
-  },
-  mounted() {
-    this.updateData()
   }
 }
 </script>

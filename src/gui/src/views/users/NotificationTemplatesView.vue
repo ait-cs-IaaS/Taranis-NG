@@ -88,6 +88,9 @@ export default {
       ]
     }
   },
+  mounted() {
+    this.updateData()
+  },
   methods: {
     ...mapActions('assets', ['loadNotificationTemplates']),
     ...mapGetters('assets', ['getNotificationTemplates']),
@@ -150,9 +153,6 @@ export default {
           notifyFailure(`Failed to update ${item.name}`)
         })
     }
-  },
-  mounted() {
-    this.updateData()
   }
 }
 </script>
