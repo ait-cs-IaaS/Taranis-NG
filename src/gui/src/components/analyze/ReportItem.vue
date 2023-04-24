@@ -3,20 +3,28 @@
     <v-toolbar density="compact">
       <v-toolbar-title>{{ container_title }}</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-switch v-model="verticalView" label="Side-by-side view"></v-switch>
-      <v-switch
-        v-if="edit"
-        v-model="report_item.completed"
-        label="Completed"
-      ></v-switch>
-      <v-btn
-        prepend-icon="mdi-content-save"
-        color="success"
-        class="mr-2"
-        @click="saveReportItem"
-      >
-        <span>{{ $t('button.save') }}</span>
-      </v-btn>
+      <v-row>
+        <v-col offset="3" cols="3">
+          <v-switch v-model="verticalView" label="Side-by-side"></v-switch>
+        </v-col>
+        <v-col cols="3">
+          <v-switch
+            v-if="edit"
+            v-model="report_item.completed"
+            label="Completed"
+          ></v-switch>
+        </v-col>
+        <v-col cols="3">
+          <v-btn
+            prepend-icon="mdi-content-save"
+            color="success"
+            class="mt-6"
+            @click="saveReportItem"
+          >
+            <span>{{ $t('button.save') }}</span>
+          </v-btn>
+        </v-col>
+      </v-row>
     </v-toolbar>
     <v-card-text>
       <v-row>
@@ -57,7 +65,7 @@
             </v-col>
           </v-row>
           <v-row>
-            <v-col v-if="report_type" cols="12" class="pa-0 ma-0">
+            <v-col v-if="report_type && edit" cols="12" class="pa-0 ma-0">
               <v-expansion-panels
                 v-for="attribute_group in report_type.attribute_groups"
                 :key="attribute_group.id"
@@ -65,13 +73,13 @@
                 multiple
               >
                 <v-expansion-panel>
-                  <v-expansion-panel-header
+                  <v-expansion-panel-title
                     color="primary--text"
                     class="body-1 text-uppercase pa-3"
                   >
                     {{ attribute_group.title }}
-                  </v-expansion-panel-header>
-                  <v-expansion-panel-content>
+                  </v-expansion-panel-title>
+                  <v-expansion-panel-text>
                     <attribute-item
                       v-for="attribute_item in attributes[attribute_group.id]"
                       :key="attribute_item.id"
@@ -80,7 +88,7 @@
                       :value="attribute_values[attribute_item.id]"
                       @input="updateAttributeValues(attribute_item.id, $event)"
                     />
-                  </v-expansion-panel-content>
+                  </v-expansion-panel-text>
                 </v-expansion-panel>
               </v-expansion-panels>
             </v-col>
@@ -103,11 +111,10 @@
 
 <script>
 import { createReportItem, updateReportItem } from '@/api/analyze'
-
 import AttributeItem from '@/components/analyze/AttributeItem.vue'
 import CardStory from '@/components/assess/CardStory.vue'
-
 import { mapActions, mapGetters } from 'vuex'
+import { isProxy, toRaw } from 'vue'
 
 export default {
   name: 'ReportItem',
@@ -116,7 +123,7 @@ export default {
     CardStory
   },
   props: {
-    report_item_prop: { type: Object, required: true },
+    reportItemProp: { type: Object, required: true },
     edit: { type: Boolean, default: false }
   },
   emits: ['reportcreated'],
@@ -129,7 +136,7 @@ export default {
       report_types: [],
       report_types_selection: [],
       attributes: {},
-      report_item: this.report_item_prop,
+      report_item: this.reportItemProp,
       required: [(v) => !!v || 'Required']
     }
   },
@@ -145,24 +152,7 @@ export default {
         return this.selected_report_type
       },
       set(value) {
-        this.selected_report_type = this.report_types.find(
-          (report_type) => report_type.id === value
-        )
-        this.report_item.report_item_type_id = value
-        this.attributes = this.extractAttributes(
-          this.selected_report_type.attribute_groups
-        )
-
-        if (this.report_item.attributes.length > 0) {
-          return
-        }
-        this.report_item.attributes =
-          this.selected_report_type.attribute_groups.flatMap((group) =>
-            group.attribute_group_items.map((item) => ({
-              attribute_group_item_id: item.id,
-              value: ''
-            }))
-          )
+        this.updateSelectedReportType(value)
       }
     },
     container_title() {
@@ -171,10 +161,48 @@ export default {
         : `${this.$t('title.add_new')} report item`
     }
   },
+  mounted() {
+    console.debug(`Loaded REPORT ITEM ${this.report_item.id}`)
+
+    this.loadReportTypes().then(() => {
+      this.report_types = this.getReportTypes().items
+      if (this.report_item.report_item_type_id) {
+        this.updateSelectedReportType(this.report_item.report_item_type_id)
+      }
+    })
+  },
   methods: {
     ...mapGetters(['getUserId']),
     ...mapGetters('analyze', ['getReportTypes']),
     ...mapActions('analyze', ['loadReportTypes']),
+
+    updateSelectedReportType(value) {
+      console.debug('Report types', this.report_types)
+
+      this.selected_report_type = this.report_types.find(
+        (report_type) => report_type.id === value
+      )
+      console.debug('update selected report type', value)
+      console.debug('Selected report type', this.selected_report_type)
+      this.report_item.report_item_type_id = value
+      if (!this.selected_report_type) {
+        return
+      }
+      this.attributes = this.extractAttributes(
+        this.selected_report_type.attribute_groups
+      )
+
+      if (this.report_item.attributes.length > 0) {
+        return
+      }
+      this.report_item.attributes =
+        this.selected_report_type.attribute_groups.flatMap((group) =>
+          group.attribute_group_items.map((item) => ({
+            attribute_group_item_id: item.id,
+            value: ''
+          }))
+        )
+    },
 
     extractAttributes(attribute_groups) {
       const result = {}
@@ -210,16 +238,6 @@ export default {
           this.$emit('reportcreated', response.data)
         })
       }
-    }
-  },
-  mounted() {
-    console.debug(`Loaded REPORT ITEM ${this.report_item.id}`)
-
-    this.loadReportTypes().then(() => {
-      this.report_types = this.getReportTypes().items
-    })
-    if (this.report_item.report_item_type_id) {
-      this.report_type = this.report_item.report_item_type_id
     }
   }
 }

@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import { isValidUrl } from '@/utils/helpers.js'
+import { getCleanHostname } from '@/utils/helpers.js'
 
 export default {
   name: 'MetaInfo',
@@ -68,11 +68,7 @@ export default {
       return this.newsItem.news_item_data.author
     },
     getSource() {
-      let source = this.newsItem.news_item_data.source
-      if (isValidUrl(source)) {
-        source = new URL(source).hostname.replace('www.', '')
-      }
-
+      const source = getCleanHostname(this.newsItem.news_item_data.source)
       // TODO: get Type (e.g. RSS, Web, Email, ...)
 
       return {

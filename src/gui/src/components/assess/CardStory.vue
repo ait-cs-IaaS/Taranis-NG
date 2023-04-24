@@ -61,11 +61,12 @@
                 size="small"
                 class="item-action-btn"
                 variant="tonal"
+                append-icon="mdi-text-box-search-outline"
                 :to="'/story/' + story.id"
+                title="View Story"
                 @click.stop
               >
                 <span>Details</span>
-                <v-icon right class="ml-2">mdi-text-box-search-outline</v-icon>
               </v-btn>
 
               <v-btn
@@ -73,12 +74,11 @@
                 size="small"
                 class="item-action-btn"
                 variant="tonal"
+                append-icon="mdi-google-circles-communities"
+                title="Add to Report"
                 @click.stop="sharingDialog = true"
               >
                 <span>Add to Report</span>
-                <v-icon right class="ml-2"
-                  >mdi-google-circles-communities</v-icon
-                >
               </v-btn>
 
               <v-btn
@@ -88,6 +88,7 @@
                 class="item-action-btn open-close-btn"
                 :class="openSummary ? 'opened' : 'closed'"
                 variant="tonal"
+                append-icon="mdi-chevron-down"
                 :style="{ minWidth: minButtonWidth }"
                 @click.stop="openSummary = !openSummary"
               >
@@ -95,7 +96,6 @@
                 <span v-if="news_item_length > 1" class="primary--text"
                   >&nbsp;[{{ news_item_length }}]</span
                 >
-                <v-icon right class="ml-2">mdi-chevron-down</v-icon>
               </v-btn>
 
               <v-btn
@@ -103,10 +103,11 @@
                 size="small"
                 class="item-action-btn"
                 variant="tonal"
+                append-icon="mdi-eye-outline"
+                title="mark as read"
                 @click.stop="markAsRead()"
               >
                 <span>mark as read</span>
-                <v-icon right class="ml-2" c>mdi-eye-outline</v-icon>
               </v-btn>
 
               <votes v-if="detailView" :story="story" />
@@ -251,9 +252,6 @@ import TagList from '@/components/assess/card/TagList.vue'
 import SummarizedContent from '@/components/assess/card/SummarizedContent.vue'
 import CardNewsItem from '@/components/assess/CardNewsItem.vue'
 import WeekChart from '@/components/assess/card/WeekChart.vue'
-import { notifySuccess } from '@/utils/helpers.js'
-
-import { mapGetters } from 'vuex'
 import {
   deleteNewsItemAggregate,
   importantNewsItemAggregate,
@@ -334,12 +332,6 @@ export default {
     }
   },
   methods: {
-    ...mapGetters('users', ['getUsernameById']),
-
-    notify(text) {
-      notifySuccess(text)
-    },
-
     toggleSelection() {
       this.$emit('selectItem', this.story.id)
     },

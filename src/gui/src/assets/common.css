@@ -38,8 +38,8 @@
     border-left: 4px solid red;
 }
 
-.v-expansion-panel > .v-expansion-panel-header,
-.v-expansion-panel--active > .v-expansion-panel-header {
+.v-expansion-panel > .v-expansion-panel-title,
+.v-expansion-panel--active > .v-expansion-panel-title {
     min-height: 32px;
 }
 
