@@ -61,7 +61,7 @@
       >
         <popup-share-items
           v-if="sharingDialog"
-          :item_ids="[newsItem.id]"
+          :item-ids="[newsItem.id]"
           @close="sharingDialog = false"
         />
       </news-item-action-dialog>

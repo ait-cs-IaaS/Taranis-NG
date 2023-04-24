@@ -103,117 +103,12 @@ import { ref, computed } from 'vue'
 export default {
   name: 'UserForm',
   props: {
-    user_id: {
+    userId: {
       type: Number,
-      required: false
+      required: false,
+      default: -1
     }
   },
-  computed: {},
-  watch: {
-    user_id(uid) {
-      this.loadUser(uid)
-    }
-  },
-  methods: {
-    ...mapActions('config', [
-      'loadOrganizations',
-      'loadRoles',
-      'loadPermissions',
-      'loadUsers'
-    ]),
-    ...mapGetters('config', [
-      'getUsers',
-      'getOrganizations',
-      'getRoles',
-      'getPermissions',
-      'getUserByID'
-    ]),
-    add() {
-      this.$validator.validateAll().then(() => {
-        if (this.$validator.errors.any()) {
-          notifyFailure('user.validation_error')
-          return
-        }
-
-        if (this.edit === false || this.pwd !== '') {
-          this.user.password = this.pwd
-        }
-
-        if (this.edit) {
-          updateUser(this.user)
-            .then(() => {
-              this.$validator.reset()
-              notifySuccess('user.successful_edit')
-            })
-            .catch(() => {
-              notifyFailure('user.error')
-            })
-        } else {
-          createUser(this.user)
-            .then(() => {
-              this.$validator.reset()
-              notifySuccess('user.successful')
-            })
-            .catch(() => {
-              notifyFailure('user.error')
-            })
-        }
-      })
-    },
-    loadUser(user_id) {
-      if (user_id !== undefined && user_id !== null) {
-        this.loadUsers().then(() => {
-          const stored_user = this.getUserByID()(this.user_id)
-          const roles = stored_user.roles.map((role) => role.id)
-          const permissions = stored_user.permissions.map(
-            (permission) => permission.id
-          )
-          stored_user.roles = roles
-          stored_user.permissions = permissions
-          if (stored_user !== null) {
-            this.user = stored_user
-            this.edit = true
-          }
-        })
-      } else {
-        this.user = {
-          id: -1,
-          username: '',
-          name: '',
-          organization: {
-            id: 0
-          },
-          roles: [],
-          permissions: []
-        }
-        this.edit = false
-      }
-    }
-  },
-  created() {
-    this.loadOrganizations().then(() => {
-      this.organizations = this.getOrganizations().items
-    })
-
-    this.loadRoles().then(() => {
-      this.roles = this.getRoles().items.map((role) => {
-        return {
-          id: role.id,
-          name: role.name,
-          description: role.description
-        }
-      })
-    })
-
-    this.loadPermissions().then(() => {
-      this.permissions = this.getPermissions().items
-    })
-
-    console.debug('Loading User: ' + this.user_id)
-    this.loadUser(this.user_id)
-    console.debug(this.user)
-  },
-
   setup() {
     const headers = [
       {
@@ -270,6 +165,105 @@ export default {
       repwd,
       user,
       passwordRules
+    }
+  },
+  watch: {
+    user_id(uid) {
+      this.loadUser(uid)
+    }
+  },
+  created() {
+    this.loadOrganizations().then(() => {
+      this.organizations = this.getOrganizations().items
+    })
+
+    this.loadRoles().then(() => {
+      this.roles = this.getRoles().items.map((role) => {
+        return {
+          id: role.id,
+          name: role.name,
+          description: role.description
+        }
+      })
+    })
+
+    this.loadPermissions().then(() => {
+      this.permissions = this.getPermissions().items
+    })
+
+    console.debug('Loading User: ' + this.userId)
+    this.loadUser(this.userId)
+    console.debug(this.user)
+  },
+  methods: {
+    ...mapActions('config', [
+      'loadOrganizations',
+      'loadRoles',
+      'loadPermissions',
+      'loadUsers'
+    ]),
+    ...mapGetters('config', [
+      'getUsers',
+      'getOrganizations',
+      'getRoles',
+      'getPermissions',
+      'getUserByID'
+    ]),
+    add() {
+      this.$validator.validateAll().then(() => {
+        if (this.edit === false || this.pwd !== '') {
+          this.user.password = this.pwd
+        }
+
+        if (this.edit) {
+          updateUser(this.user)
+            .then(() => {
+              this.$validator.reset()
+              notifySuccess('user.successful_edit')
+            })
+            .catch(() => {
+              notifyFailure('user.error')
+            })
+        } else {
+          createUser(this.user)
+            .then(() => {
+              this.$validator.reset()
+              notifySuccess('user.successful')
+            })
+            .catch(() => {
+              notifyFailure('user.error')
+            })
+        }
+      })
+    },
+    loadUser(user_id) {
+      if (!user_id || user_id === -1) {
+        this.loadUsers().then(() => {
+          const stored_user = this.getUserByID()(this.userId)
+          const roles = stored_user.roles.map((role) => role.id)
+          const permissions = stored_user.permissions.map(
+            (permission) => permission.id
+          )
+          stored_user.roles = roles
+          stored_user.permissions = permissions
+          if (stored_user !== null) {
+            this.user = stored_user
+            this.edit = true
+          }
+        })
+      } else {
+        this.user = {
+          id: -1,
+          username: '',
+          name: '',
+          organization: {
+            id: 0
+          },
+          roles: [],
+          permissions: []
+        }
+        this.edit = false
+      }
     }
   }
 }

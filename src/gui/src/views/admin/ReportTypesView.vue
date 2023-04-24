@@ -13,7 +13,7 @@
     />
     <report-type-form
       v-if="newItem || (formData && Object.keys(formData).length > 0)"
-      v-model:report_type_data="formData"
+      :report-type-data="formData"
     />
   </div>
 </template>

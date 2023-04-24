@@ -41,7 +41,10 @@
 export default {
   name: 'PopupDeleteItem',
   props: {
-    newsItem: {}
+    newsItem: {
+      type: Object,
+      default: () => ({})
+    }
   },
   emits: ['close', 'deleteItem'],
   methods: {

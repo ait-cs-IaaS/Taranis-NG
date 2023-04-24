@@ -128,11 +128,11 @@ import { notifySuccess, notifyFailure } from '@/utils/helpers'
 
 export default {
   name: 'NewACL',
-  components: {},
   props: {
-    acl_id: {
+    aclId: {
       type: Number,
-      required: false
+      required: false,
+      default: -1
     }
   },
   data: () => ({
@@ -166,7 +166,6 @@ export default {
     ],
     selected_type: null,
 
-    visible: false,
     show_validation_error: false,
     edit: false,
     show_error: false,
@@ -182,11 +181,38 @@ export default {
       roles: []
     }
   }),
+  mounted() {
+    this.loadUsers().then(() => {
+      this.users = this.getUsers().items
+    })
+
+    this.loadRoles().then(() => {
+      this.roles = this.getRoles().items
+    })
+
+    if (!this.aclId || this.aclId === -1) {
+      this.acl = {
+        id: -1,
+        name: '',
+        description: '',
+        users: [],
+        roles: []
+      }
+    } else {
+      // TODO: load acl
+      this.acl = {
+        id: -1,
+        name: '',
+        description: '',
+        users: [],
+        roles: []
+      }
+    }
+  },
   methods: {
     ...mapActions('config', ['loadUsers', 'loadRoles']),
     ...mapGetters('config', ['getUsers', 'getRoles']),
     addACL() {
-      this.visible = true
       this.edit = false
       this.show_error = false
       this.selected_type = null
@@ -205,12 +231,6 @@ export default {
       this.selected_roles = []
       this.$validator.reset()
     },
-
-    cancel() {
-      this.$validator.reset()
-      this.visible = false
-    },
-
     add() {
       this.$validator.validateAll().then(() => {
         if (!this.$validator.errors.any()) {
@@ -239,7 +259,6 @@ export default {
             updateACLEntry(this.acl)
               .then(() => {
                 this.$validator.reset()
-                this.visible = false
                 notifySuccess('acl.successful_edit')
               })
               .catch(() => {
@@ -250,7 +269,6 @@ export default {
             createACLEntry(this.acl)
               .then(() => {
                 this.$validator.reset()
-                this.visible = false
                 notifySuccess('acl.successful')
               })
               .catch(() => {
@@ -263,15 +281,6 @@ export default {
         }
       })
     }
-  },
-  mounted() {
-    this.loadUsers().then(() => {
-      this.users = this.getUsers().items
-    })
-
-    this.loadRoles().then(() => {
-      this.roles = this.getRoles().items
-    })
   }
 }
 </script>

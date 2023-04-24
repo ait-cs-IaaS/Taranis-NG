@@ -47,7 +47,10 @@ export default {
   name: 'PopupShareItems',
   components: {},
   props: {
-    item_ids: [],
+    itemIds: {
+      type: Array,
+      default: () => []
+    },
     dialog: Boolean
   },
   emits: ['close'],
@@ -55,6 +58,18 @@ export default {
     reportItems: [],
     reportItemSelection: {}
   }),
+  mounted() {
+    console.debug('PopupShareItems mounted')
+    console.debug(this.item_ids)
+    this.loadReportItems().then(() => {
+      this.reportItems = this.getReportItems().map((item) => {
+        return {
+          text: item.title,
+          value: item.id
+        }
+      })
+    })
+  },
   methods: {
     ...mapGetters('assess', ['getNewsItemById']),
     ...mapGetters('analyze', ['getReportItems']),
@@ -67,18 +82,6 @@ export default {
     close() {
       this.$emit('close')
     }
-  },
-  mounted() {
-    console.debug('PopupShareItems mounted')
-    console.debug(this.item_ids)
-    this.loadReportItems().then(() => {
-      this.reportItems = this.getReportItems().map((item) => {
-        return {
-          text: item.title,
-          value: item.id
-        }
-      })
-    })
   }
 }
 </script>

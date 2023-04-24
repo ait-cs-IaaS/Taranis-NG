@@ -97,18 +97,19 @@
 <script>
 import { createReportItemType, updateReportItemType } from '@/api/config'
 import AttributeTable from './AttributeTable'
-import AuthMixin from '@/services/auth/auth_mixin'
-import Permissions from '@/services/auth/permissions'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
 
 export default {
-  name: 'NewReportType',
+  name: 'ReportTypeForm',
   components: {
     AttributeTable
   },
-  mixins: [AuthMixin],
   props: {
-    report_type_data: Object
+    reportTypeData: {
+      type: Object || null,
+      required: false,
+      default: null
+    }
   },
   data: () => ({
     edit: false,
@@ -119,21 +120,10 @@ export default {
       attribute_groups: []
     }
   }),
-  computed: {
-    canCreate() {
-      return this.checkPermission(Permissions.CONFIG_REPORT_TYPE_CREATE)
-    },
-    canUpdate() {
-      return (
-        this.checkPermission(Permissions.CONFIG_REPORT_TYPE_UPDATE) ||
-        !this.edit
-      )
-    }
-  },
   mounted() {
-    if (this.report_type_data) {
+    if (this.reportTypeData) {
       this.edit = true
-      this.report_type = this.report_type_data
+      this.report_type = this.reportTypeData
     }
   },
   methods: {

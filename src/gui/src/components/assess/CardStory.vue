@@ -11,7 +11,7 @@
       </v-dialog>
       <v-dialog :value="sharingDialog" width="auto">
         <popup-share-items
-          :item_ids="[story.id]"
+          :item-ids="[story.id]"
           @close="sharingDialog = false"
         />
       </v-dialog>

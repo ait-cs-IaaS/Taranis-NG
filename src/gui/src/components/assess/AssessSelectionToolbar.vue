@@ -33,7 +33,7 @@
       </v-row>
       <v-dialog :value="sharingDialog" width="auto">
         <popup-share-items
-          :item_ids="selection"
+          :item-ids="selection"
           @close="sharingDialog = false"
         />
       </v-dialog>
