@@ -1200,10 +1200,14 @@ class NewsItemTag(db.Model):
             .filter(NewsItemAggregate.created >= start_date)
             .subquery()
         )
+
+        if db.session.bind.dialect.name == "sqlite":
+            group_concat_fn = func.group_concat(subquery.c.created)
+        else:
+            group_concat_fn = func.array_agg(subquery.c.created)
+
         clusters = (
-            db.session.query(
-                subquery.c.name, subquery.c.tag_type, func.group_concat(subquery.c.created), func.count(subquery.c.name).label("count")
-            )
+            db.session.query(subquery.c.name, subquery.c.tag_type, group_concat_fn, func.count(subquery.c.name).label("count"))
             .select_from(subquery.join(NewsItemAggregate, subquery.c.id == NewsItemAggregate.id))
             .group_by(subquery.c.name, subquery.c.tag_type)
             .order_by(func.count(subquery.c.name).desc())
@@ -1229,7 +1233,7 @@ class NewsItemTag(db.Model):
     def get_json(cls, filter_args: dict):
         query = cls.query
 
-        if search := filter_args.get("search", None):
+        if search := filter_args.get("search"):
             query = query.filter(cls.name.ilike(f"%{search}%"))
 
         offset = filter_args.get("offset", 0)
@@ -1242,7 +1246,7 @@ class NewsItemTag(db.Model):
     def get_list(cls, filter_args: dict):
         query = cls.query
 
-        if search := filter_args.get("search", None):
+        if search := filter_args.get("search"):
             query = query.filter(cls.name.ilike(f"%{search}%"))
 
         offset = filter_args.get("offset", 0)
