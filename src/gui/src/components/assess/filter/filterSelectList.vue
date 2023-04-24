@@ -1,6 +1,6 @@
 <template>
   <v-list
-    :selected="selvalue"
+    :selected="selected"
     density="compact"
     class="py-0"
     active-color="primary"
@@ -45,24 +45,16 @@ export default {
       default: () => []
     }
   },
-  emits: ['input'],
-  data: () => ({
-    selected: []
-  }),
+  emits: ['update:modelValue'],
   computed: {
-    selvalue: {
+    selected: {
       get() {
-        return this.selected
+        return this.value
       },
       set(val) {
         console.debug('set selvalue', val)
-        this.selected = val
+        this.$emit('update:modelValue', val)
       }
-    }
-  },
-  methods: {
-    setValue(newValue) {
-      this.$emit('input', newValue)
     }
   }
 }

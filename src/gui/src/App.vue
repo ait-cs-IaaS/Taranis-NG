@@ -1,6 +1,6 @@
 <template>
   <v-app class="grey lighten-2">
-    <MainMenu v-if="isAuthenticated()" />
+    <MainMenu v-if="isAuthenticated" />
 
     <router-view name="nav"></router-view>
 
@@ -8,7 +8,7 @@
       <router-view />
     </v-main>
 
-    <Notification v-if="isAuthenticated()" />
+    <Notification v-if="isAuthenticated" />
   </v-app>
 </template>
 
@@ -71,7 +71,10 @@ export default defineComponent({
       )
     })
 
-    return { cookies }
+    return {
+      cookies,
+      isAuthenticated
+    }
   }
 })
 </script>
