@@ -1,5 +1,6 @@
 <template>
   <v-container column class="pa-0 pb-3">
+    {{ name }}
     <v-row no-gutters class="my-1">
       <v-col cols="2">
         <strong>{{ t('assess.published') }}:</strong>
@@ -10,14 +11,14 @@
         </span>
         <v-icon
           v-if="published_date_outdated"
-          class="ml-3"
+          class="ml-2"
           size="small"
           color="error"
-          >mdi-alert</v-icon
-        >
+          icon="mdi-alert"
+        />
       </v-col>
     </v-row>
-    <v-row no-gutters class="my-1">
+    <v-row v-if="mdAndUp" no-gutters class="my-1">
       <v-col cols="2" class="d-flex align-center">
         <strong>Tags:</strong>
       </v-col>
@@ -26,7 +27,7 @@
           v-if="story.tags"
           :tags="story.tags"
           :truncate="detailView"
-          :limit="detailView ? 20 : 5"
+          :limit="tagLimit"
           :color="detailView"
         />
       </v-col>
@@ -47,6 +48,7 @@ import TagList from '@/components/assess/card/TagList.vue'
 import WeekChart from '@/components/assess/card/WeekChart.vue'
 import { useI18n } from 'vue-i18n'
 import { computed } from 'vue'
+import { useDisplay } from 'vuetify'
 
 export default {
   name: 'StoryMetaInfo',
@@ -67,6 +69,7 @@ export default {
   emits: ['selectItem', 'deleteItem'],
   setup(props) {
     const { d, t } = useI18n()
+    const { xlAndUp, mdAndUp, name } = useDisplay()
 
     const published_dates = computed(() => {
       const pub_dates = props.story.news_items
@@ -86,6 +89,13 @@ export default {
       return oneWeekAgo > pub_date
     })
 
+    const tagLimit = computed(() => {
+      if (props.detailView) {
+        return 20
+      }
+      return xlAndUp.value ? 5 : 3
+    })
+
     const getPublishedDate = computed(() => {
       const pubDateNew = new Date(published_dates.value[0])
       const pubDateNewStr = d(pubDateNew, 'short')
@@ -103,6 +113,9 @@ export default {
       published_dates,
       published_date_outdated,
       getPublishedDate,
+      mdAndUp,
+      tagLimit,
+      name,
       t
     }
   }

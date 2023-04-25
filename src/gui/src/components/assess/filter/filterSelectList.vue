@@ -1,9 +1,10 @@
 <template>
   <v-list
-    :selected="selected"
+    :selected="value"
     density="compact"
     class="py-0"
     active-color="primary"
+    @click:select="updateSelected"
   >
     <v-list-item
       v-for="item in items"
@@ -46,15 +47,10 @@ export default {
     }
   },
   emits: ['update:modelValue'],
-  computed: {
-    selected: {
-      get() {
-        return this.value
-      },
-      set(val) {
-        console.debug('set selvalue', val)
-        this.$emit('update:modelValue', val)
-      }
+  methods: {
+    updateSelected(data) {
+      console.debug('FilterSortList updateSelected', data)
+      this.$emit('update:modelValue', data.id)
     }
   }
 }

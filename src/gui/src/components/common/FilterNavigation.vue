@@ -4,12 +4,10 @@
       <v-btn
         v-if="showOmniSearch && drawerVisible"
         style="margin-left: 230px"
-        icon
+        prepend-icon="mdi-chevron-left"
         color="primary"
         @click="showOmniSearch = !showOmniSearch"
-      >
-        <v-icon left> mdi-chevron-left </v-icon>
-      </v-btn>
+      />
       <v-text-field
         v-model="search_state"
         placeholder="search"
@@ -23,10 +21,8 @@
     </v-app-bar>
     <v-navigation-drawer
       v-if="drawerVisible"
-      clipped
-      app
       color="cx-drawer-bg"
-      class="sidebar"
+      permanent="true"
       :width="300"
     >
       <v-container class="pa-0 ma-0">
