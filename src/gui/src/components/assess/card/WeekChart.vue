@@ -1,13 +1,9 @@
 <template>
-  <LineChart
-    :chart-options="chartOptions"
-    :chart-data="chart_data"
-    :height="chartHeight"
-  />
+  <LineChart :options="chartOptions" :data="chart_data" />
 </template>
 
 <script>
-import { Line as LineChart } from 'vue-chartjs/legacy'
+import { Line as LineChart } from 'vue-chartjs'
 import {
   Chart as ChartJS,
   Title,
@@ -67,7 +63,7 @@ export default {
     return {
       chartOptions: {
         responsive: true,
-        maintainAspectRatio: false,
+        maintainAspectRatio: true,
         elements: {
           line: {
             tension: 0.4

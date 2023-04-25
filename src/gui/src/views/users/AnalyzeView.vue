@@ -1,9 +1,9 @@
 <template>
   <DataTable
-    v-model:items="report_items"
+    :items="report_items"
     :add-button="false"
     :search-bar="false"
-    :header-filter="['tag', 'title', 'created']"
+    :header-filter="['tag', 'completed', 'title', 'created']"
     sort-by-item="id"
     :action-column="true"
     @delete-item="deleteItem"

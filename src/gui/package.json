@@ -19,7 +19,7 @@
     "js-base64": "^3.7.5",
     "vee-validate": "^2.2.15",
     "vue": "^3.2.47",
-    "vue-chartjs": "4.1.2",
+    "vue-chartjs": "5.2.0",
     "vue-datepicker-next": "^1.0.3",
     "vue-i18n": "^9.2.2",
     "vue-keypress": "^1.4.0",

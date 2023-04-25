@@ -51,6 +51,13 @@
           {{ item.raw.default }}
         </v-chip>
       </template>
+      <template #item.completed="{ item }">
+        <v-chip
+          :color="item.raw.completed ? 'green' : 'blue'"
+          variant="outlined"
+          :text="item.raw.completed ? 'true' : 'false'"
+        />
+      </template>
 
       <template #item.tag="{ item }">
         <v-icon small class="mr-1" :icon="item.raw.tag" />

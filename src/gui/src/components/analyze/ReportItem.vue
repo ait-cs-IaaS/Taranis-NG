@@ -114,7 +114,6 @@ import { createReportItem, updateReportItem } from '@/api/analyze'
 import AttributeItem from '@/components/analyze/AttributeItem.vue'
 import CardStory from '@/components/assess/CardStory.vue'
 import { mapActions, mapGetters } from 'vuex'
-import { isProxy, toRaw } from 'vue'
 
 export default {
   name: 'ReportItem',
