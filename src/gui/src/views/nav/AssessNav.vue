@@ -100,15 +100,14 @@
 </template>
 
 <script>
-import { useStore } from 'vuex'
 import dateChips from '@/components/assess/filter/dateChips.vue'
 import tagFilter from '@/components/assess/filter/tagFilter.vue'
 import filterSelectList from '@/components/assess/filter/filterSelectList.vue'
 import filterSortList from '@/components/assess/filter/filterSortList.vue'
 import FilterNavigation from '@/components/common/FilterNavigation.vue'
-import { ref, computed } from 'vue'
-import { onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 
 export default {
   name: 'AssessNav',
@@ -218,7 +217,7 @@ export default {
 
     const tags = computed({
       get() {
-        const tags = filter.value.tags || []
+        const tags = store.getters['filter/getFilterTags'] || []
         console.debug('tags', tags)
         return tags.map((tag) => {
           return { name: tag }

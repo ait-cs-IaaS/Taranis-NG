@@ -1,9 +1,10 @@
 <template>
   <v-list
-    :selected="selected"
+    :selected="value"
     density="compact"
     class="py-0"
     active-color="primary"
+    @click:select="updateSelected"
   >
     <v-list-item
       v-for="item in orderOptions"
@@ -32,8 +33,8 @@ export default {
   name: 'FilterSortList',
   props: {
     value: {
-      type: Object,
-      default: () => ({})
+      type: Array,
+      default: () => []
     },
     items: {
       type: Array,
@@ -46,17 +47,11 @@ export default {
       orderOptions: this.items
     }
   },
-  computed: {
-    selected: {
-      get() {
-        return this.value
-      },
-      set(newValue) {
-        this.$emit('update:modelValue', newValue)
-      }
-    }
-  },
   methods: {
+    updateSelected(data) {
+      console.debug('FilterSortList updateSelected', data)
+      this.$emit('update:modelValue', data.id)
+    },
     activeIcon(item) {
       return item.direction === 'ASC' ? 'mdi-chevron-up' : 'mdi-chevron-down'
     },

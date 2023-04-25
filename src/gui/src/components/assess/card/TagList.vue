@@ -11,17 +11,17 @@
           height="auto"
           class="tag-button"
           :color="labelcolor(i)"
+          :prepend-icon="tagIcon(tag.tag_type)"
           @click.stop="updateTags(tag.name)"
         >
-          <span class="text-decoration-underline">
+          <span
+            :style="truncate ? 'max-width: 100px' : ''"
+            class="text-decoration-underline text-truncate"
+          >
             {{ tag.name }}
           </span>
         </v-btn>
       </template>
-      <span>
-        <v-icon left>{{ tagIcon(tag.tag_type) }}</v-icon>
-        {{ tag.tag_type }}
-      </span>
     </v-tooltip>
   </div>
 </template>
@@ -53,15 +53,6 @@ export default {
   data: () => ({
     colorStart: Math.floor(Math.random() * 9)
   }),
-  computed: {
-    getChipClass() {
-      const c = 'mr-1 mb-1 story-label'
-      return this.truncate ? c : c + '-no-trunc'
-    },
-    getTagClass() {
-      return this.truncate ? 'text-truncate' : ''
-    }
-  },
   methods: {
     ...mapActions('assess', ['updateNewsItems']),
     ...mapActions('filter', ['appendTag']),

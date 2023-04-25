@@ -1,5 +1,11 @@
 <template>
-  <LineChart :options="chartOptions" :data="chart_data" />
+  <LineChart
+    ref="linechart"
+    :options="chartOptions"
+    :data="chart_data"
+    :style="chart_style"
+    update-mode="active"
+  />
 </template>
 
 <script>
@@ -44,9 +50,9 @@ export default {
       default: 7
     },
     dataPoints: {
-      type: Array || null,
+      type: Array,
       required: false,
-      default: null
+      default: () => []
     },
     threshold: {
       type: Number,
@@ -57,6 +63,11 @@ export default {
       type: Number,
       required: false,
       default: 150
+    },
+    chartWidth: {
+      type: Number,
+      required: false,
+      default: 400
     }
   },
   data: function () {
@@ -81,6 +92,12 @@ export default {
     }
   },
   computed: {
+    chart_style() {
+      return {
+        height: this.chartHeight + 'px',
+        width: this.chartWidth + 'px'
+      }
+    },
     last_n_days() {
       return Array.from(Array(this.timespan).keys(), (i) => {
         const date = new Date()
@@ -154,6 +171,16 @@ export default {
   mounted() {
     if (!this.story && !this.dataPoints) {
       console.error('No data provided to WeekChart')
+    }
+  },
+  methods: {
+    getChart() {
+      return this.$refs.linechart.chart
+    },
+    updateChart() {
+      console.debug('Updating chart')
+      this.getChart().resize()
+      this.getChart().update()
     }
   }
 }

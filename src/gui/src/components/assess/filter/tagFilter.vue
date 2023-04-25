@@ -62,11 +62,10 @@ export default {
   watch: {
     search(val) {
       val && this.querySelections({ search: val })
+    },
+    value(val) {
+      val && this.querySelections({ search: this.search })
     }
-  },
-  async mounted() {
-    await this.querySelections()
-    console.debug('mounted', this.selected)
   },
   methods: {
     shortText(item) {

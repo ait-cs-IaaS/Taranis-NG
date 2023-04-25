@@ -15,6 +15,7 @@ export const app = createApp(App)
 app.use(DatePicker)
 
 const i18n = createI18n({
+  legacy: false,
   locale:
     typeof import.meta.env.VITE_TARANIS_NG_LOCALE === 'undefined'
       ? 'en'

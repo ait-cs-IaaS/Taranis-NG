@@ -26,7 +26,7 @@
         <popup-delete-item
           v-if="deleteDialog"
           :news-item="newsItem"
-          @deleteItem="deleteNewsItem()"
+          @delete-item="deleteNewsItem()"
           @close="deleteDialog = false"
         />
       </news-item-action-dialog>
@@ -136,7 +136,7 @@
                 </v-btn>
               </v-col>
             </v-row>
-            <metainfo :news-item="newsItem" />
+            <news-meta-info :news-item="newsItem" />
           </v-container>
         </v-col>
       </v-row>
@@ -149,7 +149,7 @@ import newsItemAction from '@/components/_subcomponents/newsItemAction.vue'
 import newsItemActionDialog from '@/components/_subcomponents/newsItemActionDialog.vue'
 import PopupDeleteItem from '@/components/popups/PopupDeleteItem.vue'
 import PopupShareItems from '@/components/popups/PopupShareItems.vue'
-import metainfo from '@/components/assess/card/metainfo.vue'
+import NewsMetaInfo from '@/components/assess/card/NewsMetaInfo.vue'
 import { notifySuccess, notifyFailure } from '@/utils/helpers.js'
 
 import { mapGetters } from 'vuex'
@@ -164,7 +164,7 @@ import {
 export default {
   name: 'CardNewsItem',
   components: {
-    metainfo,
+    NewsMetaInfo,
     newsItemAction,
     newsItemActionDialog,
     PopupDeleteItem,
@@ -178,7 +178,7 @@ export default {
     selected: Boolean,
     storyView: Boolean
   },
-  emits: ['selectItem', 'deleteItem'],
+  emits: ['selectItem', 'deleteItem', 'refresh'],
   data: () => ({
     viewDetails: false,
     sharingDialog: false,
@@ -195,6 +195,10 @@ export default {
         ? this.newsItem.decorateSource
         : false
     }
+  },
+  mounted() {
+    this.likes = this.newsItem.likes
+    this.dislikes = this.newsItem.dislikes
   },
   methods: {
     ...mapGetters('users', ['getUsernameById']),
@@ -243,13 +247,6 @@ export default {
           console.log(err)
         })
     }
-  },
-  updated() {
-    // console.log('card rendered!')
-  },
-  mounted() {
-    this.likes = this.newsItem.likes
-    this.dislikes = this.newsItem.dislikes
   }
 }
 </script>

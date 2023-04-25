@@ -52,8 +52,7 @@
               cols="12"
               sm="12"
               lg="6"
-              class="d-flex flex-row flex-grow-1 mt-3 px-5 py-2 order-md-2 order-sm-3"
-              style="justify-content: space-evenly"
+              class="d-flex flex-row flex-grow-1 order-md-2 order-sm-3 justify-space-evenly"
             >
               <v-btn
                 v-if="!detailView"
@@ -90,7 +89,7 @@
                 variant="tonal"
                 append-icon="mdi-chevron-down"
                 :style="{ minWidth: minButtonWidth }"
-                @click.stop="openSummary = !openSummary"
+                @click.stop="openCard"
               >
                 <span>{{ news_item_summary_text }}</span>
                 <span v-if="news_item_length > 1" class="primary--text"
@@ -163,68 +162,18 @@
               <summarized-content
                 :open="openSummary"
                 :is_summarized="is_summarized"
-                :content="getDescription()"
+                :content="getDescription"
               />
             </v-col>
             <!-- META INFO -->
             <v-col class="px-5 pt-2 pb-3 order-4" cols="12" sm="12" lg="6">
-              <v-container column class="pa-0 pb-3">
-                <v-row no-gutters class="my-1">
-                  <v-col cols="2">
-                    <strong>{{ $t('assess.published') }}:</strong>
-                  </v-col>
-                  <v-col>
-                    <span :class="published_date_outdated ? 'error--text' : ''">
-                      {{ getPublishedDate() }}
-                    </span>
-                    <v-icon
-                      v-if="published_date_outdated"
-                      class="ml-3"
-                      size="small"
-                      color="error"
-                      >mdi-alert</v-icon
-                    >
-                  </v-col>
-                </v-row>
-                <v-row no-gutters class="my-1">
-                  <v-col cols="2" class="d-flex align-center">
-                    <strong>Tags:</strong>
-                  </v-col>
-                  <v-col>
-                    <tag-list
-                      v-if="story.tags"
-                      :tags="story.tags"
-                      :truncate="openSummary"
-                      :limit="openSummary ? 20 : 5"
-                      :color="openSummary"
-                    />
-                  </v-col>
-                </v-row>
-                <v-row
-                  v-if="openSummary && !published_date_outdated"
-                  no-gutters
-                  class="my-1"
-                >
-                  <v-col>
-                    <week-chart :story="story" />
-                  </v-col>
-                </v-row>
-
-                <metainfo
-                  v-if="openSummary && news_item_length == 1"
-                  :news-item="story.news_items[0]"
-                />
-              </v-container>
+              <story-meta-info :story="story" :detail-view="openSummary" />
             </v-col>
           </v-row>
         </v-card>
       </v-col>
     </v-row>
-    <v-row
-      v-if="openSummary && news_item_length > 1"
-      dense
-      class="ma-0 py-0 px-5"
-    >
+    <v-row v-if="openSummary" dense class="ma-0 py-0 px-5">
       <v-col cols="11" offset="1">
         <transition-group
           name="news-items-grid"
@@ -246,17 +195,16 @@
 <script>
 import PopupDeleteItem from '@/components/popups/PopupDeleteItem.vue'
 import PopupShareItems from '@/components/popups/PopupShareItems.vue'
-import metainfo from '@/components/assess/card/metainfo.vue'
+import StoryMetaInfo from '@/components/assess/card/StoryMetaInfo.vue'
 import votes from '@/components/assess/card/votes.vue'
-import TagList from '@/components/assess/card/TagList.vue'
 import SummarizedContent from '@/components/assess/card/SummarizedContent.vue'
 import CardNewsItem from '@/components/assess/CardNewsItem.vue'
-import WeekChart from '@/components/assess/card/WeekChart.vue'
 import {
   deleteNewsItemAggregate,
   importantNewsItemAggregate,
   readNewsItemAggregate
 } from '@/api/assess'
+import { ref, computed } from 'vue'
 
 export default {
   name: 'CardStory',
@@ -264,10 +212,8 @@ export default {
     CardNewsItem,
     PopupDeleteItem,
     PopupShareItems,
-    metainfo,
+    StoryMetaInfo,
     votes,
-    TagList,
-    WeekChart,
     SummarizedContent
   },
   props: {
@@ -279,115 +225,101 @@ export default {
     detailView: { type: Boolean, default: false }
   },
   emits: ['selectItem', 'deleteItem'],
-  data: function () {
-    return {
-      viewDetails: false,
-      openSummary: this.detailView,
-      sharingDialog: false,
-      deleteDialog: false,
-      showDialog: false
-    }
-  },
-  computed: {
-    item_important() {
-      return 'important' in this.story ? this.story.important : false
-    },
-    published_dates() {
-      const pub_dates = this.story.news_items
-        .map((item) => item.news_item_data.published)
-        .sort()
+  setup(props, { emit }) {
+    const viewDetails = ref(false)
+    const openSummary = ref(props.detailView)
+    const sharingDialog = ref(false)
+    const deleteDialog = ref(false)
+    const showDialog = ref(false)
 
-      return [pub_dates[pub_dates.length - 1], pub_dates[0]]
-    },
+    const item_important = computed(() =>
+      'important' in props.story ? props.story.important : false
+    )
 
-    story_in_report() {
-      return this.story.in_reports_count > 0
-    },
-    news_item_length() {
-      return this.story.news_items.length
-    },
-    news_item_summary_text() {
-      return this.openSummary ? 'Close' : 'Open'
-    },
-    minButtonWidth() {
+    const story_in_report = computed(() => props.story.in_reports_count > 0)
+    const news_item_length = computed(() => props.story.news_items.length)
+    const news_item_summary_text = computed(() =>
+      openSummary.value ? 'Close' : 'Open'
+    )
+    const minButtonWidth = computed(() => {
       const longestText = `${
-        this.news_item_length > 1 ? '(' + this.news_item_length + ')' : ''
+        news_item_length.value > 1 ? '(' + news_item_length.value + ')' : ''
       }`
       return longestText.length + 11 + 'ch'
-    },
-    published_date_outdated() {
-      const pub_date = new Date(this.published_dates[0])
-      if (!pub_date) {
-        return false
-      }
-      const oneWeekAgo = new Date()
-      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
-      return oneWeekAgo > pub_date
-    },
-    story_in_reports() {
-      return this.story ? this.story.in_reports_count : 0
-    },
-    is_summarized() {
-      return this.story.summary !== undefined && this.story.summary !== ''
+    })
+
+    const story_in_reports = computed(() => {
+      return props.story ? props.story.in_reports_count : 0
+    })
+
+    const is_summarized = computed(() => {
+      return props.story.summary !== undefined && props.story.summary !== ''
+    })
+
+    const openCard = () => {
+      openSummary.value = !openSummary.value
     }
-  },
-  methods: {
-    toggleSelection() {
-      this.$emit('selectItem', this.story.id)
-    },
-    markAsRead() {
-      readNewsItemAggregate(this.story.id)
-    },
-    markAsImportant() {
-      importantNewsItemAggregate(this.story.id)
-    },
-    deleteNewsItem() {
-      deleteNewsItemAggregate(this.story.id)
-      this.$emit('deleteItem', this.story.id)
-    },
-    addToReport() {
-      this.sharingDialog = true
-    },
-    showRelated(event) {
+
+    const toggleSelection = () => {
+      emit('selectItem', props.story.id)
+    }
+
+    const markAsRead = () => {
+      readNewsItemAggregate(props.story.id)
+    }
+
+    const markAsImportant = () => {
+      importantNewsItemAggregate(props.story.id)
+    }
+
+    const deleteNewsItem = () => {
+      deleteNewsItemAggregate(props.story.id)
+      emit('deleteItem', props.story.id)
+    }
+
+    const addToReport = () => {
+      sharingDialog.value = true
+    }
+
+    const showRelated = (event) => {
       console.log('not yet implemented')
       console.debug(event)
-    },
-    updateDetailsView(value) {
-      this.viewDetails = value
-    },
+    }
 
-    getDescription() {
-      return this.openSummary
-        ? this.news_item_length > 1
-          ? this.story.description
-          : this.story.news_items[0].news_item_data.content
-        : this.story.summary || this.story.description
-    },
+    const updateDetailsView = (value) => {
+      viewDetails.value = value
+    }
 
-    getPublishedDate() {
-      const pubDateNew = new Date(this.published_dates[0])
-      const pubDateNewStr = this.$d(pubDateNew, 'short')
-      const pubDateOld = new Date(this.published_dates[1])
-      const pubDateOldStr = this.$d(pubDateOld, 'short')
-      if (pubDateNew && pubDateOld) {
-        return pubDateNewStr === pubDateOldStr
-          ? pubDateNewStr
-          : `${pubDateOldStr} - ${pubDateNewStr}`
-      }
-      return ''
-    },
+    const getDescription = computed(() => {
+      return openSummary.value
+        ? news_item_length.value > 1
+          ? props.story.description
+          : props.story.news_items[0].news_item_data.content
+        : props.story.summary || props.story.description
+    })
 
-    getCollectedDate() {
-      const collected = this.story.created
-      return collected ? new Date(collected) : new Date(this.story.created)
-    },
-
-    getAuthor() {
-      return this.story.news_items[0].news_item_data.author
-    },
-
-    storyRestricted() {
-      return false
+    return {
+      viewDetails,
+      openSummary,
+      sharingDialog,
+      deleteDialog,
+      showDialog,
+      item_important,
+      story_in_report,
+      news_item_length,
+      news_item_summary_text,
+      minButtonWidth,
+      story_in_reports,
+      is_summarized,
+      getDescription,
+      openCard,
+      toggleSelection,
+      markAsRead,
+      markAsImportant,
+      deleteNewsItem,
+      addToReport,
+      showRelated,
+      updateDetailsView
     }
   }
 }
