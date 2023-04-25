@@ -126,7 +126,7 @@ export default {
       const days = this.last_n_days
 
       return days.map((day) => {
-        if (day in items_per_day) {
+        if (items_per_day !== 'undefined' && day in items_per_day) {
           return items_per_day[day]
         } else {
           return 0
