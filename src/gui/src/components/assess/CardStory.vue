@@ -22,7 +22,7 @@
           tile
           elevation="3"
           rounded="0"
-          class="no-gutters align-self-stretch pl-5 pb-5 pr-3 pt-3"
+          class="align-self-stretch"
           :class="[
             {
               selected: selected
@@ -30,193 +30,187 @@
           ]"
           @click="toggleSelection"
         >
-          <v-row>
-            <!-- STORY TITLE -->
-            <v-col
-              cols="12"
-              sm="12"
-              lg="6"
-              class="d-flex flex-grow-1 mt-3 px-5 py-3 order-1"
-              align-self="center"
-            >
-              <v-icon v-if="story_in_report" class="mr-2 my-auto">
-                mdi-share
-              </v-icon>
-              <h2 class="news-item-title">
-                {{ story.title }}
-              </h2>
-            </v-col>
+          <v-container fluid>
+            <v-row class="px-5 pt-3 pb-0">
+              <v-col cols="12" lg="6">
+                <v-row class="mb-3 pr-4">
+                  <!-- TITLE -->
+                  <v-icon v-if="story_in_report" class="mr-2 my-auto">
+                    mdi-share
+                  </v-icon>
+                  <h2 class="news-item-title">
+                    {{ story.title }}
+                  </h2>
+                  <!-- /TITLE -->
+                </v-row>
+                <v-row class="pr-4 mb-2">
+                  <!-- SUMMARY -->
+                  <summarized-content
+                    :open="openSummary"
+                    :is_summarized="is_summarized"
+                    :content="getDescription()"
+                  />
+                  <!-- /SUMMARY -->
+                </v-row>
+              </v-col>
+              <v-col cols="12" lg="6">
+                <v-row class="mb-3">
+                  <!-- ACTIONS -->
+                  <v-btn
+                    v-if="!detailView"
+                    v-ripple="false"
+                    size="small"
+                    class="item-action-btn"
+                    variant="tonal"
+                    append-icon="mdi-text-box-search-outline"
+                    :to="'/story/' + story.id"
+                    title="View Story"
+                    @click.stop
+                  >
+                    <span>Details</span>
+                  </v-btn>
 
-            <!-- STORY ACTIONS -->
-            <v-col
-              cols="12"
-              sm="12"
-              lg="6"
-              class="d-flex flex-row flex-grow-1 mt-3 px-5 py-2 order-md-2 order-sm-3"
-              style="justify-content: space-evenly"
-            >
-              <v-btn
-                v-if="!detailView"
-                v-ripple="false"
-                size="small"
-                class="item-action-btn"
-                variant="tonal"
-                append-icon="mdi-text-box-search-outline"
-                :to="'/story/' + story.id"
-                title="View Story"
-                @click.stop
-              >
-                <span>Details</span>
-              </v-btn>
-
-              <v-btn
-                v-ripple="false"
-                size="small"
-                class="item-action-btn"
-                variant="tonal"
-                append-icon="mdi-google-circles-communities"
-                title="Add to Report"
-                @click.stop="sharingDialog = true"
-              >
-                <span>Add to Report</span>
-              </v-btn>
-
-              <v-btn
-                v-if="!detailView"
-                v-ripple="false"
-                size="small"
-                class="item-action-btn open-close-btn"
-                :class="openSummary ? 'opened' : 'closed'"
-                variant="tonal"
-                append-icon="mdi-chevron-down"
-                :style="{ minWidth: minButtonWidth }"
-                @click.stop="openSummary = !openSummary"
-              >
-                <span>{{ news_item_summary_text }}</span>
-                <span v-if="news_item_length > 1" class="primary--text"
-                  >&nbsp;[{{ news_item_length }}]</span
-                >
-              </v-btn>
-
-              <v-btn
-                v-ripple="false"
-                size="small"
-                class="item-action-btn"
-                variant="tonal"
-                append-icon="mdi-eye-outline"
-                title="mark as read"
-                @click.stop="markAsRead()"
-              >
-                <span>mark as read</span>
-              </v-btn>
-
-              <votes v-if="detailView" :story="story" />
-
-              <v-menu bottom offset-y>
-                <template #activator="{ props }">
                   <v-btn
                     v-ripple="false"
                     size="small"
-                    class="item-action-btn expandable"
+                    class="item-action-btn"
                     variant="tonal"
-                    v-bind="props"
+                    append-icon="mdi-google-circles-communities"
+                    title="Add to Report"
+                    @click.stop="sharingDialog = true"
                   >
-                    <v-icon>mdi-dots-vertical</v-icon>
+                    <span>Add to Report</span>
                   </v-btn>
-                </template>
 
-                <v-list class="extraActionsList" dense>
-                  <v-list-item
-                    class="hidden-xl-only"
+                  <v-btn
+                    v-if="!detailView"
+                    v-ripple="false"
+                    size="small"
+                    class="item-action-btn open-close-btn"
+                    :class="openSummary ? 'opened' : 'closed'"
+                    variant="tonal"
+                    append-icon="mdi-chevron-down"
+                    :style="{ minWidth: minButtonWidth }"
+                    @click.stop="openSummary = !openSummary"
+                  >
+                    <span>{{ news_item_summary_text }}</span>
+                    <span v-if="news_item_length > 1" class="primary--text"
+                      >&nbsp;[{{ news_item_length }}]</span
+                    >
+                  </v-btn>
+
+                  <v-btn
+                    v-ripple="false"
+                    size="small"
+                    class="item-action-btn"
+                    variant="tonal"
+                    append-icon="mdi-eye-outline"
+                    title="read"
                     @click.stop="markAsRead()"
                   >
-                    <v-icon left size="small" class="mr-2"
-                      >mdi-eye-outline</v-icon
-                    >mark as read
-                  </v-list-item>
-                  <v-list-item @click.stop="markAsImportant()">
-                    <v-icon left size="small" class="mr-2"
-                      >mdi-star-outline</v-icon
-                    >mark as important
-                  </v-list-item>
-                  <v-list-item @click.stop>
-                    <v-icon left size="small" class="mr-2"
-                      >mdi-bookmark-outline</v-icon
-                    >mark as trusted author
-                  </v-list-item>
-                  <v-list-item @click.stop="deleteDialog = true">
-                    <v-icon left size="small" class="mr-2"
-                      >mdi-delete-outline</v-icon
-                    >delete
-                  </v-list-item>
-                </v-list>
-              </v-menu>
-            </v-col>
-            <!-- DESCRIPTION -->
-            <v-col
-              cols="12"
-              sm="12"
-              lg="6"
-              class="px-5 order-md-3 order-sm-2"
-              align-self="stretch"
-            >
-              <summarized-content
-                :open="openSummary"
-                :is_summarized="is_summarized"
-                :content="getDescription()"
-              />
-            </v-col>
-            <!-- META INFO -->
-            <v-col class="px-5 pt-2 pb-3 order-4" cols="12" sm="12" lg="6">
-              <v-container column class="pa-0 pb-3">
-                <v-row no-gutters class="my-1">
-                  <v-col cols="2">
-                    <strong>{{ $t('assess.published') }}:</strong>
-                  </v-col>
-                  <v-col>
-                    <span :class="published_date_outdated ? 'error--text' : ''">
-                      {{ getPublishedDate() }}
-                    </span>
-                    <v-icon
-                      v-if="published_date_outdated"
-                      class="ml-3"
-                      size="small"
-                      color="error"
-                      >mdi-alert</v-icon
-                    >
-                  </v-col>
-                </v-row>
-                <v-row no-gutters class="my-1">
-                  <v-col cols="2" class="d-flex align-center">
-                    <strong>Tags:</strong>
-                  </v-col>
-                  <v-col>
-                    <tag-list
-                      v-if="story.tags"
-                      :tags="story.tags"
-                      :truncate="openSummary"
-                      :limit="openSummary ? 20 : 5"
-                      :color="openSummary"
-                    />
-                  </v-col>
-                </v-row>
-                <v-row
-                  v-if="openSummary && !published_date_outdated"
-                  no-gutters
-                  class="my-1"
-                >
-                  <v-col>
-                    <week-chart :story="story" />
-                  </v-col>
-                </v-row>
+                    <span>read</span>
+                  </v-btn>
 
-                <metainfo
-                  v-if="openSummary && news_item_length == 1"
-                  :news-item="story.news_items[0]"
-                />
-              </v-container>
-            </v-col>
-          </v-row>
+                  <votes v-if="detailView" :story="story" />
+
+                  <v-menu bottom offset-y>
+                    <template #activator="{ props }">
+                      <v-btn
+                        v-ripple="false"
+                        size="small"
+                        class="item-action-btn expandable"
+                        variant="tonal"
+                        v-bind="props"
+                      >
+                        <v-icon>mdi-dots-vertical</v-icon>
+                      </v-btn>
+                    </template>
+
+                    <v-list class="extraActionsList" dense>
+                      <v-list-item
+                        class="hidden-xl-only"
+                        @click.stop="markAsRead()"
+                      >
+                        <v-icon left size="small" class="mr-2"
+                          >mdi-eye-outline</v-icon
+                        >read
+                      </v-list-item>
+                      <v-list-item @click.stop="markAsImportant()">
+                        <v-icon left size="small" class="mr-2"
+                          >mdi-star-outline</v-icon
+                        >important
+                      </v-list-item>
+                      <v-list-item @click.stop>
+                        <v-icon left size="small" class="mr-2"
+                          >mdi-bookmark-outline</v-icon
+                        >trusted author
+                      </v-list-item>
+                      <v-list-item @click.stop="deleteDialog = true">
+                        <v-icon left size="small" class="mr-2"
+                          >mdi-delete-outline</v-icon
+                        >delete
+                      </v-list-item>
+                    </v-list>
+                  </v-menu>
+
+                  <!-- /ACTIONS -->
+                </v-row>
+                <v-row>
+                  <!-- META -->
+                  <v-container column class="pa-0 pb-3" fluid>
+                    <v-row no-gutters class="my-1">
+                      <v-col cols="2">
+                        <strong>{{ $t('assess.published') }}:</strong>
+                      </v-col>
+                      <v-col>
+                        <span
+                          :class="published_date_outdated ? 'error--text' : ''"
+                        >
+                          {{ getPublishedDate() }}
+                        </span>
+                        <v-icon
+                          v-if="published_date_outdated"
+                          class="ml-3"
+                          size="small"
+                          color="error"
+                          >mdi-alert</v-icon
+                        >
+                      </v-col>
+                    </v-row>
+                    <v-row no-gutters class="my-1">
+                      <v-col cols="2" class="d-flex align-center">
+                        <strong>Tags:</strong>
+                      </v-col>
+                      <v-col cols="10">
+                        <tag-list
+                          v-if="story.tags"
+                          :tags="story.tags"
+                          :truncate="openSummary"
+                          :limit="openSummary ? 20 : 5"
+                          :color="openSummary"
+                        />
+                      </v-col>
+                    </v-row>
+                    <v-row
+                      v-if="openSummary && !published_date_outdated"
+                      no-gutters
+                      class="my-1"
+                    >
+                      <v-col>
+                        <week-chart :story="story" />
+                      </v-col>
+                    </v-row>
+
+                    <metainfo
+                      v-if="openSummary && news_item_length == 1"
+                      :news-item="story.news_items[0]"
+                    />
+                  </v-container>
+                  <!-- /META -->
+                </v-row>
+              </v-col>
+            </v-row>
+          </v-container>
         </v-card>
       </v-col>
     </v-row>
