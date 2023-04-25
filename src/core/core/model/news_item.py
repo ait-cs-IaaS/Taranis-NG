@@ -1214,20 +1214,24 @@ class NewsItemTag(db.Model):
             .limit(limit)
             .all()
         )
+        if not clusters:
+            return []
+        results = []
+        for cluster in clusters:
+            if db.session.bind.dialect.name == "sqlite":
+                published = list(cluster[2].split(","))
+            else:
+                published = [dt.isoformat() for dt in cluster[2]]
 
-        return (
-            [
+            results.append(
                 {
                     "name": cluster[0],
                     "tag_type": cluster[1],
-                    "published": list(cluster[2].split(",")),
+                    "published": published,
                     "size": cluster[3],
                 }
-                for cluster in clusters
-            ]
-            if clusters
-            else []
-        )
+            )
+        return results
 
     @classmethod
     def get_json(cls, filter_args: dict):
