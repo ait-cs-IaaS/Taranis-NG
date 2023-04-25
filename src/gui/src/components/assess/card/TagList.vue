@@ -1,26 +1,30 @@
 <template>
-  <div>
-    <v-tooltip v-for="(tag, i) in tags.slice(0, limit)" :key="i" bottom>
+  <div class="d-flex flex-row justify-start flex-wrap">
+    <v-tooltip
+      v-for="(tag, i) in tags.slice(0, limit)"
+      :key="i"
+      location="top"
+      transition="fade-transition"
+      offset="4"
+    >
       <template #activator="{ props }">
-        <v-btn
-          v-ripple="false"
+        <a
           v-bind="props"
           small
-          variant="text"
-          density="compact"
-          height="auto"
-          class="tag-button"
+          class="mr-1"
           :color="labelcolor(i)"
           @click.stop="updateTags(tag.name)"
         >
-          <span class="text-decoration-underline">
-            {{ tag.name }}
-          </span>
-        </v-btn>
+          <span class="tag-button"> {{ tag.name }}, </span>
+        </a>
       </template>
       <span>
-        <v-icon left>{{ tagIcon(tag.tag_type) }}</v-icon>
-        {{ tag.tag_type }}
+        <v-icon size="small" left class="ma-auto mr-2">{{
+          tagIcon(tag.tag_type)
+        }}</v-icon>
+        <span class="text-caption">
+          {{ tag.tag_type }}
+        </span>
       </span>
     </v-tooltip>
   </div>
@@ -85,3 +89,11 @@ export default {
   }
 }
 </script>
+
+<style lang="scss">
+.tag-button {
+  text-transform: capitalize;
+  letter-spacing: normal;
+  text-decoration: underline;
+}
+</style>
