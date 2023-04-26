@@ -145,16 +145,11 @@
                     title="mark as important"
                     @click.stop="markAsImportant()"
                   />
-                  <v-list-item @click.stop>
-                    <v-icon left size="small" class="mr-2"
-                      >mdi-bookmark-outline</v-icon
-                    >mark as trusted author
-                  </v-list-item>
-                  <v-list-item @click.stop="deleteDialog = true">
-                    <v-icon left size="small" class="mr-2"
-                      >mdi-delete-outline</v-icon
-                    >delete
-                  </v-list-item>
+                  <v-list-item
+                    title="delete"
+                    prepend-icon="mdi-delete-outline"
+                    @click.stop="deleteDialog = true"
+                  />
                 </v-list>
               </v-menu>
             </v-col>
