@@ -1,6 +1,6 @@
 <template>
   <filter-navigation
-    :search="filter.search"
+    :search="search"
     @update:search="(value) => (search = value)"
     :limit="limit"
     @update:limit="(value) => (limit = value)"
@@ -20,7 +20,7 @@
             <v-icon left dark> mdi-folder-plus-outline </v-icon>
             New Asset Group
           </v-btn>
-          {{ filter.search }}
+          {{ search }}
         </v-col>
       </v-row>
 
@@ -40,16 +40,13 @@
 </template>
 
 <script>
-import {
-  mapActions as mapActionsVuex,
-  mapState as mapStateVuex,
-  mapGetters
-} from 'vuex'
-import { mapActions } from 'pinia'
+import { mapState as mapStateVuex, mapGetters } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 
 import FilterNavigation from '@/components/common/FilterNavigation'
 import filterSortList from '@/components/assess/filter/filterSortList'
 import { assetsStore } from '@/stores/AssetsStore'
+import { filterStore } from '@/stores/FilterStore'
 
 export default {
   name: 'AssetsNav',
@@ -75,14 +72,12 @@ export default {
     ]
   }),
   computed: {
-    ...mapStateVuex('filter', {
-      filter: (state) => state.assetFilter
-    }),
+    ...mapState(filterStore, ['assetFilter']),
     ...mapStateVuex(['drawerVisible']),
     ...mapStateVuex('route', ['query']),
     limit: {
       get() {
-        return this.filter.limit
+        return this.assetFilter.limit
       },
       set(value) {
         this.updateAssetFilter({ limit: value })
@@ -91,8 +86,8 @@ export default {
     },
     sort: {
       get() {
-        if (!this.filter.order) return 'DATE_DESC'
-        return this.filter.order
+        if (!this.assetFilter.order) return 'DATE_DESC'
+        return this.assetFilter.order
       },
       set(value) {
         this.updateAssetFilter({ sort: value })
@@ -101,7 +96,7 @@ export default {
     },
     offset: {
       get() {
-        return this.filter.offset
+        return this.assetFilter.offset
       },
       set(value) {
         this.updateAssetFilter({ offset: value })
@@ -110,7 +105,7 @@ export default {
     },
     search: {
       get() {
-        return this.filter.search
+        return this.assetFilter.search
       },
       set(value) {
         this.updateAssetFilter({ search: value })
@@ -148,8 +143,7 @@ export default {
   methods: {
     ...mapGetters(['getItemCount']),
     ...mapActions(assetsStore, ['updateFilteredAssets']),
-    ...mapActionsVuex('filter', ['setAssetFilter', 'updateAssetFilter']),
-    ...mapGetters('filter', ['getAssetFilter']),
+    ...mapActions(filterStore, ['updateAssetFilter']),
     addAsset() {
       this.$router.push('/asset/0')
     },

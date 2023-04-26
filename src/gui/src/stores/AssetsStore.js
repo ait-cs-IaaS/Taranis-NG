@@ -4,7 +4,7 @@ import {
   getAllNotificationTemplates
 } from '@/api/assets'
 import { defineStore } from 'pinia'
-import { filter } from '@/store/filter'
+import { filterStore } from './FilterStore'
 
 export const assetsStore = defineStore('assets', {
   state: () => ({
@@ -29,7 +29,8 @@ export const assetsStore = defineStore('assets', {
       })
     },
     updateFilteredAssets() {
-      return getAllAssets(filter.state.assetFilter).then((response) => {
+      const filter = filterStore()
+      return getAllAssets(filter.assetFilter).then((response) => {
         this.assets = response.data
       })
     }

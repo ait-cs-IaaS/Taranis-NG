@@ -5,8 +5,7 @@ import {
 } from '@/api/analyze'
 
 import { defineStore } from 'pinia'
-
-import { filter } from '@/store/filter'
+import { filterStore } from './FilterStore'
 
 export const analyzeStore = defineStore('analyze', {
   state: () => ({
@@ -29,7 +28,8 @@ export const analyzeStore = defineStore('analyze', {
     },
 
     async updateReportItems() {
-      const response = await getAllReportItems(filter.state.reportFilter)
+      const filter = filterStore()
+      const response = await getAllReportItems(filter.reportFilter)
       this.report_items = response.data
     },
 

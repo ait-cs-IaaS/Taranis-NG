@@ -32,10 +32,10 @@
 
 <script>
 import { getTags } from '@/api/assess'
-import { mapActions as mapActionsVuex, mapGetters } from 'vuex'
-import { mapActions } from 'pinia'
+import { mapActions, mapState } from 'pinia'
 import { tagIconFromType } from '@/utils/helpers'
 import { assessStore } from '@/stores/AssessStore'
+import { filterStore } from '@/stores/FilterStore'
 
 export default {
   name: 'tagFilter',
@@ -47,12 +47,13 @@ export default {
   }),
   props: {},
   computed: {
+    ...mapState(filterStore, ['getFilterTags', 'newsItemsFilter']),
     selected: {
       get() {
         return this.selected_tags
       },
       set(val) {
-        this.setTags(val)
+        this.newsItemsFilter.tags = val
         this.updateNewsItems()
       }
     }
@@ -63,8 +64,6 @@ export default {
     }
   },
   methods: {
-    ...mapGetters('filter', ['getFilterTags']),
-    ...mapActionsVuex('filter', ['setTags']),
     ...mapActions(assessStore, ['updateNewsItems']),
     shortText(item) {
       return item.length > 20 ? item.substring(0, 20) + '...' : item
@@ -85,7 +84,7 @@ export default {
       })
     },
     loadFilterTags() {
-      const tags = this.getFilterTags()
+      const tags = this.getFilterTags
       if (!tags) {
         return []
       }

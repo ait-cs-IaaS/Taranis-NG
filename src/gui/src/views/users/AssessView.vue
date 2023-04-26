@@ -57,10 +57,11 @@
 import KeyboardMixin from '../../assets/keyboard_mixin'
 import CardStory from '@/components/assess/CardStory'
 import AssessSelectionToolbar from '@/components/assess/AssessSelectionToolbar'
-import { mapActions as mapActionsVuex, mapState as mapStateVuex } from 'vuex'
+import { mapActions as mapActionsVuex } from 'vuex'
 import { mapActions, mapState, storeToRefs } from 'pinia'
 import { assessStore } from '@/stores/AssessStore'
 import { watch } from 'vue'
+import { filterStore } from '@/stores/FilterStore'
 
 export default {
   name: 'Assess',
@@ -81,8 +82,7 @@ export default {
       'updateOSINTSources',
       'selectNewsItem'
     ]),
-    ...mapActionsVuex('filter', ['resetNewsItemsFilter', 'nextPage']),
-
+    ...mapActions(filterStore, ['nextPage']),
     removeAndDeleteNewsItem(id) {
       this.items = this.items.filter((x) => x.id !== id)
     },
@@ -103,13 +103,11 @@ export default {
   },
   computed: {
     ...mapState(assessStore, ['newsItems', 'newsItemsSelection']),
-    ...mapStateVuex('filter', {
-      scope: (state) => state.newsItemsFilter.scope,
-      filter: (state) => state.newsItemsFilter
-    }),
-
+    ...mapState(filterStore, ['newsItemsFilter']),
     moreToLoad() {
-      const offset = this.filter.offset ? parseInt(this.filter.offset) : 0
+      const offset = this.newsItemsFilter.offset
+        ? parseInt(this.newsItemsFilter.offset)
+        : 0
       const length = offset + this.items.length
       return length < this.newsItems.total_count
     },

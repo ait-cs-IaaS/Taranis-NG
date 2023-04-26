@@ -6,7 +6,7 @@ import {
 import { defineStore } from 'pinia'
 import { xorConcat } from '@/utils/helpers'
 
-import { filter } from '@/store/filter'
+import { filterStore } from './FilterStore'
 
 export const assessStore = defineStore('assess', {
   state: () => ({
@@ -45,9 +45,8 @@ export const assessStore = defineStore('assess', {
   },
   actions: {
     async updateNewsItems() {
-      const response = await getNewsItemsAggregates(
-        filter.state.newsItemsFilter
-      )
+      const filter = filterStore()
+      const response = await getNewsItemsAggregates(filter.newsItemsFilter)
       this.newsItems = response.data
     },
     async updateOSINTSources() {

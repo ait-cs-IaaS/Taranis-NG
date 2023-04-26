@@ -1,6 +1,6 @@
 <template>
   <filter-navigation
-    :search="filter.search"
+    :search="search"
     @update:search="(value) => (search = value)"
     :limit="limit"
     @update:limit="(value) => (limit = value)"
@@ -20,7 +20,7 @@
       <v-divider class="mt-0 mb-0"></v-divider>
       <v-row class="my-2 mr-0 px-2">
         <v-col cols="12" class="py-0">
-          <h4>filter</h4>
+          <h4>this.reportFilter</h4>
         </v-col>
 
         <!-- time tags -->
@@ -51,13 +51,14 @@
 </template>
 
 <script>
-import { mapState, mapGetters, mapActions as mapActionsVuex } from 'vuex'
+import { mapState as mapStateVuex, mapGetters } from 'vuex'
 import FilterNavigation from '@/components/common/FilterNavigation'
 import filterSortList from '@/components/assess/filter/filterSortList'
 import dateChips from '@/components/assess/filter/dateChips'
 import filterSelectList from '@/components/assess/filter/filterSelectList'
-import { mapActions } from 'pinia'
+import { mapActions, mapState } from 'pinia'
 import { analyzeStore } from '@/stores/AnalyzeStore'
+import { filterStore } from '@/stores/FilterStore'
 
 export default {
   name: 'AnalyzeNav',
@@ -84,13 +85,11 @@ export default {
     filterAttributeSelections: []
   }),
   computed: {
-    ...mapState('filter', {
-      filter: (state) => state.reportFilter
-    }),
-    ...mapState(['drawerVisible']),
+    ...mapState(filterStore, ['reportFilter']),
+    ...mapStateVuex(['drawerVisible']),
     limit: {
       get() {
-        return this.filter.limit
+        return this.reportFilter.limit
       },
       set(value) {
         this.updateReportFilter({ limit: value })
@@ -99,8 +98,8 @@ export default {
     },
     sort: {
       get() {
-        if (!this.filter.order) return 'DATE_DESC'
-        return this.filter.order
+        if (!this.reportFilter.order) return 'DATE_DESC'
+        return this.reportFilter.order
       },
       set(value) {
         this.updateReportFilter({ sort: value })
@@ -109,7 +108,7 @@ export default {
     },
     offset: {
       get() {
-        return this.filter.offset
+        return this.reportFilter.offset
       },
       set(value) {
         this.updateReportFilter({ offset: value })
@@ -118,7 +117,7 @@ export default {
     },
     range: {
       get() {
-        return this.filter.range
+        return this.reportFilter.range
       },
       set(value) {
         this.updateReportFilter({ range: value })
@@ -127,7 +126,7 @@ export default {
     },
     search: {
       get() {
-        return this.filter.search
+        return this.reportFilter.search
       },
       set(value) {
         this.updateReportFilter({ search: value })
@@ -182,8 +181,7 @@ export default {
   methods: {
     ...mapGetters(['getItemCount']),
     ...mapActions(analyzeStore, ['updateReportItems']),
-    ...mapActionsVuex('filter', ['setReportFilter', 'updateReportFilter']),
-    ...mapGetters('filter', ['getReportFilter']),
+    ...mapActions(filterStore, ['updateReportFilter']),
     addReport() {
       this.$router.push('/report/0')
     }

@@ -1,6 +1,6 @@
 import { getAllProducts } from '@/api/publish'
 import { getAllUserPublishersPresets } from '@/api/user'
-import { filter } from '@/store/filter'
+import { filterStore } from './FilterStore'
 import { defineStore } from 'pinia'
 
 export const publishStore = defineStore('publish', {
@@ -14,7 +14,8 @@ export const publishStore = defineStore('publish', {
       this.products = response.data
     },
     async updateProducts() {
-      const response = await getAllProducts(filter.state.productFilter)
+      const filter = filterStore()
+      const response = await getAllProducts(filter.productFilter)
       this.products = response.data
     },
     async loadUserPublishersPresets(context, data) {

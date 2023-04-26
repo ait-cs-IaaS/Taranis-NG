@@ -1,6 +1,6 @@
 <template>
   <filter-navigation
-    :search="filter.search"
+    :search="search"
     @update:search="(value) => (search = value)"
     :limit="limit"
     @update:limit="(value) => (limit = value)"
@@ -47,13 +47,10 @@
 import FilterNavigation from '@/components/common/FilterNavigation'
 import filterSortList from '@/components/assess/filter/filterSortList'
 import dateChips from '@/components/assess/filter/dateChips'
-import { mapActions } from 'pinia'
-import {
-  mapActions as mapActionsVuex,
-  mapGetters,
-  mapState as mapStateVuex
-} from 'vuex'
+import { mapActions, mapState } from 'pinia'
+import { mapGetters, mapState as mapStateVuex } from 'vuex'
 import { publishStore } from '@/stores/PublishStore'
+import { filterStore } from '@/stores/FilterStore'
 
 export default {
   name: 'PublishNav',
@@ -74,13 +71,11 @@ export default {
     ]
   }),
   computed: {
-    ...mapStateVuex('filter', {
-      filter: (state) => state.productFilter
-    }),
+    ...mapState(filterStore, ['productFilter']),
     ...mapStateVuex(['drawerVisible']),
     limit: {
       get() {
-        return this.filter.limit
+        return this.productFilter.limit
       },
       set(value) {
         this.updateProductFilter({ limit: value })
@@ -89,8 +84,8 @@ export default {
     },
     sort: {
       get() {
-        if (!this.filter.order) return 'DATE_DESC'
-        return this.filter.order
+        if (!this.productFilter.order) return 'DATE_DESC'
+        return this.productFilter.order
       },
       set(value) {
         this.updateProductFilter({ sort: value })
@@ -99,7 +94,7 @@ export default {
     },
     offset: {
       get() {
-        return this.filter.offset
+        return this.productFilter.offset
       },
       set(value) {
         this.updateProductFilter({ offset: value })
@@ -108,7 +103,7 @@ export default {
     },
     range: {
       get() {
-        return this.filter.range
+        return this.productFilter.range
       },
       set(value) {
         this.updateProductFilter({ range: value })
@@ -117,7 +112,7 @@ export default {
     },
     search: {
       get() {
-        return this.filter.search
+        return this.productFilter.search
       },
       set(value) {
         this.updateProductFilter({ search: value })
@@ -155,8 +150,7 @@ export default {
   methods: {
     ...mapGetters(['getItemCount']),
     ...mapActions(publishStore, ['updateProducts']),
-    ...mapActionsVuex('filter', ['setProductFilter', 'updateProductFilter']),
-    ...mapGetters('filter', ['getProductFilter']),
+    ...mapActions(filterStore, ['updateProductFilter']),
     addReport() {
       this.$router.push('/product/0')
     }

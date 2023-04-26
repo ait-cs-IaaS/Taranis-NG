@@ -1,6 +1,6 @@
 <template>
   <filter-navigation
-    :search="filter.search"
+    :search="search"
     @update:search="(value) => (search = value)"
     :limit="limit"
     @update:limit="(value) => (limit = value)"
@@ -102,11 +102,7 @@
 </template>
 
 <script>
-import {
-  mapActions as mapActionsVuex,
-  mapGetters,
-  mapState as mapStateVuex
-} from 'vuex'
+import { mapGetters, mapState as mapStateVuex } from 'vuex'
 import dateChips from '@/components/assess/filter/dateChips'
 import tagFilter from '@/components/assess/filter/tagFilter'
 import filterSelectList from '@/components/assess/filter/filterSelectList'
@@ -114,6 +110,7 @@ import filterSortList from '@/components/assess/filter/filterSortList'
 import FilterNavigation from '@/components/common/FilterNavigation'
 import { assessStore } from '@/stores/AssessStore'
 import { mapActions, mapState } from 'pinia'
+import { filterStore } from '@/stores/FilterStore'
 
 export default {
   name: 'AssessNav',
@@ -161,13 +158,11 @@ export default {
     ]
   }),
   computed: {
-    ...mapStateVuex('filter', {
-      filter: (state) => state.newsItemsFilter
-    }),
+    ...mapState(filterStore, ['newsItemsFilter']),
     ...mapStateVuex(['drawerVisible']),
     source: {
       get() {
-        return this.filter.source
+        return this.newsItemsFilter.source
       },
       set(value) {
         this.updateFilter({ source: value })
@@ -176,7 +171,7 @@ export default {
     },
     group: {
       get() {
-        return this.filter.group
+        return this.newsItemsFilter.group
       },
       set(value) {
         this.updateFilter({ group: value })
@@ -185,35 +180,35 @@ export default {
     },
     limit: {
       get() {
-        return this.filter.limit
+        return this.newsItemsFilter.limit
       },
       set(value) {
-        this.setLimit(value)
+        this.newsItemsFilter.limit = value
         this.updateNewsItems()
       }
     },
     sort: {
       get() {
-        if (!this.filter.order) return 'DATE_DESC'
-        return this.filter.order
+        if (!this.newsItemsFilter.order) return 'DATE_DESC'
+        return this.newsItemsFilter.order
       },
       set(value) {
-        this.setSort(value)
+        this.newsItemsFilter.sort = value
         this.updateNewsItems()
       }
     },
     offset: {
       get() {
-        return this.filter.offset
+        return this.newsItemsFilter.offset
       },
       set(value) {
-        this.setOffset(value)
+        this.newsItemsFilter.offset = value
         this.updateNewsItems()
       }
     },
     range: {
       get() {
-        return this.filter.range
+        return this.newsItemsFilter.range
       },
       set(value) {
         this.updateFilter({ range: value })
@@ -239,7 +234,7 @@ export default {
     },
     search: {
       get() {
-        return this.filter.search
+        return this.newsItemsFilter.search
       },
       set(value) {
         this.updateFilter({ search: value })
@@ -261,15 +256,7 @@ export default {
   methods: {
     ...mapGetters(['getItemCount']),
     ...mapActions(assessStore, ['updateNewsItems']),
-    ...mapActionsVuex('filter', [
-      'setScope',
-      'setFilter',
-      'setSort',
-      'setLimit',
-      'setOffset',
-      'updateFilter'
-    ]),
-    ...mapGetters('filter', ['getNewsItemsFilter'])
+    ...mapActions(filterStore, ['updateFilter'])
   },
   created() {
     const query = Object.fromEntries(

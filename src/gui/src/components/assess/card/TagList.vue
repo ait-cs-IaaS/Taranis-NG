@@ -28,11 +28,11 @@
 </template>
 
 <script>
-import { mapActions as mapActionsVuex } from 'vuex'
 import { mapActions } from 'pinia'
 
 import { tagIconFromType } from '@/utils/helpers'
 import { assessStore } from '@/stores/AssessStore'
+import { filterStore } from '@/stores/FilterStore'
 
 export default {
   name: 'TagList',
@@ -65,7 +65,7 @@ export default {
   }),
   methods: {
     ...mapActions(assessStore, ['updateNewsItems']),
-    ...mapActionsVuex('filter', ['appendTag']),
+    ...mapActions(filterStore, ['appendTag']),
 
     updateTags(tag) {
       this.appendTag(tag)

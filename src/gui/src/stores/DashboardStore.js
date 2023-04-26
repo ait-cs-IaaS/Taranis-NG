@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { getDashboardData, getTrendingClusters } from '@/api/dashboard'
-// import vuexStore from '@/store' // for gradual conversion, see fullUserDetails
 
 export const dashboardStore = defineStore('dashboard', {
   state: () => ({
