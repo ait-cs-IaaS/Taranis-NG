@@ -61,7 +61,8 @@
 
 <script>
 import AuthMixin from '@/services/auth/auth_mixin'
-import { mapActions } from 'vuex'
+import { authStore } from '@/stores/AuthStore'
+import { mapActions } from 'pinia'
 
 export default {
   name: 'Login',
@@ -72,7 +73,7 @@ export default {
   }),
   mixins: [AuthMixin],
   methods: {
-    ...mapActions(['login']),
+    ...mapActions(authStore, ['login']),
     authenticate() {
       this.$validator.validateAll().then(() => {
         if (!this.$validator.errors.any()) {

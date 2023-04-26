@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
-import { authenticator } from '@/store/authenticator'
+// import { authenticator } from '@/store/authenticator'
 // import { assess } from '@/store/assess'
 // import { config } from '@/store/config'
 // import { analyze } from '@/store/analyze'
@@ -51,10 +51,6 @@ const actions = {
 
   updateItemCountTotal(context, total) {
     context.commit('updateItemCountTotal', total)
-  },
-
-  logout(context) {
-    context.commit('clearJwtToken')
   },
 
   setVerticalView(context, data) {
@@ -142,7 +138,7 @@ export const store = new Vuex.Store({
   mutations,
   getters,
   modules: {
-    authenticator,
+    // authenticator,
     // assess,
     // config,
     // analyze,

@@ -45,6 +45,9 @@
 </template>
 
 <script>
+import { authStore } from '@/stores/AuthStore'
+import { mapActions } from 'pinia'
+
 export default {
   name: 'UserMenu',
   data: () => ({
@@ -59,10 +62,10 @@ export default {
     }
   },
   methods: {
-    logout() {
-      this.$store.dispatch('logout').then(() => {
-        window.location.reload()
-      })
+    ...mapActions(authStore, { storeLogout: 'logout' }),
+    async logout() {
+      this.storeLogout()
+      window.location.reload()
     },
     settings() {
       this.$router.push({ path: '/user/settings' })

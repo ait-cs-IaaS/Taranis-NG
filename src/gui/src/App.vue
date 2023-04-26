@@ -18,6 +18,7 @@ import AuthMixin from './services/auth/auth_mixin'
 import Notification from './components/common/Notification'
 import { mapActions, mapState } from 'pinia'
 import { settingsStore } from '@/stores/SettingsStore'
+import { authStore } from './stores/AuthStore'
 
 export default {
   name: 'App',
@@ -26,21 +27,21 @@ export default {
     Notification
   },
   computed: {
-    ...mapState(settingsStore, ['dark_theme'])
+    ...mapState(settingsStore, ['dark_theme']),
+    ...mapState(authStore, ['jwt'])
   },
   mixins: [AuthMixin],
   methods: {
     ...mapActions(settingsStore, ['loadUserProfile']),
-
+    ...mapActions(authStore, ['setToken', 'setAuthURLs', 'refresh', 'logout']),
     connectSSE() {
       // TODO: unsubscribe
       if (process.env.VUE_APP_TARANIS_NG_CORE_SSE === undefined) {
         return
       }
-      this.$sse(
-        `${process.env.VUE_APP_TARANIS_NG_CORE_SSE}?jwt=${this.$store.getters.getJWT}`,
-        { format: 'json' }
-      ).then((sse) => {
+      this.$sse(`${process.env.VUE_APP_TARANIS_NG_CORE_SSE}?jwt=${this.jwt}`, {
+        format: 'json'
+      }).then((sse) => {
         sse.subscribe('news-items-updated', (data) => {
           this.$root.$emit('news-items-updated', data)
         })
@@ -70,24 +71,22 @@ export default {
   updated() {
     this.$root.$emit('app-updated')
   },
-  mounted() {
+  async mounted() {
     if (this.$cookies.isKey('jwt')) {
-      this.$store.dispatch('setToken', this.$cookies.get('jwt')).then(() => {
-        this.$cookies.remove('jwt')
-        this.connectSSE()
-      })
+      this.setToken(this.$cookies.get('jwt'))
+      this.$cookies.remove('jwt')
+      this.connectSSE()
     }
 
     if (localStorage.ACCESS_TOKEN) {
       if (this.isAuthenticated()) {
-        this.$store.dispatch('setAuthURLs')
-        this.loadUserProfile().then(() => {
-          this.$vuetify.theme.dark = this.dark_theme
-        })
+        await this.loadUserProfile()
+        this.$vuetify.theme.dark = this.dark_theme
+
         this.connectSSE()
       } else {
-        if (this.$store.getters.getJWT) {
-          this.$store.dispatch('logout')
+        if (this.jwt) {
+          this.logout()
         }
       }
     }
@@ -95,14 +94,13 @@ export default {
       function () {
         if (this.isAuthenticated()) {
           if (this.needTokenRefresh() === true) {
-            this.$store.dispatch('refresh').then(() => {
-              console.debug('Token refreshed')
-              // this.reconnectSSE()
-            })
+            this.refresh()
+            console.debug('Token refreshed')
+            // this.reconnectSSE()
           }
         } else {
-          if (this.$store.getters.getJWT) {
-            this.$store.dispatch('logout')
+          if (this.jwt) {
+            this.logout()
           }
         }
       }.bind(this),

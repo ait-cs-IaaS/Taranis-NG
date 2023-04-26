@@ -1,10 +1,7 @@
-import Vue from 'vue'
 import Router from 'vue-router'
 import Home from './views/Home.vue'
-import { store } from '@/store/store'
 import Permissions from '@/services/auth/permissions'
-
-Vue.use(Router)
+import { authStore } from './stores/AuthStore'
 
 export const router = new Router({
   mode: 'history',
@@ -451,11 +448,16 @@ export const router = new Router({
 })
 
 router.beforeEach(async (to, from, next) => {
-  if (to.meta.requiresAuth && !store.getters.isAuthenticated) {
-    if (store.getters.hasExternalLoginUrl) {
-      window.location = encodeURI(store.getters.getLoginURL)
+  const authstore = authStore()
+  if (
+    to.meta.requiresAuth &&
+    !authstore.isAuthenticated &&
+    !localStorage.ACCESS_TOKEN
+  ) {
+    if (authstore.external_login_uri) {
+      window.location = encodeURI(authstore.login_uri)
     }
-    next({ path: store.getters.getLoginURL, query: { redirect: to.path } })
+    next({ path: authstore.login_uri, query: { redirect: to.path } })
   }
   next()
 })

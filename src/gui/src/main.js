@@ -3,6 +3,8 @@ import '@mdi/font/css/materialdesignicons.css'
 import Vue from 'vue'
 import App from './App.vue'
 import { router } from './router'
+
+import Router from 'vue-router'
 import { store } from '@/store/store'
 // import { sync } from 'vuex-router-sync'
 import ApiService from '@/services/api_service'
@@ -17,6 +19,7 @@ import 'vue2-datepicker/index.css'
 import vuetify from '@/plugins/vuetify'
 
 import { createPinia, PiniaVuePlugin } from 'pinia'
+import { authStore } from './stores/AuthStore'
 
 Vue.config.productionTip = false
 
@@ -49,13 +52,11 @@ const coreAPIURL =
 
 ApiService.init(coreAPIURL)
 
-if (localStorage.ACCESS_TOKEN) {
-  store.dispatch('setToken', localStorage.ACCESS_TOKEN).then()
-}
-
 // pinia
 Vue.use(PiniaVuePlugin)
 const pinia = createPinia()
+
+Vue.use(Router)
 
 export const vm = new Vue({
   i18n,
@@ -63,5 +64,11 @@ export const vm = new Vue({
   pinia,
   store,
   router,
-  render: (h) => h(App)
+  render: (h) => h(App),
+  setup() {
+    if (localStorage.ACCESS_TOKEN) {
+      const authstore = authStore()
+      authstore.setToken(localStorage.ACCESS_TOKEN)
+    }
+  }
 }).$mount('#app')

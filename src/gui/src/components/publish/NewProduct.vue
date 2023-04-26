@@ -142,6 +142,7 @@ import { mapActions, mapState } from 'pinia'
 import { configStore } from '@/stores/ConfigStore'
 import { settingsStore } from '@/stores/SettingsStore'
 import { publishStore } from '@/stores/PublishStore'
+import { authStore } from '@/stores/AuthStore'
 
 export default {
   name: 'NewProduct',
@@ -171,6 +172,7 @@ export default {
     ...mapState(settingsStore, ['spellcheck']),
     ...mapState(configStore, ['product_types']),
     ...mapState(publishStore, ['products_publisher_presets']),
+    ...mapState(authStore, ['jwt']),
     canCreate() {
       return this.checkPermission(Permissions.PUBLISH_CREATE)
     },
@@ -279,7 +281,7 @@ export default {
                 '/publish/products/' +
                 this.product.id +
                 '/overview?jwt=' +
-                this.$store.getters.getJWT
+                this.jwt
               this.$refs.previewBtn.$el.click()
             })
           } else {
@@ -291,7 +293,7 @@ export default {
                 '/publish/products/' +
                 response.data +
                 '/overview?jwt=' +
-                this.$store.getters.getJWT
+                this.jwt
               this.$refs.previewBtn.$el.click()
             })
           }
@@ -396,7 +398,7 @@ export default {
         '/publish/products/' +
         data.id +
         '/overview?jwt=' +
-        this.$store.getters.getJWT
+        this.jwt
     })
   },
   beforeDestroy() {
