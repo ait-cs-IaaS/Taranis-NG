@@ -1,13 +1,17 @@
 <template>
-  <div class="ml-0 pl-0">
-    <v-tooltip v-for="(tag, i) in tags.slice(0, limit)" :key="i" bottom>
+  <div class="ml-0 pl-0 d-flex flex-wrap">
+    <v-tooltip v-for="(tag, i) in tags.slice(0, limit)" :key="i">
       <template #activator="{ props }">
-        <a v-bind="props" class="mr-2" @click.stop="updateTags(tag.name)">
+        <a
+          v-bind="props"
+          class="mr-2 d-flex"
+          @click.stop="updateTags(tag.name)"
+        >
           <v-icon start size="small" :icon="tagIcon(tag.tag_type)" />
           <span
             :style="truncate ? 'max-width: 80px' : 'max-width: 120px'"
             :class="
-              'd-inline-block text-decoration-underline text-truncate ' +
+              'd-inline-block text-truncate text-decoration-underline ' +
               labelcolor(i)
             "
           >
