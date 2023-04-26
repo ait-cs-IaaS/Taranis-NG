@@ -1,7 +1,15 @@
 <template>
-  <v-container column class="pa-0 pb-3">
-    {{ name }}
-    <v-row no-gutters class="my-1">
+  <v-container column class="pa-0 pb-1">
+    <v-row no-gutters>
+      <v-col cols="2">
+        <strong>Breakpoint:</strong>
+      </v-col>
+      <v-col>
+        {{ name }}
+      </v-col>
+    </v-row>
+
+    <v-row no-gutters>
       <v-col cols="2">
         <strong>{{ t('assess.published') }}:</strong>
       </v-col>
@@ -11,22 +19,22 @@
         </span>
         <v-icon
           v-if="published_date_outdated"
-          class="ml-2"
+          class="ml-1"
           size="small"
           color="error"
           icon="mdi-alert"
         />
       </v-col>
     </v-row>
-    <v-row v-if="mdAndUp" no-gutters class="my-1">
-      <v-col cols="2" class="d-flex align-center">
+    <v-row v-if="mdAndUp" no-gutters>
+      <v-col cols="2">
         <strong>Tags:</strong>
       </v-col>
-      <v-col cols="6">
+      <v-col>
         <tag-list
           v-if="story.tags"
           :tags="story.tags"
-          :truncate="detailView"
+          :truncate="!detailView"
           :limit="tagLimit"
           :color="detailView"
         />

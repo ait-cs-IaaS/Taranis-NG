@@ -1,13 +1,11 @@
 <template>
   <v-card>
-    <v-card-title>
-      <span class="headline">Share Items</span>
-    </v-card-title>
+    <v-card-title> Share Items </v-card-title>
     <v-card-text>
       Select a report to share the item with:
       <v-select
         v-model="reportItemSelection"
-        solo
+        varint="solo"
         single-line
         label="Select Report"
         no-data-text="No reports found"
@@ -17,7 +15,7 @@
     <v-card-actions class="mt-1">
       <v-btn
         color="awake-red-color darken-1"
-        outlined
+        varint="outlined"
         class="text-lowercase pr-4"
         @click="close()"
       >
@@ -28,8 +26,8 @@
       <v-btn
         color="primary"
         dark
-        depressed
-        class="text-lowercase selection-toolbar-btn pr-4"
+        variant="depressed"
+        class="text-lowercase pr-4"
         @click="share()"
       >
         <v-icon left>mdi-share-outline</v-icon>

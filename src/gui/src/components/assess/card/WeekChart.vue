@@ -1,5 +1,6 @@
 <template>
   <LineChart
+    v-if="shouldRender"
     ref="linechart"
     :options="chartOptions"
     :data="chart_data"
@@ -72,6 +73,7 @@ export default {
   },
   data: function () {
     return {
+      shouldRender: false,
       chartOptions: {
         responsive: true,
         maintainAspectRatio: true,
@@ -168,19 +170,11 @@ export default {
       return Array(this.timespan).fill(this.threshold)
     }
   },
-  mounted() {
-    if (!this.story && !this.dataPoints) {
+  created() {
+    if (this.story || this.dataPoints) {
+      this.shouldRender = true
+    } else {
       console.error('No data provided to WeekChart')
-    }
-  },
-  methods: {
-    getChart() {
-      return this.$refs.linechart.chart
-    },
-    updateChart() {
-      console.debug('Updating chart')
-      this.getChart().resize()
-      this.getChart().update()
     }
   }
 }

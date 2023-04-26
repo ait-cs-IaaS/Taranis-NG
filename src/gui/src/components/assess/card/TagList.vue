@@ -1,27 +1,24 @@
 <template>
-  <div>
+  <div class="ml-0 pl-0">
     <v-tooltip v-for="(tag, i) in tags.slice(0, limit)" :key="i" bottom>
       <template #activator="{ props }">
-        <v-btn
-          v-ripple="false"
-          v-bind="props"
-          small
-          variant="text"
-          density="compact"
-          height="auto"
-          class="tag-button"
-          :color="labelcolor(i)"
-          :prepend-icon="tagIcon(tag.tag_type)"
-          @click.stop="updateTags(tag.name)"
-        >
+        <a v-bind="props" class="mr-2" @click.stop="updateTags(tag.name)">
+          <v-icon start size="small" :icon="tagIcon(tag.tag_type)" />
           <span
-            :style="truncate ? 'max-width: 100px' : ''"
-            class="text-decoration-underline text-truncate"
+            :style="truncate ? 'max-width: 80px' : 'max-width: 120px'"
+            :class="
+              'd-inline-block text-decoration-underline text-truncate ' +
+              labelcolor(i)
+            "
           >
             {{ tag.name }}
           </span>
-        </v-btn>
+        </a>
       </template>
+      <span>
+        <v-icon start :icon="tagIcon(tag.tag_type)" />
+        {{ tag.name }}
+      </span>
     </v-tooltip>
   </div>
 </template>
@@ -67,10 +64,10 @@ export default {
 
     labelcolor: function (i) {
       if (!this.color) {
-        return undefined
+        return ''
       }
 
-      const colorList = ['#2E3D7C', '#282528', '#BA292E', '#E15D3A']
+      const colorList = ['text-red', 'text-blue', 'text-green', 'text-black']
       return colorList[(this.colorStart + i) % colorList.length]
     }
   }

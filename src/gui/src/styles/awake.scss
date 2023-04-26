@@ -38,7 +38,7 @@ $awake-red-color: #d18e8e;
     font-size: 1.3rem;
   }
   p {
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 300;
   }
 }
@@ -955,22 +955,6 @@ a.item-action-btn {
   }
   i.v-icon--right {
     margin-left: 4px;
-  }
-}
-
-.item-action-btn.open-close-btn {
-  &.closed .v-icon {
-    transform: rotate(0deg);
-  }
-  &.opened {
-    background-color: $primary;
-    color: white;
-    caret-color: $primary !important;
-    border-color: $primary !important;
-    .v-icon {
-      color: white;
-      transform: rotate(180deg);
-    }
   }
 }
 

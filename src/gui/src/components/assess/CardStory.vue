@@ -84,10 +84,11 @@
                 v-if="!detailView"
                 v-ripple="false"
                 size="small"
-                class="item-action-btn open-close-btn"
-                :class="openSummary ? 'opened' : 'closed'"
+                class="item-action-btn"
                 variant="tonal"
-                append-icon="mdi-chevron-down"
+                :append-icon="
+                  openSummary ? 'mdi-chevron-up' : 'mdi-chevron-down'
+                "
                 :style="{ minWidth: minButtonWidth }"
                 @click.stop="openCard"
               >
@@ -102,11 +103,13 @@
                 size="small"
                 class="item-action-btn"
                 variant="tonal"
-                append-icon="mdi-eye-outline"
-                title="mark as read"
+                :append-icon="
+                  !story.read ? 'mdi-eye-outline' : 'mdi-eye-off-outline'
+                "
+                :title="!story.read ? 'mark as read' : 'unmark as read'"
                 @click.stop="markAsRead()"
               >
-                <span>mark as read</span>
+                <span>{{ !story.read ? 'read' : 'unread' }}</span>
               </v-btn>
 
               <votes v-if="detailView" :story="story" />
@@ -126,18 +129,22 @@
 
                 <v-list class="extraActionsList" dense>
                   <v-list-item
+                    :prepend-icon="
+                      !story.read ? 'mdi-eye-outline' : 'mdi-eye-off-outline'
+                    "
                     class="hidden-xl-only"
+                    title="mark as read"
                     @click.stop="markAsRead()"
-                  >
-                    <v-icon left size="small" class="mr-2"
-                      >mdi-eye-outline</v-icon
-                    >mark as read
-                  </v-list-item>
-                  <v-list-item @click.stop="markAsImportant()">
-                    <v-icon left size="small" class="mr-2"
-                      >mdi-star-outline</v-icon
-                    >mark as important
-                  </v-list-item>
+                  />
+                  <v-list-item
+                    :prepend-icon="
+                      !story.important
+                        ? 'mdi-star-check-outline'
+                        : 'mdi-star-check'
+                    "
+                    title="mark as important"
+                    @click.stop="markAsImportant()"
+                  />
                   <v-list-item @click.stop>
                     <v-icon left size="small" class="mr-2"
                       >mdi-bookmark-outline</v-icon
