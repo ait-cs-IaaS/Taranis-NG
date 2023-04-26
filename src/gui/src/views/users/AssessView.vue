@@ -58,8 +58,9 @@ import KeyboardMixin from '../../assets/keyboard_mixin'
 import CardStory from '@/components/assess/CardStory'
 import AssessSelectionToolbar from '@/components/assess/AssessSelectionToolbar'
 import { mapActions as mapActionsVuex, mapState as mapStateVuex } from 'vuex'
-import { mapActions, mapState, mapStores } from 'pinia'
+import { mapActions, mapState, storeToRefs } from 'pinia'
 import { assessStore } from '@/stores/AssessStore'
+import { watch } from 'vue'
 
 export default {
   name: 'Assess',
@@ -101,7 +102,6 @@ export default {
     }
   },
   computed: {
-    ...mapStores(assessStore),
     ...mapState(assessStore, ['newsItems', 'newsItemsSelection']),
     ...mapStateVuex('filter', {
       scope: (state) => state.newsItemsFilter.scope,
@@ -124,18 +124,12 @@ export default {
     this.updateOSINTSources()
     this.updateNewsItems()
 
-    this.unsubscribe = this.assessStore.$subscribe(() => {
+    const assessstore = assessStore()
+    const { newsItems } = storeToRefs(assessstore)
+
+    watch(newsItems, () => {
       this.getNewsItemsFromStore()
     })
-
-    // this.unsubscribe = this.$store.subscribe((mutation) => {
-    //   if (mutation.type === 'assess/UPDATE_NEWSITEMS') {
-    //     this.getNewsItemsFromStore()
-    //   }
-    // })
-  },
-  beforeDestroy() {
-    this.unsubscribe()
   }
 }
 </script>
