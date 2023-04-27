@@ -36,7 +36,7 @@
               cols="12"
               sm="12"
               lg="6"
-              class="d-flex flex-grow-1 mt-3 px-5 py-3 order-1"
+              class="d-flex flex-grow-1 mt-3 px-5 py-3 order-first"
               align-self="center"
             >
               <v-icon v-if="story_in_report" class="mr-2 my-auto">
@@ -52,7 +52,7 @@
               cols="12"
               sm="12"
               lg="6"
-              class="d-flex flex-row flex-grow-1 order-md-2 order-sm-3 justify-space-evenly"
+              class="d-flex flex-row flex-grow-1 order-lg-2 order-sm-3 justify-space-evenly"
             >
               <v-btn
                 v-if="!detailView"
@@ -163,7 +163,7 @@
               cols="12"
               sm="12"
               lg="6"
-              class="px-5 order-md-3 order-sm-2"
+              class="px-5 order-lg-3 order-md-2"
               align-self="stretch"
             >
               <summarized-content
