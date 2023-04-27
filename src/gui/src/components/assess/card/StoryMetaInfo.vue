@@ -1,51 +1,63 @@
 <template>
   <v-container column class="pa-0 pb-1">
-    <v-row no-gutters>
-      <v-col cols="2">
-        <strong>Breakpoint:</strong>
-      </v-col>
+    <v-row>
       <v-col>
-        {{ name }}
+        <!-- left column -->
+        <v-row>
+          <v-col style="max-width: 110px" class="py-0 pt-2">
+            <strong>Breakpoint:</strong>
+          </v-col>
+          <v-col class="py-0 pt-2"> {{ name }} </v-col>
+        </v-row>
+        <v-row>
+          <v-col style="max-width: 110px" class="py-0">
+            <strong>{{ t('assess.published') }}:</strong>
+          </v-col>
+          <v-col class="py-0">
+            <span :class="published_date_outdated ? 'error--text' : ''">
+              {{ getPublishedDate }}
+            </span>
+            <v-icon
+              v-if="published_date_outdated"
+              class="ml-1"
+              size="small"
+              color="error"
+              icon="mdi-alert"
+            />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col style="max-width: 110px" class="py-0">
+            <strong>Tags:</strong>
+          </v-col>
+          <v-col class="py-0">
+            <tag-list
+              v-if="story.tags"
+              :tags="story.tags"
+              :truncate="!detailView"
+              :limit="tagLimit"
+              :color="detailView"
+            />
+          </v-col>
+        </v-row>
+        <!-- /left column -->
       </v-col>
-    </v-row>
-
-    <v-row no-gutters>
-      <v-col cols="2">
-        <strong>{{ t('assess.published') }}:</strong>
-      </v-col>
-      <v-col>
-        <span :class="published_date_outdated ? 'error--text' : ''">
-          {{ getPublishedDate }}
-        </span>
-        <v-icon
-          v-if="published_date_outdated"
-          class="ml-1"
-          size="small"
-          color="error"
-          icon="mdi-alert"
-        />
-      </v-col>
-    </v-row>
-    <v-row v-if="mdAndUp" no-gutters>
-      <v-col cols="2">
-        <strong>Tags:</strong>
-      </v-col>
-      <v-col>
-        <tag-list
-          v-if="story.tags"
-          :tags="story.tags"
-          :truncate="!detailView"
-          :limit="tagLimit"
-          :color="detailView"
-        />
-      </v-col>
-      <v-col :cols="detailView ? 12 : 4">
-        <week-chart
-          v-if="!published_date_outdated"
-          :chart-height="detailView ? 300 : 200"
-          :chart-width="detailView ? 800 : 600"
-          :story="story"
-        />
+      <v-col
+        :cols="detailView ? 10 : 4"
+        :style="detailView ? 'margin-left: 120px' : ''"
+      >
+        <!-- right column -->
+        <v-row>
+          <v-col class="py-0 pt-2">
+            <week-chart
+              v-if="!published_date_outdated"
+              :chart-height="detailView ? 300 : 200"
+              :chart-width="detailView ? 800 : 600"
+              :story="story"
+            />
+          </v-col>
+        </v-row>
+        <!-- /right column -->
       </v-col>
     </v-row>
   </v-container>
