@@ -20,7 +20,9 @@ import DataTable from '@/components/common/DataTable.vue'
 import NewACL from '@/components/config/user/NewACL.vue'
 import { deleteACLEntry, createACLEntry, updateACLEntry } from '@/api/config'
 import { notifySuccess } from '@/utils/helpers'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapState, mapWritableState } from 'pinia'
+import { configStore } from '@/stores/ConfigStore'
+import { useMainStore } from '@/stores/MainStore'
 
 export default {
   name: 'ACLsView',
@@ -29,25 +31,22 @@ export default {
     NewACL
   },
   data: () => ({
-    acls: [],
     showForm: false,
     edit: false
   }),
   mounted() {
     this.updateData()
   },
+  computed: {
+    ...mapState(configStore, ['acls'])
+  },
   methods: {
-    ...mapActions('config', ['loadACLEntries']),
-    ...mapGetters('config', ['getACLEntries']),
-    ...mapActions(['updateItemCount']),
+    ...mapActions(configStore, ['loadACLEntries']),
+    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     updateData() {
       this.loadACLEntries().then(() => {
-        const sources = this.getACLEntries()
-        this.acls = sources.items
-        this.updateItemCount({
-          total: sources.total_count,
-          filtered: sources.length
-        })
+        this.itemCountTotal = this.acls.total_count
+        this.itemCountFiltered = this.acls.items.length
       })
     },
     addItem() {

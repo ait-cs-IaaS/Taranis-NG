@@ -24,8 +24,9 @@ import {
   // solveVulnerability,
   deleteAsset
 } from '@/api/assets'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapState, mapWritableState } from 'pinia'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
+import { assetsStore } from '@/stores/AssetsStore'
 
 export default {
   name: 'AssetsView',
@@ -45,21 +46,24 @@ export default {
   mounted() {
     this.updateData()
   },
+  computed: {
+    ...mapState(assetsStore, {
+      store_asset_groups: 'asset_groups',
+      store_assets: 'assets'
+    })
+  },
   methods: {
-    ...mapActions('assets', ['loadAssetGroups', 'loadAssets']),
-    ...mapGetters('assets', ['getAssetGroups', 'getAssets']),
-    ...mapActions(['updateItemCount']),
+    ...mapActions(assetsStore, ['loadAssetGroups', 'loadAssets']),
+    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     updateData() {
       this.loadAssets().then(() => {
-        const sources = this.getAssets()
+        const sources = this.store_assets
         this.assets = sources.items
-        this.updateItemCount({
-          total: sources.total_count,
-          filtered: sources.length
-        })
+        this.itemCountTotal = sources.total_count
+        this.itemCountFiltered = sources.length
       })
       this.loadAssetGroups().then(() => {
-        this.asset_groups = this.getAssetGroups().items
+        this.asset_groups = this.store_asset_groups.items
       })
     },
     addAsset() {

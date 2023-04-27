@@ -83,8 +83,8 @@
                     <attribute-item
                       v-for="attribute_item in attributes[attribute_group.id]"
                       :key="attribute_item.id"
-                      :read_only="!edit"
-                      :attribute_item="attribute_item"
+                      :read-only="!edit"
+                      :attribute-item="attribute_item"
                       :value="attribute_values[attribute_item.id]"
                       @input="updateAttributeValues(attribute_item.id, $event)"
                     />
@@ -113,7 +113,8 @@
 import { createReportItem, updateReportItem } from '@/api/analyze'
 import AttributeItem from '@/components/analyze/AttributeItem.vue'
 import CardStory from '@/components/assess/CardStory.vue'
-import { mapActions, mapGetters } from 'vuex'
+import { useAnalyzeStore } from '@/stores/AnalyzeStore'
+import { mapActions, mapState } from 'pinia'
 
 export default {
   name: 'ReportItem',
@@ -140,6 +141,7 @@ export default {
     }
   },
   computed: {
+    ...mapState(useAnalyzeStore, ['report_item_types']),
     attribute_values() {
       return this.report_item.attributes.reduce((acc, attr) => {
         acc[attr.attribute_group_item_id] = attr.value
@@ -171,9 +173,7 @@ export default {
     })
   },
   methods: {
-    ...mapGetters(['getUserId']),
-    ...mapGetters('analyze', ['getReportTypes']),
-    ...mapActions('analyze', ['loadReportTypes']),
+    ...mapActions(useAnalyzeStore, ['loadReportTypes']),
 
     updateSelectedReportType(value) {
       console.debug('Report types', this.report_types)

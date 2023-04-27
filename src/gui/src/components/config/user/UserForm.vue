@@ -51,7 +51,7 @@
             item-value="id"
             :hint="$t('user.organization')"
             :label="$t('user.organization')"
-            :items="organizations"
+            :items="organizations.items"
           >
           </v-select>
         </v-col>
@@ -96,9 +96,10 @@
 
 <script>
 import { createUser, updateUser } from '@/api/config'
-import { mapGetters, mapActions } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
 import { ref, computed } from 'vue'
+import { configStore } from '@/stores/ConfigStore'
 
 export default {
   name: 'UserForm',
@@ -174,11 +175,10 @@ export default {
   },
   created() {
     this.loadOrganizations().then(() => {
-      this.organizations = this.getOrganizations().items
+      this.organizations = this.store_organizations
     })
-
     this.loadRoles().then(() => {
-      this.roles = this.getRoles().items.map((role) => {
+      this.roles = this.store_roles.items.map((role) => {
         return {
           id: role.id,
           name: role.name,
@@ -186,9 +186,8 @@ export default {
         }
       })
     })
-
     this.loadPermissions().then(() => {
-      this.permissions = this.getPermissions().items
+      this.permissions = this.store_permissions.items
     })
 
     console.debug('Loading User: ' + this.userId)
@@ -196,18 +195,11 @@ export default {
     console.debug(this.user)
   },
   methods: {
-    ...mapActions('config', [
+    ...mapActions(configStore, [
       'loadOrganizations',
       'loadRoles',
       'loadPermissions',
       'loadUsers'
-    ]),
-    ...mapGetters('config', [
-      'getUsers',
-      'getOrganizations',
-      'getRoles',
-      'getPermissions',
-      'getUserByID'
     ]),
     add() {
       this.$validator.validateAll().then(() => {

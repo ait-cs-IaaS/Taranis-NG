@@ -35,8 +35,10 @@ import {
   exportWordList,
   importWordList
 } from '@/api/config'
-import { mapActions, mapGetters } from 'vuex'
 import { notifySuccess, emptyValues, notifyFailure } from '@/utils/helpers'
+import { mapActions, mapState, mapWritableState } from 'pinia'
+import { configStore } from '@/stores/ConfigStore'
+import { mapActions as mapActionsVuex } from 'vuex'
 
 export default {
   name: 'WordLists',
@@ -46,7 +48,6 @@ export default {
     ImportExport
   },
   data: () => ({
-    word_lists: [],
     selected: [],
     formData: {},
     edit: false
@@ -54,22 +55,20 @@ export default {
   mounted() {
     this.updateData()
   },
+  computed: {
+    ...mapState(configStore, ['word_lists'])
+  },
   methods: {
-    ...mapActions('config', ['loadWordLists']),
-    ...mapGetters('config', ['getWordLists']),
-    ...mapActions(['updateItemCount']),
+    ...mapActions(configStore, ['loadWordLists']),
+    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     updateData() {
       this.loadWordLists().then(() => {
-        const sources = this.getWordLists()
-        this.word_lists = sources.items
-        this.updateItemCount({
-          total: sources.total_count,
-          filtered: sources.length
-        })
+        this.itemCountTotal = this.word_lists.total_count
+        this.itemCountFiltered = this.word_lists.items.length
       })
     },
     addItem() {
-      this.formData = emptyValues(this.word_lists[0])
+      this.formData = emptyValues(this.word_lists.items[0])
       this.edit = false
     },
     editItem(item) {

@@ -51,7 +51,8 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapState } from 'pinia'
+import { useAuthStore } from '@/stores/AuthStore'
 import { defineComponent, ref, computed, inject } from 'vue'
 
 export default defineComponent({
@@ -81,12 +82,12 @@ export default defineComponent({
   },
 
   methods: {
-    ...mapActions(['login']),
-    ...mapGetters(['isAuthenticated']),
+    ...mapState(useAuthStore, ['isAuthenticated']),
+    ...mapActions(useAuthStore, ['login']),
     authenticate() {
       this.login({ username: this.username, password: this.password }).then(
         (error) => {
-          if (this.isAuthenticated()) {
+          if (this.isAuthenticated) {
             this.login_error = undefined
             this.$router.push('/')
             return

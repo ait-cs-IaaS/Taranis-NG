@@ -24,6 +24,9 @@
 <script>
 import { defineComponent } from 'vue'
 
+import { useAuthStore } from '@/stores/AuthStore'
+import { mapActions } from 'pinia'
+
 export default defineComponent({
   name: 'UserMenu',
   computed: {
@@ -35,10 +38,10 @@ export default defineComponent({
     }
   },
   methods: {
-    logout() {
-      this.$store.dispatch('logout').then(() => {
-        window.location.reload()
-      })
+    ...mapActions(useAuthStore, { storeLogout: 'logout' }),
+    async logout() {
+      this.storeLogout()
+      window.location.reload()
     },
     settings() {
       this.$router.push({ path: '/user/settings' })

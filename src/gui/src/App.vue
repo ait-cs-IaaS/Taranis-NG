@@ -17,7 +17,8 @@ import MainMenu from '@/components/MainMenu.vue'
 import Notification from '@/components/common/Notification.vue'
 import { useCookies } from 'vue3-cookies'
 import { defineComponent, onMounted } from 'vue'
-import { useStore } from 'vuex'
+import { useSettingsStore } from '@/stores/SettingsStore'
+import { useAuthStore } from '@/stores/AuthStore'
 import { connectSSE, reconnectSSE } from '@/utils/sse'
 
 export default defineComponent({
@@ -27,28 +28,29 @@ export default defineComponent({
     Notification
   },
   setup() {
-    const store = useStore()
+    const authStore = useAuthStore()
+    const settingsStore = useSettingsStore()
     const { cookies } = useCookies()
 
-    const loadUserProfile = () => store.dispatch('settings/loadUserProfile')
-    const isAuthenticated = () => store.getters['isAuthenticated']
-    const needTokenRefresh = () => store.getters['needTokenRefresh']
+    const loadUserProfile = () => settingsStore.loadUserProfile()
+    const isAuthenticated = () => authStore.isAuthenticated
+    const needTokenRefresh = () => authStore.needTokenRefresh
 
     onMounted(() => {
       if (cookies.isKey('jwt')) {
-        store.dispatch('setToken', cookies.get('jwt')).then(() => {
+        authStore.setToken(cookies.get('jwt')).then(() => {
           cookies.remove('jwt')
         })
       }
 
       if (localStorage.ACCESS_TOKEN) {
         if (isAuthenticated()) {
-          store.dispatch('setAuthURLs')
+          authStore.setAuthURLs()
           loadUserProfile()
           connectSSE()
         } else {
-          if (store.getters.getJWT) {
-            store.dispatch('logout')
+          if (authStore.jwt) {
+            authStore.logout()
           }
         }
       }
@@ -56,14 +58,14 @@ export default defineComponent({
         function () {
           if (isAuthenticated()) {
             if (needTokenRefresh() === true) {
-              store.dispatch('refresh').then(() => {
+              authStore.refresh().then(() => {
                 console.debug('Token refreshed')
                 reconnectSSE()
               })
             }
           } else {
-            if (store.getters.getJWT) {
-              store.dispatch('logout')
+            if (authStore.jwt) {
+              authStore.logout()
             }
           }
         }.bind(this),

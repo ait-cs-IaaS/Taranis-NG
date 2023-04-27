@@ -92,7 +92,8 @@ import ToolbarFilterAnalyze from '@/components/analyze/ToolbarFilterAnalyze.vue'
 import RemoteReportItem from '@/components/analyze/RemoteReportItem.vue'
 import Permissions from '@/services/auth/permissions'
 import { getReportItemData, updateReportItem } from '@/api/analyze'
-import { mapActions, mapGetters } from 'vuex'
+import { useAnalyzeStore } from '@/stores/AnalyzeStore'
+import { mapActions, mapState } from 'pinia'
 
 export default {
   name: 'RemoteReportItemSelector',
@@ -118,6 +119,11 @@ export default {
     selected_group_id: ''
   }),
   computed: {
+    ...mapState(useAnalyzeStore, [
+      'report_item_groups',
+      'current_report_item_group_id',
+      'selection_report'
+    ]),
     canModify() {
       return (
         this.edit === false ||
@@ -127,21 +133,18 @@ export default {
     }
   },
   methods: {
-    ...mapActions('analyze', [
+    ...mapActions(useAnalyzeStore, [
       'loadReportItemGroups',
-      'changeCurrentReportItemGroup'
+      'setMultiSelectReport'
     ]),
-    ...mapGetters('analyze', [
-      'getReportItemGroups',
-      'getCurrentReportItemGroup'
-    ]),
+
     newDataLoaded(count) {
       this.$refs.toolbarFilter.updateDataCount(count)
     },
 
     changeGroup(e, group_id) {
       this.selected_group_id = group_id
-      this.$store.dispatch('changeCurrentReportItemGroup', group_id)
+      this.current_report_item_group_id = group_id
       this.$refs.contentData.updateData(false, false)
     },
 
@@ -174,13 +177,13 @@ export default {
     },
 
     openSelector() {
-      this.$store.dispatch('multiSelectReport', true)
+      this.setMultiSelectReport(true)
       this.dialog = true
       this.$refs.contentData.updateData(false, false)
     },
 
     add() {
-      const selection = this.$store.getters.getSelectionReport
+      const selection = this.selection_report
       const added_values = []
       const data = {}
       data.add = true
@@ -216,7 +219,7 @@ export default {
     },
 
     close() {
-      this.$store.dispatch('multiSelectReport', false)
+      this.setMultiSelectReport(false)
       this.dialog = false
     },
 
@@ -249,7 +252,7 @@ export default {
   },
   mounted() {
     this.loadReportItemGroups().then(() => {
-      this.groups = this.getReportItemGroups()
+      this.groups = this.report_item_groups
 
       for (let i = 0; i < this.groups.length; i++) {
         this.links.push({
@@ -259,13 +262,13 @@ export default {
         })
       }
 
-      if (this.getCurrentReportItemGroup() === null && this.links) {
+      if (this.current_report_item_group_id === null && this.links) {
         if (this.links.length > 0) {
           this.selected_group_id = this.links[0].id
-          this.changeCurrentReportItemGroup(this.links[0].id)
+          this.current_report_item_group_id = this.links[0].id
         }
       } else {
-        this.selected_group_id = this.getCurrentReportItemGroup()
+        this.selected_group_id = this.current_report_item_group_id
       }
     })
 

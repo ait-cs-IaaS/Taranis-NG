@@ -2,13 +2,13 @@ import '@mdi/font/css/materialdesignicons.css'
 import { createApp } from 'vue'
 import App from './App.vue'
 import { router } from './router'
-import { store } from '@/store/store'
 import ApiService from '@/services/api_service'
 import { createI18n } from 'vue-i18n'
 import { messages } from '@/i18n/messages'
 import { datetimeFormats } from '@/i18n/datetimeformat'
 import DatePicker from 'vue-datepicker-next'
 import { vuetify } from '@/plugins/vuetify'
+import { createPinia } from 'pinia'
 
 export const app = createApp(App)
 
@@ -34,13 +34,10 @@ const coreAPIURL =
 
 ApiService.init(coreAPIURL)
 app.provide('$coreAPIURL', coreAPIURL)
-store.dispatch('setCoreAPIURL', coreAPIURL)
 
-if (localStorage.ACCESS_TOKEN) {
-  store.dispatch('setToken', localStorage.ACCESS_TOKEN).then()
-}
+const pinia = createPinia()
 
-app.use(store)
+app.use(pinia)
 app.use(router)
 app.use(vuetify)
 app.mount('#app')

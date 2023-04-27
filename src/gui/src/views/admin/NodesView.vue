@@ -30,7 +30,9 @@
 import DataTable from '@/components/common/DataTable.vue'
 import EditConfig from '@/components/config/EditConfig.vue'
 import { deleteNode, createNode, updateNode, triggerNode } from '@/api/config'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapState } from 'pinia'
+import { configStore } from '@/stores/ConfigStore'
+import { mapActions as mapActionsVuex } from 'vuex'
 import { notifySuccess, notifyFailure, objectFromFormat } from '@/utils/helpers'
 
 export default {
@@ -40,13 +42,13 @@ export default {
     EditConfig
   },
   data: () => ({
-    nodes: [],
     formData: {},
     edit: false,
     selected: [],
     workers: []
   }),
   computed: {
+    ...mapState(configStore, ['nodes', 'collectors']),
     formFormat() {
       return [
         {
@@ -96,17 +98,12 @@ export default {
     this.updateData()
   },
   methods: {
-    ...mapActions('config', ['loadNodes', 'loadCollectors']),
-    ...mapGetters('config', ['getNodes', 'getCollectors']),
-    ...mapActions(['updateItemCount']),
+    ...mapActions(configStore, ['loadNodes', 'loadCollectors']),
+    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     updateData() {
       this.loadNodes().then(() => {
-        const sources = this.getNodes()
-        this.nodes = sources.items
-        this.updateItemCount({
-          total: sources.total_count,
-          filtered: sources.length
-        })
+        this.itemCountTotal = this.nodes.total_count
+        this.itemCountFiltered = this.nodes.items.length
       })
     },
     addItem() {
@@ -118,7 +115,7 @@ export default {
         this.workers = item.bots
       } else if (item.type === 'collector') {
         this.loadCollectors().then(() => {
-          this.workers = this.getCollectors().items
+          this.workers = this.collectors.items
         })
       } else {
         console.log('No workers found')

@@ -35,7 +35,7 @@
                 type="text"
                 data-vv-name="name"
                 :error-messages="errors.collect('name')"
-                :spellcheck="$store.state.settings.spellcheck"
+                :spellcheck="spellcheck"
               />
             </v-col>
             <v-col cols="6" class="pr-3">
@@ -45,7 +45,7 @@
                 :label="$t('asset.serial')"
                 name="serial"
                 type="text"
-                :spellcheck="$store.state.settings.spellcheck"
+                :spellcheck="spellcheck"
               />
             </v-col>
             <v-col cols="12" class="pr-3">
@@ -54,7 +54,7 @@
                 :disabled="!editAllowed()"
                 :label="$t('asset.description')"
                 name="description"
-                :spellcheck="$store.state.settings.spellcheck"
+                :spellcheck="spellcheck"
               />
             </v-col>
           </v-row>
@@ -109,8 +109,9 @@ import { createAsset, updateAsset } from '@/api/assets'
 
 import CPETable from '@/components/assets/CPETable.vue'
 import CardVulnerability from '@/components/assets/CardVulnerability.vue'
-import AuthMixin from '@/services/auth/auth_mixin'
-import Permissions from '@/services/auth/permissions'
+
+import { mapState } from 'pinia'
+import { settingsStore } from '@/stores/SettingsStore'
 
 export default {
   name: 'NewAsset',
@@ -118,7 +119,6 @@ export default {
     CPETable,
     CardVulnerability
   },
-  mixins: [AuthMixin],
   data: () => ({
     visible: false,
     edit: false,
@@ -134,34 +134,12 @@ export default {
       asset_group_id: ''
     }
   }),
-  mounted() {
-    this.$root.$on('show-edit', (data) => {
-      this.visible = true
-      this.edit = true
-      this.show_error = false
-
-      this.asset.id = data.id
-      this.asset.name = data.name
-      this.asset.serial = data.serial
-      this.asset.description = data.description
-      this.asset.asset_group_id = data.group_id
-
-      this.asset.asset_cpes = []
-      for (let i = 0; i < data.asset_cpes.length; i++) {
-        this.asset.asset_cpes.push({
-          value: data.asset_cpes[i].value.replace('%', '*')
-        })
-      }
-
-      this.vulnerabilities = data.vulnerabilities
-    })
-  },
-  beforeUnmount() {
-    this.$root.$off('show-edit')
+  computed: {
+    ...mapState(settingsStore, ['spellcheck'])
   },
   methods: {
     editAllowed() {
-      return this.checkPermission(Permissions.MY_ASSETS_CREATE)
+      return true
     },
     cardLayout() {
       return 'CardVulnerability'

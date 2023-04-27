@@ -27,8 +27,10 @@ import {
   createRemoteAccess,
   updateRemoteAccess
 } from '@/api/config'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions as mapActionsVuex } from 'vuex'
 import { notifySuccess, notifyFailure, emptyValues } from '@/utils/helpers'
+import { mapActions, mapState } from 'pinia'
+import { configStore } from '@/stores/ConfigStore'
 
 export default {
   name: 'RemoteAccess',
@@ -42,6 +44,7 @@ export default {
     edit: false
   }),
   computed: {
+    ...mapState(configStore, ['remote_access']),
     formFormat() {
       return [
         {
@@ -79,16 +82,14 @@ export default {
     this.updateData()
   },
   methods: {
-    ...mapActions('config', ['loadRemoteAccesses']),
-    ...mapGetters('config', ['getRemoteAccesses']),
-    ...mapActions(['updateItemCount']),
+    ...mapActions(configStore, ['loadRemoteAccesses']),
+    ...mapActionsVuex(['updateItemCount']),
     updateData() {
       this.loadRemoteAccesses().then(() => {
-        const sources = this.getRemoteAccesses()
-        this.RemoteAccess = sources.items
+        this.RemoteAccess = this.remote_access.items
         this.updateItemCount({
-          total: sources.total_count,
-          filtered: sources.length
+          total: this.remote_access.total_count,
+          filtered: this.remote_access.length
         })
       })
     },

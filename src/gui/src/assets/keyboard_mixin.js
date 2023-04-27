@@ -1,3 +1,7 @@
+import { useAssessStore } from '@/stores/AssessStore'
+import { configStore } from '@/stores/ConfigStore'
+import { mapState } from 'pinia'
+
 const keyboardMixin = (targetId) => ({
   data: () => ({
     target: String,
@@ -13,8 +17,9 @@ const keyboardMixin = (targetId) => ({
   }),
 
   computed: {
+    ...mapState(useAssessStore, ['getMultiSelect', 'getSelection']),
     multiSelectActive() {
-      return this.$store.getters.getMultiSelect
+      return this.getMultiSelect
     },
     state() {
       return this.keyboard_state
@@ -279,7 +284,7 @@ const keyboardMixin = (targetId) => ({
                 this.multiSelectActive &&
                 this.$store.getters.getFilter.read
               ) {
-                const selection = this.$store.getters.getSelection
+                const selection = this.getSelection
                 // set focus to the next item to read instead of keeping the current position
                 this.setNewsItem(this.pos - selection.length + 1)
               }
@@ -291,7 +296,7 @@ const keyboardMixin = (targetId) => ({
                 this.multiSelectActive &&
                 this.$store.getters.getFilter.important
               ) {
-                const selection = this.$store.getters.getSelection
+                const selection = this.getSelection
                 // set focus to the next item to read instead of keeping the current position
                 this.setNewsItem(this.pos - selection.length + 1)
               }
@@ -307,7 +312,7 @@ const keyboardMixin = (targetId) => ({
                 this.multiSelectActive &&
                 this.$store.getters.getFilter.relevant
               ) {
-                const selection = this.$store.getters.getSelection
+                const selection = this.getSelection
                 // set focus to the next item to read instead of keeping the current position
                 this.setNewsItem(this.pos - selection.length + 1)
               }
@@ -316,7 +321,7 @@ const keyboardMixin = (targetId) => ({
             case 'delete_item':
               this.card.delete.click()
               if (this.multiSelectActive) {
-                const selection = this.$store.getters.getSelection
+                const selection = this.getSelection
                 // set focus to the next item to read instead of keeping the current position
                 this.setNewsItem(this.pos - selection.length + 1)
               }

@@ -9,7 +9,6 @@
           v-bind="UI.ELEMENT.SEARCH"
           v-model="filter.search"
           :placeholder="$t('toolbar_filter.search')"
-          @keyup="filterSearch"
         />
       </v-col>
       <v-col v-bind="UI.TOOLBAR.COL.RIGHT">
@@ -29,17 +28,22 @@
 </template>
 
 <script>
-import AuthMixin from '../../services/auth/auth_mixin'
-import { mapGetters } from 'vuex'
+import { mapState } from 'pinia'
+import { configStore } from '@/stores/ConfigStore'
 
 export default {
   name: 'ToolbarFilter',
-  mixins: [AuthMixin],
   props: {
     title: String,
     dialog: String,
     total_count_title: String,
     total_count_getter: String
+  },
+  computed: {
+    ...mapState(configStore, ['nodes']),
+    totalCount() {
+      return this.nodes.total_count
+    }
   },
   data: () => ({
     filter: {
@@ -47,13 +51,7 @@ export default {
     },
     timeout: null
   }),
-  computed: {
-    totalCount() {
-      return this.getNodes().total_count
-    }
-  },
   methods: {
-    ...mapGetters('config', ['getNodes']),
     changeTheme() {
       this.$vuetify.theme.themes.light.primary = '#f0f'
       this.$vuetify.theme.themes.light.secondary = '#f00'

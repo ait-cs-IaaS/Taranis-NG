@@ -28,7 +28,7 @@ import {
   createPublisherPreset,
   updatePublisherPreset
 } from '@/api/config'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions as mapActionsVuex } from 'vuex'
 import {
   notifySuccess,
   parseParameterValues,
@@ -36,6 +36,8 @@ import {
   objectFromFormat,
   notifyFailure
 } from '@/utils/helpers'
+import { mapActions, mapState } from 'pinia'
+import { configStore } from '@/stores/ConfigStore'
 
 export default {
   name: 'PublisherPresetsView',
@@ -51,6 +53,8 @@ export default {
     edit: false
   }),
   computed: {
+    ...mapState(configStore, ['publisher_presets']),
+    ...mapState(configStore, { store_publishers: 'publishers' }),
     formFormat() {
       const base = [
         {
@@ -90,20 +94,18 @@ export default {
     this.updateData()
   },
   methods: {
-    ...mapActions('config', ['loadPublisherPresets', 'loadPublishers']),
-    ...mapGetters('config', ['getPublisherPresets', 'getPublishers']),
-    ...mapActions(['updateItemCount']),
+    ...mapActions(configStore, ['loadPublisherPresets', 'loadPublishers']),
+    ...mapActionsVuex(['updateItemCount']),
     updateData() {
       this.loadPublisherPresets().then(() => {
-        const sources = this.getPublisherPresets()
-        this.presets = parseParameterValues(sources.items)
+        this.presets = parseParameterValues(this.publisher_presets.items)
         this.updateItemCount({
-          total: sources.total_count,
-          filtered: sources.length
+          total: this.publisher_presets.total_count,
+          filtered: this.publisher_presets.length
         })
       })
       this.loadPublishers().then(() => {
-        const publishers = this.getPublishers()
+        const publishers = this.store_publishers
         this.publishers = publishers.items.map((publisher) => {
           this.parameters[publisher.id] = publisher.parameters.map(
             (parameter) => {

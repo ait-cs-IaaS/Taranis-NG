@@ -20,7 +20,7 @@ import DataTable from '@/components/common/DataTable.vue'
 import UserForm from '@/components/config/user/UserForm.vue'
 import { deleteUser, createUser, updateUser } from '@/api/config'
 import { ref, onMounted } from 'vue'
-import { useStore } from 'vuex'
+import { configStore } from '@/stores/ConfigStore'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
 
 export default {
@@ -30,24 +30,17 @@ export default {
     UserForm
   },
   setup() {
-    const store = useStore()
+    const store = configStore()
+    const { users } = storeToRefs(store)
+    const mainStore = useMainStore()
     const showForm = ref(false)
-    const users = ref([])
     const selected = ref([])
     const userID = ref(-1)
 
-    const loadUsers = () => store.dispatch('config/loadUsers')
-    const getUsers = () => store.getters['config/getUsers']
-    const updateItemCount = (count) => store.dispatch('updateItemCount', count)
-
     const updateData = () => {
-      loadUsers().then(() => {
-        const sources = getUsers()
-        users.value = sources.items
-        updateItemCount({
-          total: sources.total_count,
-          filtered: sources.length
-        })
+      store.loadUsers().then(() => {
+        mainStore.itemCountTotal = users.total_count
+        mainStore.itemCountFiltered = users.items.length
       })
     }
 

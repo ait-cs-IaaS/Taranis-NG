@@ -56,7 +56,8 @@ import ToolbarFilter from '@/components/common/ToolbarFilter.vue'
 import CardAnalyze from '../analyze/CardAnalyze'
 import ToolbarFilterAnalyze from '@/components/analyze/ToolbarFilterAnalyze.vue'
 import AuthMixin from '@/services/auth/auth_mixin'
-import { mapGetters, mapActions } from 'vuex'
+import { mapActions } from 'pinia'
+import { useAnalyzeStore } from '@/stores/AnalyzeStore'
 
 export default {
   name: 'ReportItemSelector',
@@ -76,14 +77,11 @@ export default {
     value: '',
     selector_values: this.values
   }),
-  computed: {},
+  computed: {
+    ...mapActions(useAnalyzeStore, ['selection_report'])
+  },
   methods: {
-    ...mapGetters('analyze', [
-      'getCurrentReportItemGroup',
-      'getReportItems',
-      'getSelectionReport'
-    ]),
-    ...mapActions('analyze', ['selectReport', 'multiSelectReport']),
+    ...mapActions(useAnalyzeStore, ['setMultiSelectReport']),
     newDataLoaded(count) {
       this.$refs.toolbarFilter.updateDataCount(count)
     },
@@ -106,12 +104,12 @@ export default {
     },
 
     openSelector() {
-      this.$store.dispatch('multiSelectReport', true)
+      this.setMultiSelectReport(true)
       this.dialog = true
     },
 
     add() {
-      const selection = this.getSelectionReport()
+      const selection = this.selection_report
       for (let i = 0; i < selection.length; i++) {
         let found = false
         for (let j = 0; j < this.selector_values.length; j++) {
@@ -131,7 +129,7 @@ export default {
     },
 
     close() {
-      this.$store.dispatch('multiSelectReport', false)
+      this.setMultiSelectReport(false)
       this.dialog = false
     }
   }

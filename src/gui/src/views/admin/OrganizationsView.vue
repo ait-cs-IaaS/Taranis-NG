@@ -27,9 +27,11 @@ import {
   createOrganization,
   updateOrganization
 } from '@/api/config'
-import { useStore } from 'vuex'
+import { configStore } from '@/stores/ConfigStore'
 import { notifySuccess, emptyValues, notifyFailure } from '@/utils/helpers'
 import { ref, onMounted } from 'vue'
+import { useMainStore } from '@/stores/MainStore'
+import { storeToRefs } from 'pinia'
 
 export default {
   name: 'OrganizationsView',
@@ -38,23 +40,16 @@ export default {
     EditConfig
   },
   setup() {
-    const store = useStore()
-    const organizations = ref([])
+    const store = configStore()
+    const mainStore = useMainStore()
+    const { organizations } = storeToRefs(store)
     const formData = ref({})
     const edit = ref(false)
 
-    const loadOrganizations = () => store.dispatch('config/loadOrganizations')
-    const getOrganizations = () => store.getters['config/getOrganizations']
-    const updateItemCount = (count) => store.dispatch('updateItemCount', count)
-
     const updateData = () => {
-      loadOrganizations().then(() => {
-        const sources = getOrganizations()
-        organizations.value = sources.items
-        updateItemCount({
-          total: sources.total_count,
-          filtered: sources.length
-        })
+      store.loadOrganizations().then(() => {
+        mainStore.itemCountTotal = organizations.total_count
+        mainStore.itemCountFiltered = organizations.items.length
       })
     }
 

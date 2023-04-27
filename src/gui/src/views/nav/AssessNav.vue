@@ -107,7 +107,8 @@ import filterSortList from '@/components/assess/filter/filterSortList.vue'
 import FilterNavigation from '@/components/common/FilterNavigation.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { useStore } from 'vuex'
+import { useFilterStore } from '@/stores/FilterStore'
+import { useAssessStore } from '@/stores/AssessStore'
 
 export default {
   name: 'AssessNav',
@@ -119,7 +120,8 @@ export default {
     FilterNavigation
   },
   setup() {
-    const store = useStore()
+    const store = useFilterStore()
+    const assessStore = useAssessStore()
     const route = useRoute()
     const awaitingSearch = ref(false)
     const filterAttributeSelections = ref([])
@@ -157,11 +159,11 @@ export default {
     ]
 
     const filter = computed(() => {
-      return store.state.filter.newsItemsFilter
+      return store.filter.newsItemsFilter
     })
 
     const drawerVisible = computed(() => {
-      return store.state.drawerVisible
+      return store.drawerVisible
     })
 
     const source = computed({
@@ -169,7 +171,7 @@ export default {
         return filter.value.source
       },
       set(value) {
-        store.dispatch('filter/setFilter', { source: value })
+        store.setFilter({ source: value })
         updateNewsItems()
       }
     })
@@ -179,7 +181,7 @@ export default {
         return filter.value.group
       },
       set(value) {
-        store.dispatch('filter/setFilter', { group: value })
+        store.setFilter({ group: value })
         updateNewsItems()
       }
     })
@@ -189,7 +191,7 @@ export default {
         return filter.value.limit
       },
       set(value) {
-        store.dispatch('filter/setLimit', value)
+        store.setLimit(value)
         updateNewsItems()
       }
     })
@@ -200,7 +202,7 @@ export default {
         return filter.value.order
       },
       set(value) {
-        store.dispatch('filter/setSort', value)
+        store.setSort(value)
         updateNewsItems()
       }
     })
@@ -210,21 +212,20 @@ export default {
         return filter.value.offset
       },
       set(value) {
-        store.dispatch('filter/setOffset', value)
+        store.setOffset(value)
         updateNewsItems()
       }
     })
 
     const tags = computed({
       get() {
-        const tags = store.getters['filter/getFilterTags'] || []
-        console.debug('tags', tags)
+        const tags = store.getFilterTags || []
         return tags.map((tag) => {
           return { name: tag }
         })
       },
       set(value) {
-        store.dispatch('filter/setFilter', { tags: value })
+        store.setFilter({ tags: value })
         updateNewsItems()
       }
     })
@@ -234,7 +235,7 @@ export default {
         return filter.value.range
       },
       set(value) {
-        store.dispatch('filter/setFilter', { range: value })
+        store.setFilter({ range: value })
         updateNewsItems()
       }
     })
@@ -252,17 +253,17 @@ export default {
         }, {})
 
         console.debug('filterAttributeSelections', filterUpdate)
-        store.dispatch('filter/setFilter', filterUpdate)
+        store.setFilter(filterUpdate)
         updateNewsItems()
       }
     })
 
     const search = computed({
       get() {
-        return filter.value.search
+        return this.newsItemsFilter.search
       },
       set(value) {
-        store.dispatch('filter/setFilter', { search: value })
+        store.setFilter({ search: value })
         if (!awaitingSearch.value) {
           setTimeout(() => {
             updateNewsItems()
@@ -274,48 +275,20 @@ export default {
       }
     })
 
-    const getItemCount = computed(() => {
-      return store.getters.getItemCount
-    })
-
     const getOSINTSourceGroupsList = computed(() => {
-      return store.getters['assess/getOSINTSourceGroupsList']
+      return assessStore.getOSINTSourceGroupsList
     })
 
     const getOSINTSourcesList = computed(() => {
-      return store.getters['assess/getOSINTSourcesList']
+      return assessStore.getOSINTSourcesList
     })
 
-    const setScope = (value) => {
-      store.dispatch('filter/setScope', value)
-    }
-
-    const setFilter = (value) => {
-      store.dispatch('filter/setFilter', value)
-    }
-
-    const setSort = (value) => {
-      store.dispatch('filter/setSort', value)
-    }
-
-    const setLimit = (value) => {
-      store.dispatch('filter/setLimit', value)
-    }
-
-    const setOffset = (value) => {
-      store.dispatch('filter/setOffset', value)
-    }
-
-    const updateFilter = (value) => {
-      store.dispatch('filter/updateFilter', value)
-    }
-
     const getNewsItemsFilter = computed(() => {
-      return store.getters['filter/getNewsItemsFilter']
+      return store.newsItemsFilter
     })
 
     const updateNewsItems = () => {
-      store.dispatch('assess/updateNewsItems')
+      assessStore.updateNewsItems()
     }
 
     onMounted(() => {
@@ -345,11 +318,6 @@ export default {
       getItemCount,
       getOSINTSourceGroupsList,
       getOSINTSourcesList,
-      setScope,
-      setFilter,
-      setSort,
-      setLimit,
-      setOffset,
       updateFilter,
       getNewsItemsFilter,
       updateNewsItems

@@ -37,7 +37,7 @@
                   <v-text-field
                     v-model="edited_cpe.value"
                     :label="$t('asset.value')"
-                    :spellcheck="$store.state.settings.spellcheck"
+                    :spellcheck="spellcheck"
                   ></v-text-field>
                 </v-col>
               </v-row>
@@ -125,6 +125,9 @@ import { findAttributeCPE } from '@/api/assets'
 
 import VueCsvImport from '@/components/common/ImportCSV.vue'
 
+import { mapState } from 'pinia'
+import { settingsStore } from '@/stores/SettingsStore'
+
 export default {
   name: 'CPETable',
   components: {
@@ -160,7 +163,8 @@ export default {
   computed: {
     formTitle() {
       return this.edited_index === -1 ? 'Add CPE Code' : 'Edit CPE Code'
-    }
+    },
+    ...mapState(settingsStore, ['spellcheck'])
   },
   watch: {
     dialog(val) {

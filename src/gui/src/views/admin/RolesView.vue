@@ -25,7 +25,7 @@ import DataTable from '@/components/common/DataTable.vue'
 import EditConfig from '@/components/config/EditConfig.vue'
 import { deleteRole, createRole, updateRole } from '@/api/config'
 import { ref, onMounted, computed } from 'vue'
-import { useStore } from 'vuex'
+import { configStore } from '@/stores/ConfigStore'
 import { notifySuccess, objectFromFormat, notifyFailure } from '@/utils/helpers'
 
 export default {
@@ -35,12 +35,12 @@ export default {
     EditConfig
   },
   setup() {
-    const store = useStore()
-    const roles = ref([])
+    const store = configStore()
+    const mainStore = useMainStore()
+    const { roles, permissions } = storeToRefs(store)
     const formData = ref({})
     const selected = ref([])
     const edit = ref(false)
-    const permissions = ref([])
 
     const formFormat = computed(() => [
       {
@@ -73,23 +73,12 @@ export default {
       }
     ])
 
-    const loadRoles = () => store.dispatch('config/loadRoles')
-    const loadPermissions = () => store.dispatch('config/loadPermissions')
-    const getRoles = () => store.getters['config/getRoles']
-    const getPermissions = () => store.getters['config/getPermissions']
-    const updateItemCount = (count) => store.dispatch('updateItemCount', count)
     const updateData = () => {
-      loadRoles().then(() => {
-        const sources = getRoles()
-        roles.value = sources.items
-        updateItemCount({
-          total: sources.total_count,
-          filtered: sources.length
-        })
+      store.loadRoles().then(() => {
+        mainStore.itemCountTotal = roles.total_count
+        mainStore.itemCountFiltered = roles.items.length
       })
-      loadPermissions().then(() => {
-        permissions.value = getPermissions().items
-      })
+      store.loadPermissions().then()
     }
 
     const addItem = () => {

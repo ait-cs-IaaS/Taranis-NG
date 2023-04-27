@@ -1,7 +1,7 @@
 <template>
   <div>
     <DataTable
-      v-model:items="osint_source_groups"
+      v-model:items="osint_source_groups.items"
       :add-button="true"
       :header-filter="['tag', 'default', 'name', 'description']"
       sort-by-item="id"
@@ -31,8 +31,9 @@ import {
   updateOSINTSourceGroup
 } from '@/api/config'
 import { ref, computed, onMounted } from 'vue'
-import { useStore } from 'vuex'
 import { notifySuccess, objectFromFormat, notifyFailure } from '@/utils/helpers'
+import { configStore } from '@/stores/ConfigStore'
+import { storeToRefs } from 'pinia'
 
 export default {
   name: 'OSINTSourceGroupsView',
@@ -41,20 +42,12 @@ export default {
     EditConfig
   },
   setup() {
-    const store = useStore()
-    const osint_source_groups = ref([])
-    const osint_sources = ref([])
+    const store = configStore()
+    const mainStore = useMainStore()
+    const { osint_source_groups, osint_sources } = storeToRefs(store)
     const selected = ref([])
     const formData = ref({})
     const edit = ref(false)
-
-    const loadOSINTSourceGroups = () =>
-      store.dispatch('config/loadOSINTSourceGroups')
-    const getOSINTSourceGroups = () =>
-      store.getters['config/getOSINTSourceGroups']
-    const loadOSINTSources = () => store.dispatch('config/loadOSINTSources')
-    const getOSINTSources = () => store.getters['config/getOSINTSources']
-    const updateItemCount = (count) => store.dispatch('updateItemCount', count)
 
     const formFormat = computed(() => [
       {
@@ -83,22 +76,16 @@ export default {
           { text: 'Name', value: 'name' },
           { text: 'Description', value: 'description' }
         ],
-        items: osint_sources.value
+        items: osint_sources.items
       }
     ])
 
     const updateData = () => {
-      loadOSINTSourceGroups().then(() => {
-        const sources = getOSINTSourceGroups()
-        osint_source_groups.value = sources.items
-        updateItemCount({
-          total: sources.total_count,
-          filtered: sources.length
-        })
+      store.loadOSINTSourceGroups().then(() => {
+        mainStore.itemCountTotal = osint_source_groups.total_count
+        mainStore.itemCountFiltered = osint_source_groups.items.length
       })
-      loadOSINTSources().then(() => {
-        osint_sources.value = getOSINTSources().items
-      })
+      loadOSINTSources().then()
     }
 
     const addItem = () => {

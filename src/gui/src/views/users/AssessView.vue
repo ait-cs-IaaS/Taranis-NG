@@ -47,19 +47,20 @@
     <v-expand-transition>
       <assess-selection-toolbar
         v-if="activeSelection"
-        class="px-1 pt-2 pb-3"
-        :selection="getNewsItemsSelection()"
+        :selection="newsItemsSelection"
       ></assess-selection-toolbar>
     </v-expand-transition>
   </div>
 </template>
 
 <script>
-import KeyboardMixin from '@/assets/keyboard_mixin.js'
-import CardStory from '@/components/assess/CardStory.vue'
-import AssessSelectionToolbar from '@/components/assess/AssessSelectionToolbar.vue'
-
-import { mapState, mapGetters, mapActions } from 'vuex'
+import KeyboardMixin from '../../assets/keyboard_mixin'
+import CardStory from '@/components/assess/CardStory'
+import AssessSelectionToolbar from '@/components/assess/AssessSelectionToolbar'
+import { mapActions, mapState, storeToRefs, mapWritableState } from 'pinia'
+import { useAssessStore } from '@/stores/AssessStore'
+import { watch } from 'vue'
+import { useFilterStore } from '@/stores/FilterStore'
 
 export default {
   name: 'AssessView',
@@ -73,19 +74,18 @@ export default {
     items: []
   }),
   computed: {
-    ...mapState('filter', {
-      scope: (state) => state.newsItemsFilter.scope,
-      filter: (state) => state.newsItemsFilter
-    }),
-
+    ...mapState(useAssessStore, ['newsItems', 'newsItemsSelection']),
+    ...mapState(useFilterStore, ['newsItemsFilter']),
     moreToLoad() {
-      const offset = this.filter.offset ? parseInt(this.filter.offset) : 0
+      const offset = this.newsItemsFilter.offset
+        ? parseInt(this.newsItemsFilter.offset)
+        : 0
       const length = offset + this.items.length
-      return length < this.getNewsItems().total_count
+      return length < this.newsItems.total_count
     },
 
     activeSelection() {
-      return this.getNewsItemsSelection().length > 0
+      return this.newsItemsSelection.length > 0
     }
   },
 
@@ -94,33 +94,22 @@ export default {
     this.updateOSINTSources()
     this.updateNewsItems()
 
-    this.unsubscribe = this.$store.subscribe((mutation) => {
-      if (mutation.type === 'assess/UPDATE_NEWSITEMS') {
-        this.getNewsItemsFromStore()
-      }
+    const assessstore = useAssessStore()
+    const { newsItems } = storeToRefs(assessstore)
+
+    watch(newsItems, () => {
+      this.getNewsItemsFromStore()
     })
   },
-  beforeUnmount() {
-    this.unsubscribe()
-  },
   methods: {
-    ...mapActions(['updateItemCountTotal', 'updateItemCountFiltered']),
-    ...mapActions('assess', [
+    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
+    ...mapActions(useAssessStore, [
       'updateNewsItems',
       'updateOSINTSourceGroupsList',
       'updateOSINTSources',
-      'selectNewsItem',
-      'removeStoryFromNewsItem'
+      'selectNewsItem'
     ]),
-    ...mapGetters('assess', [
-      'getNewsItems',
-      'getNewsItemList',
-      'getNewsItemById',
-      'getNewsItemsSelection',
-      'getOSINTSourceGroupList'
-    ]),
-    ...mapActions('filter', ['resetNewsItemsFilter', 'nextPage']),
-
+    ...mapActions(useFilterStore, ['nextPage']),
     removeAndDeleteNewsItem(id) {
       this.items = this.items.filter((x) => x.id !== id)
     },
@@ -133,10 +122,10 @@ export default {
     // TODO: Call API via Store
     // + pass filter parameter for presorting
     getNewsItemsFromStore() {
-      this.items = this.getNewsItems().items
-      this.updateItemCountTotal(this.getNewsItems().total_count)
-      this.updateItemCountFiltered(this.items.length)
-      console.debug('number of newsitems: ' + this.getNewsItems().total_count)
+      this.items = this.newsItems.items
+      this.itemCountTotal = this.newsItems.total_count
+      this.itemCountFiltered = this.items.length
+      console.debug('number of newsitems: ' + this.newsItems.total_count)
     }
   }
 }

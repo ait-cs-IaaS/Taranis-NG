@@ -36,8 +36,10 @@ import {
   createReportItem,
   updateReportItem
 } from '@/api/analyze'
-import { mapActions, mapGetters } from 'vuex'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
+import { mapActions, mapState, mapWritableState } from 'pinia'
+import { useAnalyzeStore } from '@/stores/AnalyzeStore'
+import { useMainStore } from '@/stores/MainStore'
 
 export default {
   name: 'AnalyzeView',
@@ -45,7 +47,6 @@ export default {
     DataTable
   },
   data: () => ({
-    report_items: [],
     report_types: {},
     selected: [],
     report_item: {
@@ -57,21 +58,19 @@ export default {
   mounted() {
     this.updateData()
   },
+  computed: {
+    ...mapState(useAnalyzeStore, ['report_items', 'report_item_types'])
+  },
   methods: {
-    ...mapActions('analyze', ['loadReportItems', 'loadReportTypes']),
-    ...mapGetters('analyze', ['getReportItems', 'getReportTypes']),
-    ...mapActions(['updateItemCount']),
+    ...mapActions(useAnalyzeStore, ['loadReportItems', 'loadReportTypes']),
+    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     updateData() {
       this.loadReportItems().then(() => {
-        const sources = this.getReportItems()
-        this.report_items = sources
-        this.updateItemCount({
-          total: sources.length,
-          filtered: sources.length
-        })
+        this.itemCountTotal = this.newsItems.total_count
+        this.itemCountFiltered = this.items.length
       })
       this.loadReportTypes().then(() => {
-        this.report_types = this.getReportTypes().items
+        this.report_types = this.report_item_types.items
       })
     },
     addItem() {

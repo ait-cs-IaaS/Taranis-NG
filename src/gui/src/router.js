@@ -1,6 +1,6 @@
 import { createWebHistory, createRouter } from 'vue-router'
 import Home from '@/views/Home.vue'
-import { store } from '@/store/store'
+import { useAuthStore } from './stores/AuthStore'
 import Permissions from '@/services/auth/permissions'
 
 export const router = createRouter({
@@ -343,9 +343,10 @@ export const router = createRouter({
 })
 
 router.beforeEach((to) => {
-  if (to.meta.requiresAuth && !store.getters.isAuthenticated) {
-    if (store.getters.hasExternalLoginUrl) {
-      window.location = encodeURI(store.getters.getLoginURL)
+  const authstore = useAuthStore()
+  if (to.meta.requiresAuth && !authstore.isAuthenticated) {
+    if (authstore.external_login_uri) {
+      window.location = encodeURI(authstore.login_uri)
     }
     return { name: 'login' }
   }

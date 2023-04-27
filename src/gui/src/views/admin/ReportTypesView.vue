@@ -1,7 +1,7 @@
 <template>
   <div>
     <data-table
-      v-model:items="report_types"
+      v-model:items="report_types.items"
       :add-button="true"
       :header-filter="['tag', 'id', 'title', 'description']"
       sort-by-item="id"
@@ -22,8 +22,10 @@
 import DataTable from '@/components/common/DataTable.vue'
 import ReportTypeForm from '@/components/config/ReportTypeForm.vue'
 import { deleteReportItemType } from '@/api/config'
-import { mapActions, mapGetters } from 'vuex'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
+
+import { mapActions, mapState } from 'pinia'
+import { configStore } from '@/stores/ConfigStore'
 
 export default {
   name: 'ReportTypes',
@@ -32,27 +34,23 @@ export default {
     ReportTypeForm
   },
   data: () => ({
-    report_types: [],
     selected: [],
     formData: {},
     newItem: false
   }),
-  computed: {},
   mounted() {
     this.updateData()
   },
+  computed: {
+    ...mapState(configStore, { report_types: 'report_item_types_config' })
+  },
   methods: {
-    ...mapActions('config', ['loadReportTypesConfig']),
-    ...mapGetters('config', ['getReportTypesConfig']),
-    ...mapActions(['updateItemCount']),
+    ...mapActions(configStore, ['loadReportTypesConfig']),
+    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     updateData() {
       this.loadReportTypesConfig().then(() => {
-        const sources = this.getReportTypesConfig()
-        this.report_types = sources.items
-        this.updateItemCount({
-          total: sources.total_count,
-          filtered: sources.length
-        })
+        this.itemCountTotal = this.report_types.total_count
+        this.itemCountFiltered = this.report_types.items.length
       })
     },
     addItem() {

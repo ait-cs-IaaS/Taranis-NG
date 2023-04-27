@@ -20,7 +20,7 @@
             <v-icon left dark> mdi-folder-plus-outline </v-icon>
             New Asset Group
           </v-btn>
-          {{ filter.search }}
+          {{ search }}
         </v-col>
       </v-row>
 
@@ -40,9 +40,12 @@
 </template>
 
 <script>
-import { mapState, mapGetters, mapActions } from 'vuex'
+import { mapActions, mapState } from 'pinia'
+
 import FilterNavigation from '@/components/common/FilterNavigation.vue'
 import filterSortList from '@/components/assess/filter/filterSortList.vue'
+import { assetsStore } from '@/stores/AssetsStore'
+import { useFilterStore } from '@/stores/FilterStore'
 
 export default {
   name: 'AssetsNav',
@@ -68,70 +71,50 @@ export default {
     ]
   }),
   computed: {
-    ...mapState('filter', {
-      filter: (state) => state.assetFilter
-    }),
-    ...mapState(['drawerVisible']),
+    ...mapState(useFilterStore, ['assetFilter']),
     limit: {
       get() {
-        return this.filter.limit
+        return this.assetFilter.limit
       },
       set(value) {
         this.updateAssetFilter({ limit: value })
-        this.updateAssets()
+        this.updateFilteredAssets()
       }
     },
     sort: {
       get() {
-        if (!this.filter.order) return 'DATE_DESC'
-        return this.filter.order
+        if (!this.assetFilter.order) return 'DATE_DESC'
+        return this.assetFilter.order
       },
       set(value) {
         this.updateAssetFilter({ sort: value })
-        this.updateAssets()
+        this.updateFilteredAssets()
       }
     },
     offset: {
       get() {
-        return this.filter.offset
+        return this.assetFilter.offset
       },
       set(value) {
         this.updateAssetFilter({ offset: value })
-        this.updateAssets()
+        this.updateFilteredAssets()
       }
     },
     search: {
       get() {
-        return this.filter.search
+        return this.assetFilter.search
       },
       set(value) {
         this.updateAssetFilter({ search: value })
         if (!this.awaitingSearch) {
           setTimeout(() => {
-            this.updateAssets()
+            this.updateFilteredAssets()
             this.awaitingSearch = false
           }, 500)
         }
 
         this.awaitingSearch = true
       }
-    },
-    offsetRange() {
-      const list = []
-      for (let i = 0; i <= this.getItemCount().total; i++) {
-        list.push(i)
-      }
-      return list
-    },
-    pages() {
-      const blocks = Math.ceil(
-        this.getItemCount().total / this.getItemCount().filtered
-      )
-      const list = []
-      for (let i = 0; i <= blocks; i++) {
-        list.push(i)
-      }
-      return list
     },
     navigation_drawer_class() {
       return this.showOmniSearch ? 'mt-12' : ''
@@ -146,9 +129,8 @@ export default {
   },
   methods: {
     ...mapGetters(['getItemCount']),
-    ...mapActions('assets', ['updateAssets']),
-    ...mapActions('filter', ['setAssetFilter', 'updateAssetFilter']),
-    ...mapGetters('filter', ['getAssetFilter']),
+    ...mapActions(assetsStore, ['updateFilteredAssets']),
+    ...mapActions(useFilterStore, ['updateAssetFilter']),
     addAsset() {
       this.$router.push('/asset/0')
     },

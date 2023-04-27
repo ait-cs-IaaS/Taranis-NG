@@ -106,7 +106,9 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { settingsStore } from '@/stores/SettingsStore'
+import { mapActions, mapState, mapStores } from 'pinia'
+import { configStore } from '@/stores/ConfigStore'
 
 export default {
   name: 'UserSettings',
@@ -125,17 +127,16 @@ export default {
       },
       { text: 'Description', value: 'description' }
     ],
-    word_lists: [],
     selected_word_lists: []
   }),
   computed: {
     browser_locale: {
       get() {
-        return this.getProfileBrowserLocale()
+        return this.settingsStore.getProfileBrowserLocale
       },
       set(value) {
         this.$i18n.locale = value
-        this.setLocale(value)
+        this.settingsStore.setLocale(value)
         console.warn('TODO: extend user profile to include locale')
         // TODO: extend user profile to include locale
         // this.saveUserProfile({ browser_locale: value })
@@ -147,7 +148,9 @@ export default {
         { value: 'de', text: 'Deutsch' },
         { value: 'sk', text: 'Slovensky' }
       ]
-    }
+    },
+    ...mapStores(settingsStore),
+    ...mapState(configStore, ['word_lists'])
   },
   mounted() {
     this.spellcheck = this.getProfileSpellcheck()
@@ -157,18 +160,9 @@ export default {
     this.loadWordList()
   },
   methods: {
-    ...mapGetters('settings', [
-      'getProfileSpellcheck',
-      'getProfileDarkTheme',
-      'getProfileHotkeys',
-      'getProfileWordLists',
-      'getProfileBrowserLocale'
-    ]),
-    ...mapActions('settings', ['saveUserProfile', 'setLocale']),
-    ...mapActions('config', ['loadWordLists']),
-    ...mapGetters('config', ['getWordLists']),
+    ...mapActions(configStore, ['loadWordLists']),
     save() {
-      this.saveUserProfile({
+      this.settingsStore.saveUserProfile({
         spellcheck: this.spellcheck,
         dark_theme: this.dark_theme,
         hotkeys: this.shortcuts,
@@ -187,10 +181,8 @@ export default {
       this.hotkeyAlias = event
     },
 
-    loadWordList() {
-      this.loadWordLists().then(() => {
-        this.word_lists = this.getWordLists().items
-      })
+    async loadWordList() {
+      await this.loadWordLists()
     },
 
     pressKey(event) {

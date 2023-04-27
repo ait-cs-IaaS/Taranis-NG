@@ -44,10 +44,12 @@
 </template>
 
 <script>
-import { mapState, mapGetters, mapActions } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import FilterNavigation from '@/components/common/FilterNavigation.vue'
 import filterSortList from '@/components/assess/filter/filterSortList.vue'
 import dateChips from '@/components/assess/filter/dateChips.vue'
+import { usePublishStore } from '@/stores/PublishStore'
+import { useFilterStore } from '@/stores/FilterStore'
 
 export default {
   name: 'PublishNav',
@@ -68,13 +70,10 @@ export default {
     ]
   }),
   computed: {
-    ...mapState('filter', {
-      filter: (state) => state.productFilter
-    }),
-    ...mapState(['drawerVisible']),
+    ...mapState(useFilterStore, ['productFilter']),
     limit: {
       get() {
-        return this.filter.limit
+        return this.productFilter.limit
       },
       set(value) {
         this.updateProductFilter({ limit: value })
@@ -83,8 +82,8 @@ export default {
     },
     sort: {
       get() {
-        if (!this.filter.order) return 'DATE_DESC'
-        return this.filter.order
+        if (!this.productFilter.order) return 'DATE_DESC'
+        return this.productFilter.order
       },
       set(value) {
         this.updateProductFilter({ sort: value })
@@ -93,7 +92,7 @@ export default {
     },
     offset: {
       get() {
-        return this.filter.offset
+        return this.productFilter.offset
       },
       set(value) {
         this.updateProductFilter({ offset: value })
@@ -102,7 +101,7 @@ export default {
     },
     range: {
       get() {
-        return this.filter.range
+        return this.productFilter.range
       },
       set(value) {
         this.updateProductFilter({ range: value })
@@ -111,7 +110,7 @@ export default {
     },
     search: {
       get() {
-        return this.filter.search
+        return this.productFilter.search
       },
       set(value) {
         this.updateProductFilter({ search: value })
@@ -124,26 +123,6 @@ export default {
 
         this.awaitingSearch = true
       }
-    },
-    offsetRange() {
-      const list = []
-      for (let i = 0; i <= this.getItemCount().total; i++) {
-        list.push(i)
-      }
-      return list
-    },
-    pages() {
-      const blocks = Math.ceil(
-        this.getItemCount().total / this.getItemCount().filtered
-      )
-      const list = []
-      for (let i = 0; i <= blocks; i++) {
-        list.push(i)
-      }
-      return list
-    },
-    navigation_drawer_class() {
-      return this.showOmniSearch ? 'mt-12' : ''
     }
   },
   created() {
@@ -154,10 +133,8 @@ export default {
     console.debug('loaded with query', query)
   },
   methods: {
-    ...mapGetters(['getItemCount']),
-    ...mapActions('analyze', ['updateProducts']),
-    ...mapActions('filter', ['setProductFilter', 'updateProductFilter']),
-    ...mapGetters('filter', ['getProductFilter']),
+    ...mapActions(usePublishStore, ['updateProducts']),
+    ...mapActions(useFilterStore, ['updateProductFilter']),
     addReport() {
       this.$router.push('/product/0')
     }

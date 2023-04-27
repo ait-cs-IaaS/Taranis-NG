@@ -1,44 +1,39 @@
 <template>
   <v-container fluid>
-    <v-card v-for="product in products" :key="product.id" class="mt-3">
+    <v-card v-for="product in products.items" :key="product.id" class="mt-3">
       <v-card-title>
         {{ product }}
       </v-card-title>
     </v-card>
-    <h2 v-if="!products">No Products found</h2>
+    <h2 v-if="!products.items">No Products found</h2>
   </v-container>
 </template>
 
 <script>
 import { deleteProduct } from '@/api/publish'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapState, mapWritableState } from 'pinia'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
+import { usePublishStore } from '@/stores/PublishStore'
+import { useMainStore } from '@/stores/MainStore'
 
 export default {
   name: 'PruoductView',
   components: {},
   data: function () {
     return {
-      selected: [],
-      products: []
+      selected: []
     }
   },
-  computed: {},
-  mounted() {
-    this.updateData()
+  computed: {
+    ...mapState(usePublishStore, ['products'])
   },
   methods: {
-    ...mapActions('publish', ['loadProducts']),
-    ...mapGetters('publish', ['getProducts']),
-    ...mapActions(['updateItemCount']),
+    ...mapActions(usePublishStore, ['loadProducts']),
+    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     updateData() {
       this.loadProducts().then(() => {
-        const sources = this.getProducts()
-        this.products = sources.items
-        this.updateItemCount({
-          total: sources.total_count,
-          filtered: sources.length
-        })
+        this.itemCountTotal = this.products.total_count
+        this.itemCountFiltered = this.products.items.length
       })
     },
     editProduct(item) {

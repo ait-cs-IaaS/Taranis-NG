@@ -63,21 +63,21 @@
                 :label="$t('report_type.name')"
                 name="name"
                 type="text"
-                :spellcheck="$store.state.settings.spellcheck"
+                :spellcheck="spellcheck"
               ></v-text-field>
               <v-textarea
                 v-model="group.description"
                 :disabled="!canUpdate"
                 :label="$t('report_type.description')"
                 name="description"
-                :spellcheck="$store.state.settings.spellcheck"
+                :spellcheck="spellcheck"
               ></v-textarea>
               <v-text-field
                 v-model="group.section_title"
                 :disabled="!canUpdate"
                 :label="$t('report_type.section_title')"
                 name="section_title"
-                :spellcheck="$store.state.settings.spellcheck"
+                :spellcheck="spellcheck"
               ></v-text-field>
               <AttributeTable
                 v-model:attributes="
@@ -98,6 +98,9 @@
 import { createReportItemType, updateReportItemType } from '@/api/config'
 import AttributeTable from './AttributeTable'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
+
+import { mapState } from 'pinia'
+import { useSettingsStore } from '@/stores/SettingsStore'
 
 export default {
   name: 'ReportTypeForm',
@@ -120,10 +123,10 @@ export default {
       attribute_groups: []
     }
   }),
-  mounted() {
-    if (this.reportTypeData) {
-      this.edit = true
-      this.report_type = this.reportTypeData
+  computed: {
+    ...mapState(useSettingsStore, ['spellcheck']),
+    canUpdate() {
+      return !this.edit
     }
   },
   methods: {

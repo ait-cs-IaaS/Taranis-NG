@@ -24,7 +24,7 @@
         <v-textarea
           v-model="asset.description"
           :label="$t('asset.description')"
-          :spellcheck="$store.state.settings.spellcheck"
+          :spellcheck="spellcheck"
         />
       </v-col>
       <v-col cols="12">
@@ -50,6 +50,9 @@
 import { createAsset, updateAsset } from '@/api/assets'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
 
+import { mapState } from 'pinia'
+import { settingsStore } from '@/stores/SettingsStore'
+
 export default {
   name: 'AssetView',
   props: {
@@ -68,7 +71,8 @@ export default {
       return this.edit
         ? `${this.$t('title.edit')} asset`
         : `${this.$t('title.add_new')} asset`
-    }
+    },
+    ...mapState(settingsStore, ['spellcheck'])
   },
   methods: {
     saveAsset() {

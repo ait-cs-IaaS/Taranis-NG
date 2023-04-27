@@ -101,7 +101,9 @@ import CardAssess from '@/components/assess/legacy/CardAssess.vue'
 import NewsItemSingleDetail from '@/components/assess/NewsItemSingleDetail.vue'
 import NewsItemDetail from '@/components/assess/NewsItemDetail.vue'
 import { getReportItemData, updateReportItem } from '@/api/analyze'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapState } from 'pinia'
+import { configStore } from '@/stores/ConfigStore'
+import { useAssessStore } from '@/stores/AssessStore'
 
 export default {
   name: 'NewsItemSelector',
@@ -134,11 +136,13 @@ export default {
         (this.checkPermission(Permissions.ANALYZE_UPDATE) &&
           this.modify === true)
       )
-    }
+    },
+    ...mapState(configStore, ['osint_source_groups']),
+    ...mapState(useAssessStore, ['getSelection'])
   },
   methods: {
-    ...mapGetters('config', ['getOSINTSourceGroups']),
-    ...mapActions('config', ['loadOSINTSourceGroups']),
+    ...mapActions(configStore, ['loadOSINTSourceGroups']),
+    ...mapActions(useAssessStore, ['multiSelect']),
     cardLayout: function () {
       return 'CardAssess'
     },
@@ -149,12 +153,12 @@ export default {
 
     openSelector() {
       this.selected_group_id = this.groups[0].id
-      this.$store.dispatch('multiSelect', true)
+      this.multiSelect(true)
       this.dialog = true
     },
 
     add() {
-      const selection = this.$store.getters.getSelection
+      const selection = this.getSelection
       const added_values = []
       const data = {}
       data.add = true
@@ -193,7 +197,7 @@ export default {
     },
 
     close() {
-      this.$store.dispatch('multiSelect', false)
+      this.multiSelect(false)
       this.dialog = false
     },
 
@@ -255,7 +259,7 @@ export default {
 
   mounted() {
     this.loadOSINTSourceGroups().then(() => {
-      this.groups = this.getOSINTSourceGroups()
+      this.groups = this.osint_source_groups
       for (let i = 0; i < this.groups.length; i++) {
         this.links.push({
           icon: 'mdi-folder-multiple',

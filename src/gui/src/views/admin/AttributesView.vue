@@ -24,8 +24,11 @@
 import DataTable from '@/components/common/DataTable.vue'
 import EditConfig from '@/components/config/EditConfig.vue'
 import { deleteAttribute, createAttribute, updateAttribute } from '@/api/config'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapState, mapWritableState } from 'pinia'
+import { configStore } from '@/stores/ConfigStore'
+import { mapActions as mapActionsVuex } from 'vuex'
 import { notifySuccess, emptyValues, notifyFailure } from '@/utils/helpers'
+import { useMainStore } from '@/stores/MainStore'
 
 export default {
   name: 'AttributesView',
@@ -34,7 +37,6 @@ export default {
     EditConfig
   },
   data: () => ({
-    attributes: [],
     formData: {},
     edit: false,
     formFormat: [
@@ -100,22 +102,19 @@ export default {
   mounted() {
     this.updateData()
   },
+  computed: {
+    ...mapState(configStore, ['attributes'])
+  },
   methods: {
-    ...mapActions('config', ['loadAttributes']),
-    ...mapGetters('config', ['getAttributes']),
-    ...mapActions(['updateItemCount']),
-    updateData() {
-      this.loadAttributes().then(() => {
-        const sources = this.getAttributes()
-        this.attributes = sources.items
-        this.updateItemCount({
-          total: sources.total_count,
-          filtered: sources.length
-        })
-      })
+    ...mapActions(configStore, ['loadAttributes']),
+    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
+    async updateData() {
+      await this.loadAttributes()
+      this.itemCountTotal = this.attributes.total_count
+      this.itemCountFiltered = this.attributes.items.length
     },
     addItem() {
-      this.formData = emptyValues(this.attributes[0])
+      this.formData = emptyValues(this.attributes.items[0])
       this.edit = false
     },
     editItem(item) {

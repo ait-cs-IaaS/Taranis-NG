@@ -23,7 +23,9 @@
 import DataTable from '@/components/common/DataTable.vue'
 import EditConfig from '@/components/config/EditConfig.vue'
 import { updateBot } from '@/api/config'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapState } from 'pinia'
+import { configStore } from '@/stores/ConfigStore'
+import { mapActions as mapActionsVuex } from 'vuex'
 import {
   notifySuccess,
   objectFromFormat,
@@ -47,6 +49,7 @@ export default {
     edit: false
   }),
   computed: {
+    ...mapState(configStore, { store_bots: 'bots' }),
     formFormat() {
       const base = [
         {
@@ -86,12 +89,11 @@ export default {
     this.updateData()
   },
   methods: {
-    ...mapActions('config', ['loadBots', 'loadParameters']),
-    ...mapGetters('config', ['getBots', 'getParameters']),
-    ...mapActions(['updateItemCount']),
+    ...mapActions(configStore, ['loadBots', 'loadParameters']),
+    ...mapActionsVuex(['updateItemCount']),
     updateData() {
       this.loadBots().then(() => {
-        const sources = this.getBots()
+        const sources = this.store_bots
         this.unparsed_sources = sources.items
         this.bots = parseParameterValues(sources.items)
 

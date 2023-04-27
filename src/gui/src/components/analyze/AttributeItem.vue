@@ -1,59 +1,59 @@
 <template>
   <div>
     <v-textarea
-      v-if="attribute_item.type === 'TEXT'"
+      v-if="attributeItem.type === 'TEXT'"
       v-model="input"
-      :readonly="read_only"
-      :label="attribute_item.title"
+      :readonly="readOnly"
+      :label="attributeItem.title"
     ></v-textarea>
     <v-text-field
-      v-if="attribute_item.type === 'STRING'"
+      v-if="attributeItem.type === 'STRING'"
       v-model="input"
-      :readonly="read_only"
-      :label="attribute_item.title"
+      :readonly="readOnly"
+      :label="attributeItem.title"
     ></v-text-field>
     <v-checkbox
-      v-if="attribute_item.type === 'BOOLEAN'"
+      v-if="attributeItem.type === 'BOOLEAN'"
       v-model="input"
-      :readonly="read_only"
-      :label="attribute_item.title"
+      :readonly="readOnly"
+      :label="attributeItem.title"
     />
     <v-select
-      v-if="attribute_item.type === 'ENUM'"
+      v-if="attributeItem.type === 'ENUM'"
       v-model="input"
-      :readonly="read_only"
+      :readonly="readOnly"
       item-title="value"
       item-value="id"
-      :items="attribute_item.attribute_enums"
-      :label="attribute_item.title"
+      :items="attributeItem.attribute_enums"
+      :label="attributeItem.title"
     />
     <v-radio-group
-      v-if="attribute_item.type === 'RADIO'"
+      v-if="attributeItem.type === 'RADIO'"
       v-model="input"
-      :disabled="read_only"
+      :disabled="readOnly"
       row
     >
       <v-radio
-        v-for="attr_enum in attribute_item.attribute_enums"
+        v-for="attr_enum in attributeItem.attribute_enums"
         :key="attr_enum.id"
         :label="attr_enum.value"
         :value="attr_enum.value"
       ></v-radio>
     </v-radio-group>
     <vue-editor
-      v-if="attribute_item.type === 'RICH_TEXT'"
+      v-if="attributeItem.type === 'RICH_TEXT'"
       v-model="input"
-      :disabled="read_only"
+      :disabled="readOnly"
       :editor-options="{
         height: 300
       }"
     />
     <v-radio-group
-      v-if="attribute_item.type === 'TLP'"
+      v-if="attributeItem.type === 'TLP'"
       v-model="input"
-      :disabled="read_only"
+      :disabled="readOnly"
       row
-      :label="attribute_item.title"
+      :label="attributeItem.title"
     >
       <v-radio
         :label="$t('attribute.tlp_white')"
@@ -77,36 +77,36 @@
       ></v-radio>
     </v-radio-group>
     <date-picker
-      v-if="attribute_item.type === 'DATE'"
+      v-if="attributeItem.type === 'DATE'"
       v-model="input"
-      :placeholder="attribute_item.title"
-      :disabled="read_only"
+      :placeholder="attributeItem.title"
+      :disabled="readOnly"
     />
     <date-picker
-      v-if="attribute_item.type === 'DATE_TIME'"
+      v-if="attributeItem.type === 'DATE_TIME'"
       v-model="input"
-      :placeholder="attribute_item.title"
+      :placeholder="attributeItem.title"
       type="datetime"
-      :disabled="read_only"
+      :disabled="readOnly"
     />
     <date-picker
-      v-if="attribute_item.type === 'TIME'"
+      v-if="attributeItem.type === 'TIME'"
       v-model="input"
-      :placeholder="attribute_item.title"
+      :placeholder="attributeItem.title"
       type="time"
       :show-second="false"
-      :disabled="read_only"
+      :disabled="readOnly"
     />
     <v-autocomplete
-      v-if="attribute_item.type === 'CPE' || attribute_item.type === 'CVE'"
+      v-if="attributeItem.type === 'CPE' || attributeItem.type === 'CVE'"
       v-model="input"
-      :readonly="read_only"
-      :label="attribute_item.title"
-      :items="attribute_item.attribute_enums"
+      :readonly="readOnly"
+      :label="attributeItem.title"
+      :items="attributeItem.attribute_enums"
     >
       <!-- TODO: Use MyAssets for Autocomplete -->
     </v-autocomplete>
-    <AttributeCVSS v-if="attribute_item.type === 'CVSS'" v-model="input" />
+    <AttributeCVSS v-if="attributeItem.type === 'CVSS'" v-model="input" />
   </div>
 </template>
 
@@ -126,11 +126,11 @@ export default {
       default: '',
       required: true
     },
-    attribute_item: {
+    attributeItem: {
       type: Object,
       required: true
     },
-    read_only: { type: Boolean, default: false }
+    readOnly: { type: Boolean, default: false }
   },
   emits: ['input'],
   computed: {

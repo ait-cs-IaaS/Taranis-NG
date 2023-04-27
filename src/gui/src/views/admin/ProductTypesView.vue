@@ -28,7 +28,7 @@ import {
   createProductType,
   updateProductType
 } from '@/api/config'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions as mapActionsVuex } from 'vuex'
 import {
   notifySuccess,
   notifyFailure,
@@ -36,6 +36,8 @@ import {
   createParameterValues,
   objectFromFormat
 } from '@/utils/helpers'
+import { mapActions, mapState } from 'pinia'
+import { configStore } from '@/stores/ConfigStore'
 
 export default {
   name: 'ProductTypesView',
@@ -52,6 +54,10 @@ export default {
     presenters: []
   }),
   computed: {
+    ...mapState(configStore, {
+      store_product_types: 'product_types',
+      store_presenters: 'presenters'
+    }),
     formFormat() {
       const base = [
         {
@@ -91,12 +97,11 @@ export default {
     this.updateData()
   },
   methods: {
-    ...mapActions('config', ['loadProductTypes', 'loadPresenters']),
-    ...mapGetters('config', ['getProductTypes', 'getPresenters']),
-    ...mapActions(['updateItemCount']),
+    ...mapActions(configStore, ['loadProductTypes', 'loadPresenters']),
+    ...mapActionsVuex(['updateItemCount']),
     updateData() {
       this.loadProductTypes().then(() => {
-        const sources = this.getProductTypes()
+        const sources = this.store_product_types
         this.productTypes = parseParameterValues(sources.items)
         this.updateItemCount({
           total: sources.total_count,
@@ -104,7 +109,7 @@ export default {
         })
       })
       this.loadPresenters().then(() => {
-        const presenters = this.getPresenters()
+        const presenters = this.store_presenters
         this.presenters = presenters.items.map((presenter) => {
           this.parameters[presenter.id] = presenter.parameters.map(
             (parameter) => {

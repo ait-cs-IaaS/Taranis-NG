@@ -18,7 +18,6 @@
             v-model="acl.description"
             :label="$t('acl.description')"
             name="description"
-            :spellcheck="$store.state.settings.spellcheck"
           />
         </v-col>
         <v-col cols="6" class="pa-1">
@@ -72,7 +71,7 @@
           <v-data-table
             v-model="selected_users"
             :headers="headers_user"
-            :items="users"
+            :items="users.items"
             item-key="id"
             :show-select="true"
             class="elevation-1"
@@ -88,7 +87,7 @@
           <v-data-table
             v-model="selected_roles"
             :headers="headers_role"
-            :items="roles"
+            :items="roles.items"
             item-key="id"
             :show-select="true"
             class="elevation-1"
@@ -123,8 +122,9 @@
 
 <script>
 import { createACLEntry, updateACLEntry } from '@/api/config'
-import { mapActions, mapGetters } from 'vuex'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
+import { mapActions } from 'pinia'
+import { configStore } from '@/stores/ConfigStore'
 
 export default {
   name: 'NewACL',
@@ -170,9 +170,7 @@ export default {
     edit: false,
     show_error: false,
     selected_users: [],
-    users: [],
     selected_roles: [],
-    roles: [],
     acl: {
       id: -1,
       name: '',
@@ -210,8 +208,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions('config', ['loadUsers', 'loadRoles']),
-    ...mapGetters('config', ['getUsers', 'getRoles']),
+    ...mapActions(configStore, ['loadUsers', 'loadRoles']),
     addACL() {
       this.edit = false
       this.show_error = false

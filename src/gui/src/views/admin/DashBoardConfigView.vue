@@ -6,7 +6,7 @@
           <v-icon class="mr-2"> mdi-email-multiple </v-icon>
           <span class="caption">
             There are
-            <strong>{{ dashboardData.total_news_items }}</strong> total Assess
+            <strong>{{ dashboard_data.total_news_items }}</strong> total Assess
             items.
           </span>
         </template>
@@ -15,7 +15,7 @@
         <template #content>
           <v-icon class="mr-2" color="orange"> mdi-email-check-outline </v-icon>
           <span class="caption">
-            There are <b>{{ dashboardData.total_products }}</b> products ready
+            There are <b>{{ dashboard_data.total_products }}</b> products ready
             for publications.
           </span>
         </template>
@@ -26,7 +26,7 @@
         <template #content>
           <v-icon class="mr-2"> mdi-account </v-icon>
           <span class="caption">
-            There are <b>{{ dashboardData.report_items_completed }}</b>
+            There are <b>{{ dashboard_data.report_items_completed }}</b>
             completed analyses.
           </span>
           <v-divider inset></v-divider>
@@ -34,7 +34,7 @@
             mdi-account-question-outline
           </v-icon>
           <span class="caption">
-            There are <b>{{ dashboardData.report_items_in_progress }}</b>
+            There are <b>{{ dashboard_data.report_items_in_progress }}</b>
             pending analyses.
           </span>
         </template>
@@ -50,7 +50,7 @@
           <v-icon class="mr-2"> mdi-clock-check-outline </v-icon>
           <span class="caption"
             >Last successful run ended at
-            <b>{{ dashboardData.latest_collected }}</b></span
+            <b>{{ dashboard_data.latest_collected }}</b></span
           >
         </template>
       </dash-board-card>
@@ -58,7 +58,7 @@
         <template #content>
           <v-icon class="mr-2" color="blue"> mdi-database </v-icon>
           <span class="caption"
-            >There are <b>{{ dashboardData.total_database_items }}</b> live
+            >There are <b>{{ dashboard_data.total_database_items }}</b> live
             items.</span
           >
           <v-divider inset></v-divider>
@@ -73,35 +73,21 @@
 
 <script>
 import { ref, onMounted } from 'vue'
-import { useStore } from 'vuex'
+import { dashboardStore } from '@/stores/DashboardStore'
 import DashBoardCard from '@/components/common/DashBoardCard.vue'
+import { storeToRefs } from 'pinia'
 
 export default {
   name: 'DashBoardConfig',
   components: { DashBoardCard },
   setup() {
-    const store = useStore()
-    const dashboardData = ref({})
+    const store = dashboardStore()
+    const { dashboard_data } = storeToRefs(store)
 
-    const loadDashboardData = () =>
-      store.dispatch('dashboard/loadDashboardData')
-    const getDashboardData = () => store.getters['dashboard/getDashboardData']
-    const getItemCount = () => store.getters['getItemCount']
-
-    const totalItems = ref(0)
-
-    const updateDashboardData = () => {
-      loadDashboardData().then(() => {
-        dashboardData.value = getDashboardData()
-        totalItems.value = getItemCount().total
-      })
-    }
-
-    onMounted(updateDashboardData)
+    onMounted(store.loadDashboardData())
 
     return {
-      dashboardData,
-      totalItems
+      dashboard_data
     }
   }
 }

@@ -34,7 +34,7 @@
                 type="text"
                 data-vv-name="name"
                 :error-messages="errors.collect('name')"
-                :spellcheck="$store.state.settings.spellcheck"
+                :spellcheck="spellcheck"
               />
             </v-col>
             <v-col cols="12" class="pa-1">
@@ -42,7 +42,7 @@
                 v-model="group.description"
                 :label="$t('asset_group.description')"
                 name="description"
-                :spellcheck="$store.state.settings.spellcheck"
+                :spellcheck="spellcheck"
               />
             </v-col>
           </v-row>
@@ -103,6 +103,11 @@
 <script>
 import { createAssetGroup, updateAssetGroup } from '@/api/assets'
 
+import { mapActions, mapState } from 'pinia'
+import { settingsStore } from '@/stores/SettingsStore'
+import { configStore } from '@/stores/ConfigStore'
+import { assetsStore } from '@/stores/AssetsStore'
+
 export default {
   name: 'NewAssetGroup',
   data: () => ({
@@ -125,7 +130,6 @@ export default {
       { text: 'Description', value: 'description' }
     ],
     selected_users: [],
-    users: [],
     templates: [],
     selected_templates: [],
     show_validation_error: false,
@@ -138,18 +142,17 @@ export default {
       templates: []
     }
   }),
-  mounted() {
-    this.$store
-      .dispatch('config/getAllExternalUsers', { search: '' })
-      .then(() => {
-        this.users = this.$store.getters.getUsers.items
-      })
+  computed: {
+    ...mapState(settingsStore, ['spellcheck']),
+    ...mapState(assetsStore, ['notification_templates']),
+    ...mapState(configStore, ['users'])
+  },
+  async mounted() {
+    await this.getAllExternalUsers({ search: '' })
 
-    this.$store
-      .dispatch('config/getAllNotificationTemplates', { search: '' })
-      .then(() => {
-        this.templates = this.$store.getters.getNotificationTemplates.items
-      })
+    this.getAllNotificationTemplates({ search: '' }).then(() => {
+      this.templates = this.notification_templates.items
+    })
 
     this.$root.$on('show-edit', (data) => {
       this.visible = true
@@ -162,10 +165,11 @@ export default {
       this.selected_templates = data.templates
     })
   },
-  beforeUnmount() {
-    this.$root.$off('show-edit')
-  },
   methods: {
+    ...mapActions(configStore, [
+      'getAllNotificationTemplates',
+      'getAllExternalUsers'
+    ]),
     addGroup() {
       this.visible = true
       this.edit = false
