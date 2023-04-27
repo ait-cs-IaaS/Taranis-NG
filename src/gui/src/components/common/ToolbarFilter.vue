@@ -29,7 +29,7 @@
 
 <script>
 import { mapState } from 'pinia'
-import { configStore } from '@/stores/ConfigStore'
+import { useConfigStore } from '@/stores/ConfigStore'
 
 export default {
   name: 'ToolbarFilter',
@@ -40,7 +40,7 @@ export default {
     total_count_getter: String
   },
   computed: {
-    ...mapState(configStore, ['nodes']),
+    ...mapState(useConfigStore, ['nodes']),
     totalCount() {
       return this.nodes.total_count
     }

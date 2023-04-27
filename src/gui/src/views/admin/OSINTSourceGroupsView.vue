@@ -32,7 +32,7 @@ import {
 } from '@/api/config'
 import { ref, computed, onMounted } from 'vue'
 import { notifySuccess, objectFromFormat, notifyFailure } from '@/utils/helpers'
-import { configStore } from '@/stores/ConfigStore'
+import { useConfigStore } from '@/stores/ConfigStore'
 import { storeToRefs } from 'pinia'
 
 export default {
@@ -42,7 +42,7 @@ export default {
     EditConfig
   },
   setup() {
-    const store = configStore()
+    const store = useConfigStore()
     const mainStore = useMainStore()
     const { osint_source_groups, osint_sources } = storeToRefs(store)
     const selected = ref([])

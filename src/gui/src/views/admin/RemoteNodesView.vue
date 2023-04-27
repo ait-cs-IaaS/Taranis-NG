@@ -23,11 +23,10 @@
 import DataTable from '@/components/common/DataTable.vue'
 import EditConfig from '@/components/config/EditConfig.vue'
 import { deleteNode, createNode, updateNode } from '@/api/config'
-import { mapActions as mapActionsVuex } from 'vuex'
 import { notifySuccess, notifyFailure, emptyValues } from '@/utils/helpers'
 
 import { mapActions, mapState } from 'pinia'
-import { configStore } from '@/stores/ConfigStore'
+import { useConfigStore } from '@/stores/ConfigStore'
 
 export default {
   name: 'RemoteNodes',
@@ -42,7 +41,7 @@ export default {
     edit: false
   }),
   computed: {
-    ...mapState(configStore, ['remote_nodes']),
+    ...mapState(useConfigStore, ['remote_nodes']),
     formFormat() {
       return [
         {
@@ -80,7 +79,7 @@ export default {
     this.updateData()
   },
   methods: {
-    ...mapActions(configStore, ['loadRemoteNodes']),
+    ...mapActions(useConfigStore, ['loadRemoteNodes']),
     ...mapActionsVuex(['updateItemCount']),
     updateData() {
       this.loadRemoteNodes().then(() => {

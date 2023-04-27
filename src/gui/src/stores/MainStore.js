@@ -18,5 +18,10 @@ export const useMainStore = defineStore('dashboard', {
     getItemCount(state) {
       return { total: state.itemCountTotal, filtered: state.itemCountFiltered }
     }
+  },
+  actions: {
+    toggleDrawer() {
+      this.drawerVisible = !this.drawerVisible
+    }
   }
 })

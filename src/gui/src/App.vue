@@ -32,7 +32,6 @@ export default defineComponent({
     const settingsStore = useSettingsStore()
     const { cookies } = useCookies()
 
-    const loadUserProfile = () => settingsStore.loadUserProfile()
     const isAuthenticated = () => authStore.isAuthenticated
     const needTokenRefresh = () => authStore.needTokenRefresh
 
@@ -46,7 +45,7 @@ export default defineComponent({
       if (localStorage.ACCESS_TOKEN) {
         if (isAuthenticated()) {
           authStore.setAuthURLs()
-          loadUserProfile()
+          settingsStore.loadUserProfile()
           connectSSE()
         } else {
           if (authStore.jwt) {

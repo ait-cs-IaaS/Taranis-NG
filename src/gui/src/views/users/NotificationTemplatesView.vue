@@ -28,10 +28,9 @@ import {
   createNotificationTemplate,
   updateNotificationTemplate
 } from '@/api/assets'
-import { mapActions as mapActionsVuex } from 'vuex'
 import { mapActions, mapState } from 'pinia'
 import { notifySuccess, objectFromFormat, notifyFailure } from '@/utils/helpers'
-import { assetsStore } from '@/stores/AssetsStore'
+import { useAssetsStore } from '@/stores/AssetsStore'
 
 export default {
   name: 'NotificationTemplatesView',
@@ -46,7 +45,7 @@ export default {
     permissions: []
   }),
   computed: {
-    ...mapState(assetsStore, ['notification_templates']),
+    ...mapState(useAssetsStore, ['notification_templates']),
     formFormat() {
       return [
         {
@@ -95,7 +94,7 @@ export default {
     this.updateData()
   },
   methods: {
-    ...mapActions(assetsStore, ['loadNotificationTemplates']),
+    ...mapActions(useAssetsStore, ['loadNotificationTemplates']),
     ...mapActionsVuex(['updateItemCount']),
     updateData() {
       this.loadNotificationTemplates().then(() => {

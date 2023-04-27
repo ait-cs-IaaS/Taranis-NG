@@ -5,13 +5,13 @@
 </template>
 
 <script>
-import { useStore } from 'vuex'
+import { useMainStore } from '@/stores/MainStore'
 
 export default {
   name: 'OpenAPI',
   setup() {
-    const store = useStore()
-    const iframeSrc = store.state.coreAPIURL + '/doc'
+    const store = useMainStore()
+    const iframeSrc = store.coreAPIURL + '/doc'
     return { iframeSrc }
   }
 }

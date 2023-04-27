@@ -21,7 +21,7 @@ import NewACL from '@/components/config/user/NewACL.vue'
 import { deleteACLEntry, createACLEntry, updateACLEntry } from '@/api/config'
 import { notifySuccess } from '@/utils/helpers'
 import { mapActions, mapState, mapWritableState } from 'pinia'
-import { configStore } from '@/stores/ConfigStore'
+import { useConfigStore } from '@/stores/ConfigStore'
 import { useMainStore } from '@/stores/MainStore'
 
 export default {
@@ -38,10 +38,10 @@ export default {
     this.updateData()
   },
   computed: {
-    ...mapState(configStore, ['acls'])
+    ...mapState(useConfigStore, ['acls'])
   },
   methods: {
-    ...mapActions(configStore, ['loadACLEntries']),
+    ...mapActions(useConfigStore, ['loadACLEntries']),
     ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     updateData() {
       this.loadACLEntries().then(() => {

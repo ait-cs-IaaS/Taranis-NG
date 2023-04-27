@@ -25,8 +25,7 @@ import DataTable from '@/components/common/DataTable.vue'
 import EditConfig from '@/components/config/EditConfig.vue'
 import { deleteAttribute, createAttribute, updateAttribute } from '@/api/config'
 import { mapActions, mapState, mapWritableState } from 'pinia'
-import { configStore } from '@/stores/ConfigStore'
-import { mapActions as mapActionsVuex } from 'vuex'
+import { useConfigStore } from '@/stores/ConfigStore'
 import { notifySuccess, emptyValues, notifyFailure } from '@/utils/helpers'
 import { useMainStore } from '@/stores/MainStore'
 
@@ -103,10 +102,10 @@ export default {
     this.updateData()
   },
   computed: {
-    ...mapState(configStore, ['attributes'])
+    ...mapState(useConfigStore, ['attributes'])
   },
   methods: {
-    ...mapActions(configStore, ['loadAttributes']),
+    ...mapActions(useConfigStore, ['loadAttributes']),
     ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     async updateData() {
       await this.loadAttributes()

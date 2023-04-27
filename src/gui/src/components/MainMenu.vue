@@ -73,7 +73,8 @@
 <script>
 import UserMenu from '@/components/UserMenu.vue'
 
-import { mapActions, mapGetters, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
+import { useMainStore } from '@/stores/MainStore'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
@@ -133,8 +134,8 @@ export default defineComponent({
     ]
   }),
   computed: {
-    ...mapState(['drawerVisible']),
-    ...mapGetters(['getItemCount']),
+    ...mapState(useMainStore, ['drawerVisible', 'user', 'getItemCount']),
+
     isFiltered() {
       return this.getItemCount.filtered === undefined
         ? false
@@ -142,8 +143,7 @@ export default defineComponent({
     }
   },
   methods: {
-    ...mapActions(['toggleDrawer']),
-    ...mapGetters(['getPermissions']),
+    ...mapActions(useMainStore, ['toggleDrawer']),
 
     navClicked() {
       this.toggleDrawer()
@@ -152,7 +152,7 @@ export default defineComponent({
     getButtonList() {
       return this.buttons.filter(
         (button) =>
-          this.getPermissions().includes(button.permission) && button.show
+          this.user.permissions.includes(button.permission) && button.show
       )
     }
   }

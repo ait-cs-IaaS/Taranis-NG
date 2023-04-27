@@ -25,7 +25,7 @@ import { deleteReportItemType } from '@/api/config'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
 
 import { mapActions, mapState } from 'pinia'
-import { configStore } from '@/stores/ConfigStore'
+import { useConfigStore } from '@/stores/ConfigStore'
 
 export default {
   name: 'ReportTypes',
@@ -42,10 +42,10 @@ export default {
     this.updateData()
   },
   computed: {
-    ...mapState(configStore, { report_types: 'report_item_types_config' })
+    ...mapState(useConfigStore, { report_types: 'report_item_types_config' })
   },
   methods: {
-    ...mapActions(configStore, ['loadReportTypesConfig']),
+    ...mapActions(useConfigStore, ['loadReportTypesConfig']),
     ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     updateData() {
       this.loadReportTypesConfig().then(() => {

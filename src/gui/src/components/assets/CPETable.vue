@@ -126,7 +126,7 @@ import { findAttributeCPE } from '@/api/assets'
 import VueCsvImport from '@/components/common/ImportCSV.vue'
 
 import { mapState } from 'pinia'
-import { settingsStore } from '@/stores/SettingsStore'
+import { useSettingsStore } from '@/stores/SettingsStore'
 
 export default {
   name: 'CPETable',
@@ -164,7 +164,7 @@ export default {
     formTitle() {
       return this.edited_index === -1 ? 'Add CPE Code' : 'Edit CPE Code'
     },
-    ...mapState(settingsStore, ['spellcheck'])
+    ...mapState(useSettingsStore, ['spellcheck'])
   },
   watch: {
     dialog(val) {

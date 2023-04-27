@@ -111,7 +111,7 @@ import CPETable from '@/components/assets/CPETable.vue'
 import CardVulnerability from '@/components/assets/CardVulnerability.vue'
 
 import { mapState } from 'pinia'
-import { settingsStore } from '@/stores/SettingsStore'
+import { useSettingsStore } from '@/stores/SettingsStore'
 
 export default {
   name: 'NewAsset',
@@ -135,7 +135,7 @@ export default {
     }
   }),
   computed: {
-    ...mapState(settingsStore, ['spellcheck'])
+    ...mapState(useSettingsStore, ['spellcheck'])
   },
   methods: {
     editAllowed() {

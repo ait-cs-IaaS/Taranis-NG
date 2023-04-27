@@ -57,7 +57,7 @@ import DashBoardCard from '@/components/common/DashBoardCard.vue'
 import { ref, onMounted } from 'vue'
 import TrendingCard from '@/components/common/TrendingCard.vue'
 import { defineComponent } from 'vue'
-import { dashboardStore } from '@/stores/DashboardStore'
+import { useDashboardStore } from '@/stores/DashboardStore'
 
 export default defineComponent({
   name: 'HomeView',
@@ -66,7 +66,7 @@ export default defineComponent({
     TrendingCard
   },
   setup() {
-    const store = dashboardStore()
+    const store = useDashboardStore()
     const dashboardData = ref({})
     const clusters = ref([])
 

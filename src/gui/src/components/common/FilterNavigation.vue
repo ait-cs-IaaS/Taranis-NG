@@ -84,7 +84,8 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex'
+import { mapState } from 'pinia'
+import { useMainStore } from '@/stores/MainStore'
 
 export default {
   name: 'FilterNavigation',
@@ -108,7 +109,7 @@ export default {
     items_per_page: [5, 15, 25, 50, 100]
   }),
   computed: {
-    ...mapState(['drawerVisible']),
+    ...mapState(useMainStore, ['drawerVisible', 'itemCountTotal']),
     limit_state: {
       get() {
         return this.limit
@@ -135,7 +136,7 @@ export default {
     },
     offsetRange() {
       const list = []
-      for (let i = 0; i <= this.getItemCount().total; i++) {
+      for (let i = 0; i <= this.itemCountTotal; i++) {
         list.push(i)
       }
       return list
@@ -143,9 +144,6 @@ export default {
     navigation_drawer_class() {
       return this.showOmniSearch ? 'mt-12' : ''
     }
-  },
-  methods: {
-    ...mapGetters(['getItemCount'])
   }
 }
 </script>

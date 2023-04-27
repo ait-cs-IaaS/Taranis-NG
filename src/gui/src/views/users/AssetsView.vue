@@ -26,7 +26,7 @@ import {
 } from '@/api/assets'
 import { mapActions, mapState, mapWritableState } from 'pinia'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
-import { assetsStore } from '@/stores/AssetsStore'
+import { useAssetsStore } from '@/stores/AssetsStore'
 
 export default {
   name: 'AssetsView',
@@ -47,13 +47,13 @@ export default {
     this.updateData()
   },
   computed: {
-    ...mapState(assetsStore, {
+    ...mapState(useAssetsStore, {
       store_asset_groups: 'asset_groups',
       store_assets: 'assets'
     })
   },
   methods: {
-    ...mapActions(assetsStore, ['loadAssetGroups', 'loadAssets']),
+    ...mapActions(useAssetsStore, ['loadAssetGroups', 'loadAssets']),
     ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     updateData() {
       this.loadAssets().then(() => {

@@ -27,7 +27,8 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex'
+import { mapState } from 'pinia'
+import { useMainStore } from '@/stores/MainStore'
 
 export default {
   name: 'IconNavigation',
@@ -43,13 +44,12 @@ export default {
   },
   data: () => ({}),
   computed: {
-    ...mapState(['drawerVisible']),
-    ...mapGetters(['getPermissions']),
+    ...mapState(useMainStore, ['drawerVisible', 'user']),
 
     filteredLinks() {
       return this.links.filter(
         (link) =>
-          !link.permission || this.getPermissions.includes(link.permission)
+          !link.permission || this.user.permissions.includes(link.permission)
       )
     }
   },

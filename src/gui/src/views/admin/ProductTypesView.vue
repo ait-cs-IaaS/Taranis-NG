@@ -28,7 +28,6 @@ import {
   createProductType,
   updateProductType
 } from '@/api/config'
-import { mapActions as mapActionsVuex } from 'vuex'
 import {
   notifySuccess,
   notifyFailure,
@@ -37,7 +36,7 @@ import {
   objectFromFormat
 } from '@/utils/helpers'
 import { mapActions, mapState } from 'pinia'
-import { configStore } from '@/stores/ConfigStore'
+import { useConfigStore } from '@/stores/ConfigStore'
 
 export default {
   name: 'ProductTypesView',
@@ -54,7 +53,7 @@ export default {
     presenters: []
   }),
   computed: {
-    ...mapState(configStore, {
+    ...mapState(useConfigStore, {
       store_product_types: 'product_types',
       store_presenters: 'presenters'
     }),
@@ -97,7 +96,7 @@ export default {
     this.updateData()
   },
   methods: {
-    ...mapActions(configStore, ['loadProductTypes', 'loadPresenters']),
+    ...mapActions(useConfigStore, ['loadProductTypes', 'loadPresenters']),
     ...mapActionsVuex(['updateItemCount']),
     updateData() {
       this.loadProductTypes().then(() => {

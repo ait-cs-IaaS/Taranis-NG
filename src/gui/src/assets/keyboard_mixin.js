@@ -1,5 +1,5 @@
 import { useAssessStore } from '@/stores/AssessStore'
-import { configStore } from '@/stores/ConfigStore'
+import { useConfigStore } from '@/stores/ConfigStore'
 import { mapState } from 'pinia'
 
 const keyboardMixin = (targetId) => ({

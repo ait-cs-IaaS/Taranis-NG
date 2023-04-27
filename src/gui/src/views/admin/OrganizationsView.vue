@@ -27,7 +27,7 @@ import {
   createOrganization,
   updateOrganization
 } from '@/api/config'
-import { configStore } from '@/stores/ConfigStore'
+import { useConfigStore } from '@/stores/ConfigStore'
 import { notifySuccess, emptyValues, notifyFailure } from '@/utils/helpers'
 import { ref, onMounted } from 'vue'
 import { useMainStore } from '@/stores/MainStore'
@@ -40,7 +40,7 @@ export default {
     EditConfig
   },
   setup() {
-    const store = configStore()
+    const store = useConfigStore()
     const mainStore = useMainStore()
     const { organizations } = storeToRefs(store)
     const formData = ref({})

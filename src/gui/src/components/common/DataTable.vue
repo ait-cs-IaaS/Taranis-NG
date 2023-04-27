@@ -88,7 +88,8 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import { useMainStore } from '@/stores/MainStore'
+import { mapWritableState } from 'pinia'
 import { defineComponent, toRaw } from 'vue'
 
 export default defineComponent({
@@ -158,7 +159,7 @@ export default defineComponent({
     }
   },
   methods: {
-    ...mapActions(['updateItemCountFiltered']),
+    ...mapWritableState(useMainStore, ['itemCountFiltered']),
 
     headerTransform(key) {
       if (key === 'tag') {
@@ -174,7 +175,7 @@ export default defineComponent({
     emitFilterChange(selected) {
       this.selected = selected
       this.$emit('selection-change', selected)
-      this.updateItemCountFiltered(selected.length)
+      this.itemCountFiltered = selected.length
     },
     customFilter(value, query) {
       return (

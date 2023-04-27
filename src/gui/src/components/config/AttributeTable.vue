@@ -95,8 +95,8 @@
 
 <script>
 import { mapActions, mapState } from 'pinia'
-import { settingsStore } from '@/stores/SettingsStore'
-import { configStore } from '@/stores/ConfigStore'
+import { useSettingsStore } from '@/stores/SettingsStore'
+import { useConfigStore } from '@/stores/ConfigStore'
 
 export default {
   name: 'AttributeTable',
@@ -135,8 +135,8 @@ export default {
     }
   }),
   computed: {
-    ...mapState(settingsStore, ['spellcheck']),
-    ...mapState(configStore, { store_attributes: 'attributes' }),
+    ...mapState(useSettingsStore, ['spellcheck']),
+    ...mapState(useConfigStore, { store_attributes: 'attributes' }),
     attribute_contents() {
       return this.attributes || []
     },
@@ -166,7 +166,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(configStore, ['loadAttributes']),
+    ...mapActions(useConfigStore, ['loadAttributes']),
     close() {
       this.dialog = false
       this.$nextTick(() => {

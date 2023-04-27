@@ -124,7 +124,7 @@
 import { createACLEntry, updateACLEntry } from '@/api/config'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
 import { mapActions } from 'pinia'
-import { configStore } from '@/stores/ConfigStore'
+import { useConfigStore } from '@/stores/ConfigStore'
 
 export default {
   name: 'NewACL',
@@ -208,7 +208,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(configStore, ['loadUsers', 'loadRoles']),
+    ...mapActions(useConfigStore, ['loadUsers', 'loadRoles']),
     addACL() {
       this.edit = false
       this.show_error = false

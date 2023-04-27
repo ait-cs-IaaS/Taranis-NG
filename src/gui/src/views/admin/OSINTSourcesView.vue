@@ -36,7 +36,6 @@ import {
   exportOSINTSources,
   importOSINTSources
 } from '@/api/config'
-import { mapActions as mapActionsVuex } from 'vuex'
 import {
   notifySuccess,
   objectFromFormat,
@@ -45,7 +44,7 @@ import {
   createParameterValues
 } from '@/utils/helpers'
 import { mapActions, mapState } from 'pinia'
-import { configStore } from '@/stores/ConfigStore'
+import { useConfigStore } from '@/stores/ConfigStore'
 
 export default {
   name: 'OSINTSourcesView',
@@ -63,7 +62,7 @@ export default {
     edit: false
   }),
   computed: {
-    ...mapState(configStore, {
+    ...mapState(useConfigStore, {
       store_collectors: 'collectors',
       store_osint_sources: 'osint_sources'
     }),
@@ -104,7 +103,7 @@ export default {
     this.updateData()
   },
   methods: {
-    ...mapActions(configStore, ['loadOSINTSources', 'loadCollectors']),
+    ...mapActions(useConfigStore, ['loadOSINTSources', 'loadCollectors']),
     ...mapActionsVuex(['updateItemCount']),
     updateData() {
       this.loadOSINTSources().then(() => {

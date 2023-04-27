@@ -104,9 +104,9 @@
 import { createAssetGroup, updateAssetGroup } from '@/api/assets'
 
 import { mapActions, mapState } from 'pinia'
-import { settingsStore } from '@/stores/SettingsStore'
-import { configStore } from '@/stores/ConfigStore'
-import { assetsStore } from '@/stores/AssetsStore'
+import { useSettingsStore } from '@/stores/SettingsStore'
+import { useConfigStore } from '@/stores/ConfigStore'
+import { useAssetsStore } from '@/stores/AssetsStore'
 
 export default {
   name: 'NewAssetGroup',
@@ -143,9 +143,9 @@ export default {
     }
   }),
   computed: {
-    ...mapState(settingsStore, ['spellcheck']),
-    ...mapState(assetsStore, ['notification_templates']),
-    ...mapState(configStore, ['users'])
+    ...mapState(useSettingsStore, ['spellcheck']),
+    ...mapState(useAssetsStore, ['notification_templates']),
+    ...mapState(useConfigStore, ['users'])
   },
   async mounted() {
     await this.getAllExternalUsers({ search: '' })
@@ -166,7 +166,7 @@ export default {
     })
   },
   methods: {
-    ...mapActions(configStore, [
+    ...mapActions(useConfigStore, [
       'getAllNotificationTemplates',
       'getAllExternalUsers'
     ]),

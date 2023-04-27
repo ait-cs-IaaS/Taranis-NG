@@ -102,7 +102,7 @@ import NewsItemSingleDetail from '@/components/assess/NewsItemSingleDetail.vue'
 import NewsItemDetail from '@/components/assess/NewsItemDetail.vue'
 import { getReportItemData, updateReportItem } from '@/api/analyze'
 import { mapActions, mapState } from 'pinia'
-import { configStore } from '@/stores/ConfigStore'
+import { useConfigStore } from '@/stores/ConfigStore'
 import { useAssessStore } from '@/stores/AssessStore'
 
 export default {
@@ -137,11 +137,11 @@ export default {
           this.modify === true)
       )
     },
-    ...mapState(configStore, ['osint_source_groups']),
+    ...mapState(useConfigStore, ['osint_source_groups']),
     ...mapState(useAssessStore, ['getSelection'])
   },
   methods: {
-    ...mapActions(configStore, ['loadOSINTSourceGroups']),
+    ...mapActions(useConfigStore, ['loadOSINTSourceGroups']),
     ...mapActions(useAssessStore, ['multiSelect']),
     cardLayout: function () {
       return 'CardAssess'

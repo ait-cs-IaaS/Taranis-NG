@@ -37,8 +37,7 @@ import {
 } from '@/api/config'
 import { notifySuccess, emptyValues, notifyFailure } from '@/utils/helpers'
 import { mapActions, mapState, mapWritableState } from 'pinia'
-import { configStore } from '@/stores/ConfigStore'
-import { mapActions as mapActionsVuex } from 'vuex'
+import { useConfigStore } from '@/stores/ConfigStore'
 
 export default {
   name: 'WordLists',
@@ -56,10 +55,10 @@ export default {
     this.updateData()
   },
   computed: {
-    ...mapState(configStore, ['word_lists'])
+    ...mapState(useConfigStore, ['word_lists'])
   },
   methods: {
-    ...mapActions(configStore, ['loadWordLists']),
+    ...mapActions(useConfigStore, ['loadWordLists']),
     ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     updateData() {
       this.loadWordLists().then(() => {

@@ -25,7 +25,7 @@ import DataTable from '@/components/common/DataTable.vue'
 import EditConfig from '@/components/config/EditConfig.vue'
 import { deleteRole, createRole, updateRole } from '@/api/config'
 import { ref, onMounted, computed } from 'vue'
-import { configStore } from '@/stores/ConfigStore'
+import { useConfigStore } from '@/stores/ConfigStore'
 import { notifySuccess, objectFromFormat, notifyFailure } from '@/utils/helpers'
 
 export default {
@@ -35,7 +35,7 @@ export default {
     EditConfig
   },
   setup() {
-    const store = configStore()
+    const store = useConfigStore()
     const mainStore = useMainStore()
     const { roles, permissions } = storeToRefs(store)
     const formData = ref({})

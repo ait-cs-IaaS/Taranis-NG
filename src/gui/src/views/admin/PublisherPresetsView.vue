@@ -28,7 +28,6 @@ import {
   createPublisherPreset,
   updatePublisherPreset
 } from '@/api/config'
-import { mapActions as mapActionsVuex } from 'vuex'
 import {
   notifySuccess,
   parseParameterValues,
@@ -37,7 +36,7 @@ import {
   notifyFailure
 } from '@/utils/helpers'
 import { mapActions, mapState } from 'pinia'
-import { configStore } from '@/stores/ConfigStore'
+import { useConfigStore } from '@/stores/ConfigStore'
 
 export default {
   name: 'PublisherPresetsView',
@@ -53,8 +52,8 @@ export default {
     edit: false
   }),
   computed: {
-    ...mapState(configStore, ['publisher_presets']),
-    ...mapState(configStore, { store_publishers: 'publishers' }),
+    ...mapState(useConfigStore, ['publisher_presets']),
+    ...mapState(useConfigStore, { store_publishers: 'publishers' }),
     formFormat() {
       const base = [
         {
@@ -94,7 +93,7 @@ export default {
     this.updateData()
   },
   methods: {
-    ...mapActions(configStore, ['loadPublisherPresets', 'loadPublishers']),
+    ...mapActions(useConfigStore, ['loadPublisherPresets', 'loadPublishers']),
     ...mapActionsVuex(['updateItemCount']),
     updateData() {
       this.loadPublisherPresets().then(() => {

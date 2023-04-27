@@ -20,7 +20,7 @@ import DataTable from '@/components/common/DataTable.vue'
 import UserForm from '@/components/config/user/UserForm.vue'
 import { deleteUser, createUser, updateUser } from '@/api/config'
 import { ref, onMounted } from 'vue'
-import { configStore } from '@/stores/ConfigStore'
+import { useConfigStore } from '@/stores/ConfigStore'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
 
 export default {
@@ -30,7 +30,7 @@ export default {
     UserForm
   },
   setup() {
-    const store = configStore()
+    const store = useConfigStore()
     const { users } = storeToRefs(store)
     const mainStore = useMainStore()
     const showForm = ref(false)

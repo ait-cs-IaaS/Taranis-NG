@@ -44,7 +44,7 @@ import { mapActions, mapState } from 'pinia'
 
 import FilterNavigation from '@/components/common/FilterNavigation.vue'
 import filterSortList from '@/components/assess/filter/filterSortList.vue'
-import { assetsStore } from '@/stores/AssetsStore'
+import { useAssetsStore } from '@/stores/AssetsStore'
 import { useFilterStore } from '@/stores/FilterStore'
 
 export default {
@@ -129,7 +129,7 @@ export default {
   },
   methods: {
     ...mapGetters(['getItemCount']),
-    ...mapActions(assetsStore, ['updateFilteredAssets']),
+    ...mapActions(useAssetsStore, ['updateFilteredAssets']),
     ...mapActions(useFilterStore, ['updateAssetFilter']),
     addAsset() {
       this.$router.push('/asset/0')

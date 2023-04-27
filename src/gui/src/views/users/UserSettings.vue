@@ -106,9 +106,9 @@
 </template>
 
 <script>
-import { settingsStore } from '@/stores/SettingsStore'
+import { useSettingsStore } from '@/stores/SettingsStore'
 import { mapActions, mapState, mapStores } from 'pinia'
-import { configStore } from '@/stores/ConfigStore'
+import { useConfigStore } from '@/stores/ConfigStore'
 
 export default {
   name: 'UserSettings',
@@ -132,11 +132,11 @@ export default {
   computed: {
     browser_locale: {
       get() {
-        return this.settingsStore.getProfileBrowserLocale
+        return this.useSettingsStore.getProfileBrowserLocale
       },
       set(value) {
         this.$i18n.locale = value
-        this.settingsStore.setLocale(value)
+        this.useSettingsStore.setLocale(value)
         console.warn('TODO: extend user profile to include locale')
         // TODO: extend user profile to include locale
         // this.saveUserProfile({ browser_locale: value })
@@ -149,8 +149,8 @@ export default {
         { value: 'sk', text: 'Slovensky' }
       ]
     },
-    ...mapStores(settingsStore),
-    ...mapState(configStore, ['word_lists'])
+    ...mapStores(useSettingsStore),
+    ...mapState(useConfigStore, ['word_lists'])
   },
   mounted() {
     this.spellcheck = this.getProfileSpellcheck()
@@ -160,9 +160,9 @@ export default {
     this.loadWordList()
   },
   methods: {
-    ...mapActions(configStore, ['loadWordLists']),
+    ...mapActions(useConfigStore, ['loadWordLists']),
     save() {
-      this.settingsStore.saveUserProfile({
+      this.useSettingsStore.saveUserProfile({
         spellcheck: this.spellcheck,
         dark_theme: this.dark_theme,
         hotkeys: this.shortcuts,

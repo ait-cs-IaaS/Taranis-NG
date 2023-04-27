@@ -99,7 +99,7 @@ import { createUser, updateUser } from '@/api/config'
 import { mapActions, mapState } from 'pinia'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
 import { ref, computed } from 'vue'
-import { configStore } from '@/stores/ConfigStore'
+import { useConfigStore } from '@/stores/ConfigStore'
 
 export default {
   name: 'UserForm',
@@ -195,7 +195,7 @@ export default {
     console.debug(this.user)
   },
   methods: {
-    ...mapActions(configStore, [
+    ...mapActions(useConfigStore, [
       'loadOrganizations',
       'loadRoles',
       'loadPermissions',

@@ -1,7 +1,7 @@
 import { authenticate, refresh } from '@/api/auth'
 import ApiService from '@/services/api_service'
 import { Base64 } from 'js-base64'
-import { store } from '@/store/store'
+import { useMainStore } from './MainStore'
 import { defineStore } from 'pinia'
 
 export const useAuthStore = defineStore('authenticator', {
@@ -33,7 +33,8 @@ export const useAuthStore = defineStore('authenticator', {
       try {
         const response = await authenticate(userData)
         this.setJwtToken(response.data.access_token)
-        store.dispatch('setUser', this.user)
+        const store = useMainStore()
+        store.user = this.user
       } catch (error) {
         this.clearJwtToken()
         console.log(error)
@@ -47,14 +48,16 @@ export const useAuthStore = defineStore('authenticator', {
       try {
         const response = await refresh()
         this.setJwtToken(response.data.access_token)
-        store.dispatch('setUser', this.user)
+        const store = useMainStore()
+        store.user = this.user
       } catch {
         this.clearJwtToken()
       }
     },
     setToken(access_token) {
       this.setJwtToken(access_token)
-      store.dispatch('setUser', this.user)
+      const store = useMainStore()
+      store.user = this.user
     },
     setAuthURLs() {
       this.setLoginURL()

@@ -23,9 +23,8 @@
 import DataTable from '@/components/common/DataTable.vue'
 import EditConfig from '@/components/config/EditConfig.vue'
 import { updateBot } from '@/api/config'
-import { mapActions, mapState } from 'pinia'
-import { configStore } from '@/stores/ConfigStore'
-import { mapActions as mapActionsVuex } from 'vuex'
+import { mapActions, mapState, mapWritableState } from 'pinia'
+import { useConfigStore } from '@/stores/ConfigStore'
 import {
   notifySuccess,
   objectFromFormat,
@@ -33,6 +32,7 @@ import {
   parseParameterValues,
   createParameterValues
 } from '@/utils/helpers'
+import { useMainStore } from '@/stores/MainStore'
 
 export default {
   name: 'BotsView',
@@ -49,7 +49,7 @@ export default {
     edit: false
   }),
   computed: {
-    ...mapState(configStore, { store_bots: 'bots' }),
+    ...mapState(useConfigStore, { store_bots: 'bots' }),
     formFormat() {
       const base = [
         {
@@ -89,8 +89,8 @@ export default {
     this.updateData()
   },
   methods: {
-    ...mapActions(configStore, ['loadBots', 'loadParameters']),
-    ...mapActionsVuex(['updateItemCount']),
+    ...mapActions(useConfigStore, ['loadBots', 'loadParameters']),
+    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     updateData() {
       this.loadBots().then(() => {
         const sources = this.store_bots
@@ -107,10 +107,8 @@ export default {
           })
           return item.type
         })
-        this.updateItemCount({
-          total: sources.total_count,
-          filtered: sources.length
-        })
+        this.itemCountTotal = sources.total_count
+        this.itemCountFiltered = sources.items.length
       })
     },
     addItem() {

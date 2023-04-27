@@ -51,7 +51,7 @@ import { createAsset, updateAsset } from '@/api/assets'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
 
 import { mapState } from 'pinia'
-import { settingsStore } from '@/stores/SettingsStore'
+import { useSettingsStore } from '@/stores/SettingsStore'
 
 export default {
   name: 'AssetView',
@@ -72,7 +72,7 @@ export default {
         ? `${this.$t('title.edit')} asset`
         : `${this.$t('title.add_new')} asset`
     },
-    ...mapState(settingsStore, ['spellcheck'])
+    ...mapState(useSettingsStore, ['spellcheck'])
   },
   methods: {
     saveAsset() {
