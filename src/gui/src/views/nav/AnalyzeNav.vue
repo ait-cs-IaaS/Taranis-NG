@@ -86,10 +86,10 @@ export default {
     filterAttributeSelections: []
   }),
   computed: {
+    ...mapState(useMainStore, ['getItemCount']),
     ...mapState('filter', {
       filter: (state) => state.reportFilter
     }),
-    ...mapState(useMainStore, ['drawerVisible']),
     ...mapState(useFilterStore, ['reportFilter']),
     limit: {
       get() {
@@ -163,14 +163,14 @@ export default {
     },
     offsetRange() {
       const list = []
-      for (let i = 0; i <= this.getItemCount().total; i++) {
+      for (let i = 0; i <= this.getItemCount.total; i++) {
         list.push(i)
       }
       return list
     },
     pages() {
       const blocks = Math.ceil(
-        this.getItemCount().total / this.getItemCount().filtered
+        this.getItemCount.total / this.getItemCount.filtered
       )
       const list = []
       for (let i = 0; i <= blocks; i++) {
@@ -190,7 +190,6 @@ export default {
     console.debug('loaded with query', query)
   },
   methods: {
-    ...mapGetters(['getItemCount']),
     ...mapActions(useAnalyzeStore, ['updateReportItems']),
     ...mapActions(useFilterStore, ['updateReportFilter']),
     addReport() {

@@ -27,6 +27,7 @@ import {
 import { mapActions, mapState, mapWritableState } from 'pinia'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
 import { useAssetsStore } from '@/stores/AssetsStore'
+import { useMainStore } from '@/stores/MainStore'
 
 export default {
   name: 'AssetsView',
@@ -47,6 +48,7 @@ export default {
     this.updateData()
   },
   computed: {
+    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     ...mapState(useAssetsStore, {
       store_asset_groups: 'asset_groups',
       store_assets: 'assets'
@@ -54,7 +56,6 @@ export default {
   },
   methods: {
     ...mapActions(useAssetsStore, ['loadAssetGroups', 'loadAssets']),
-    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     updateData() {
       this.loadAssets().then(() => {
         const sources = this.store_assets

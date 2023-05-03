@@ -104,6 +104,7 @@ import { getReportItemData, updateReportItem } from '@/api/analyze'
 import { mapActions, mapState } from 'pinia'
 import { useConfigStore } from '@/stores/ConfigStore'
 import { useAssessStore } from '@/stores/AssessStore'
+import { useMainStore } from '@/stores/MainStore'
 
 export default {
   name: 'NewsItemSelector',
@@ -138,7 +139,8 @@ export default {
       )
     },
     ...mapState(useConfigStore, ['osint_source_groups']),
-    ...mapState(useAssessStore, ['getSelection'])
+    ...mapState(useAssessStore, ['getSelection']),
+    ...mapState(useMainStore, ['user'])
   },
   methods: {
     ...mapActions(useConfigStore, ['loadOSINTSourceGroups']),
@@ -234,7 +236,7 @@ export default {
         this.edit === true &&
         this.report_item_id === data_info.report_item_id
       ) {
-        if (data_info.user_id !== this.$store.getters.getUserId) {
+        if (data_info.user_id !== this.user.id) {
           if (data_info.add !== undefined) {
             getReportItemData(this.report_item_id, data_info).then(
               (response) => {

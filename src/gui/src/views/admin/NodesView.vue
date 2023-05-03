@@ -30,7 +30,7 @@
 import DataTable from '@/components/common/DataTable.vue'
 import EditConfig from '@/components/config/EditConfig.vue'
 import { deleteNode, createNode, updateNode, triggerNode } from '@/api/config'
-import { mapActions, mapState } from 'pinia'
+import { mapActions, mapState, mapWritableState } from 'pinia'
 import { useConfigStore } from '@/stores/ConfigStore'
 import { notifySuccess, notifyFailure, objectFromFormat } from '@/utils/helpers'
 
@@ -47,6 +47,7 @@ export default {
     workers: []
   }),
   computed: {
+    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     ...mapState(useConfigStore, ['nodes', 'collectors']),
     formFormat() {
       return [
@@ -98,7 +99,6 @@ export default {
   },
   methods: {
     ...mapActions(useConfigStore, ['loadNodes', 'loadCollectors']),
-    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     updateData() {
       this.loadNodes().then(() => {
         this.itemCountTotal = this.nodes.total_count

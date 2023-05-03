@@ -49,6 +49,7 @@ export default {
     edit: false
   }),
   computed: {
+    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     ...mapState(useConfigStore, { store_bots: 'bots' }),
     formFormat() {
       const base = [
@@ -90,7 +91,6 @@ export default {
   },
   methods: {
     ...mapActions(useConfigStore, ['loadBots', 'loadParameters']),
-    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     updateData() {
       this.loadBots().then(() => {
         const sources = this.store_bots

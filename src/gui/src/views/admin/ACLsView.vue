@@ -38,11 +38,11 @@ export default {
     this.updateData()
   },
   computed: {
-    ...mapState(useConfigStore, ['acls'])
+    ...mapState(useConfigStore, ['acls']),
+    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered'])
   },
   methods: {
     ...mapActions(useConfigStore, ['loadACLEntries']),
-    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     updateData() {
       this.loadACLEntries().then(() => {
         this.itemCountTotal = this.acls.total_count

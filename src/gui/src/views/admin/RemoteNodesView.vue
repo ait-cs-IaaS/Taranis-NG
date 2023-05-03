@@ -25,8 +25,9 @@ import EditConfig from '@/components/config/EditConfig.vue'
 import { deleteNode, createNode, updateNode } from '@/api/config'
 import { notifySuccess, notifyFailure, emptyValues } from '@/utils/helpers'
 
-import { mapActions, mapState } from 'pinia'
+import { mapActions, mapState, mapWritableState } from 'pinia'
 import { useConfigStore } from '@/stores/ConfigStore'
+import { useMainStore } from '@/stores/MainStore'
 
 export default {
   name: 'RemoteNodes',
@@ -42,6 +43,7 @@ export default {
   }),
   computed: {
     ...mapState(useConfigStore, ['remote_nodes']),
+    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     formFormat() {
       return [
         {
@@ -80,14 +82,11 @@ export default {
   },
   methods: {
     ...mapActions(useConfigStore, ['loadRemoteNodes']),
-    ...mapActionsVuex(['updateItemCount']),
     updateData() {
       this.loadRemoteNodes().then(() => {
         this.RemoteNodes = this.remote_nodes.items
-        this.updateItemCount({
-          total: this.remote_nodes.total_count,
-          filtered: this.remote_nodes.length
-        })
+        this.itemCountFiltered = this.remote_nodes.length
+        this.itemCountTotal = this.remote_nodes.total_count
       })
     },
     addItem() {

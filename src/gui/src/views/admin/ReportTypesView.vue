@@ -24,7 +24,7 @@ import ReportTypeForm from '@/components/config/ReportTypeForm.vue'
 import { deleteReportItemType } from '@/api/config'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
 
-import { mapActions, mapState } from 'pinia'
+import { mapActions, mapState, mapWritableState } from 'pinia'
 import { useConfigStore } from '@/stores/ConfigStore'
 
 export default {
@@ -42,11 +42,11 @@ export default {
     this.updateData()
   },
   computed: {
+    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     ...mapState(useConfigStore, { report_types: 'report_item_types_config' })
   },
   methods: {
     ...mapActions(useConfigStore, ['loadReportTypesConfig']),
-    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     updateData() {
       this.loadReportTypesConfig().then(() => {
         this.itemCountTotal = this.report_types.total_count

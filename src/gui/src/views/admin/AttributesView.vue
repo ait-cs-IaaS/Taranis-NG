@@ -102,11 +102,11 @@ export default {
     this.updateData()
   },
   computed: {
+    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     ...mapState(useConfigStore, ['attributes'])
   },
   methods: {
     ...mapActions(useConfigStore, ['loadAttributes']),
-    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     async updateData() {
       await this.loadAttributes()
       this.itemCountTotal = this.attributes.total_count

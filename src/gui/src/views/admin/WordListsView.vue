@@ -55,11 +55,11 @@ export default {
     this.updateData()
   },
   computed: {
+    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     ...mapState(useConfigStore, ['word_lists'])
   },
   methods: {
     ...mapActions(useConfigStore, ['loadWordLists']),
-    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     updateData() {
       this.loadWordLists().then(() => {
         this.itemCountTotal = this.word_lists.total_count

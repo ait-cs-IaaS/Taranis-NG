@@ -59,11 +59,11 @@ export default {
     this.updateData()
   },
   computed: {
+    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     ...mapState(useAnalyzeStore, ['report_items', 'report_item_types'])
   },
   methods: {
     ...mapActions(useAnalyzeStore, ['loadReportItems', 'loadReportTypes']),
-    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     updateData() {
       this.loadReportItems().then(() => {
         this.itemCountTotal = this.newsItems.total_count

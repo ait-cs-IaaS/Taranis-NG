@@ -74,6 +74,7 @@ export default {
     items: []
   }),
   computed: {
+    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     ...mapState(useAssessStore, ['newsItems', 'newsItemsSelection']),
     ...mapState(useFilterStore, ['newsItemsFilter']),
     moreToLoad() {
@@ -102,7 +103,6 @@ export default {
     })
   },
   methods: {
-    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     ...mapActions(useAssessStore, [
       'updateNewsItems',
       'updateOSINTSourceGroupsList',

@@ -35,8 +35,9 @@ import {
   objectFromFormat,
   notifyFailure
 } from '@/utils/helpers'
-import { mapActions, mapState } from 'pinia'
+import { mapActions, mapState, mapWritableState } from 'pinia'
 import { useConfigStore } from '@/stores/ConfigStore'
+import { useMainStore } from '@/stores/MainStore'
 
 export default {
   name: 'PublisherPresetsView',
@@ -54,6 +55,7 @@ export default {
   computed: {
     ...mapState(useConfigStore, ['publisher_presets']),
     ...mapState(useConfigStore, { store_publishers: 'publishers' }),
+    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     formFormat() {
       const base = [
         {
@@ -94,14 +96,11 @@ export default {
   },
   methods: {
     ...mapActions(useConfigStore, ['loadPublisherPresets', 'loadPublishers']),
-    ...mapActionsVuex(['updateItemCount']),
     updateData() {
       this.loadPublisherPresets().then(() => {
         this.presets = parseParameterValues(this.publisher_presets.items)
-        this.updateItemCount({
-          total: this.publisher_presets.total_count,
-          filtered: this.publisher_presets.length
-        })
+        this.itemCountFiltered = this.publisher_presets.length
+        this.itemCountTotal = this.publisher_presets.total_count
       })
       this.loadPublishers().then(() => {
         const publishers = this.store_publishers

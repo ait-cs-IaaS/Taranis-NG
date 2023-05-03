@@ -28,8 +28,9 @@ import {
   updateRemoteAccess
 } from '@/api/config'
 import { notifySuccess, notifyFailure, emptyValues } from '@/utils/helpers'
-import { mapActions, mapState } from 'pinia'
+import { mapActions, mapState, mapWritableState } from 'pinia'
 import { useConfigStore } from '@/stores/ConfigStore'
+import { useMainStore } from '@/stores/MainStore'
 
 export default {
   name: 'RemoteAccess',
@@ -44,6 +45,7 @@ export default {
   }),
   computed: {
     ...mapState(useConfigStore, ['remote_access']),
+    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     formFormat() {
       return [
         {
@@ -82,14 +84,11 @@ export default {
   },
   methods: {
     ...mapActions(useConfigStore, ['loadRemoteAccesses']),
-    ...mapActionsVuex(['updateItemCount']),
     updateData() {
       this.loadRemoteAccesses().then(() => {
         this.RemoteAccess = this.remote_access.items
-        this.updateItemCount({
-          total: this.remote_access.total_count,
-          filtered: this.remote_access.length
-        })
+        this.itemCountFiltered = this.remote_access.length
+        this.itemCountTotal = this.remote_access.total_count
       })
     },
     addItem() {

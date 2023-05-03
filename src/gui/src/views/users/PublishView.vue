@@ -25,11 +25,11 @@ export default {
     }
   },
   computed: {
+    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     ...mapState(usePublishStore, ['products'])
   },
   methods: {
     ...mapActions(usePublishStore, ['loadProducts']),
-    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     updateData() {
       this.loadProducts().then(() => {
         this.itemCountTotal = this.products.total_count

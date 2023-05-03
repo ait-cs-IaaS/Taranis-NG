@@ -94,6 +94,7 @@ import Permissions from '@/services/auth/permissions'
 import { getReportItemData, updateReportItem } from '@/api/analyze'
 import { useAnalyzeStore } from '@/stores/AnalyzeStore'
 import { mapActions, mapState } from 'pinia'
+import { useMainStore } from '@/stores/MainStore'
 
 export default {
   name: 'RemoteReportItemSelector',
@@ -124,6 +125,7 @@ export default {
       'current_report_item_group_id',
       'selection_report'
     ]),
+    ...mapState(useMainStore, ['user']),
     canModify() {
       return (
         this.edit === false ||
@@ -228,7 +230,7 @@ export default {
         this.edit === true &&
         this.report_item_id === data_info.report_item_id
       ) {
-        if (data_info.user_id !== this.$store.getters.getUserId) {
+        if (data_info.user_id !== this.user.id) {
           if (data_info.add !== undefined) {
             getReportItemData(this.report_item_id, data_info).then(
               (response) => {

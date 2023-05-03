@@ -22,17 +22,21 @@
 </template>
 
 <script>
+import { useMainStore } from '@/stores/MainStore'
+import { mapState } from 'pinia'
+
 export default {
   name: 'UserView',
   data: () => ({
     expanded: false
   }),
   computed: {
+    ...mapState(useMainStore, ['user']),
     user() {
-      return this.$store.getters.getUser
+      return this.user
     },
     organizationName() {
-      return this.$store.getters.getOrganizationName
+      return this.user.organization_name
     }
   },
   methods: {}

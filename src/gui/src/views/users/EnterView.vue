@@ -49,6 +49,8 @@
 import { quillEditor } from 'vue3-quill'
 import { addNewsItem } from '@/api/assess'
 import { notifySuccess } from '@/utils/helpers'
+import { mapState } from 'pinia'
+import { useMainStore } from '@/stores/MainStore'
 
 export default {
   name: 'EnterView',
@@ -80,6 +82,9 @@ export default {
       attributes: []
     }
   }),
+  computed: {
+    ...mapState(useMainStore, ['user'])
+  },
   methods: {
     add() {
       this.$validator.validateAll().then(() => {
@@ -93,7 +98,7 @@ export default {
             len
           )
 
-          this.news_item.author = this.$store.getters.getUserName
+          this.news_item.author = this.user.name
           const d = new Date()
           this.news_item.collected =
             this.appendLeadingZeroes(d.getDate()) +

@@ -133,6 +133,7 @@ export default defineComponent({
     selected: []
   }),
   computed: {
+    ...mapWritableState(useMainStore, ['itemCountFiltered']),
     headers() {
       const actionHeader = {
         title: 'Actions',
@@ -159,8 +160,6 @@ export default defineComponent({
     }
   },
   methods: {
-    ...mapWritableState(useMainStore, ['itemCountFiltered']),
-
     headerTransform(key) {
       if (key === 'tag') {
         return {

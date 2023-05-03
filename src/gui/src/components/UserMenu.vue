@@ -25,16 +25,18 @@
 import { defineComponent } from 'vue'
 
 import { useAuthStore } from '@/stores/AuthStore'
-import { mapActions } from 'pinia'
+import { mapActions, mapState } from 'pinia'
+import { useMainStore } from '@/stores/MainStore'
 
 export default defineComponent({
   name: 'UserMenu',
   computed: {
+    ...mapState(useMainStore, ['user']),
     username() {
-      return this.$store.getters.getUserName
+      return this.user.name
     },
     organizationName() {
-      return this.$store.getters.getOrganizationName
+      return this.user.organization_name
     }
   },
   methods: {

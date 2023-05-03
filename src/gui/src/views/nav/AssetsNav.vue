@@ -128,7 +128,6 @@ export default {
     console.debug('loaded with query', query)
   },
   methods: {
-    ...mapGetters(['getItemCount']),
     ...mapActions(useAssetsStore, ['updateFilteredAssets']),
     ...mapActions(useFilterStore, ['updateAssetFilter']),
     addAsset() {

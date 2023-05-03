@@ -43,8 +43,9 @@ import {
   parseParameterValues,
   createParameterValues
 } from '@/utils/helpers'
-import { mapActions, mapState } from 'pinia'
+import { mapActions, mapState, mapWritableState } from 'pinia'
 import { useConfigStore } from '@/stores/ConfigStore'
+import { useMainStore } from '@/stores/MainStore'
 
 export default {
   name: 'OSINTSourcesView',
@@ -66,6 +67,7 @@ export default {
       store_collectors: 'collectors',
       store_osint_sources: 'osint_sources'
     }),
+    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     formFormat() {
       const base = [
         {
@@ -104,15 +106,12 @@ export default {
   },
   methods: {
     ...mapActions(useConfigStore, ['loadOSINTSources', 'loadCollectors']),
-    ...mapActionsVuex(['updateItemCount']),
     updateData() {
       this.loadOSINTSources().then(() => {
         const sources = this.store_osint_sources
         this.osint_sources = parseParameterValues(sources.items)
-        this.updateItemCount({
-          total: sources.total_count,
-          filtered: sources.length
-        })
+        this.itemCountFiltered = sources.length
+        this.itemCountTotal = sources.total_count
       })
       this.loadCollectors().then(() => {
         const collectors = this.store_collectors

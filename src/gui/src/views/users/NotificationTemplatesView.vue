@@ -28,9 +28,10 @@ import {
   createNotificationTemplate,
   updateNotificationTemplate
 } from '@/api/assets'
-import { mapActions, mapState } from 'pinia'
+import { mapActions, mapState, mapWritableState } from 'pinia'
 import { notifySuccess, objectFromFormat, notifyFailure } from '@/utils/helpers'
 import { useAssetsStore } from '@/stores/AssetsStore'
+import { useMainStore } from '@/stores/MainStore'
 
 export default {
   name: 'NotificationTemplatesView',
@@ -46,6 +47,7 @@ export default {
   }),
   computed: {
     ...mapState(useAssetsStore, ['notification_templates']),
+    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     formFormat() {
       return [
         {
@@ -95,15 +97,12 @@ export default {
   },
   methods: {
     ...mapActions(useAssetsStore, ['loadNotificationTemplates']),
-    ...mapActionsVuex(['updateItemCount']),
     updateData() {
       this.loadNotificationTemplates().then(() => {
         const sources = this.notification_templates
         this.roles = sources.items
-        this.updateItemCount({
-          total: sources.total_count,
-          filtered: sources.length
-        })
+        this.itemCountFiltered = sources.length
+        this.itemCountTotal = sources.total_count
       })
     },
     addItem() {

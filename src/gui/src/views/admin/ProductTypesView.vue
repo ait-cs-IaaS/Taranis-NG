@@ -35,8 +35,9 @@ import {
   createParameterValues,
   objectFromFormat
 } from '@/utils/helpers'
-import { mapActions, mapState } from 'pinia'
+import { mapActions, mapState, mapWritableState } from 'pinia'
 import { useConfigStore } from '@/stores/ConfigStore'
+import { useMainStore } from '@/stores/MainStore'
 
 export default {
   name: 'ProductTypesView',
@@ -57,6 +58,7 @@ export default {
       store_product_types: 'product_types',
       store_presenters: 'presenters'
     }),
+    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     formFormat() {
       const base = [
         {
@@ -97,15 +99,12 @@ export default {
   },
   methods: {
     ...mapActions(useConfigStore, ['loadProductTypes', 'loadPresenters']),
-    ...mapActionsVuex(['updateItemCount']),
     updateData() {
       this.loadProductTypes().then(() => {
         const sources = this.store_product_types
         this.productTypes = parseParameterValues(sources.items)
-        this.updateItemCount({
-          total: sources.total_count,
-          filtered: sources.length
-        })
+        this.itemCountFiltered = sources.length
+        this.itemCountTotal = sources.total_count
       })
       this.loadPresenters().then(() => {
         const presenters = this.store_presenters
