@@ -55,12 +55,12 @@ export default {
       title: ''
     }
   }),
-  mounted() {
-    this.updateData()
-  },
   computed: {
     ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     ...mapState(useAnalyzeStore, ['report_items', 'report_item_types'])
+  },
+  mounted() {
+    this.updateData()
   },
   methods: {
     ...mapActions(useAnalyzeStore, ['loadReportItems', 'loadReportTypes']),

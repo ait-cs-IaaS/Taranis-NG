@@ -51,12 +51,12 @@ export default {
     formData: {},
     edit: false
   }),
-  mounted() {
-    this.updateData()
-  },
   computed: {
     ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     ...mapState(useConfigStore, ['word_lists'])
+  },
+  mounted() {
+    this.updateData()
   },
   methods: {
     ...mapActions(useConfigStore, ['loadWordLists']),

@@ -1,6 +1,6 @@
 <template>
   <filter-navigation
-    :search="filter.search"
+    :search="reportFilter.search"
     :limit="limit"
     :offsest="offset"
     @update:search="(value) => (search = value)"
@@ -87,9 +87,6 @@ export default {
   }),
   computed: {
     ...mapState(useMainStore, ['getItemCount']),
-    ...mapState('filter', {
-      filter: (state) => state.reportFilter
-    }),
     ...mapState(useFilterStore, ['reportFilter']),
     limit: {
       get() {

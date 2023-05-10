@@ -1,6 +1,6 @@
 <template>
   <filter-navigation
-    :search="filter.search"
+    :search="assetFilter.search"
     :limit="limit"
     :offsest="offset"
     @update:search="(value) => (search = value)"

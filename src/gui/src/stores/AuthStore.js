@@ -77,31 +77,17 @@ export const useAuthStore = defineStore('authenticator', {
       this.jwt = ''
     },
     setLoginURL() {
-      if (
-        '$VUE_APP_TARANIS_NG_LOGIN_URL' !== '' &&
-        '$VUE_APP_TARANIS_NG_LOGIN_URL'[0] !== '$'
-      ) {
-        this.login_uri = '$VUE_APP_TARANIS_NG_LOGIN_URL'
-        this.external_login_uri = true
-      }
-      if (process.env.VUE_APP_TARANIS_NG_LOGIN_URL) {
-        this.login_uri = process.env.VUE_APP_TARANIS_NG_LOGIN_URL
+      if (import.meta.env.VUE_APP_TARANIS_NG_LOGIN_URL) {
+        this.login_uri = import.meta.env.VUE_APP_TARANIS_NG_LOGIN_URL
         this.external_login_uri = true
       }
     },
     setLogoutURL() {
       if (
-        '$VUE_APP_TARANIS_NG_LOGOUT_URL' !== '' &&
-        '$VUE_APP_TARANIS_NG_LOGOUT_URL'[0] !== '$'
+        typeof import.meta.env !== 'undefined' &&
+        import.meta.env.VUE_APP_TARANIS_NG_LOGOUT_URL != null
       ) {
-        this.logout_uri = '$VUE_APP_TARANIS_NG_LOGOUT_URL'
-        this.external_logout_uri = true
-      } else if (
-        typeof process !== 'undefined' &&
-        typeof process.env !== 'undefined' &&
-        process.env.VUE_APP_TARANIS_NG_LOGOUT_URL != null
-      ) {
-        this.logout_uri = process.env.VUE_APP_TARANIS_NG_LOGOUT_URL
+        this.logout_uri = import.meta.env.VUE_APP_TARANIS_NG_LOGOUT_URL
         this.external_logout_uri = true
       }
     }

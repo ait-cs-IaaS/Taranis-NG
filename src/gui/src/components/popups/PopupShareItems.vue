@@ -57,6 +57,9 @@ export default {
     reportItems: [],
     reportItemSelection: {}
   }),
+  computed: {
+    ...mapState(useAnalyzeStore, ['report_items'])
+  },
   mounted() {
     console.debug('PopupShareItems mounted')
     console.debug(this.item_ids)
@@ -68,9 +71,6 @@ export default {
         }
       })
     })
-  },
-  computed: {
-    ...mapState(useAnalyzeStore, ['report_items'])
   },
   methods: {
     ...mapActions(useAnalyzeStore, ['loadReportItems']),

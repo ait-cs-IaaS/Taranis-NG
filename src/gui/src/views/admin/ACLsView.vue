@@ -34,12 +34,12 @@ export default {
     showForm: false,
     edit: false
   }),
-  mounted() {
-    this.updateData()
-  },
   computed: {
     ...mapState(useConfigStore, ['acls']),
     ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered'])
+  },
+  mounted() {
+    this.updateData()
   },
   methods: {
     ...mapActions(useConfigStore, ['loadACLEntries']),

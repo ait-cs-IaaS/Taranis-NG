@@ -72,7 +72,7 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import { useDashboardStore } from '@/stores/DashboardStore'
 import DashBoardCard from '@/components/common/DashBoardCard.vue'
 import { storeToRefs } from 'pinia'
@@ -81,10 +81,10 @@ export default {
   name: 'DashBoardConfig',
   components: { DashBoardCard },
   setup() {
-    const store = useDashboardStore()
-    const { dashboard_data } = storeToRefs(store)
+    const { dashboard_data } = storeToRefs(useDashboardStore())
+    const { loadDashboardData } = useDashboardStore()
 
-    onMounted(store.loadDashboardData())
+    onMounted(loadDashboardData())
 
     return {
       dashboard_data

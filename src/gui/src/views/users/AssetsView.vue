@@ -44,15 +44,15 @@ export default {
       ]
     }
   },
-  mounted() {
-    this.updateData()
-  },
   computed: {
     ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     ...mapState(useAssetsStore, {
       store_asset_groups: 'asset_groups',
       store_assets: 'assets'
     })
+  },
+  mounted() {
+    this.updateData()
   },
   methods: {
     ...mapActions(useAssetsStore, ['loadAssetGroups', 'loadAssets']),

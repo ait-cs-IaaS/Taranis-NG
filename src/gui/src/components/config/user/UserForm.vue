@@ -96,7 +96,7 @@
 
 <script>
 import { createUser, updateUser } from '@/api/config'
-import { mapActions, mapState } from 'pinia'
+import { mapActions } from 'pinia'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
 import { ref, computed } from 'vue'
 import { useConfigStore } from '@/stores/ConfigStore'

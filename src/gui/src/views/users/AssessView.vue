@@ -55,8 +55,8 @@
 
 <script>
 import KeyboardMixin from '../../assets/keyboard_mixin'
-import CardStory from '@/components/assess/CardStory'
-import AssessSelectionToolbar from '@/components/assess/AssessSelectionToolbar'
+import CardStory from '@/components/assess/CardStory.vue'
+import AssessSelectionToolbar from '@/components/assess/AssessSelectionToolbar.vue'
 import { mapActions, mapState, storeToRefs, mapWritableState } from 'pinia'
 import { useAssessStore } from '@/stores/AssessStore'
 import { watch } from 'vue'

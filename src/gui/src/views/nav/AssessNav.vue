@@ -109,6 +109,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useFilterStore } from '@/stores/FilterStore'
 import { useAssessStore } from '@/stores/AssessStore'
+import { useMainStore } from '@/stores/MainStore'
 
 export default {
   name: 'AssessNav',
@@ -120,8 +121,16 @@ export default {
     FilterNavigation
   },
   setup() {
-    const store = useFilterStore()
-    const assessStore = useAssessStore()
+    const { drawerVisible } = storeToRefs(useMainStore())
+
+    const { getOSINTSourceGroupsList, getOSINTSourcesList } = storeToRefs(
+      useAssessStore()
+    )
+    const { updateNewsItems } = useAssessStore()
+
+    const { getFilterTags, newsItemsFilter } = storeToRefs(useFilterStore())
+    const { setFilter, setLimit, setSort, setOffset } = useFilterStore()
+
     const route = useRoute()
     const awaitingSearch = ref(false)
     const filterAttributeSelections = ref([])
@@ -159,11 +168,7 @@ export default {
     ]
 
     const filter = computed(() => {
-      return store.filter.newsItemsFilter
-    })
-
-    const drawerVisible = computed(() => {
-      return store.drawerVisible
+      return newsItemsFilter
     })
 
     const source = computed({
@@ -171,7 +176,7 @@ export default {
         return filter.value.source
       },
       set(value) {
-        store.setFilter({ source: value })
+        setFilter({ source: value })
         updateNewsItems()
       }
     })
@@ -181,7 +186,7 @@ export default {
         return filter.value.group
       },
       set(value) {
-        store.setFilter({ group: value })
+        setFilter({ group: value })
         updateNewsItems()
       }
     })
@@ -191,7 +196,7 @@ export default {
         return filter.value.limit
       },
       set(value) {
-        store.setLimit(value)
+        setLimit(value)
         updateNewsItems()
       }
     })
@@ -202,7 +207,7 @@ export default {
         return filter.value.order
       },
       set(value) {
-        store.setSort(value)
+        setSort(value)
         updateNewsItems()
       }
     })
@@ -212,20 +217,20 @@ export default {
         return filter.value.offset
       },
       set(value) {
-        store.setOffset(value)
+        setOffset(value)
         updateNewsItems()
       }
     })
 
     const tags = computed({
       get() {
-        const tags = store.getFilterTags || []
+        const tags = getFilterTags || []
         return tags.map((tag) => {
           return { name: tag }
         })
       },
       set(value) {
-        store.setFilter({ tags: value })
+        setFilter({ tags: value })
         updateNewsItems()
       }
     })
@@ -235,7 +240,7 @@ export default {
         return filter.value.range
       },
       set(value) {
-        store.setFilter({ range: value })
+        setFilter({ range: value })
         updateNewsItems()
       }
     })
@@ -253,7 +258,7 @@ export default {
         }, {})
 
         console.debug('filterAttributeSelections', filterUpdate)
-        store.setFilter(filterUpdate)
+        setFilter(filterUpdate)
         updateNewsItems()
       }
     })
@@ -263,7 +268,7 @@ export default {
         return this.newsItemsFilter.search
       },
       set(value) {
-        store.setFilter({ search: value })
+        setFilter({ search: value })
         if (!awaitingSearch.value) {
           setTimeout(() => {
             updateNewsItems()
@@ -275,21 +280,9 @@ export default {
       }
     })
 
-    const getOSINTSourceGroupsList = computed(() => {
-      return assessStore.getOSINTSourceGroupsList
-    })
-
-    const getOSINTSourcesList = computed(() => {
-      return assessStore.getOSINTSourcesList
-    })
-
     const getNewsItemsFilter = computed(() => {
-      return store.newsItemsFilter
+      return newsItemsFilter
     })
-
-    const updateNewsItems = () => {
-      assessStore.updateNewsItems()
-    }
 
     onMounted(() => {
       const query = Object.fromEntries(

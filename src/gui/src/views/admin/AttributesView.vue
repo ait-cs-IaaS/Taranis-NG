@@ -98,12 +98,12 @@ export default {
       }
     ]
   }),
-  mounted() {
-    this.updateData()
-  },
   computed: {
     ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     ...mapState(useConfigStore, ['attributes'])
+  },
+  mounted() {
+    this.updateData()
   },
   methods: {
     ...mapActions(useConfigStore, ['loadAttributes']),

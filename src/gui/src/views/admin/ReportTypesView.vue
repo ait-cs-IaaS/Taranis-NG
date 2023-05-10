@@ -38,12 +38,12 @@ export default {
     formData: {},
     newItem: false
   }),
-  mounted() {
-    this.updateData()
-  },
   computed: {
     ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
     ...mapState(useConfigStore, { report_types: 'report_item_types_config' })
+  },
+  mounted() {
+    this.updateData()
   },
   methods: {
     ...mapActions(useConfigStore, ['loadReportTypesConfig']),

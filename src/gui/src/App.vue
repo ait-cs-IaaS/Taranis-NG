@@ -20,6 +20,7 @@ import { defineComponent, onMounted } from 'vue'
 import { useSettingsStore } from '@/stores/SettingsStore'
 import { useAuthStore } from '@/stores/AuthStore'
 import { connectSSE, reconnectSSE } from '@/utils/sse'
+import { storeToRefs } from 'pinia'
 
 export default defineComponent({
   name: 'App',
@@ -28,43 +29,43 @@ export default defineComponent({
     Notification
   },
   setup() {
-    const authStore = useAuthStore()
-    const settingsStore = useSettingsStore()
     const { cookies } = useCookies()
-
-    const isAuthenticated = () => authStore.isAuthenticated
-    const needTokenRefresh = () => authStore.needTokenRefresh
+    const { isAuthenticated, needTokenRefresh, jwt } = storeToRefs(
+      useAuthStore()
+    )
+    const { refresh, logout, setAuthURLs, setToken } = useAuthStore()
+    const { loadUserProfile } = useSettingsStore()
 
     onMounted(() => {
       if (cookies.isKey('jwt')) {
-        authStore.setToken(cookies.get('jwt')).then(() => {
+        setToken(cookies.get('jwt')).then(() => {
           cookies.remove('jwt')
         })
       }
 
       if (localStorage.ACCESS_TOKEN) {
-        if (isAuthenticated()) {
-          authStore.setAuthURLs()
-          settingsStore.loadUserProfile()
+        if (isAuthenticated) {
+          setAuthURLs()
+          loadUserProfile()
           connectSSE()
         } else {
-          if (authStore.jwt) {
-            authStore.logout()
+          if (jwt) {
+            logout()
           }
         }
       }
       setInterval(
         function () {
-          if (isAuthenticated()) {
-            if (needTokenRefresh() === true) {
-              authStore.refresh().then(() => {
+          if (isAuthenticated) {
+            if (needTokenRefresh === true) {
+              refresh().then(() => {
                 console.debug('Token refreshed')
                 reconnectSSE()
               })
             }
           } else {
-            if (authStore.jwt) {
-              authStore.logout()
+            if (jwt) {
+              logout()
             }
           }
         }.bind(this),

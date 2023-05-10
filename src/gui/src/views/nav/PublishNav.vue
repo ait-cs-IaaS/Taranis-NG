@@ -1,6 +1,6 @@
 <template>
   <filter-navigation
-    :search="filter.search"
+    :search="productFilter.search"
     :limit="limit"
     :offsest="offset"
     @update:search="(value) => (search = value)"
@@ -20,7 +20,7 @@
       <v-divider class="mt-0 mb-0"></v-divider>
       <v-row class="my-2 mr-0 px-2">
         <v-col cols="12" class="py-0">
-          <h4>filter</h4>
+          <h4>productFilter</h4>
         </v-col>
 
         <!-- time tags -->
