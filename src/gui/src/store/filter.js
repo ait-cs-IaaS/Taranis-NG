@@ -11,7 +11,9 @@ const state = {
     source: undefined,
     in_report: undefined,
     relevant: undefined,
-    important: undefined
+    important: undefined,
+    threshold: 10,
+    y2max: 3
   },
   assetFilter: {
     offset: undefined,
@@ -84,6 +86,12 @@ const actions = {
   },
   setProductFilter(context, filter) {
     context.commit('SET_PRODUCT_FILTER', filter)
+  },
+  setThreshold(context, threshold) {
+    context.commit('SET_THRESHHOLD', threshold)
+  },
+  setY2Max(context, y2max) {
+    context.commit('SET_y2max', y2max)
   }
 }
 
@@ -111,6 +119,12 @@ const getters = {
       return [state.newsItemsFilter.tags]
     }
     return state.newsItemsFilter.tags
+  },
+  getThreshold(state) {
+    return state.newsItemsFilter.threshold
+  },
+  getY2max(state) {
+    return state.newsItemsFilter.y2max
   }
 }
 
@@ -141,7 +155,9 @@ const mutations = {
       source: undefined,
       in_report: undefined,
       relevant: undefined,
-      important: undefined
+      important: undefined,
+      threshold: 10,
+      y2max: 30
     }
   },
   SET_FILTER(state, filter) {
@@ -194,6 +210,12 @@ const mutations = {
     } else {
       state.newsItemsFilter.tags = [tag]
     }
+  },
+  SET_THRESHHOLD(state, threshold) {
+    state.newsItemsFilter.threshold = threshold
+  },
+  SET_y2max(state, y2max) {
+    state.newsItemsFilter.y2max = y2max
   }
 }
 
