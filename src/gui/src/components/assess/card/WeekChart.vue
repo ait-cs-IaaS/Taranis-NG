@@ -93,7 +93,18 @@ export default {
       }
     }
   },
+  watch: {
+    getY2MaxFromStore: {
+      handler(newValue) {
+        this.chartOptions.scales.y2.max = parseInt(newValue)
+      },
+      immediate: true
+    }
+  },
   computed: {
+    getY2MaxFromStore() {
+      return this.getY2max()
+    },
     last_n_days() {
       return Array.from(Array(this.timespan).keys(), (i) => {
         const date = new Date()
@@ -120,13 +131,11 @@ export default {
 
       const days = this.last_n_days
 
-      // TODO change back
       return days.map((day) => {
         if (day in items_per_day) {
-          return items_per_day[day] + 5
+          return items_per_day[day]
         } else {
-          return 1
-          //return 0
+          return 0
         }
       })
     },

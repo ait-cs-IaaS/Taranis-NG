@@ -13,7 +13,7 @@ const state = {
     relevant: undefined,
     important: undefined,
     threshold: 10,
-    y2max: 3
+    y2max: 30
   },
   assetFilter: {
     offset: undefined,
