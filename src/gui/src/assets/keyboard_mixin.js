@@ -214,7 +214,7 @@ const keyboardMixin = (targetId) => ({
               break
 
             case 'source_group_up': {
-              const groups = this.$store.getters.getOSINTSourceGroups.items
+              const groups = this.getOSINTSourceGroups.items
               const active_group_element = document.querySelector(
                 '.v-list-item--active'
               )
@@ -234,7 +234,7 @@ const keyboardMixin = (targetId) => ({
               break
             }
             case 'source_group_down': {
-              const groups = this.$store.getters.getOSINTSourceGroups.items
+              const groups = this.getOSINTSourceGroups.items
               const active_group_element = document.querySelector(
                 '.v-list-item--active'
               )
@@ -280,10 +280,7 @@ const keyboardMixin = (targetId) => ({
 
             case 'read_item':
               this.card.read.click()
-              if (
-                this.multiSelectActive &&
-                this.$store.getters.getFilter.read
-              ) {
+              if (this.multiSelectActive && this.getFilter.read) {
                 const selection = this.getSelection
                 // set focus to the next item to read instead of keeping the current position
                 this.setNewsItem(this.pos - selection.length + 1)
@@ -292,10 +289,7 @@ const keyboardMixin = (targetId) => ({
 
             case 'important_item':
               this.card.important.click()
-              if (
-                this.multiSelectActive &&
-                this.$store.getters.getFilter.important
-              ) {
+              if (this.multiSelectActive && this.getFilter.important) {
                 const selection = this.getSelection
                 // set focus to the next item to read instead of keeping the current position
                 this.setNewsItem(this.pos - selection.length + 1)
@@ -308,10 +302,7 @@ const keyboardMixin = (targetId) => ({
 
             case 'unlike_item':
               this.card.unlike.click()
-              if (
-                this.multiSelectActive &&
-                this.$store.getters.getFilter.relevant
-              ) {
+              if (this.multiSelectActive && this.getFilter.relevant) {
                 const selection = this.getSelection
                 // set focus to the next item to read instead of keeping the current position
                 this.setNewsItem(this.pos - selection.length + 1)
@@ -508,7 +499,7 @@ const keyboardMixin = (targetId) => ({
   },
 
   mounted() {
-    this.shortcuts = this.$store.getters.getProfileHotkeys
+    this.shortcuts = this.getProfileHotkeys
     this.pos = 0
     this.focus = null
   },

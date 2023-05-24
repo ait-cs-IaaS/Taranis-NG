@@ -23,5 +23,6 @@ export const useMainStore = defineStore('main', {
     toggleDrawer() {
       this.drawerVisible = !this.drawerVisible
     }
-  }
+  },
+  persist: true
 })

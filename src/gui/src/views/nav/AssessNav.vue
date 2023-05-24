@@ -110,6 +110,7 @@ import { useRoute } from 'vue-router'
 import { useFilterStore } from '@/stores/FilterStore'
 import { useAssessStore } from '@/stores/AssessStore'
 import { useMainStore } from '@/stores/MainStore'
+import { storeToRefs } from 'pinia'
 
 export default {
   name: 'AssessNav',
@@ -128,8 +129,15 @@ export default {
     )
     const { updateNewsItems } = useAssessStore()
 
-    const { getFilterTags, newsItemsFilter } = storeToRefs(useFilterStore())
-    const { setFilter, setLimit, setSort, setOffset } = useFilterStore()
+    const {
+      setFilter,
+      setLimit,
+      setSort,
+      setOffset,
+      updateFilter,
+      getFilterTags,
+      newsItemsFilter
+    } = useFilterStore()
 
     const route = useRoute()
     const awaitingSearch = ref(false)
@@ -308,7 +316,6 @@ export default {
       range,
       filterAttribute,
       search,
-      getItemCount,
       getOSINTSourceGroupsList,
       getOSINTSourcesList,
       updateFilter,

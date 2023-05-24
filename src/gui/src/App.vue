@@ -15,7 +15,6 @@
 <script>
 import MainMenu from '@/components/MainMenu.vue'
 import Notification from '@/components/common/Notification.vue'
-import { useCookies } from 'vue3-cookies'
 import { defineComponent, onMounted } from 'vue'
 import { useSettingsStore } from '@/stores/SettingsStore'
 import { useAuthStore } from '@/stores/AuthStore'
@@ -29,31 +28,23 @@ export default defineComponent({
     Notification
   },
   setup() {
-    const { cookies } = useCookies()
     const { isAuthenticated, needTokenRefresh, jwt } = storeToRefs(
       useAuthStore()
     )
-    const { refresh, logout, setAuthURLs, setToken } = useAuthStore()
+    const { refresh, logout, setAuthURLs } = useAuthStore()
     const { loadUserProfile } = useSettingsStore()
 
     onMounted(() => {
-      if (cookies.isKey('jwt')) {
-        setToken(cookies.get('jwt')).then(() => {
-          cookies.remove('jwt')
-        })
-      }
-
-      if (localStorage.ACCESS_TOKEN) {
-        if (isAuthenticated) {
-          setAuthURLs()
-          loadUserProfile()
-          connectSSE()
-        } else {
-          if (jwt) {
-            logout()
-          }
+      if (isAuthenticated) {
+        setAuthURLs()
+        loadUserProfile()
+        connectSSE()
+      } else {
+        if (jwt) {
+          logout()
         }
       }
+
       setInterval(
         function () {
           if (isAuthenticated) {
@@ -74,7 +65,6 @@ export default defineComponent({
     })
 
     return {
-      cookies,
       isAuthenticated
     }
   }

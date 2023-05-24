@@ -3,7 +3,7 @@
     :selected="value"
     density="compact"
     class="py-0"
-    active-color="primary"
+    color="primary"
     @click:select="updateSelected"
   >
     <v-list-item

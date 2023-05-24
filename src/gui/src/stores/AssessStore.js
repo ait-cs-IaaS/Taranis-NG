@@ -86,9 +86,6 @@ export const useAssessStore = defineStore('assess', {
           break
         }
       }
-    },
-    UPDATE_NEWSITEMS(newsItems) {
-      this.newsItems = newsItems
     }
   }
 })

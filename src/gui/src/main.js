@@ -9,6 +9,7 @@ import { datetimeFormats } from '@/i18n/datetimeformat'
 import DatePicker from 'vue-datepicker-next'
 import { vuetify } from '@/plugins/vuetify'
 import { createPinia } from 'pinia'
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 
 export const app = createApp(App)
 
@@ -36,8 +37,9 @@ ApiService.init(coreAPIURL)
 app.provide('$coreAPIURL', coreAPIURL)
 
 const pinia = createPinia()
+pinia.use(piniaPluginPersistedstate)
 
-app.use(pinia)
 app.use(router)
+app.use(pinia)
 app.use(vuetify)
 app.mount('#app')

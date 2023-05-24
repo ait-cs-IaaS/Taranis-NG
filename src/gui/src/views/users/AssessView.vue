@@ -1,36 +1,26 @@
 <template>
   <div>
     <v-container fluid class="flex-column">
-      <transition name="empty-list-transition" mode="out-in">
-        <v-row v-if="!items">
-          <v-col cols="12" class="empty-list-notification">
-            <v-icon x-large> mdi-circle-off-outline </v-icon>
-            <span v-if="items.total_count">
-              The currently selected filters do not yield any results. Try
-              changing the filters.
-            </span>
-            <span v-else> No elements to display. </span>
-          </v-col>
-        </v-row>
+      <v-row v-if="!items">
+        <v-col cols="12" class="empty-list-notification">
+          <v-icon x-large> mdi-circle-off-outline </v-icon>
+          <span v-if="items.total_count">
+            The currently selected filters do not yield any results. Try
+            changing the filters.
+          </span>
+          <span v-else> No elements to display. </span>
+        </v-col>
+      </v-row>
 
-        <!-- class="row d-flex align-stretch row--dense stories-grid-container" -->
-        <transition-group
-          v-else
-          name="news-items-grid"
-          tag="div"
-          class="row d-flex align-stretch row--dense flex-column"
-          appear
-        >
-          <card-story
-            v-for="newsItem in items"
-            :key="newsItem.id"
-            :story="newsItem"
-            :selected="getNewsItemsSelection().includes(newsItem.id)"
-            @delete-item="removeAndDeleteNewsItem(newsItem.id)"
-            @select-item="selectNewsItem(newsItem.id)"
-          ></card-story>
-        </transition-group>
-      </transition>
+      <!-- class="row d-flex align-stretch row--dense stories-grid-container" -->
+      <card-story
+        v-for="newsItem in items"
+        :key="newsItem.id"
+        :story="newsItem"
+        :selected="newsItemsSelection.includes(newsItem.id)"
+        @delete-item="removeAndDeleteNewsItem(newsItem.id)"
+        @select-item="selectNewsItem(newsItem.id)"
+      ></card-story>
     </v-container>
 
     <!-- TODO: Loader not working -->
@@ -61,6 +51,7 @@ import { mapActions, mapState, storeToRefs, mapWritableState } from 'pinia'
 import { useAssessStore } from '@/stores/AssessStore'
 import { watch } from 'vue'
 import { useFilterStore } from '@/stores/FilterStore'
+import { useMainStore } from '@/stores/MainStore'
 
 export default {
   name: 'AssessView',

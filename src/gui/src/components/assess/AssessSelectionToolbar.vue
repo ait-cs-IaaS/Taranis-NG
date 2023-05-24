@@ -55,7 +55,10 @@ export default {
     PopupShareItems
   },
   props: {
-    selection: []
+    selection: {
+      type: Array,
+      default: () => []
+    }
   },
   data: () => ({
     actionButtons: [

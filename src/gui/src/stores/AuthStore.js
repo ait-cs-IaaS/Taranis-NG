@@ -91,5 +91,6 @@ export const useAuthStore = defineStore('authenticator', {
         this.external_logout_uri = true
       }
     }
-  }
+  },
+  persist: true
 })
