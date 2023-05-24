@@ -71,7 +71,7 @@ export default {
           y2: {
             position: 'right',
             beginAtZero: true,
-            max: parseInt(this.getY2max()),
+            max: parseInt(this.getMaxItem()),
             grid: {
               // display gridlines only for y1
               drawOnChartArea: false
@@ -103,7 +103,10 @@ export default {
   },
   computed: {
     getY2MaxFromStore() {
-      return this.getY2max()
+      if (this.getY2max()) {
+        return this.getY2max()
+      }
+      return this.getMaxItem()
     },
     last_n_days() {
       return Array.from(Array(this.timespan).keys(), (i) => {
@@ -174,7 +177,8 @@ export default {
     }
   },
   methods: {
-    ...mapGetters('filter', ['getThreshold', 'getY2max'])
+    ...mapGetters('filter', ['getThreshold', 'getY2max']),
+    ...mapGetters('assess', ['getMaxItem'])
   },
   updated() {
     //console.log('card rendered!')

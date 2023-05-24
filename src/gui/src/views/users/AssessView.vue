@@ -1,10 +1,5 @@
 <template>
   <div>
-    <v-container class="justify-center font-weight-light" sticky>
-      Threshold: <input type="number" v-model="filter.threshold" min="0" /> y2
-      Max: <input type="number" v-model="filter.y2max" min="0" />
-    </v-container>
-
     <v-container fluid style="min-height: 40vh">
       <transition name="empty-list-transition" mode="out-in">
         <v-row v-if="!items">

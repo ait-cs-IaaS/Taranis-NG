@@ -11,9 +11,7 @@ const state = {
     source: undefined,
     in_report: undefined,
     relevant: undefined,
-    important: undefined,
-    threshold: 10,
-    y2max: 30
+    important: undefined
   },
   assetFilter: {
     offset: undefined,
@@ -35,6 +33,10 @@ const state = {
     search: undefined,
     sort: undefined,
     range: undefined
+  },
+  chartFilter: {
+    threshold: 20,
+    y2max: undefined
   }
 }
 
@@ -121,10 +123,10 @@ const getters = {
     return state.newsItemsFilter.tags
   },
   getThreshold(state) {
-    return state.newsItemsFilter.threshold
+    return state.chartFilter.threshold
   },
   getY2max(state) {
-    return state.newsItemsFilter.y2max
+    return state.chartFilter.y2max
   }
 }
 
@@ -155,9 +157,7 @@ const mutations = {
       source: undefined,
       in_report: undefined,
       relevant: undefined,
-      important: undefined,
-      threshold: 10,
-      y2max: 30
+      important: undefined
     }
   },
   SET_FILTER(state, filter) {
@@ -212,10 +212,10 @@ const mutations = {
     }
   },
   SET_THRESHHOLD(state, threshold) {
-    state.newsItemsFilter.threshold = threshold
+    state.chartFilter.threshold = threshold
   },
   SET_y2max(state, y2max) {
-    state.newsItemsFilter.y2max = y2max
+    state.chartFilter.y2max = y2max
   }
 }
 
