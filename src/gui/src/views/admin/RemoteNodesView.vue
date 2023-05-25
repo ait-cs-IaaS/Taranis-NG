@@ -1,7 +1,7 @@
 <template>
   <div>
     <DataTable
-      v-model:items="RemoteNodes"
+      v-model:items="remote_nodes.items"
       :add-button="true"
       :header-filter="['tag', 'name', 'title', 'description']"
       :action-column="true"

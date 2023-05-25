@@ -1,7 +1,7 @@
 <template>
   <div>
     <DataTable
-      v-model:items="organizations"
+      v-model:items="organizations.items"
       :add-button="true"
       :header-filter="['tag', 'id', 'name', 'description']"
       sort-by-item="id"
@@ -48,8 +48,8 @@ export default {
 
     const updateData = () => {
       store.loadOrganizations().then(() => {
-        mainStore.itemCountTotal = organizations.total_count
-        mainStore.itemCountFiltered = organizations.items.length
+        mainStore.itemCountTotal = organizations.value.total_count
+        mainStore.itemCountFiltered = organizations.value.items.length
       })
     }
 
@@ -107,7 +107,9 @@ export default {
         })
     }
 
-    onMounted(updateData)
+    onMounted(() => {
+      updateData()
+    })
 
     return {
       organizations,
@@ -116,6 +118,7 @@ export default {
       addItem,
       editItem,
       handleSubmit,
+      updateData,
       deleteItem,
       createItem,
       updateItem

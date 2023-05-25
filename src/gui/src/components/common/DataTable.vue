@@ -18,17 +18,17 @@
             <v-text-field
               v-if="searchBar"
               v-model="search"
-              append-icon="mdi-magnify"
+              append-inner-icon="mdi-magnify"
               label="Search"
               single-line
-              class="mr-8"
+              class="mr-4"
               hide-details
             ></v-text-field>
             <v-btn
               v-if="selected.length > 0"
               color="error"
               dark
-              class="ml-8"
+              class="ml-4"
               @click="deleteItems(selected)"
             >
               Delete {{ selected.length }}
@@ -37,7 +37,7 @@
               v-if="addButton"
               color="primary"
               dark
-              class="ml-8"
+              class="ml-4"
               @click="addItem"
             >
               New Item

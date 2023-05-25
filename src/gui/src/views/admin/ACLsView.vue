@@ -1,7 +1,7 @@
 <template>
   <div>
     <DataTable
-      v-model:items="acls"
+      v-model:items="acls.items"
       :add-button="true"
       :header-filter="['tag', 'id', 'name', 'username']"
       sort-by-item="id"
@@ -16,11 +16,11 @@
 </template>
 
 <script>
+import { ref, onMounted } from 'vue'
 import DataTable from '@/components/common/DataTable.vue'
 import NewACL from '@/components/config/user/NewACL.vue'
 import { deleteACLEntry, createACLEntry, updateACLEntry } from '@/api/config'
 import { notifySuccess } from '@/utils/helpers'
-import { mapActions, mapState, mapWritableState } from 'pinia'
 import { useConfigStore } from '@/stores/ConfigStore'
 import { useMainStore } from '@/stores/MainStore'
 
@@ -30,57 +30,77 @@ export default {
     DataTable,
     NewACL
   },
-  data: () => ({
-    showForm: false,
-    edit: false
-  }),
-  computed: {
-    ...mapState(useConfigStore, ['acls']),
-    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered'])
-  },
-  mounted() {
-    this.updateData()
-  },
-  methods: {
-    ...mapActions(useConfigStore, ['loadACLEntries']),
-    updateData() {
-      this.loadACLEntries().then(() => {
-        this.itemCountTotal = this.acls.total_count
-        this.itemCountFiltered = this.acls.items.length
-      })
-    },
-    addItem() {
-      this.userID = null
-      this.showForm = true
-    },
-    editItem(item) {
-      this.userID = item.id
-      this.showForm = true
-    },
-    handleSubmit(submittedData) {
-      if (this.showForm) {
-        this.updateItem(submittedData)
+  setup() {
+    const showForm = ref(false)
+    const edit = ref(false)
+    const userID = ref(null)
+    const acls = useConfigStore().acls
+    const mainStore = useMainStore()
+
+    const updateData = () => {
+      useConfigStore()
+        .loadACLEntries()
+        .then(() => {
+          mainStore.itemCountTotal = acls.total_count
+          mainStore.itemCountFiltered = acls.items.length
+        })
+    }
+
+    const addItem = () => {
+      userID.value = null
+      showForm.value = true
+    }
+
+    const editItem = (item) => {
+      userID.value = item.id
+      showForm.value = true
+    }
+
+    const handleSubmit = (submittedData) => {
+      if (showForm.value) {
+        updateItem(submittedData)
       } else {
-        this.createItem(submittedData)
+        createItem(submittedData)
       }
-    },
-    deleteItem(item) {
+    }
+
+    const deleteItem = (item) => {
       deleteACLEntry(item).then(() => {
         notifySuccess(`Successfully deleted ${item.name}`)
-        this.updateData()
+        updateData()
       })
-    },
-    createItem(item) {
+    }
+
+    const createItem = (item) => {
       createACLEntry(item).then(() => {
         notifySuccess(`Successfully created ${item.name}`)
-        this.updateData()
+        updateData()
       })
-    },
-    updateItem(item) {
+    }
+
+    const updateItem = (item) => {
       updateACLEntry(item).then(() => {
         notifySuccess(`Successfully updated ${item.name}`)
-        this.updateData()
+        updateData()
       })
+    }
+
+    onMounted(() => {
+      updateData()
+    })
+
+    return {
+      showForm,
+      edit,
+      userID,
+      acls,
+      addItem,
+      editItem,
+      handleSubmit,
+      deleteItem,
+      createItem,
+      updateItem,
+      updateData
     }
   }
 }

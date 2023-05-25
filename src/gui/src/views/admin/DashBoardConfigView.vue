@@ -84,7 +84,9 @@ export default {
     const { dashboard_data } = storeToRefs(useDashboardStore())
     const { loadDashboardData } = useDashboardStore()
 
-    onMounted(loadDashboardData())
+    onMounted(() => {
+      loadDashboardData()
+    })
 
     return {
       dashboard_data

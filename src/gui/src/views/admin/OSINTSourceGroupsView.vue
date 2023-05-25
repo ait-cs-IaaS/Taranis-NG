@@ -33,6 +33,7 @@ import {
 import { ref, computed, onMounted } from 'vue'
 import { notifySuccess, objectFromFormat, notifyFailure } from '@/utils/helpers'
 import { useConfigStore } from '@/stores/ConfigStore'
+import { useMainStore } from '@/stores/MainStore'
 import { storeToRefs } from 'pinia'
 
 export default {
@@ -82,10 +83,10 @@ export default {
 
     const updateData = () => {
       store.loadOSINTSourceGroups().then(() => {
-        mainStore.itemCountTotal = osint_source_groups.total_count
-        mainStore.itemCountFiltered = osint_source_groups.items.length
+        mainStore.itemCountTotal = osint_source_groups.value.total_count
+        mainStore.itemCountFiltered = osint_source_groups.value.items.length
       })
-      loadOSINTSources().then()
+      store.loadOSINTSources().then()
     }
 
     const addItem = () => {
@@ -145,7 +146,9 @@ export default {
       selected.value = selectedItems.map((item) => item.id)
     }
 
-    onMounted(updateData)
+    onMounted(() => {
+      updateData()
+    })
 
     return {
       osint_source_groups,
@@ -157,6 +160,7 @@ export default {
       addItem,
       editItem,
       handleSubmit,
+      updateData,
       deleteItem,
       createItem,
       updateItem,

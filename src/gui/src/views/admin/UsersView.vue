@@ -1,7 +1,7 @@
 <template>
   <div>
     <DataTable
-      v-model:items="users"
+      v-model:items="users.items"
       :add-button="true"
       :header-filter="['tag', 'id', 'name', 'username']"
       sort-by-item="id"
@@ -19,9 +19,11 @@
 import DataTable from '@/components/common/DataTable.vue'
 import UserForm from '@/components/config/user/UserForm.vue'
 import { deleteUser, createUser, updateUser } from '@/api/config'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, toRaw } from 'vue'
 import { useConfigStore } from '@/stores/ConfigStore'
+import { useMainStore } from '@/stores/MainStore'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
+import { storeToRefs } from 'pinia'
 
 export default {
   name: 'UsersView',
@@ -39,8 +41,8 @@ export default {
 
     const updateData = () => {
       store.loadUsers().then(() => {
-        mainStore.itemCountTotal = users.total_count
-        mainStore.itemCountFiltered = users.items.length
+        mainStore.itemCountTotal = users.value.total_count
+        mainStore.itemCountFiltered = users.value.items?.length || 0
       })
     }
 
@@ -99,13 +101,16 @@ export default {
       selected.value = selectedItems.map((item) => item.id)
     }
 
-    onMounted(updateData)
+    onMounted(() => {
+      updateData()
+    })
 
     return {
       showForm,
       users,
       selected,
       userID,
+      updateData,
       addItem,
       editItem,
       handleSubmit,

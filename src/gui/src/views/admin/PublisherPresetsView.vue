@@ -1,7 +1,7 @@
 <template>
   <div>
     <DataTable
-      v-model:items="presets"
+      v-model:items="publisher_presets.items"
       :add-button="true"
       :header-filter="['tag', 'id', 'name', 'description']"
       sort-by-item="id"

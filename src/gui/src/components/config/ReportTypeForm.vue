@@ -96,7 +96,7 @@
 
 <script>
 import { createReportItemType, updateReportItemType } from '@/api/config'
-import AttributeTable from './AttributeTable'
+import AttributeTable from './AttributeTable.vue'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
 
 import { mapState } from 'pinia'

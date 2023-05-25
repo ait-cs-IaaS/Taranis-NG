@@ -1,7 +1,7 @@
 <template>
   <div>
     <DataTable
-      v-model:items="word_lists"
+      v-model:items="word_lists.items"
       :add-button="true"
       :header-filter="['tag', 'name', 'description']"
       sort-by-item="id"
@@ -38,6 +38,7 @@ import {
 import { notifySuccess, emptyValues, notifyFailure } from '@/utils/helpers'
 import { mapActions, mapState, mapWritableState } from 'pinia'
 import { useConfigStore } from '@/stores/ConfigStore'
+import { useMainStore } from '@/stores/MainStore'
 
 export default {
   name: 'WordLists',

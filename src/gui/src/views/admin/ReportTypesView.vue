@@ -19,63 +19,74 @@
 </template>
 
 <script>
+import { defineComponent, ref } from 'vue'
 import DataTable from '@/components/common/DataTable.vue'
 import ReportTypeForm from '@/components/config/ReportTypeForm.vue'
 import { deleteReportItemType } from '@/api/config'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
 
-import { mapActions, mapState, mapWritableState } from 'pinia'
 import { useConfigStore } from '@/stores/ConfigStore'
+import { useMainStore } from '@/stores/MainStore'
 
-export default {
+export default defineComponent({
   name: 'ReportTypes',
   components: {
     DataTable,
     ReportTypeForm
   },
-  data: () => ({
-    selected: [],
-    formData: {},
-    newItem: false
-  }),
-  computed: {
-    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
-    ...mapState(useConfigStore, { report_types: 'report_item_types_config' })
-  },
-  mounted() {
-    this.updateData()
-  },
-  methods: {
-    ...mapActions(useConfigStore, ['loadReportTypesConfig']),
-    updateData() {
-      this.loadReportTypesConfig().then(() => {
-        this.itemCountTotal = this.report_types.total_count
-        this.itemCountFiltered = this.report_types.items.length
+  setup() {
+    const selected = ref([])
+    const formData = ref({})
+    const newItem = ref(false)
+
+    const report_types = useConfigStore().report_item_types_config
+    const mainStore = useMainStore()
+
+    const updateData = () => {
+      loadReportTypesConfig().then(() => {
+        mainStore.itemCountTotal = report_types.total_count
+        mainStore.itemCountFiltered = report_types.items.length
       })
-    },
-    addItem() {
-      this.formData = undefined
-      this.newItem = true
-    },
-    editItem(item) {
-      this.newItem = false
-      this.formData = item
-    },
-    deleteItem(item) {
+    }
+
+    const addItem = () => {
+      formData.value = undefined
+      newItem.value = true
+    }
+
+    const editItem = (item) => {
+      newItem.value = false
+      formData.value = item
+    }
+
+    const deleteItem = (item) => {
       if (!item.default) {
         deleteReportItemType(item)
           .then(() => {
             notifySuccess(`Successfully deleted ${item.name}`)
-            this.updateData()
+            updateData()
           })
           .catch(() => {
             notifyFailure(`Failed to delete ${item.name}`)
           })
       }
-    },
-    selectionChange(selected) {
-      this.selected = selected.map((item) => item.id)
+    }
+
+    const selectionChange = (selected) => {
+      selected.value = selected.map((item) => item.id)
+    }
+
+    return {
+      selected,
+      formData,
+      newItem,
+      report_types,
+      addItem,
+      editItem,
+      deleteItem,
+      selectionChange,
+      updateData
     }
   }
-}
+})
 </script>

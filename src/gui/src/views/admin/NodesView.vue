@@ -1,7 +1,7 @@
 <template>
   <div>
     <DataTable
-      v-model:items="nodes"
+      v-model:items="nodes.items"
       :add-button="true"
       :header-filter="['tag', 'name', 'description']"
       :action-column="true"
@@ -30,9 +30,11 @@
 import DataTable from '@/components/common/DataTable.vue'
 import EditConfig from '@/components/config/EditConfig.vue'
 import { deleteNode, createNode, updateNode, triggerNode } from '@/api/config'
-import { mapActions, mapState, mapWritableState } from 'pinia'
+import { mapActions } from 'pinia'
 import { useConfigStore } from '@/stores/ConfigStore'
+import { useMainStore } from '@/stores/MainStore'
 import { notifySuccess, notifyFailure, objectFromFormat } from '@/utils/helpers'
+import { ref, reactive, computed } from 'vue'
 
 export default {
   name: 'NodesView',
@@ -40,16 +42,19 @@ export default {
     DataTable,
     EditConfig
   },
-  data: () => ({
-    formData: {},
-    edit: false,
-    selected: [],
-    workers: []
-  }),
-  computed: {
-    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
-    ...mapState(useConfigStore, ['nodes', 'collectors']),
-    formFormat() {
+  setup() {
+    const formData = ref({})
+    const edit = ref(false)
+    const selected = ref([])
+    const workers = ref([])
+    const mainStore = useMainStore()
+    const nodes = useConfigStore().nodes
+
+    const collectors = reactive({
+      items: []
+    })
+
+    const formFormat = computed(() => {
       return [
         {
           name: 'id',
@@ -80,8 +85,8 @@ export default {
           type: 'text'
         },
         {
-          name: this.formData.type,
-          label: `${this.formData.type} Types`,
+          name: formData.value.type,
+          label: `${formData.value.type} Types`,
           type: 'table',
           disabled: true,
           headers: [
@@ -89,83 +94,110 @@ export default {
             { text: 'Description', value: 'description' },
             { text: 'Type', value: 'type' }
           ],
-          items: this.workers
+          items: workers.value
         }
       ]
-    }
-  },
-  mounted() {
-    this.updateData()
-  },
-  methods: {
-    ...mapActions(useConfigStore, ['loadNodes', 'loadCollectors']),
-    updateData() {
-      this.loadNodes().then(() => {
-        this.itemCountTotal = this.nodes.total_count
-        this.itemCountFiltered = this.nodes.items.length
+    })
+
+    const loadNodes = mapActions(useConfigStore, ['loadNodes'])
+    const loadCollectors = mapActions(useConfigStore, ['loadCollectors'])
+
+    const updateData = () => {
+      loadNodes().then(() => {
+        mainStore.itemCountTotal = nodes.total_count
+        mainStore.itemCountFiltered = nodes.items.length
       })
-    },
-    addItem() {
-      this.formData = objectFromFormat(this.formFormat)
-      this.edit = false
-    },
-    editItem(item) {
+    }
+
+    const addItem = () => {
+      formData.value = objectFromFormat(formFormat.value)
+      edit.value = false
+    }
+
+    const editItem = (item) => {
       if (item.type === 'bot') {
-        this.workers = item.bots
+        workers.value = item.bots
       } else if (item.type === 'collector') {
-        this.loadCollectors().then(() => {
-          this.workers = this.collectors.items
+        loadCollectors().then(() => {
+          workers.value = collectors.items
         })
       } else {
         console.log('No workers found')
       }
-      this.formData = item
-      this.edit = true
-    },
-    handleSubmit(submittedData) {
-      if (this.edit) {
-        this.updateItem(submittedData)
+      formData.value = item
+      edit.value = true
+    }
+
+    const handleSubmit = (submittedData) => {
+      if (edit.value) {
+        updateItem(submittedData)
       } else {
-        this.createItem(submittedData)
+        createItem(submittedData)
       }
-    },
-    deleteItem(item) {
+    }
+
+    const deleteItem = (item) => {
       deleteNode(item)
         .then(() => {
           notifySuccess(`Successfully deleted ${item.name}`)
-          this.updateData()
+          updateData()
         })
         .catch(() => {
           notifyFailure(`Failed to delete ${item.name}`)
         })
-    },
-    createItem(item) {
+    }
+
+    const createItem = (item) => {
       createNode(item)
         .then(() => {
           notifySuccess(`Successfully created ${item.name}`)
-          this.updateData()
+          updateData()
         })
         .catch(() => {
           notifyFailure(`Failed to create ${item.name}`)
         })
-    },
-    updateItem(item) {
+    }
+
+    const updateItem = (item) => {
       updateNode(item)
         .then(() => {
           notifySuccess(`Successfully updated ${item.name}`)
-          this.updateData()
+          updateData()
         })
         .catch(() => {
           notifyFailure(`Failed to update ${item.name}`)
         })
-    },
-    selectionChange(selected) {
-      this.selected = selected.map((item) => item.id)
-    },
-    triggerWorkers() {
+    }
+
+    const selectionChange = (selected) => {
+      selected = selected.map((item) => item.id)
+    }
+
+    const triggerWorkers = () => {
       triggerNode().then(() => {
         notifySuccess('Node run triggerd')
       })
+    }
+
+    return {
+      formData,
+      edit,
+      selected,
+      workers,
+      nodes,
+      collectors,
+      formFormat,
+      loadNodes,
+      loadCollectors,
+      updateData,
+      addItem,
+      editItem,
+      handleSubmit,
+      deleteItem,
+      createItem,
+      updateItem,
+      selectionChange,
+      triggerWorkers
     }
   }
 }

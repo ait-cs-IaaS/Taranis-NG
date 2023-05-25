@@ -1,7 +1,7 @@
 <template>
   <div>
     <DataTable
-      v-model:items="roles"
+      v-model:items="roles.items"
       :add-button="true"
       :header-filter="['tag', 'id', 'name', 'description']"
       sort-by-item="id"
@@ -26,6 +26,8 @@ import EditConfig from '@/components/config/EditConfig.vue'
 import { deleteRole, createRole, updateRole } from '@/api/config'
 import { ref, onMounted, computed } from 'vue'
 import { useConfigStore } from '@/stores/ConfigStore'
+import { useMainStore } from '@/stores/MainStore'
+import { storeToRefs } from 'pinia'
 import { notifySuccess, objectFromFormat, notifyFailure } from '@/utils/helpers'
 
 export default {
@@ -75,8 +77,8 @@ export default {
 
     const updateData = () => {
       store.loadRoles().then(() => {
-        mainStore.itemCountTotal = roles.total_count
-        mainStore.itemCountFiltered = roles.items.length
+        mainStore.itemCountTotal = roles.value.total_count
+        mainStore.itemCountFiltered = roles.value.items.length
       })
       store.loadPermissions().then()
     }
@@ -139,7 +141,9 @@ export default {
       selected.value = selectedItems.map((item) => item.id)
     }
 
-    onMounted(updateData)
+    onMounted(() => {
+      updateData()
+    })
 
     return {
       roles,
