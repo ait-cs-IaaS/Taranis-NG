@@ -59,7 +59,7 @@
           <v-data-table
             v-model="user.roles"
             :headers="headers"
-            :items="roles"
+            :items="simple_roles"
             item-value="id"
             :show-select="true"
             class="elevation-1"
@@ -98,8 +98,9 @@
 import { createUser, updateUser } from '@/api/config'
 import { mapActions } from 'pinia'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useConfigStore } from '@/stores/ConfigStore'
+import { storeToRefs } from 'pinia'
 
 export default {
   name: 'UserForm',
@@ -111,6 +112,9 @@ export default {
     }
   },
   setup() {
+    const store = useConfigStore()
+    const { loadOrganizations, loadRoles, loadPermissions } = store
+    const { roles, permissions, organizations } = storeToRefs(store)
     const headers = [
       {
         text: 'Name',
@@ -123,9 +127,7 @@ export default {
     const edit = ref(false)
     const pwd = ref('')
     const repwd = ref('')
-    const organizations = ref([])
-    const roles = ref([])
-    const permissions = ref([])
+    const simple_roles = ref([])
     const user = ref({
       id: -1,
       username: '',
@@ -155,6 +157,86 @@ export default {
         : [rules.required, rules.matchPassword]
     })
 
+    const loadUser = (user_id) => {
+      if (!user_id || user_id === -1) {
+        loadUsers().then(() => {
+          const stored_user = getUserByID()(props.userId)
+          const roles = stored_user.roles.map((role) => role.id)
+          const permissions = stored_user.permissions.map(
+            (permission) => permission.id
+          )
+          stored_user.roles = roles
+          stored_user.permissions = permissions
+          if (stored_user !== null) {
+            user.value = stored_user
+            edit.value = true
+          }
+        })
+      } else {
+        user.value = {
+          id: -1,
+          username: '',
+          name: '',
+          organization: {
+            id: 0
+          },
+          roles: [],
+          permissions: []
+        }
+        edit.value = false
+      }
+    }
+
+    const loadUsers = mapActions(useConfigStore, ['loadUsers'])
+    const getUserByID = mapActions(useConfigStore, ['getUserByID'])
+
+    const add = () => {
+      $refs.form.validateAll().then(() => {
+        if (edit.value === false || pwd.value !== '') {
+          user.value.password = pwd.value
+        }
+
+        if (edit.value) {
+          updateUser(user.value)
+            .then(() => {
+              $refs.form.reset()
+              notifySuccess('user.successful_edit')
+            })
+            .catch(() => {
+              notifyFailure('user.error')
+            })
+        } else {
+          createUser(user.value)
+            .then(() => {
+              $refs.form.reset()
+              notifySuccess('user.successful')
+            })
+            .catch(() => {
+              notifyFailure('user.error')
+            })
+        }
+      })
+    }
+
+    onMounted(() => {
+      if (props.userId > 0) {
+        edit.value = true
+      }
+      loadOrganizations()
+      loadRoles().then(() => {
+        simple_roles.value = roles.items.map((role) => {
+          return {
+            id: role.id,
+            name: role.name,
+            description: role.description
+          }
+        })
+      })
+      loadPermissions()
+      console.debug('Loading User: ' + this.userId)
+      this.loadUser(this.userId)
+    })
+
     return {
       headers,
       rules,
@@ -165,97 +247,14 @@ export default {
       pwd,
       repwd,
       user,
-      passwordRules
+      passwordRules,
+      loadUser,
+      add
     }
   },
   watch: {
     user_id(uid) {
       this.loadUser(uid)
-    }
-  },
-  created() {
-    this.loadOrganizations().then(() => {
-      this.organizations = this.store_organizations
-    })
-    this.loadRoles().then(() => {
-      this.roles = this.store_roles.items.map((role) => {
-        return {
-          id: role.id,
-          name: role.name,
-          description: role.description
-        }
-      })
-    })
-    this.loadPermissions().then(() => {
-      this.permissions = this.store_permissions.items
-    })
-
-    console.debug('Loading User: ' + this.userId)
-    this.loadUser(this.userId)
-    console.debug(this.user)
-  },
-  methods: {
-    ...mapActions(useConfigStore, [
-      'loadOrganizations',
-      'loadRoles',
-      'loadPermissions',
-      'loadUsers'
-    ]),
-    add() {
-      this.$validator.validateAll().then(() => {
-        if (this.edit === false || this.pwd !== '') {
-          this.user.password = this.pwd
-        }
-
-        if (this.edit) {
-          updateUser(this.user)
-            .then(() => {
-              this.$validator.reset()
-              notifySuccess('user.successful_edit')
-            })
-            .catch(() => {
-              notifyFailure('user.error')
-            })
-        } else {
-          createUser(this.user)
-            .then(() => {
-              this.$validator.reset()
-              notifySuccess('user.successful')
-            })
-            .catch(() => {
-              notifyFailure('user.error')
-            })
-        }
-      })
-    },
-    loadUser(user_id) {
-      if (!user_id || user_id === -1) {
-        this.loadUsers().then(() => {
-          const stored_user = this.getUserByID()(this.userId)
-          const roles = stored_user.roles.map((role) => role.id)
-          const permissions = stored_user.permissions.map(
-            (permission) => permission.id
-          )
-          stored_user.roles = roles
-          stored_user.permissions = permissions
-          if (stored_user !== null) {
-            this.user = stored_user
-            this.edit = true
-          }
-        })
-      } else {
-        this.user = {
-          id: -1,
-          username: '',
-          name: '',
-          organization: {
-            id: 0
-          },
-          roles: [],
-          permissions: []
-        }
-        this.edit = false
-      }
     }
   }
 }

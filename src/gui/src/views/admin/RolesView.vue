@@ -68,10 +68,10 @@ export default {
         label: 'Permissions',
         type: 'table',
         headers: [
-          { text: 'Name', value: 'name' },
-          { text: 'Description', value: 'description' }
+          { title: 'Name', key: 'name' },
+          { title: 'Description', key: 'description' }
         ],
-        items: permissions.value
+        items: permissions.value.items
       }
     ])
 

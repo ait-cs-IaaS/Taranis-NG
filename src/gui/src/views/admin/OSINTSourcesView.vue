@@ -114,8 +114,7 @@ export default {
         this.itemCountTotal = sources.total_count
       })
       this.loadCollectors().then(() => {
-        const collectors = this.store_collectors
-        this.collectors = collectors.items.map((collector) => {
+        this.collectors = this.store_collectors.items.map((collector) => {
           this.parameters[collector.id] = collector.parameters.map(
             (parameter) => {
               return {
@@ -126,8 +125,8 @@ export default {
             }
           )
           return {
-            value: collector.id,
-            text: collector.name
+            key: collector.id,
+            title: collector.name
           }
         })
       })

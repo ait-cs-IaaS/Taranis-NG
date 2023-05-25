@@ -17,6 +17,7 @@
         </v-btn>
       </template>
     </DataTable>
+    {{ formData }}
     <EditConfig
       v-if="formData && Object.keys(formData).length > 0"
       :config-data="formData"
@@ -34,7 +35,7 @@ import { mapActions } from 'pinia'
 import { useConfigStore } from '@/stores/ConfigStore'
 import { useMainStore } from '@/stores/MainStore'
 import { notifySuccess, notifyFailure, objectFromFormat } from '@/utils/helpers'
-import { ref, reactive, computed } from 'vue'
+import { ref, computed } from 'vue'
 
 export default {
   name: 'NodesView',
@@ -49,10 +50,7 @@ export default {
     const workers = ref([])
     const mainStore = useMainStore()
     const nodes = useConfigStore().nodes
-
-    const collectors = reactive({
-      items: []
-    })
+    const collectors = useConfigStore().collectors
 
     const formFormat = computed(() => {
       return [
@@ -90,9 +88,9 @@ export default {
           type: 'table',
           disabled: true,
           headers: [
-            { text: 'Name', value: 'name' },
-            { text: 'Description', value: 'description' },
-            { text: 'Type', value: 'type' }
+            { title: 'Name', key: 'name' },
+            { title: 'Description', key: 'description' },
+            { title: 'Type', key: 'type' }
           ],
           items: workers.value
         }
@@ -187,8 +185,6 @@ export default {
       nodes,
       collectors,
       formFormat,
-      loadNodes,
-      loadCollectors,
       updateData,
       addItem,
       editItem,

@@ -115,8 +115,8 @@ export default {
             }
           )
           return {
-            value: publisher.id,
-            text: publisher.name
+            key: publisher.id,
+            title: publisher.name
           }
         })
       })

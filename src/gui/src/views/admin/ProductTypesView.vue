@@ -119,8 +119,8 @@ export default {
             }
           )
           return {
-            value: presenter.id,
-            text: presenter.name
+            key: presenter.id,
+            title: presenter.name
           }
         })
       })

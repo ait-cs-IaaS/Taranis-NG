@@ -11,12 +11,9 @@
         <v-col cols="12">
           <v-text-field
             v-model="report_type.title"
-            v-validate="'required'"
             :disabled="!canUpdate"
             :label="$t('report_type.name')"
             name="name"
-            data-vv-name="name"
-            :error-messages="errors.collect('name')"
           />
         </v-col>
         <v-col cols="12">
@@ -32,7 +29,7 @@
       <v-row no-gutters>
         <v-col cols="12">
           <v-btn v-if="canUpdate" color="primary" @click="addAttributeGroup">
-            <v-icon left>{{ UI.ICON.PLUS }}</v-icon>
+            <v-icon icon="mdi-plus" />
             <span>{{ $t('report_type.new_group') }}</span>
           </v-btn>
         </v-col>
@@ -61,7 +58,7 @@
                 v-model="group.title"
                 :disabled="!canUpdate"
                 :label="$t('report_type.name')"
-                name="name"
+                name="group_title"
                 type="text"
                 :spellcheck="spellcheck"
               ></v-text-field>
@@ -69,7 +66,7 @@
                 v-model="group.description"
                 :disabled="!canUpdate"
                 :label="$t('report_type.description')"
-                name="description"
+                name="group_description"
                 :spellcheck="spellcheck"
               ></v-textarea>
               <v-text-field
