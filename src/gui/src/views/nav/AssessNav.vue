@@ -104,6 +104,9 @@
       <v-divider class="mt-2 mb-0"></v-divider>
       <v-row class="my-2 mr-0 px-2 pb-5">
         <v-col cols="12" class="py-0">
+          <h4>Debug</h4>
+        </v-col>
+        <v-col cols="12" class="py-2">
           <v-btn @click="updateNewsItems()" color="primary" block>
             Reload
             <v-icon right dark> mdi-reload </v-icon>
