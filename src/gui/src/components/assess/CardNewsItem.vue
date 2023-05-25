@@ -37,34 +37,6 @@
         tooltip="mark as read/unread"
         @click="markAsRead()"
       />
-
-      <news-item-action
-        :active="newsItem.important"
-        icon="mdi-exclamation"
-        tooltip="mark as important"
-        @click="markAsImportant()"
-      />
-
-      <news-item-action
-        :active="newsItem.decorateSource"
-        icon="mdi-seal"
-        tooltip="emphasise originator"
-        @click="decorateSource()"
-      />
-
-      <news-item-action-dialog
-        icon="mdi-google-circles-communities"
-        tooltip="add to report"
-        :show-dialog="sharingDialog"
-        @close="sharingDialog = false"
-        @open="sharingDialog = true"
-      >
-        <popup-share-items
-          v-if="sharingDialog"
-          :item-ids="[newsItem.id]"
-          @close="sharingDialog = false"
-        />
-      </news-item-action-dialog>
     </div>
 
     <v-container no-gutters class="ma-0 pa-0">
@@ -148,7 +120,6 @@
 import newsItemAction from '@/components/_subcomponents/newsItemAction.vue'
 import newsItemActionDialog from '@/components/_subcomponents/newsItemActionDialog.vue'
 import PopupDeleteItem from '@/components/popups/PopupDeleteItem.vue'
-import PopupShareItems from '@/components/popups/PopupShareItems.vue'
 import NewsMetaInfo from '@/components/assess/card/NewsMetaInfo.vue'
 import { notifySuccess, notifyFailure } from '@/utils/helpers.js'
 
@@ -165,8 +136,7 @@ export default {
     NewsMetaInfo,
     newsItemAction,
     newsItemActionDialog,
-    PopupDeleteItem,
-    PopupShareItems
+    PopupDeleteItem
   },
   props: {
     newsItem: {

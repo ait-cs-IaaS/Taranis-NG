@@ -85,6 +85,7 @@ export default {
 
     const addItem = () => {
       formData.value = objectFromFormat(formFormat.value)
+      console.debug(formData.value)
       edit.value = false
     }
 

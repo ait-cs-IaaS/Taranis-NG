@@ -141,6 +141,7 @@ export default {
 
     const route = useRoute()
     const awaitingSearch = ref(false)
+
     const filterAttributeSelections = ref([])
     const filterAttributeOptions = [
       { type: 'read', label: 'read', icon: 'mdi-email-mark-as-unread' },

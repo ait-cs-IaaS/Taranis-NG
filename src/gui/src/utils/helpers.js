@@ -1,4 +1,4 @@
-import { app } from '../main.js'
+import { useMainStore } from '@/stores/MainStore'
 
 export function xorConcat(array, element) {
   const i = array.indexOf(element)
@@ -19,17 +19,19 @@ export function getCleanHostname(url) {
 }
 
 export function notifySuccess(text) {
-  app.$emit('notification', {
+  const store = useMainStore()
+  store.notification = {
     type: 'success',
     loc: text
-  })
+  }
 }
 
 export function notifyFailure(text) {
-  app.$emit('notification', {
+  const store = useMainStore()
+  store.notification = {
     type: 'red',
     loc: text
-  })
+  }
 }
 
 export function emptyValues(obj) {

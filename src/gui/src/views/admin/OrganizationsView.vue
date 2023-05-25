@@ -54,7 +54,7 @@ export default {
     }
 
     const addItem = () => {
-      formData.value = emptyValues(organizations.value[0])
+      formData.value = emptyValues(organizations.value.items[0])
       edit.value = false
     }
 

@@ -1,7 +1,7 @@
 <template>
-  <v-snackbar v-model="notification" dark :color="notify.type">
-    <span>{{ $t(notify.loc) }}</span>
-    <v-btn variant="text" color="white--text" @click="notification = false">{{
+  <v-snackbar v-model="notify" dark :color="notification.type">
+    <span>{{ $t(notification.loc) }}</span>
+    <v-btn variant="text" color="white--text" @click="notify = false">{{
       $t('notification.close')
     }}</v-btn>
   </v-snackbar>
@@ -9,24 +9,19 @@
 
 <script>
 import { defineComponent, ref } from 'vue'
-// import { useNotificationStore } from '@/store/notification';
+import { useMainStore } from '@/stores/MainStore'
+import { storeToRefs } from 'pinia'
+import { watch } from 'vue'
 
 export default defineComponent({
   name: 'NotificationView',
 
   setup() {
-    const notify = {
-      loc: 'notification.test',
-      type: 'success'
-    }
-    const notification = ref(false)
-    // const store = useNotificationStore();
-    // const notification = computed(() => store.notification);
-    // const notify = computed(() => store.notify);
-    // const closeNotification = () => {
-    //   store.closeNotification();
-    // };
-    // return { notification, notify, closeNotification };
+    const notify = ref(false)
+    const { notification } = storeToRefs(useMainStore())
+    watch(notification, () => {
+      notify.value = true
+    })
     return { notify, notification }
   }
 })

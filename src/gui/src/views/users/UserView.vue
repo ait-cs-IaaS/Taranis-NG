@@ -4,7 +4,7 @@
       <v-col>
         <v-card>
           <v-card-title>
-            {{ user.name }}
+            {{ username }}
           </v-card-title>
           <v-card-subtitle> User Name </v-card-subtitle>
         </v-card>
@@ -32,13 +32,12 @@ export default {
   }),
   computed: {
     ...mapState(useMainStore, ['user']),
-    user() {
-      return this.user
+    username() {
+      return this.user.name || ''
     },
     organizationName() {
-      return this.user.organization_name
+      return this.user.organization_name || ''
     }
-  },
-  methods: {}
+  }
 }
 </script>

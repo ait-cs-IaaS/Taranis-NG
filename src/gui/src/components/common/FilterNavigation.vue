@@ -22,7 +22,7 @@
     <v-navigation-drawer
       v-if="drawerVisible"
       color="cx-drawer-bg"
-      permanent="true"
+      :permanent="true"
       :width="300"
     >
       <v-container class="pa-0 ma-0">

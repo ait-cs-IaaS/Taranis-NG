@@ -68,7 +68,11 @@
           <slot name="actionColumn"></slot>
           <v-tooltip left>
             <template #activator="{ props }">
-              <v-icon v-bind="props" color="red" @click.stop="deleteItem(item)">
+              <v-icon
+                v-bind="props"
+                color="red"
+                @click.stop="deleteItem(item.raw)"
+              >
                 mdi-delete
               </v-icon>
             </template>

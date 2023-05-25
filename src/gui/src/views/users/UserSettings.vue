@@ -149,15 +149,16 @@ export default {
         { value: 'sk', text: 'Slovensky' }
       ]
     },
-    ...mapState(useSettingsStore, ['getProfileBrowserLocale']),
+    ...mapState(useSettingsStore, [
+      'getProfileBrowserLocale',
+      'dark_theme',
+      'spellcheck',
+      'hotkeys'
+    ]),
+    ...mapState(useConfigStore, {
+      selected_word_lists: (state) => state.word_lists
+    }),
     ...mapState(useConfigStore, ['word_lists', 'setLocale'])
-  },
-  mounted() {
-    this.spellcheck = this.getProfileSpellcheck()
-    this.dark_theme = this.getProfileDarkTheme()
-    this.selected_word_lists = this.getProfileWordLists()
-    this.shortcuts = this.getProfileHotkeys()
-    this.loadWordList()
   },
   methods: {
     ...mapActions(useConfigStore, ['loadWordLists']),
@@ -166,8 +167,8 @@ export default {
       this.saveUserProfile({
         spellcheck: this.spellcheck,
         dark_theme: this.dark_theme,
-        hotkeys: this.shortcuts,
-        word_lists: this.selected_word_lists
+        hotkeys: this.hotkeys,
+        word_lists: this.word_lists
       })
     },
 

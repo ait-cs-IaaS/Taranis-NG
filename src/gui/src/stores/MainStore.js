@@ -12,7 +12,8 @@ export const useMainStore = defineStore('main', {
     itemCountTotal: 0,
     itemCountFiltered: 0,
     drawerVisible: true,
-    coreAPIURL: '/api'
+    coreAPIURL: '/api',
+    notification: {}
   }),
   getters: {
     getItemCount(state) {

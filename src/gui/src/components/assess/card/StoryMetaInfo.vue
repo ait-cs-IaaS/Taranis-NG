@@ -4,12 +4,6 @@
       <v-col>
         <!-- left column -->
         <v-row>
-          <v-col style="max-width: 110px" class="py-0 pt-2">
-            <strong>Breakpoint:</strong>
-          </v-col>
-          <v-col class="py-0 pt-2"> {{ name }} </v-col>
-        </v-row>
-        <v-row>
           <v-col style="max-width: 110px" class="py-0">
             <strong>{{ t('assess.published') }}:</strong>
           </v-col>
