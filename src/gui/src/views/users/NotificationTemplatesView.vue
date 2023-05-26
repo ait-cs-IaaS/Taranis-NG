@@ -84,8 +84,8 @@ export default {
           type: 'table',
           addButton: true,
           headers: [
-            { text: 'Name', value: 'name' },
-            { text: 'E-Mail', value: 'email' }
+            { title: 'Name', key: 'name' },
+            { title: 'E-Mail', key: 'email' }
           ],
           items: this.formData.recipients || []
         }

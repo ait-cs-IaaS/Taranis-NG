@@ -56,8 +56,7 @@
             <v-data-table
               v-model="selected_word_lists"
               :headers="headers"
-              :items="word_lists"
-              item-value="id"
+              :items="word_lists.items"
               show-select
             >
               <template #top>
@@ -71,11 +70,7 @@
           </v-window-item>
           <v-window-item value="hotkeys">
             <v-row no-gutters class="ma-0">
-              <v-tooltip
-                v-for="shortcut in shortcuts"
-                :key="shortcut.alias"
-                top
-              >
+              <v-tooltip v-for="shortcut in hotkeys" :key="shortcut.alias" top>
                 <template #activator="{ props }">
                   <v-btn
                     :id="shortcut.alias"
@@ -86,7 +81,7 @@
                     @click.stop="pressKeyDialog(shortcut.alias)"
                     @blur="pressKeyVisible = false"
                   >
-                    <v-icon left>{{ shortcut.icon }}</v-icon>
+                    <v-icon :icon="shortcut.icon" />
                     <span v-if="shortcut.key != 'undefined'" class="caption">
                       {{ shortcut.key }}
                     </span>
@@ -113,21 +108,18 @@ import { useConfigStore } from '@/stores/ConfigStore'
 export default {
   name: 'UserSettings',
   data: () => ({
-    dark_theme: false,
-    spellcheck: null,
     pressKeyVisible: false,
     shortcuts: [],
     tab: 'general',
     hotkeyAlias: String,
     headers: [
       {
-        text: 'Name',
+        title: 'Name',
         align: 'start',
-        value: 'name'
+        key: 'name'
       },
-      { text: 'Description', value: 'description' }
-    ],
-    selected_word_lists: []
+      { title: 'Description', key: 'description' }
+    ]
   }),
   computed: {
     browser_locale: {
@@ -156,7 +148,7 @@ export default {
       'hotkeys'
     ]),
     ...mapState(useConfigStore, {
-      selected_word_lists: (state) => state.word_lists
+      selected_word_lists: (state) => state.word_lists.items
     }),
     ...mapState(useConfigStore, ['word_lists', 'setLocale'])
   },

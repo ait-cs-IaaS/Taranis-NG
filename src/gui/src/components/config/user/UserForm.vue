@@ -117,11 +117,11 @@ export default {
     const { roles, permissions, organizations } = storeToRefs(store)
     const headers = [
       {
-        text: 'Name',
+        title: 'Name',
         align: 'start',
-        value: 'name'
+        key: 'name'
       },
-      { text: 'Description', value: 'description' }
+      { title: 'Description', key: 'description' }
     ]
 
     const edit = ref(false)

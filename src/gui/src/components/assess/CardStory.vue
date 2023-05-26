@@ -89,6 +89,20 @@
 
         <votes v-if="detailView" :story="story" />
 
+        <v-dialog v-model="deleteDialog" width="auto">
+          <popup-delete-item
+            :news-item="story"
+            @delete-item="deleteNewsItem()"
+            @close="deleteDialog = false"
+          />
+        </v-dialog>
+        <v-dialog v-model="sharingDialog" width="auto">
+          <popup-share-items
+            :item-ids="[story.id]"
+            @close="sharingDialog = false"
+          />
+        </v-dialog>
+
         <v-menu bottom offset-y>
           <template #activator="{ props }">
             <v-btn
@@ -103,20 +117,6 @@
           </template>
 
           <v-list class="extraActionsList" dense>
-            <v-dialog :value="deleteDialog" width="auto">
-              <popup-delete-item
-                :news-item="story"
-                @delete-item="deleteNewsItem()"
-                @close="deleteDialog = false"
-              />
-            </v-dialog>
-            <v-dialog :value="sharingDialog" width="auto">
-              <popup-share-items
-                :item-ids="[story.id]"
-                @close="sharingDialog = false"
-              />
-            </v-dialog>
-
             <v-list-item
               :prepend-icon="
                 !story.read ? 'mdi-eye-outline' : 'mdi-eye-off-outline'
@@ -210,7 +210,6 @@ export default {
     const openSummary = ref(props.detailView)
     const sharingDialog = ref(false)
     const deleteDialog = ref(false)
-    const showDialog = ref(false)
 
     const item_important = computed(() =>
       'important' in props.story ? props.story.important : false
@@ -283,7 +282,6 @@ export default {
       openSummary,
       sharingDialog,
       deleteDialog,
-      showDialog,
       item_important,
       story_in_report,
       news_item_length,

@@ -3,9 +3,9 @@
     <v-card-title> Share Items </v-card-title>
     <v-card-text>
       Select a report to share the item with:
+      {{ reportItemSelection }}
       <v-select
         v-model="reportItemSelection"
-        varint="solo"
         single-line
         label="Select Report"
         no-data-text="No reports found"
@@ -25,8 +25,7 @@
 
       <v-btn
         color="primary"
-        dark
-        variant="depressed"
+        varint="outlined"
         class="text-lowercase pr-4"
         @click="share()"
       >
@@ -40,11 +39,10 @@
 <script>
 import { addAggregatesToReportItem } from '@/api/analyze'
 import { useAnalyzeStore } from '@/stores/AnalyzeStore'
-import { mapActions, mapState } from 'pinia'
+import { ref, onMounted } from 'vue'
 
 export default {
   name: 'PopupShareItems',
-  components: {},
   props: {
     itemIds: {
       type: Array,
@@ -53,33 +51,39 @@ export default {
     dialog: Boolean
   },
   emits: ['close'],
-  data: () => ({
-    reportItems: [],
-    reportItemSelection: {}
-  }),
-  computed: {
-    ...mapState(useAnalyzeStore, ['report_items'])
-  },
-  mounted() {
-    console.debug('PopupShareItems mounted')
-    console.debug(this.item_ids)
-    this.loadReportItems().then(() => {
-      this.reportItems = this.getReportItems().map((item) => {
+  setup(props, { emit }) {
+    const reportItems = ref([])
+    const reportItemSelection = ref(null)
+    const store = useAnalyzeStore()
+
+    const { loadReportItems, report_items } = store
+
+    const share = () => {
+      addAggregatesToReportItem(reportItemSelection.value, props.itemIds)
+      emit('close')
+    }
+
+    const close = () => {
+      emit('close')
+    }
+
+    onMounted(async () => {
+      console.debug('PopupShareItems mounted')
+      console.debug(props.itemIds)
+      await loadReportItems()
+      reportItems.value = report_items.items.map((item) => {
         return {
-          text: item.title,
+          title: item.title,
           value: item.id
         }
       })
     })
-  },
-  methods: {
-    ...mapActions(useAnalyzeStore, ['loadReportItems']),
-    share() {
-      addAggregatesToReportItem(this.reportItemSelection, this.item_ids)
-      this.close()
-    },
-    close() {
-      this.$emit('close')
+
+    return {
+      reportItems,
+      reportItemSelection,
+      share,
+      close
     }
   }
 }

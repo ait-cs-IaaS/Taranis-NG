@@ -1,11 +1,9 @@
 <template>
   <v-app-bar
-    app
-    clipped
-    bottom
     flat
-    dense
     dark
+    density="compact"
+    location="bottom"
     color="primary"
     class="selection-toolbar"
   >

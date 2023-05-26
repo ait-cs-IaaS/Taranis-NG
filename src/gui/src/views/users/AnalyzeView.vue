@@ -1,6 +1,6 @@
 <template>
   <DataTable
-    :items="report_items"
+    :items="report_items.items"
     :add-button="false"
     :search-bar="false"
     :header-filter="['tag', 'completed', 'title', 'created']"
@@ -66,8 +66,8 @@ export default {
     ...mapActions(useAnalyzeStore, ['loadReportItems', 'loadReportTypes']),
     updateData() {
       this.loadReportItems().then(() => {
-        this.itemCountTotal = this.newsItems.total_count
-        this.itemCountFiltered = this.items.length
+        this.itemCountTotal = this.report_items.total_count
+        this.itemCountFiltered = this.report_items.items.length
       })
       this.loadReportTypes().then(() => {
         this.report_types = this.report_item_types.items

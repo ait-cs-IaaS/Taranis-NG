@@ -138,20 +138,20 @@ export default {
   data: () => ({
     headers_user: [
       {
-        text: 'Username',
+        title: 'Username',
         align: 'start',
-        value: 'username'
+        key: 'username'
       },
-      { text: 'Name', value: 'name' }
+      { title: 'Name', key: 'name' }
     ],
 
     headers_role: [
       {
-        text: 'Name',
+        title: 'Name',
         align: 'start',
-        value: 'name'
+        key: 'name'
       },
-      { text: 'Description', value: 'description' }
+      { title: 'Description', key: 'description' }
     ],
 
     types: [

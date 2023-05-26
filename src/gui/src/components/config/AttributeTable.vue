@@ -143,16 +143,16 @@ export default {
     headers() {
       return [
         {
-          text: 'Type',
-          value: 'attribute_name',
+          title: 'Type',
+          key: 'attribute_name',
           align: 'left',
           sortable: false
         },
-        { text: 'Name', value: 'title', sortable: false },
-        { text: 'Description', value: 'description', sortable: false },
-        { text: 'Min Occurence', value: 'min_occurrence', sortable: false },
-        { text: 'Max Occurence', value: 'max_occurrence', sortable: false },
-        { text: 'Actions', value: 'actions', align: 'right', sortable: false }
+        { title: 'Name', key: 'title', sortable: false },
+        { title: 'Description', key: 'description', sortable: false },
+        { title: 'Min Occurence', key: 'min_occurrence', sortable: false },
+        { title: 'Max Occurence', key: 'max_occurrence', sortable: false },
+        { title: 'Actions', key: 'actions', align: 'right', sortable: false }
       ]
     },
 

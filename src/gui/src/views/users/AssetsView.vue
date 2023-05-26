@@ -38,9 +38,9 @@ export default {
       assets: [],
       asset_groups: [],
       headers: [
-        { text: 'tag', value: 'tag', sortable: false, width: '15px' },
-        { text: 'name', value: 'name' },
-        { text: 'description', value: 'description' }
+        { title: 'tag', key: 'tag', sortable: false, width: '15px' },
+        { title: 'name', key: 'name' },
+        { title: 'description', key: 'description' }
       ]
     }
   },

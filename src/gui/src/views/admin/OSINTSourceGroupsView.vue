@@ -74,10 +74,10 @@ export default {
         label: 'Sources',
         type: 'table',
         headers: [
-          { text: 'Name', value: 'name' },
-          { text: 'Description', value: 'description' }
+          { title: 'Name', key: 'name' },
+          { title: 'Description', key: 'description' }
         ],
-        items: osint_sources.items
+        items: osint_sources.value.items
       }
     ])
 

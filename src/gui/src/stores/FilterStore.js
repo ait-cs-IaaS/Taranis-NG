@@ -47,20 +47,8 @@ export const useFilterStore = defineStore('filter', {
     }
   },
   actions: {
-    setLimit(limit) {
-      this.newsItemsFilter.limit = limit
-    },
-    setOffset(offset) {
-      this.newsItemsFilter.offset = offset
-    },
-    incrementOffset() {
-      this.newsItemsFilter.offset++
-    },
     setFilter(filter) {
       this.newsItemsFilter = filter
-    },
-    setSort(sort) {
-      this.newsItemsFilter.sort = sort
     },
     appendTag(tag) {
       if (this.newsItemsFilter.tags) {

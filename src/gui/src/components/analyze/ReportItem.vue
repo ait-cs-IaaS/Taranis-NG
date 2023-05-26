@@ -129,7 +129,7 @@ export default {
   emits: ['reportcreated'],
   data: function () {
     return {
-      verticalView: true,
+      verticalView: this.edit,
       expand_panel_groups: [],
       modify: true,
       selected_report_type: null,
@@ -166,7 +166,7 @@ export default {
     console.debug(`Loaded REPORT ITEM ${this.report_item.id}`)
 
     this.loadReportTypes().then(() => {
-      this.report_types = this.getReportTypes().items
+      this.report_types = this.report_item_types.items
       if (this.report_item.report_item_type_id) {
         this.updateSelectedReportType(this.report_item.report_item_type_id)
       }

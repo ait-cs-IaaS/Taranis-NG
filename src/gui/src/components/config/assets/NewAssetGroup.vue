@@ -115,19 +115,19 @@ export default {
     edit: false,
     headers: [
       {
-        text: 'Username',
+        title: 'Username',
         align: 'start',
-        value: 'username'
+        key: 'username'
       },
-      { text: 'Name', value: 'name' }
+      { title: 'Name', key: 'name' }
     ],
     headers_template: [
       {
-        text: 'Name',
+        title: 'Name',
         align: 'start',
-        value: 'name'
+        key: 'name'
       },
-      { text: 'Description', value: 'description' }
+      { title: 'Description', key: 'description' }
     ],
     selected_users: [],
     templates: [],

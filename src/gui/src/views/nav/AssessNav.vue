@@ -1,11 +1,11 @@
 <template>
   <filter-navigation
-    :search="filter.search"
-    :limit="limit"
-    :offsest="offset"
+    :search="search"
+    :limit="newsItemsFilter.limit"
+    :offsest="newsItemsFilter.offset"
     @update:search="(value) => (search = value)"
-    @update:limit="(value) => (limit = value)"
-    @update:offset="(value) => (offset = value)"
+    @update:limit="(value) => (newsItemsFilter.limit = value)"
+    @update:offset="(value) => (newsItemsFilter.offset = value)"
   >
     <template #navdrawer>
       <!-- scope -->
@@ -16,7 +16,7 @@
 
         <v-col cols="12" class="pt-0">
           <v-select
-            v-model="group"
+            v-model="newsItemsFilter.group"
             :items="getOSINTSourceGroupsList"
             item-title="title"
             item-value="id"
@@ -30,7 +30,7 @@
 
         <v-col cols="12" class="pt-0">
           <v-select
-            v-model="source"
+            v-model="newsItemsFilter.source"
             :items="getOSINTSourcesList"
             item-title="title"
             item-value="id"
@@ -53,7 +53,7 @@
 
         <!-- time range -->
         <v-col cols="12" class="pb-0">
-          <date-chips v-model="range" />
+          <date-chips v-model="newsItemsFilter.range" />
         </v-col>
 
         <!-- tags -->
@@ -81,7 +81,10 @@
         </v-col>
 
         <v-col cols="12" class="pt-2">
-          <filter-sort-list v-model="sort" :items="orderOptions" />
+          <filter-sort-list
+            v-model="newsItemsFilter.sort"
+            :items="orderOptions"
+          />
         </v-col>
       </v-row>
 
@@ -105,12 +108,13 @@ import tagFilter from '@/components/assess/filter/tagFilter.vue'
 import filterSelectList from '@/components/assess/filter/filterSelectList.vue'
 import filterSortList from '@/components/assess/filter/filterSortList.vue'
 import FilterNavigation from '@/components/common/FilterNavigation.vue'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useFilterStore } from '@/stores/FilterStore'
 import { useAssessStore } from '@/stores/AssessStore'
 import { useMainStore } from '@/stores/MainStore'
 import { storeToRefs } from 'pinia'
+import { watch } from 'vue'
 
 export default {
   name: 'AssessNav',
@@ -122,22 +126,16 @@ export default {
     FilterNavigation
   },
   setup() {
+    const assessStore = useAssessStore()
+    const filterStore = useFilterStore()
     const { drawerVisible } = storeToRefs(useMainStore())
 
-    const { getOSINTSourceGroupsList, getOSINTSourcesList } = storeToRefs(
-      useAssessStore()
-    )
-    const { updateNewsItems } = useAssessStore()
+    const { getOSINTSourceGroupsList, getOSINTSourcesList } =
+      storeToRefs(assessStore)
+    const { updateNewsItems } = assessStore
+    const { newsItemsFilter } = storeToRefs(filterStore)
 
-    const {
-      setFilter,
-      setLimit,
-      setSort,
-      setOffset,
-      updateFilter,
-      getFilterTags,
-      newsItemsFilter
-    } = useFilterStore()
+    const { setFilter, updateFilter, getFilterTags } = useFilterStore()
 
     const route = useRoute()
     const awaitingSearch = ref(false)
@@ -176,61 +174,6 @@ export default {
       }
     ]
 
-    const filter = computed(() => {
-      return newsItemsFilter
-    })
-
-    const source = computed({
-      get() {
-        return filter.value.source
-      },
-      set(value) {
-        setFilter({ source: value })
-        updateNewsItems()
-      }
-    })
-
-    const group = computed({
-      get() {
-        return filter.value.group
-      },
-      set(value) {
-        setFilter({ group: value })
-        updateNewsItems()
-      }
-    })
-
-    const limit = computed({
-      get() {
-        return filter.value.limit
-      },
-      set(value) {
-        setLimit(value)
-        updateNewsItems()
-      }
-    })
-
-    const sort = computed({
-      get() {
-        if (!filter.value.order) return 'DATE_DESC'
-        return filter.value.order
-      },
-      set(value) {
-        setSort(value)
-        updateNewsItems()
-      }
-    })
-
-    const offset = computed({
-      get() {
-        return filter.value.offset
-      },
-      set(value) {
-        setOffset(value)
-        updateNewsItems()
-      }
-    })
-
     const tags = computed({
       get() {
         const tags = getFilterTags || []
@@ -240,16 +183,6 @@ export default {
       },
       set(value) {
         setFilter({ tags: value })
-        updateNewsItems()
-      }
-    })
-
-    const range = computed({
-      get() {
-        return filter.value.range
-      },
-      set(value) {
-        setFilter({ range: value })
         updateNewsItems()
       }
     })
@@ -274,7 +207,7 @@ export default {
 
     const search = computed({
       get() {
-        return this.newsItemsFilter.search
+        return newsItemsFilter.value.search
       },
       set(value) {
         setFilter({ search: value })
@@ -289,10 +222,6 @@ export default {
       }
     })
 
-    const getNewsItemsFilter = computed(() => {
-      return newsItemsFilter
-    })
-
     onMounted(() => {
       const query = Object.fromEntries(
         Object.entries(route.query).filter(([, v]) => v != null)
@@ -301,26 +230,30 @@ export default {
       console.debug('loaded with query', query)
     })
 
+    onUnmounted(() => {
+      setFilter({})
+    })
+
+    watch(
+      newsItemsFilter,
+      (filter, prevFilter) => {
+        console.debug('filter changed', filter, prevFilter)
+        updateNewsItems()
+      },
+      { deep: true }
+    )
+
     return {
-      awaitingSearch,
       filterAttributeSelections,
       filterAttributeOptions,
-      orderOptions,
-      filter,
-      drawerVisible,
-      source,
-      group,
-      limit,
-      sort,
-      offset,
-      tags,
-      range,
       filterAttribute,
+      orderOptions,
+      drawerVisible,
+      tags,
       search,
       getOSINTSourceGroupsList,
       getOSINTSourcesList,
-      updateFilter,
-      getNewsItemsFilter,
+      newsItemsFilter,
       updateNewsItems
     }
   }
