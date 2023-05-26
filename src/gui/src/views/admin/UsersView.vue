@@ -19,7 +19,7 @@
 import DataTable from '@/components/common/DataTable.vue'
 import UserForm from '@/components/config/user/UserForm.vue'
 import { deleteUser, createUser, updateUser } from '@/api/config'
-import { ref, onMounted, toRaw } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useConfigStore } from '@/stores/ConfigStore'
 import { useMainStore } from '@/stores/MainStore'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'

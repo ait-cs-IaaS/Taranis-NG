@@ -72,8 +72,7 @@
           />
         </v-col>
       </v-row>
-
-      <v-divider class="mt-2 mb-0"></v-divider>
+      <v-divider class="mt-0 mb-0"></v-divider>
 
       <v-row class="my-2 mr-0 px-2">
         <v-col cols="12" class="py-0">
@@ -88,10 +87,27 @@
         </v-col>
       </v-row>
 
-      <v-divider class="mt-2 mb-0"></v-divider>
+      <v-divider class="mt-1 mb-0"></v-divider>
+      <v-row class="my-2 mr-0 px-2">
+        <v-col cols="12" class="py-0">
+          <h4>Set Chart properties</h4>
+        </v-col>
+        <v-col cols="4" class="pt-2"> Threshold: </v-col>
+        <v-col cols="8" class="pt-2">
+          <input v-model="chartFilter.threshold" type="number" min="0"
+        /></v-col>
+        <v-col cols="4" class="pt-2"> y2 Max: </v-col>
+        <v-col cols="8" class="pt-2">
+          <input v-model="chartFilter.yMax" type="number" min="0" />
+        </v-col>
+      </v-row>
 
+      <v-divider class="mt-2 mb-0"></v-divider>
       <v-row class="my-2 mr-0 px-2 pb-5">
         <v-col cols="12" class="py-0">
+          <h4>Debug</h4>
+        </v-col>
+        <v-col cols="12" class="py-2">
           <v-btn color="primary" block @click="updateNewsItems()">
             Reload
             <v-icon right dark> mdi-reload </v-icon>
@@ -133,7 +149,7 @@ export default {
     const { getOSINTSourceGroupsList, getOSINTSourcesList } =
       storeToRefs(assessStore)
     const { updateNewsItems } = assessStore
-    const { newsItemsFilter } = storeToRefs(filterStore)
+    const { newsItemsFilter, chartFilter } = storeToRefs(filterStore)
 
     const { setFilter, updateFilter, getFilterTags } = useFilterStore()
 
@@ -251,6 +267,7 @@ export default {
       drawerVisible,
       tags,
       search,
+      chartFilter,
       getOSINTSourceGroupsList,
       getOSINTSourcesList,
       newsItemsFilter,

@@ -36,6 +36,10 @@ export const useFilterStore = defineStore('filter', {
       search: undefined,
       sort: undefined,
       range: undefined
+    },
+    chartFilter: {
+      threshold: 20,
+      y2max: undefined
     }
   }),
   getters: {

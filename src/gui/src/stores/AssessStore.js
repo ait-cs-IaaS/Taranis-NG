@@ -17,7 +17,8 @@ export const useAssessStore = defineStore('assess', {
     default_source_group_id: '',
     newsItems: { total_count: 0, items: [] },
     newsItemsSelection: [],
-    top_stories: []
+    top_stories: [],
+    max_item: null
   }),
   getters: {
     getMultiSelect() {
@@ -48,6 +49,7 @@ export const useAssessStore = defineStore('assess', {
       const filter = useFilterStore()
       const response = await getNewsItemsAggregates(filter.newsItemsFilter)
       this.newsItems = response.data
+      this.updateMaxItem()
     },
     async updateOSINTSources() {
       const response = await getOSINTSourcesList()
@@ -59,6 +61,25 @@ export const useAssessStore = defineStore('assess', {
       this.default_source_group_id = response.data.items.filter(
         (value) => value.default
       )[0].id
+    },
+    updateMaxItem() {
+      const countsArray = this.newsItems.map((item) =>
+        Math.max(
+          ...Object.values(
+            item.news_items.reduce((acc, item) => {
+              const day = new Date(
+                item.news_item_data.published
+              ).toLocaleDateString(undefined, {
+                day: '2-digit',
+                month: '2-digit'
+              })
+              acc[day] = (acc[day] || 0) + 1
+              return acc
+            }, {})
+          )
+        )
+      )
+      this.max_item = Math.max(...countsArray)
     },
     selectNewsItem(id) {
       this.newsItemsSelection = xorConcat(this.newsItemsSelection, id)

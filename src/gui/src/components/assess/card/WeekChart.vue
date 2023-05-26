@@ -1,16 +1,9 @@
 <template>
-  <LineChart
-    v-if="shouldRender"
-    ref="linechart"
-    :options="chartOptions"
-    :data="chart_data"
-    :style="chart_style"
-    update-mode="active"
-  />
+  <Bar :options="chartOptions" :data="chart_data" :height="chartHeight" />
 </template>
 
 <script>
-import { Line as LineChart } from 'vue-chartjs'
+import { Bar } from 'vue-chartjs'
 import {
   Chart as ChartJS,
   Title,
@@ -18,10 +11,13 @@ import {
   Legend,
   Filler,
   LineElement,
+  BarElement,
   LinearScale,
   CategoryScale,
-  PointElement
+  PointElement,
+  LineController
 } from 'chart.js'
+import { mapGetters } from 'vuex'
 
 ChartJS.register(
   Title,
@@ -29,15 +25,17 @@ ChartJS.register(
   Legend,
   Filler,
   LineElement,
+  BarElement,
   LinearScale,
   CategoryScale,
-  PointElement
+  PointElement,
+  LineController
 )
 
 export default {
   name: 'WeekChart',
   components: {
-    LineChart
+    Bar
   },
   props: {
     story: {
@@ -49,16 +47,6 @@ export default {
       type: Number,
       required: false,
       default: 7
-    },
-    dataPoints: {
-      type: Array,
-      required: false,
-      default: () => []
-    },
-    threshold: {
-      type: Number,
-      required: false,
-      default: 20
     },
     chartHeight: {
       type: Number,
@@ -77,9 +65,19 @@ export default {
       chartOptions: {
         responsive: true,
         maintainAspectRatio: true,
-        elements: {
-          line: {
-            tension: 0.4
+        scales: {
+          y1: {
+            position: 'left',
+            beginAtZero: true
+          },
+          y2: {
+            position: 'right',
+            beginAtZero: true,
+            max: parseInt(this.getMaxItem()),
+            grid: {
+              // display gridlines only for y1
+              drawOnChartArea: false
+            }
           }
         },
         plugins: {
@@ -88,17 +86,21 @@ export default {
           },
           legend: {
             display: false
+          },
+          tooltip: {
+            mode: 'index',
+            intersect: false
           }
         }
       }
     }
   },
   computed: {
-    chart_style() {
-      return {
-        height: this.chartHeight + 'px',
-        width: this.chartWidth + 'px'
+    getY2MaxFromStore() {
+      if (this.getY2max()) {
+        return this.getY2max()
       }
+      return this.getMaxItem()
     },
     last_n_days() {
       return Array.from(Array(this.timespan).keys(), (i) => {
@@ -110,19 +112,6 @@ export default {
         })
       }).reverse()
     },
-
-    data_point_items() {
-      const dateCounts = {}
-      this.dataPoints.forEach((date) => {
-        const day = new Date(date).toLocaleDateString(undefined, {
-          day: '2-digit',
-          month: '2-digit'
-        })
-        dateCounts[day] = (dateCounts[day] || 0) + 1
-      })
-      return dateCounts
-    },
-
     story_items() {
       return this.story.news_items.reduce((acc, item) => {
         const day = new Date(item.news_item_data.published).toLocaleDateString(
@@ -133,15 +122,10 @@ export default {
         return acc
       }, {})
     },
-
     news_items_per_day() {
       let items_per_day = {}
-      if (this.dataPoints.length > 0) {
-        items_per_day = this.data_point_items
-      }
-      if (this.story) {
-        items_per_day = this.story_items
-      }
+      items_per_day = this.story_items
+
       const days = this.last_n_days
 
       return days.map((day) => {
@@ -152,30 +136,59 @@ export default {
         }
       })
     },
-
+    chart_colors() {
+      return this.news_items_per_day.map((item) => {
+        if (item >= this.getThreshold()) {
+          return 'rgba(255, 0, 0, 1.0)'
+        } else {
+          return 'rgba(127, 116, 234, 1.0)'
+        }
+      })
+    },
     chart_data() {
       return {
         labels: this.last_n_days,
         datasets: [
           {
+            label: 'items/day',
             data: this.news_items_per_day,
-            showLine: false,
-            backgroundColor: 'rgba(127, 116, 234, 1.0)',
-            fill: true
+            backgroundColor: this.chart_colors,
+            type: 'bar',
+            yAxisID: 'y1',
+            order: 2
+          },
+          {
+            label: 'items/day',
+            type: 'line',
+            data: this.news_items_per_day,
+            borderColor: '#000',
+            backgroundColor: '#000',
+            yAxisID: 'y2',
+            order: 1
           }
         ]
       }
-    },
-    threshold_line() {
-      return Array(this.timespan).fill(this.threshold)
     }
   },
-  created() {
-    if (this.story || this.dataPoints) {
-      this.shouldRender = true
-    } else {
+  watch: {
+    getY2MaxFromStore: {
+      handler(newValue) {
+        this.chartOptions.scales.y2.max = parseInt(newValue)
+      },
+      immediate: true
+    }
+  },
+  updated() {
+    //console.log('card rendered!')
+  },
+  mounted() {
+    if (!this.story) {
       console.error('No data provided to WeekChart')
     }
+  },
+  methods: {
+    ...mapGetters('filter', ['getThreshold', 'getY2max']),
+    ...mapGetters('assess', ['getMaxItem'])
   }
 }
 </script>
