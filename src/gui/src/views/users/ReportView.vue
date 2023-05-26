@@ -13,7 +13,8 @@
 import { getReportItem } from '@/api/analyze'
 import ReportItem from '@/components/analyze/ReportItem.vue'
 import { notifySuccess } from '@/utils/helpers'
-import { mapActions } from 'vuex'
+import { mapActions } from 'pinia'
+import { useAssessStore } from '@/stores/AssessStore'
 export default {
   name: 'ReportView',
   components: {
@@ -39,7 +40,7 @@ export default {
   },
 
   methods: {
-    ...mapActions('assess', ['updateMaxItem']),
+    ...mapActions(useAssessStore, ['updateMaxItem']),
     async loadReportItem() {
       if (this.$route.params.id && this.$route.params.id !== '0') {
         return await getReportItem(this.$route.params.id).then((response) => {

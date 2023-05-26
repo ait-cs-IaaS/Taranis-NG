@@ -17,7 +17,9 @@ import {
   PointElement,
   LineController
 } from 'chart.js'
-import { mapGetters } from 'vuex'
+import { mapState } from 'pinia'
+import { useAssessStore } from '@/stores/AssessStore'
+import { useFilterStore } from '@/stores/FilterStore'
 
 ChartJS.register(
   Title,
@@ -96,6 +98,8 @@ export default {
     }
   },
   computed: {
+    ...mapState(useFilterStore, ['getThreshold', 'getY2max']),
+    ...mapState(useAssessStore, ['getMaxItem']),
     getY2MaxFromStore() {
       if (this.getY2max()) {
         return this.getY2max()
@@ -185,10 +189,6 @@ export default {
     if (!this.story) {
       console.error('No data provided to WeekChart')
     }
-  },
-  methods: {
-    ...mapGetters('filter', ['getThreshold', 'getY2max']),
-    ...mapGetters('assess', ['getMaxItem'])
   }
 }
 </script>
