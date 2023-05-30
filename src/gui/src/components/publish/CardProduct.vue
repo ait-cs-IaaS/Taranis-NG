@@ -1,66 +1,65 @@
 <template>
-  <v-container>
-    <v-row>
-      <v-col :class="UI.CLASS.card_offset">
-        <v-hover v-slot="{ hover }">
-          <v-card :elevation="hover ? 12 : 2" @click.stop="cardItemToolbar">
-            <v-layout class="status">
-              <v-row>
-                <v-col :style="UI.STYLE.card_tag">
-                  <v-icon center>{{ card.tag }}</v-icon>
-                </v-col>
-                <v-col>
-                  <div class="grey--text">{{ $t('card_item.title') }}</div>
-                  <span>{{ card.title }}</span>
-                </v-col>
-                <v-col>
-                  <div class="grey--text">
-                    {{ $t('card_item.description') }}
-                  </div>
-                  <span>{{ card.subtitle }}</span>
-                </v-col>
-              </v-row>
-            </v-layout>
-          </v-card>
-        </v-hover>
-      </v-col>
-    </v-row>
-  </v-container>
+  <v-card>
+    <v-toolbar density="compact">
+      <v-toolbar-title>{{ container_title }}</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-btn
+        prepend-icon="mdi-content-save"
+        color="success"
+        variant="flat"
+        @click="saveProduct"
+      >
+        {{ $t('button.save') }}
+      </v-btn>
+    </v-toolbar>
+    <v-card-text>
+      {{ product }}
+    </v-card-text>
+  </v-card>
 </template>
 
 <script>
+import { ref, computed } from 'vue'
+import { createProduct, updateProduct } from '@/api/publish'
+import { useI18n } from 'vue-i18n'
+
 export default {
   name: 'CardProduct',
   props: {
-    card: {
+    productProp: {
       type: Object,
       required: true
-    }
+    },
+    edit: { type: Boolean, default: false }
   },
-  data: () => ({
-    toolbar: false
-  }),
-  methods: {
-    itemClicked(data) {
-      this.$root.$emit('show-product-edit', data)
-    },
-    deleteClicked(data) {
-      this.$root.$emit('delete-product', data)
-    },
-    cardItemToolbar(action) {
-      switch (action) {
-        case 'edit':
-          break
+  emits: ['productcreated'],
+  setup(props, { emit }) {
+    const { t } = useI18n()
+    const product = ref(props.productProp)
+    const required = [(v) => !!v || 'Required']
 
-        case 'delete':
-          this.deleteClicked(this.card)
-          break
+    const container_title = computed(() => {
+      return props.edit
+        ? `${t('title.edit')} product - ${product.value.title}`
+        : `${t('title.add_new')} product`
+    })
 
-        default:
-          this.toolbar = false
-          this.itemClicked(this.card)
-          break
+    const saveProduct = () => {
+      if (props.edit) {
+        updateProduct(product.value.id, product.value)
+      } else {
+        createProduct(product.value).then((response) => {
+          this.$router.push('/product/' + response.data)
+          emit('productcreated', response.data)
+        })
       }
+    }
+
+    return {
+      product,
+      required,
+      container_title,
+      saveProduct
     }
   }
 }

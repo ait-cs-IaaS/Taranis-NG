@@ -50,12 +50,7 @@ export const useConfigStore = defineStore('config', {
   }),
   getters: {
     getUserByID: (state) => (user_id) => {
-      for (const user of state.users.items) {
-        if (user.id === user_id) {
-          return user
-        }
-      }
-      return null
+      return state.users.items.find((user) => user.id === user_id) || null
     },
     getCollectorsNodes() {
       return this.nodes.items.map(function (item) {

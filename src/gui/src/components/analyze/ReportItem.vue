@@ -3,28 +3,20 @@
     <v-toolbar density="compact">
       <v-toolbar-title>{{ container_title }}</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-row>
-        <v-col offset="3" cols="3">
-          <v-switch v-model="verticalView" label="Side-by-side"></v-switch>
-        </v-col>
-        <v-col cols="3">
-          <v-switch
-            v-if="edit"
-            v-model="report_item.completed"
-            label="Completed"
-          ></v-switch>
-        </v-col>
-        <v-col cols="3">
-          <v-btn
-            prepend-icon="mdi-content-save"
-            color="success"
-            class="mt-6"
-            @click="saveReportItem"
-          >
-            <span>{{ $t('button.save') }}</span>
-          </v-btn>
-        </v-col>
-      </v-row>
+      <v-switch v-model="verticalView" label="Side-by-side"></v-switch>
+      <v-switch
+        v-if="edit"
+        v-model="report_item.completed"
+        label="Completed"
+      ></v-switch>
+      <v-btn
+        prepend-icon="mdi-content-save"
+        color="success"
+        variant="flat"
+        @click="saveReportItem"
+      >
+        {{ $t('button.save') }}
+      </v-btn>
     </v-toolbar>
     <v-card-text>
       <v-row>
@@ -158,7 +150,7 @@ export default {
     },
     container_title() {
       return this.edit
-        ? `${this.$t('title.edit')} report item`
+        ? `${this.$t('title.edit')} report item - ${this.report_item.title}`
         : `${this.$t('title.add_new')} report item`
     }
   },

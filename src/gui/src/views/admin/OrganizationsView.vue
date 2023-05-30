@@ -14,6 +14,7 @@
     <EditConfig
       v-if="formData && Object.keys(formData).length > 0"
       :config-data="formData"
+      :form-format="formFormat"
       @submit="handleSubmit"
     ></EditConfig>
   </div>
@@ -29,7 +30,7 @@ import {
 } from '@/api/config'
 import { useConfigStore } from '@/stores/ConfigStore'
 import { notifySuccess, emptyValues, notifyFailure } from '@/utils/helpers'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useMainStore } from '@/stores/MainStore'
 import { storeToRefs } from 'pinia'
 
@@ -45,6 +46,46 @@ export default {
     const { organizations } = storeToRefs(store)
     const formData = ref({})
     const edit = ref(false)
+    const formFormat = computed(() => [
+      {
+        name: 'id',
+        label: 'ID',
+        type: 'text',
+        disabled: true
+      },
+      {
+        name: 'name',
+        label: 'Name',
+        type: 'text',
+        required: true
+      },
+      {
+        name: 'description',
+        label: 'Description',
+        type: 'textarea',
+        required: true
+      },
+      {
+        name: 'street',
+        label: 'Street',
+        type: 'text'
+      },
+      {
+        name: 'city',
+        label: 'City',
+        type: 'text'
+      },
+      {
+        name: 'zip',
+        label: 'Zip',
+        type: 'text'
+      },
+      {
+        country: 'country',
+        label: 'Country',
+        type: 'text'
+      }
+    ])
 
     const updateData = () => {
       store.loadOrganizations().then(() => {
@@ -113,6 +154,7 @@ export default {
 
     return {
       organizations,
+      formFormat,
       formData,
       edit,
       addItem,

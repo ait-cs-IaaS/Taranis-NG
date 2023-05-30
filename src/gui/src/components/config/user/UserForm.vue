@@ -1,6 +1,7 @@
 <template>
   <v-container fluid class="ma-5 mt-5 pa-5 pt-0">
-    <v-form id="form" ref="form" @submit.prevent="add">
+    ID: {{ user.id }}
+    <v-form id="form" ref="form" validate-on="submit" @submit.prevent="add">
       <v-row no-gutters>
         <v-btn type="submit" color="success" class="mr-4"> Submit </v-btn>
       </v-row>
@@ -57,36 +58,32 @@
         </v-col>
         <v-col cols="12" class="pl-1">
           <v-data-table
-            v-model="user.roles"
+            v-model="user_roles"
             :headers="headers"
-            :items="simple_roles"
-            item-value="id"
-            :show-select="true"
-            class="elevation-1"
+            :items="roles.items"
+            show-select
           >
             <template #top>
-              <v-toolbar flat color="white">
-                <v-toolbar-title>{{ $t('user.roles') }}</v-toolbar-title>
-              </v-toolbar>
+              <v-toolbar-title class="ml-3 text-center">
+                {{ $t('user.roles') }}
+              </v-toolbar-title>
             </template>
-            <template v-if="roles.length < 10" #bottom />
+            <template v-if="roles.items.length < 10" #bottom />
           </v-data-table>
         </v-col>
         <v-col cols="12" class="pt-2">
           <v-data-table
             v-model="user.permissions"
             :headers="headers"
-            :items="permissions"
-            item-value="id"
-            :show-select="true"
-            class="elevation-1"
+            :items="permissions.items"
+            show-select
           >
             <template #top>
-              <v-toolbar flat color="white">
-                <v-toolbar-title>{{ $t('user.permissions') }}</v-toolbar-title>
-              </v-toolbar>
+              <v-toolbar-title class="ml-3 text-center">
+                {{ $t('user.permissions') }}
+              </v-toolbar-title>
             </template>
-            <template v-if="permissions.length < 10" #bottom />
+            <template v-if="permissions.items.length < 10" #bottom />
           </v-data-table>
         </v-col>
       </v-row>
@@ -96,7 +93,6 @@
 
 <script>
 import { createUser, updateUser } from '@/api/config'
-import { mapActions } from 'pinia'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
 import { ref, computed, onMounted } from 'vue'
 import { useConfigStore } from '@/stores/ConfigStore'
@@ -105,16 +101,22 @@ import { storeToRefs } from 'pinia'
 export default {
   name: 'UserForm',
   props: {
-    userId: {
-      type: Number,
-      required: false,
-      default: -1
+    userProp: {
+      type: Object,
+      required: true
+    },
+    edit: {
+      type: Boolean,
+      required: true,
+      default: false
     }
   },
-  setup() {
+  setup(props) {
     const store = useConfigStore()
     const { loadOrganizations, loadRoles, loadPermissions } = store
     const { roles, permissions, organizations } = storeToRefs(store)
+    const form = ref(null)
+
     const headers = [
       {
         title: 'Name',
@@ -124,25 +126,14 @@ export default {
       { title: 'Description', key: 'description' }
     ]
 
-    const edit = ref(false)
     const pwd = ref('')
     const repwd = ref('')
-    const simple_roles = ref([])
-    const user = ref({
-      id: -1,
-      username: '',
-      name: '',
-      organization: {
-        id: 0
-      },
-      roles: [],
-      permissions: []
-    })
+    const user = ref(props.userProp)
 
     const rules = {
       required: (value) => !!value || 'Required.',
       matchPassword: (value) => {
-        if (!edit.value) {
+        if (!props.edit) {
           return !!value || 'Required.'
         }
         if (!value && !pwd.value) {
@@ -152,109 +143,81 @@ export default {
       }
     }
     const passwordRules = computed(() => {
-      return edit.value
+      return props.edit
         ? [rules.matchPassword]
         : [rules.required, rules.matchPassword]
     })
 
-    const loadUser = (user_id) => {
-      if (!user_id || user_id === -1) {
-        loadUsers().then(() => {
-          const stored_user = getUserByID()(props.userId)
-          const roles = stored_user.roles.map((role) => role.id)
-          const permissions = stored_user.permissions.map(
-            (permission) => permission.id
-          )
-          stored_user.roles = roles
-          stored_user.permissions = permissions
-          if (stored_user !== null) {
-            user.value = stored_user
-            edit.value = true
-          }
-        })
-      } else {
-        user.value = {
-          id: -1,
-          username: '',
-          name: '',
-          organization: {
-            id: 0
-          },
-          roles: [],
-          permissions: []
-        }
-        edit.value = false
+    const user_roles = computed({
+      get: () => {
+        return user.value.roles.map((role) => role.id)
+      },
+      set: (value) => {
+        user.value.roles = value
       }
-    }
+    })
 
-    const loadUsers = mapActions(useConfigStore, ['loadUsers'])
-    const getUserByID = mapActions(useConfigStore, ['getUserByID'])
+    const user_permissions = computed({
+      get: () => {
+        return user.value.permissions.map((permission) => permission.id)
+      },
+      set: (value) => {
+        user.value.permissions = value
+      }
+    })
 
     const add = () => {
-      $refs.form.validateAll().then(() => {
-        if (edit.value === false || pwd.value !== '') {
-          user.value.password = pwd.value
-        }
+      if (props.edit === false || pwd.value !== '') {
+        user.value.password = pwd.value
+      }
 
-        if (edit.value) {
-          updateUser(user.value)
-            .then(() => {
-              $refs.form.reset()
-              notifySuccess('user.successful_edit')
-            })
-            .catch(() => {
-              notifyFailure('user.error')
-            })
-        } else {
-          createUser(user.value)
-            .then(() => {
-              $refs.form.reset()
-              notifySuccess('user.successful')
-            })
-            .catch(() => {
-              notifyFailure('user.error')
-            })
-        }
-      })
+      if (props.edit) {
+        updateUser(user.value)
+          .then(() => {
+            form.value.reset()
+            notifySuccess('user.successful_edit')
+          })
+          .catch(() => {
+            notifyFailure('user.error')
+          })
+      } else {
+        createUser(user.value)
+          .then(() => {
+            form.value.reset()
+            notifySuccess('user.successful')
+          })
+          .catch(() => {
+            notifyFailure('user.error')
+          })
+      }
     }
 
     onMounted(() => {
-      if (props.userId > 0) {
-        edit.value = true
-      }
+      console.debug('Loading User: ' + user.value.id)
       loadOrganizations()
-      loadRoles().then(() => {
-        simple_roles.value = roles.items.map((role) => {
-          return {
-            id: role.id,
-            name: role.name,
-            description: role.description
-          }
-        })
-      })
+      loadRoles()
       loadPermissions()
-      console.debug('Loading User: ' + this.userId)
-      this.loadUser(this.userId)
     })
 
     return {
       headers,
       rules,
-      edit,
       roles,
       permissions,
+      form,
       organizations,
+      user_roles,
+      user_permissions,
       pwd,
       repwd,
-      user,
       passwordRules,
-      loadUser,
+      user,
       add
     }
   },
   watch: {
-    user_id(uid) {
-      this.loadUser(uid)
+    userProp(u) {
+      this.user = u
     }
   }
 }

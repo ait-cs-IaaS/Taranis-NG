@@ -7,7 +7,7 @@
         :link-to="`/assess?tags=${cluster.name}`"
         :link-text="cluster.name"
       >
-        <template #content>
+        <template #card>
           <trending-card :cluster="cluster" />
         </template>
       </dash-board-card>

@@ -11,7 +11,7 @@
       @add-item="addItem"
       @update-items="updateData"
     />
-    <UserForm v-if="showForm" :user_id="userID"></UserForm>
+    <UserForm v-if="showForm" :user-prop="user" :edit="edit"></UserForm>
   </div>
 </template>
 
@@ -37,7 +37,8 @@ export default {
     const mainStore = useMainStore()
     const showForm = ref(false)
     const selected = ref([])
-    const userID = ref(-1)
+    const user = ref({})
+    const edit = ref(false)
 
     const updateData = () => {
       store.loadUsers().then(() => {
@@ -47,12 +48,23 @@ export default {
     }
 
     const addItem = () => {
-      userID.value = -1
+      user.value = {
+        id: -1,
+        username: '',
+        name: '',
+        organization: {
+          id: undefined
+        },
+        roles: [],
+        permissions: []
+      }
+      edit.value = false
       showForm.value = true
     }
 
     const editItem = (item) => {
-      userID.value = item.id
+      user.value = item
+      edit.value = true
       showForm.value = true
     }
 
@@ -109,7 +121,8 @@ export default {
       showForm,
       users,
       selected,
-      userID,
+      user,
+      edit,
       updateData,
       addItem,
       editItem,
