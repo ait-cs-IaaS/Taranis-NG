@@ -63,7 +63,7 @@ export const useAssessStore = defineStore('assess', {
       )[0].id
     },
     updateMaxItem() {
-      const countsArray = this.newsItems.map((item) =>
+      const countsArray = this.newsItems.items.map((item) =>
         Math.max(
           ...Object.values(
             item.news_items.reduce((acc, item) => {

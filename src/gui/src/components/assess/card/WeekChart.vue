@@ -1,5 +1,11 @@
 <template>
-  <Bar :options="chartOptions" :data="chart_data" :height="chartHeight" />
+  <Bar
+    v-if="shouldRender"
+    :options="chartOptions"
+    :data="chart_data"
+    :style="chart_style"
+    update-mode="active"
+  />
 </template>
 
 <script>
@@ -63,48 +69,24 @@ export default {
   },
   data: function () {
     return {
-      shouldRender: false,
-      chartOptions: {
-        responsive: true,
-        maintainAspectRatio: true,
-        scales: {
-          y1: {
-            position: 'left',
-            beginAtZero: true
-          },
-          y2: {
-            position: 'right',
-            beginAtZero: true,
-            max: parseInt(this.getMaxItem()),
-            grid: {
-              // display gridlines only for y1
-              drawOnChartArea: false
-            }
-          }
-        },
-        plugins: {
-          filler: {
-            propagate: false
-          },
-          legend: {
-            display: false
-          },
-          tooltip: {
-            mode: 'index',
-            intersect: false
-          }
-        }
-      }
+      shouldRender: false
     }
   },
   computed: {
-    ...mapState(useFilterStore, ['getThreshold', 'getY2max']),
-    ...mapState(useAssessStore, ['getMaxItem']),
-    getY2MaxFromStore() {
-      if (this.getY2max()) {
-        return this.getY2max()
+    ...mapState(useFilterStore, ['chartFilter']),
+    ...mapState(useAssessStore, ['max_item']),
+    chart_style() {
+      return {
+        height: this.chartHeight + 'px',
+        width: this.chartWidth + 'px'
       }
-      return this.getMaxItem()
+    },
+
+    getY2MaxFromStore() {
+      if (this.chartFilter.y2max) {
+        return this.chartFilter.y2max
+      }
+      return this.max_item
     },
     last_n_days() {
       return Array.from(Array(this.timespan).keys(), (i) => {
@@ -126,6 +108,39 @@ export default {
         return acc
       }, {})
     },
+    chartOptions() {
+      return {
+        responsive: true,
+        maintainAspectRatio: true,
+        scales: {
+          y1: {
+            position: 'left',
+            beginAtZero: true
+          },
+          y2: {
+            position: 'right',
+            beginAtZero: true,
+            max: parseInt(this.max_item),
+            grid: {
+              // display gridlines only for y1
+              drawOnChartArea: false
+            }
+          }
+        },
+        plugins: {
+          filler: {
+            propagate: false
+          },
+          legend: {
+            display: false
+          },
+          tooltip: {
+            mode: 'index',
+            intersect: false
+          }
+        }
+      }
+    },
     news_items_per_day() {
       let items_per_day = {}
       items_per_day = this.story_items
@@ -142,7 +157,7 @@ export default {
     },
     chart_colors() {
       return this.news_items_per_day.map((item) => {
-        if (item >= this.getThreshold()) {
+        if (item >= this.chartFilter.threshold) {
           return 'rgba(255, 0, 0, 1.0)'
         } else {
           return 'rgba(127, 116, 234, 1.0)'
@@ -186,7 +201,9 @@ export default {
     //console.log('card rendered!')
   },
   mounted() {
-    if (!this.story) {
+    if (this.story) {
+      this.shouldRender = true
+    } else {
       console.error('No data provided to WeekChart')
     }
   }
