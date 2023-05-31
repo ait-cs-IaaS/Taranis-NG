@@ -17,7 +17,6 @@
         </v-btn>
       </template>
     </DataTable>
-    {{ formData }}
     <EditConfig
       v-if="formData && Object.keys(formData).length > 0"
       :config-data="formData"

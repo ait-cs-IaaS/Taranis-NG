@@ -45,7 +45,7 @@
           <v-col class="py-0 pt-2">
             <week-chart
               v-if="!published_date_outdated"
-              :chart-height="detailView ? 300 : 200"
+              :chart-height="detailView ? 300 : 250"
               :chart-width="detailView ? 800 : 600"
               :story="story"
             />

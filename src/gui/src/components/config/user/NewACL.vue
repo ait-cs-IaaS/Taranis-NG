@@ -1,16 +1,18 @@
 <template>
   <v-container fluid class="ma-5 mt-5 pa-5 pt-0">
-    <v-form id="form" ref="form" class="px-4" @submit.prevent="add">
+    <span v-if="edit" class="caption">ID: {{ acl.id }}</span>
+    <v-form id="form" ref="form" validate-on="submit" @submit.prevent="add">
+      <v-row no-gutters>
+        <v-btn type="submit" color="success" class="mr-4"> Submit </v-btn>
+      </v-row>
       <v-row no-gutters>
         <v-col cols="12" class="pa-1">
           <v-text-field
             v-model="acl.name"
-            v-validate="'required'"
             :label="$t('acl.name')"
             name="name"
             type="text"
-            data-vv-name="name"
-            :error-messages="errors.collect('name')"
+            :rules="[rules.required]"
           />
         </v-col>
         <v-col cols="12" class="pa-1">
@@ -100,16 +102,6 @@
           </v-data-table>
         </v-col>
       </v-row>
-      <v-row no-gutters>
-        <v-col cols="12">
-          <v-alert v-if="show_validation_error" dense type="error" text>
-            {{ $t('acl.validation_error') }}
-          </v-alert>
-          <v-alert v-if="show_error" dense type="error" text>
-            {{ $t('acl.error') }}
-          </v-alert>
-        </v-col>
-      </v-row>
       <v-row>
         <v-btn text dark type="submit" form="form">
           <v-icon left>mdi-content-save</v-icon>
@@ -129,32 +121,41 @@ import { useConfigStore } from '@/stores/ConfigStore'
 export default {
   name: 'NewACL',
   props: {
-    aclId: {
-      type: Number,
-      required: false,
-      default: -1
+    aclProp: {
+      type: Obejct,
+      required: true
+    },
+    edit: {
+      type: Boolean,
+      default: false
     }
   },
-  data: () => ({
-    headers_user: [
+  setup(props) {
+    const store = useConfigStore()
+    const { loadOrganizations, loadRoles, loadPermissions } = store
+    const { roles, permissions, organizations } = storeToRefs(store)
+    const form = ref(null)
+    const rules = {
+      required: (value) => !!value || 'Required.'
+    }
+
+    const headers_user = [
       {
         title: 'Username',
-        align: 'start',
         key: 'username'
       },
       { title: 'Name', key: 'name' }
-    ],
+    ]
 
-    headers_role: [
+    const headers_role = [
       {
         title: 'Name',
-        align: 'start',
         key: 'name'
       },
       { title: 'Description', key: 'description' }
-    ],
+    ]
 
-    types: [
+    const types = [
       { id: 'COLLECTOR', title: 'Collector' },
       { id: 'DELEGATION', title: 'Delegation' },
       { id: 'OSINT_SOURCE', title: 'OSINT Source' },
@@ -163,22 +164,33 @@ export default {
       { id: 'REPORT_ITEM', title: 'Report Item' },
       { id: 'REPORT_ITEM_TYPE', title: 'Report Item Type' },
       { id: 'WORD_LIST', title: 'Word List' }
-    ],
-    selected_type: null,
+    ]
+    const selected_type = null
 
-    show_validation_error: false,
-    edit: false,
-    show_error: false,
-    selected_users: [],
-    selected_roles: [],
-    acl: {
+    const show_validation_error = false
+    const selected_users = []
+    const selected_roles = []
+    const acl = {
       id: -1,
       name: '',
       description: '',
       users: [],
       roles: []
     }
-  }),
+
+    return {
+      form,
+      rules,
+      headers_user,
+      headers_role,
+      loadOrganizations,
+      loadRoles,
+      loadPermissions,
+      roles,
+      permissions,
+      organizations
+    }
+  },
   mounted() {
     this.loadUsers().then(() => {
       this.users = this.getUsers().items
@@ -210,7 +222,6 @@ export default {
   methods: {
     ...mapActions(useConfigStore, ['loadUsers', 'loadRoles']),
     addACL() {
-      this.edit = false
       this.show_error = false
       this.selected_type = null
       this.acl.id = -1

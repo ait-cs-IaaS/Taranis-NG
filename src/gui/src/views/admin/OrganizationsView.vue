@@ -29,7 +29,7 @@ import {
   updateOrganization
 } from '@/api/config'
 import { useConfigStore } from '@/stores/ConfigStore'
-import { notifySuccess, emptyValues, notifyFailure } from '@/utils/helpers'
+import { notifySuccess, objectFromFormat, notifyFailure } from '@/utils/helpers'
 import { ref, onMounted, computed } from 'vue'
 import { useMainStore } from '@/stores/MainStore'
 import { storeToRefs } from 'pinia'
@@ -95,7 +95,7 @@ export default {
     }
 
     const addItem = () => {
-      formData.value = emptyValues(organizations.value.items[0])
+      formData.value = objectFromFormat(formFormat.value)
       edit.value = false
     }
 

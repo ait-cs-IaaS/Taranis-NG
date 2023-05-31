@@ -15,34 +15,37 @@
       <template #top>
         <v-card>
           <v-card-title>
-            <v-text-field
-              v-if="searchBar"
-              v-model="search"
-              append-inner-icon="mdi-magnify"
-              label="Search"
-              single-line
-              class="mr-4"
-              hide-details
-            ></v-text-field>
-            <v-btn
-              v-if="selected.length > 0"
-              color="error"
-              dark
-              class="ml-4"
-              @click="deleteItems(selected)"
-            >
-              Delete {{ selected.length }}
-            </v-btn>
-            <v-btn
-              v-if="addButton"
-              color="primary"
-              dark
-              class="ml-4"
-              @click="addItem"
-            >
-              New Item
-            </v-btn>
-            <slot name="titlebar"></slot>
+            <v-row no-gutters>
+              <v-text-field
+                v-if="searchBar"
+                v-model="search"
+                append-inner-icon="mdi-magnify"
+                density="compact"
+                label="Search"
+                single-line
+                class="mr-4"
+                hide-details
+              />
+              <v-btn
+                v-if="selected.length > 0"
+                color="error"
+                dark
+                class="ml-4"
+                @click="deleteItems(selected)"
+              >
+                Delete {{ selected.length }}
+              </v-btn>
+              <v-btn
+                v-if="addButton"
+                color="primary"
+                dark
+                class="ml-4"
+                @click="addItem"
+              >
+                New Item
+              </v-btn>
+              <slot name="titlebar"></slot>
+            </v-row>
           </v-card-title>
         </v-card>
       </template>

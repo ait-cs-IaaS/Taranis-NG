@@ -1,6 +1,6 @@
 <template>
   <v-container fluid class="ma-5 mt-5 pa-5 pt-0">
-    ID: {{ user.id }}
+    <span v-if="edit" class="caption">ID: {{ user.id }}</span>
     <v-form id="form" ref="form" validate-on="submit" @submit.prevent="add">
       <v-row no-gutters>
         <v-btn type="submit" color="success" class="mr-4"> Submit </v-btn>
