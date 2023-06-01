@@ -106,7 +106,8 @@ export default {
   emits: ['update:search', 'update:limit', 'update:offset'],
   data: () => ({
     showOmniSearch: false,
-    items_per_page: [5, 15, 25, 50, 100]
+    items_per_page: [5, 15, 25, 50, 100],
+    timeout: null
   }),
   computed: {
     ...mapState(useMainStore, ['drawerVisible', 'itemCountTotal']),
@@ -131,7 +132,10 @@ export default {
         return this.search
       },
       set(value) {
-        this.$emit('update:search', value)
+        clearTimeout(this.timeout)
+        this.timeout = setTimeout(() => {
+          this.$emit('update:search', value)
+        }, 500)
       }
     },
     offsetRange() {

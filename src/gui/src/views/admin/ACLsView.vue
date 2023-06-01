@@ -11,7 +11,7 @@
       @add-item="addItem"
       @update-items="updateData"
     />
-    <NewACL v-if="showForm" :user_id="userID"></NewACL>
+    <new-ACL v-if="showForm" :acl-prop="acl" :edit="edit"></new-ACL>
   </div>
 </template>
 
@@ -33,7 +33,7 @@ export default {
   setup() {
     const showForm = ref(false)
     const edit = ref(false)
-    const userID = ref(null)
+    const acl = ref({})
     const acls = useConfigStore().acls
     const mainStore = useMainStore()
 
@@ -47,12 +47,20 @@ export default {
     }
 
     const addItem = () => {
-      userID.value = null
+      acl.value = {
+        id: -1,
+        name: '',
+        description: '',
+        users: [],
+        roles: []
+      }
+      edit.value = false
       showForm.value = true
     }
 
     const editItem = (item) => {
-      userID.value = item.id
+      acl.value = item
+      edit.value = true
       showForm.value = true
     }
 
@@ -91,8 +99,8 @@ export default {
 
     return {
       showForm,
+      acl,
       edit,
-      userID,
       acls,
       addItem,
       editItem,

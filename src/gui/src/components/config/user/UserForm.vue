@@ -52,7 +52,7 @@
             item-value="id"
             :hint="$t('user.organization')"
             :label="$t('user.organization')"
-            :items="organizations.items"
+            :items="organizations"
           >
           </v-select>
         </v-col>
@@ -60,7 +60,7 @@
           <v-data-table
             v-model="user_roles"
             :headers="headers"
-            :items="roles.items"
+            :items="roles"
             show-select
           >
             <template #top>
@@ -68,14 +68,14 @@
                 {{ $t('user.roles') }}
               </v-toolbar-title>
             </template>
-            <template v-if="roles.items.length < 10" #bottom />
+            <template v-if="roles.length < 10" #bottom />
           </v-data-table>
         </v-col>
         <v-col cols="12" class="pt-2">
           <v-data-table
             v-model="user.permissions"
             :headers="headers"
-            :items="permissions.items"
+            :items="permissions"
             show-select
           >
             <template #top>
@@ -83,7 +83,7 @@
                 {{ $t('user.permissions') }}
               </v-toolbar-title>
             </template>
-            <template v-if="permissions.items.length < 10" #bottom />
+            <template v-if="permissions.length < 10" #bottom />
           </v-data-table>
         </v-col>
       </v-row>
@@ -96,7 +96,6 @@ import { createUser, updateUser } from '@/api/config'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
 import { ref, computed, onMounted } from 'vue'
 import { useConfigStore } from '@/stores/ConfigStore'
-import { storeToRefs } from 'pinia'
 
 export default {
   name: 'UserForm',
@@ -114,7 +113,6 @@ export default {
   setup(props) {
     const store = useConfigStore()
     const { loadOrganizations, loadRoles, loadPermissions } = store
-    const { roles, permissions, organizations } = storeToRefs(store)
     const form = ref(null)
 
     const headers = [
@@ -129,6 +127,9 @@ export default {
     const pwd = ref('')
     const repwd = ref('')
     const user = ref(props.userProp)
+    const roles = computed(() => store.roles.items)
+    const organizations = computed(() => store.organizations.items)
+    const permissions = computed(() => store.permissions.items)
 
     const rules = {
       required: (value) => !!value || 'Required.',
@@ -204,8 +205,8 @@ export default {
       rules,
       roles,
       permissions,
-      form,
       organizations,
+      form,
       user_roles,
       user_permissions,
       pwd,

@@ -154,7 +154,6 @@ export default {
     const { setFilter, updateFilter, getFilterTags } = useFilterStore()
 
     const route = useRoute()
-    const awaitingSearch = ref(false)
 
     const filterAttributeSelections = ref([])
     const filterAttributeOptions = [
@@ -199,7 +198,6 @@ export default {
       },
       set(value) {
         setFilter({ tags: value })
-        updateNewsItems()
       }
     })
 
@@ -217,7 +215,6 @@ export default {
 
         console.debug('filterAttributeSelections', filterUpdate)
         setFilter(filterUpdate)
-        updateNewsItems()
       }
     })
 
@@ -227,14 +224,6 @@ export default {
       },
       set(value) {
         setFilter({ search: value })
-        if (!awaitingSearch.value) {
-          setTimeout(() => {
-            updateNewsItems()
-            awaitingSearch.value = false
-          }, 500)
-        }
-
-        awaitingSearch.value = true
       }
     })
 

@@ -73,7 +73,7 @@
           <v-data-table
             v-model="selected_users"
             :headers="headers_user"
-            :items="users.items"
+            :items="users"
             item-key="id"
             :show-select="true"
             class="elevation-1"
@@ -89,7 +89,7 @@
           <v-data-table
             v-model="selected_roles"
             :headers="headers_role"
-            :items="roles.items"
+            :items="roles"
             item-key="id"
             :show-select="true"
             class="elevation-1"
@@ -102,12 +102,6 @@
           </v-data-table>
         </v-col>
       </v-row>
-      <v-row>
-        <v-btn text dark type="submit" form="form">
-          <v-icon left>mdi-content-save</v-icon>
-          <span>{{ $t('acl.save') }}</span>
-        </v-btn></v-row
-      >
     </v-form>
   </v-container>
 </template>
@@ -115,14 +109,14 @@
 <script>
 import { createACLEntry, updateACLEntry } from '@/api/config'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
-import { mapActions } from 'pinia'
 import { useConfigStore } from '@/stores/ConfigStore'
+import { ref, computed, onMounted } from 'vue'
 
 export default {
   name: 'NewACL',
   props: {
     aclProp: {
-      type: Obejct,
+      type: Object,
       required: true
     },
     edit: {
@@ -132,9 +126,11 @@ export default {
   },
   setup(props) {
     const store = useConfigStore()
-    const { loadOrganizations, loadRoles, loadPermissions } = store
-    const { roles, permissions, organizations } = storeToRefs(store)
+    const { loadUsers, loadRoles } = store
     const form = ref(null)
+    const acl = ref(props.aclProp)
+    const roles = computed(() => store.roles.items)
+    const users = computed(() => store.users.items)
     const rules = {
       required: (value) => !!value || 'Required.'
     }
@@ -167,127 +163,57 @@ export default {
     ]
     const selected_type = null
 
-    const show_validation_error = false
     const selected_users = []
     const selected_roles = []
-    const acl = {
-      id: -1,
-      name: '',
-      description: '',
-      users: [],
-      roles: []
+
+    const add = () => {
+      if (props.edit) {
+        if (selected_type !== null) {
+          acl.value.item_type = selected_type.id
+        }
+
+        acl.value.users = selected_users.map((user) => ({ id: user.id }))
+        acl.value.roles = selected_roles.map((role) => ({ id: role.id }))
+
+        if (edit) {
+          updateACLEntry(acl.value)
+            .then(() => {
+              notifySuccess('acl.successful_edit')
+            })
+            .catch(() => {
+              notifyFailure('acl.error_edit')
+            })
+        } else {
+          createACLEntry(acl.value)
+            .then(() => {
+              notifySuccess('acl.successful')
+            })
+            .catch(() => {
+              notifyFailure(roles, 'acl.error')
+            })
+        }
+      }
     }
 
+    onMounted(() => {
+      console.debug('Loading ACL: ' + acl.value.id)
+      loadUsers()
+      loadRoles()
+    })
+
     return {
+      acl,
       form,
       rules,
       headers_user,
       headers_role,
-      loadOrganizations,
-      loadRoles,
-      loadPermissions,
+      selected_roles,
+      selected_users,
+      selected_type,
+      types,
       roles,
-      permissions,
-      organizations
-    }
-  },
-  mounted() {
-    this.loadUsers().then(() => {
-      this.users = this.getUsers().items
-    })
-
-    this.loadRoles().then(() => {
-      this.roles = this.getRoles().items
-    })
-
-    if (!this.aclId || this.aclId === -1) {
-      this.acl = {
-        id: -1,
-        name: '',
-        description: '',
-        users: [],
-        roles: []
-      }
-    } else {
-      // TODO: load acl
-      this.acl = {
-        id: -1,
-        name: '',
-        description: '',
-        users: [],
-        roles: []
-      }
-    }
-  },
-  methods: {
-    ...mapActions(useConfigStore, ['loadUsers', 'loadRoles']),
-    addACL() {
-      this.show_error = false
-      this.selected_type = null
-      this.acl.id = -1
-      this.acl.name = ''
-      this.acl.description = ''
-      this.acl.item_type = ''
-      this.acl.item_id = ''
-      this.acl.everyone = false
-      this.acl.see = false
-      this.acl.access = false
-      this.acl.modify = false
-      this.acl.users = []
-      this.acl.roles = []
-      this.selected_users = []
-      this.selected_roles = []
-      this.$validator.reset()
-    },
-    add() {
-      this.$validator.validateAll().then(() => {
-        if (!this.$validator.errors.any()) {
-          this.show_validation_error = false
-          this.show_error = false
-
-          if (this.selected_type !== null) {
-            this.acl.item_type = this.selected_type.id
-          }
-
-          this.acl.users = []
-          for (let i = 0; i < this.selected_users.length; i++) {
-            this.acl.users.push({
-              id: this.selected_users[i].id
-            })
-          }
-
-          this.acl.roles = []
-          for (let i = 0; i < this.selected_roles.length; i++) {
-            this.acl.roles.push({
-              id: this.selected_roles[i].id
-            })
-          }
-
-          if (this.edit) {
-            updateACLEntry(this.acl)
-              .then(() => {
-                this.$validator.reset()
-                notifySuccess('acl.successful_edit')
-              })
-              .catch(() => {
-                notifyFailure('acl.error_edit')
-                this.show_error = true
-              })
-          } else {
-            createACLEntry(this.acl)
-              .then(() => {
-                this.$validator.reset()
-                notifySuccess('acl.successful')
-              })
-              .catch(() => {
-                notifyFailure('acl.error')
-                this.show_error = true
-              })
-          }
-        } else {
-          this.show_validation_error = true
-        }
-      })
+      users,
+      add
     }
   }
 }
