@@ -43,6 +43,9 @@ export const useAuthStore = defineStore('authenticator', {
     },
     logout() {
       this.clearJwtToken()
+      this.$reset()
+      const store = useMainStore()
+      store.$reset()
     },
     async refresh() {
       try {
@@ -74,7 +77,6 @@ export const useAuthStore = defineStore('authenticator', {
     },
     clearJwtToken() {
       localStorage.ACCESS_TOKEN = ''
-      this.jwt = ''
     },
     setLoginURL() {
       if (import.meta.env.VUE_APP_TARANIS_NG_LOGIN_URL) {

@@ -13,10 +13,10 @@
       </v-btn>
     </v-toolbar>
     <v-card-text>
-      {{ product }}
       <v-form id="form" ref="form" class="px-4">
         <v-row no-gutters>
           <v-col cols="6" class="pr-3">
+            {{ product_types }}
             <v-select
               v-model="product.product_type_id"
               :items="product_types"
@@ -41,7 +41,7 @@
         </v-row>
         <v-row no-gutters>
           <v-col cols="12">
-            {{ report_items }}
+            {{ product.report_items }}
           </v-col>
         </v-row>
         <v-row no-gutters>
@@ -57,7 +57,6 @@
         </v-row>
         <v-row no-gutters class="pt-4">
           <v-col cols="6">
-            <v-btn :href="preview_link" style="display: none" target="_blank" />
             <v-btn depressed small @click="previewProduct">
               <v-icon left>mdi-eye-outline</v-icon>
               <span>{{ $t('product.preview') }}</span>
@@ -70,7 +69,7 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { createProduct, updateProduct } from '@/api/publish'
 import { useI18n } from 'vue-i18n'
 import { useConfigStore } from '@/stores/ConfigStore'
@@ -88,6 +87,7 @@ export default {
   setup(props, { emit }) {
     const { t } = useI18n()
     const store = useConfigStore()
+    const { loadProductTypes, loadPublisherPresets } = store
     const product_types = computed(() => {
       return store.product_types.items
     })
@@ -115,6 +115,16 @@ export default {
       }
     }
 
+    const previewProduct = () => {
+      // this.$router.push('/product/' + product.value.id)
+      console.debug('TODO: IMPLEMENT')
+    }
+
+    onMounted(() => {
+      loadProductTypes()
+      loadPublisherPresets()
+    })
+
     return {
       product,
       required,
@@ -122,7 +132,8 @@ export default {
       container_title,
       product_types,
       publisher_presets,
-      saveProduct
+      saveProduct,
+      previewProduct
     }
   }
 }
