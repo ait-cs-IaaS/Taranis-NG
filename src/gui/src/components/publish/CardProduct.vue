@@ -9,11 +9,62 @@
         variant="flat"
         @click="saveProduct"
       >
-        {{ $t('button.save') }}
+        {{ $t('product.publish') }}
       </v-btn>
     </v-toolbar>
     <v-card-text>
       {{ product }}
+      <v-form id="form" ref="form" class="px-4">
+        <v-row no-gutters>
+          <v-col cols="6" class="pr-3">
+            <v-select
+              v-model="product.product_type_id"
+              :items="product_types"
+              item-text="title"
+              :label="$t('product.report_type')"
+            />
+          </v-col>
+          <v-col cols="6" class="pr-3">
+            <v-text-field
+              v-model="product.title"
+              :label="$t('product.title')"
+              name="title"
+            />
+          </v-col>
+          <v-col cols="12" class="pr-3">
+            <v-textarea
+              v-model="product.description"
+              :label="$t('product.description')"
+              name="description"
+            />
+          </v-col>
+        </v-row>
+        <v-row no-gutters>
+          <v-col cols="12">
+            {{ report_items }}
+          </v-col>
+        </v-row>
+        <v-row no-gutters>
+          <v-col cols="12">
+            <v-select
+              v-model="preset.selected"
+              :items="publisher_presets"
+              :label="preset.name"
+              multiple
+            >
+            </v-select>
+          </v-col>
+        </v-row>
+        <v-row no-gutters class="pt-4">
+          <v-col cols="6">
+            <v-btn :href="preview_link" style="display: none" target="_blank" />
+            <v-btn depressed small @click="previewProduct">
+              <v-icon left>mdi-eye-outline</v-icon>
+              <span>{{ $t('product.preview') }}</span>
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-form>
     </v-card-text>
   </v-card>
 </template>
@@ -22,6 +73,7 @@
 import { ref, computed } from 'vue'
 import { createProduct, updateProduct } from '@/api/publish'
 import { useI18n } from 'vue-i18n'
+import { useConfigStore } from '@/stores/ConfigStore'
 
 export default {
   name: 'CardProduct',
@@ -35,7 +87,15 @@ export default {
   emits: ['productcreated'],
   setup(props, { emit }) {
     const { t } = useI18n()
+    const store = useConfigStore()
+    const product_types = computed(() => {
+      return store.product_types.items
+    })
+    const publisher_presets = computed(() => {
+      return store.publisher_presets.items
+    })
     const product = ref(props.productProp)
+    const preset = ref({ selected: null, name: 'Preset' })
     const required = [(v) => !!v || 'Required']
 
     const container_title = computed(() => {
@@ -58,7 +118,10 @@ export default {
     return {
       product,
       required,
+      preset,
       container_title,
+      product_types,
+      publisher_presets,
       saveProduct
     }
   }

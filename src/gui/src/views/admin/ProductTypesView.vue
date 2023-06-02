@@ -13,7 +13,7 @@
     />
     <EditConfig
       v-if="formData && Object.keys(formData).length > 0"
-      v-model:form-format="formFormat"
+      :form-format="formFormat"
       :config-data="formData"
       @submit="handleSubmit"
     ></EditConfig>
@@ -92,6 +92,9 @@ export default {
         return base.concat(this.parameters[this.formData.presenter_id])
       }
       return base
+    },
+    xxx() {
+      return objectFromFormat(this.formFormat)
     }
   },
   mounted() {
@@ -119,7 +122,7 @@ export default {
             }
           )
           return {
-            key: presenter.id,
+            value: presenter.id,
             title: presenter.name
           }
         })
@@ -134,6 +137,7 @@ export default {
       this.edit = true
     },
     handleSubmit(submittedData) {
+      console.debug('submittedData', submittedData)
       delete submittedData.parameter_values
       const parameter_list = this.parameters[this.formData.presenter_id].map(
         (item) => item.name

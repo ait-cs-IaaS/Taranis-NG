@@ -1,15 +1,35 @@
 <template>
-  <v-container fluid>
-    <v-card v-for="product in products.items" :key="product.id" class="mt-3">
-      <v-card-title>
-        {{ product }}
-      </v-card-title>
-    </v-card>
-    <h2 v-if="!products.items">No Products found</h2>
-  </v-container>
+  <DataTable
+    :items="products.items"
+    :add-button="false"
+    :search-bar="false"
+    sort-by-item="id"
+    :action-column="true"
+    @delete-item="deleteItem"
+    @edit-item="editItem"
+    @add-item="addItem"
+    @update-items="updateData"
+    @selection-change="selectionChange"
+  >
+    <template #actionColumn>
+      <v-tooltip left>
+        <template #activator="{ props }">
+          <v-icon
+            v-bind="props"
+            color="secondary"
+            @click.stop="createProduct(item)"
+          >
+            mdi-file
+          </v-icon>
+        </template>
+        <span>Create Product</span>
+      </v-tooltip>
+    </template>
+  </DataTable>
 </template>
 
 <script>
+import DataTable from '@/components/common/DataTable.vue'
 import { deleteProduct } from '@/api/publish'
 import { mapActions, mapState, mapWritableState } from 'pinia'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
@@ -18,7 +38,9 @@ import { useMainStore } from '@/stores/MainStore'
 
 export default {
   name: 'PruoductView',
-  components: {},
+  components: {
+    DataTable
+  },
   data: function () {
     return {
       selected: []
@@ -36,7 +58,10 @@ export default {
         this.itemCountFiltered = this.products.items.length
       })
     },
-    editProduct(item) {
+    addItem() {
+      this.$router.push('/report/0')
+    },
+    editItem(item) {
       this.$router.push('/product/' + item.id)
     },
     deleteItem(item) {
