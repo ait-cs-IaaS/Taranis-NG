@@ -1,6 +1,6 @@
 <template>
   <v-btn-toggle
-    v-model="modelValue"
+    v-model="selected"
     variant="outlined"
     density="compact"
     divided
@@ -16,26 +16,21 @@
 export default {
   name: 'DateChips',
   props: {
-    value: {
+    modelValue: {
       type: String,
       default: 'all'
     }
   },
   emits: ['update:modelValue'],
   computed: {
-    modelValue: {
+    selected: {
       get() {
-        return this.value
+        return this.modelValue
       },
-      set(newValue) {
-        this.setValue(newValue)
+      set(val) {
+        console.debug('dateChips.setValue', val)
+        this.$emit('update:modelValue', val)
       }
-    }
-  },
-  methods: {
-    setValue(newValue) {
-      console.debug('dateChips.setValue', newValue)
-      this.$emit('update:modelValue', newValue)
     }
   }
 }

@@ -58,7 +58,7 @@
 
         <!-- tags -->
         <v-col cols="12" class="pr-0">
-          <tag-filter v-model="tags" />
+          <tag-filter v-model="newsItemsFilter.tags" />
         </v-col>
       </v-row>
 
@@ -68,7 +68,7 @@
         <v-col cols="12" class="pt-1">
           <filter-select-list
             v-model="filterAttribute"
-            :items="filterAttributeOptions"
+            :filter-attribute-options="filterAttributeOptions"
           />
         </v-col>
       </v-row>
@@ -124,7 +124,7 @@ import tagFilter from '@/components/assess/filter/tagFilter.vue'
 import filterSelectList from '@/components/assess/filter/filterSelectList.vue'
 import filterSortList from '@/components/assess/filter/filterSortList.vue'
 import FilterNavigation from '@/components/common/FilterNavigation.vue'
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { computed, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useFilterStore } from '@/stores/FilterStore'
 import { useAssessStore } from '@/stores/AssessStore'
@@ -151,29 +151,40 @@ export default {
     const { updateNewsItems } = assessStore
     const { newsItemsFilter, chartFilter } = storeToRefs(filterStore)
 
-    const { setFilter, updateFilter, getFilterTags } = useFilterStore()
+    const { setFilter, updateFilter } = useFilterStore()
 
     const route = useRoute()
 
-    const filterAttributeSelections = ref([])
     const filterAttributeOptions = [
-      { type: 'read', label: 'read', icon: 'mdi-email-mark-as-unread' },
+      { value: 'read', label: 'read', icon: 'mdi-email-mark-as-unread' },
       {
-        type: 'important',
+        value: 'important',
         label: 'important',
         icon: 'mdi-exclamation'
       },
       {
-        type: 'in_report',
+        value: 'in_report',
         label: 'items in reports',
         icon: 'mdi-share-outline'
       },
       {
-        type: 'relevant',
+        value: 'relevant',
         label: 'relevant',
         icon: 'mdi-bullhorn-outline'
       }
     ]
+    const filterAttribute = computed({
+      get() {
+        return filterAttributeOptions
+          .filter((option) => newsItemsFilter.value[option.value])
+          .map((option) => option.value)
+      },
+      set(value) {
+        setFilter(value)
+        console.debug('filterAttributeSelections', value)
+      }
+    })
+
     const orderOptions = [
       {
         label: 'published date',
@@ -188,35 +199,6 @@ export default {
         direction: 'DESC'
       }
     ]
-
-    const tags = computed({
-      get() {
-        const tags = getFilterTags || []
-        return tags.map((tag) => {
-          return { name: tag }
-        })
-      },
-      set(value) {
-        setFilter({ tags: value })
-      }
-    })
-
-    const filterAttribute = computed({
-      get() {
-        return filterAttributeSelections.value
-      },
-      set(value) {
-        filterAttributeSelections.value = value
-
-        const filterUpdate = filterAttributeOptions.reduce((obj, item) => {
-          obj[item.type] = value.includes(item.type) ? 'true' : undefined
-          return obj
-        }, {})
-
-        console.debug('filterAttributeSelections', filterUpdate)
-        setFilter(filterUpdate)
-      }
-    })
 
     const search = computed({
       get() {
@@ -249,17 +231,15 @@ export default {
     )
 
     return {
-      filterAttributeSelections,
-      filterAttributeOptions,
-      filterAttribute,
       orderOptions,
       drawerVisible,
-      tags,
       search,
       chartFilter,
       getOSINTSourceGroupsList,
       getOSINTSourcesList,
       newsItemsFilter,
+      filterAttribute,
+      filterAttributeOptions,
       updateNewsItems
     }
   }

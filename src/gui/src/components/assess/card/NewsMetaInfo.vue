@@ -1,41 +1,39 @@
 <template>
-  <v-row class="news-item-meta-infos">
-    <v-col class="news-item-meta-infos-label">
-      <strong>{{ $t('assess.collected') }}:</strong>
-    </v-col>
-    <v-col>
-      {{ $d(getCollectedDate(), 'long') }}
-    </v-col>
-  </v-row>
-  <v-row class="news-item-meta-infos">
-    <v-col class="news-item-meta-infos-label">
-      <strong>{{ $t('assess.source') }}:</strong>
-    </v-col>
-    <v-col>
-      {{ getSource().name }} <br />
-      <a :href="getSource().link" target="_blank" icon class="meta-link d-flex">
-        <v-icon left x-small color="primary">mdi-open-in-new</v-icon>
-        <span class="label">{{ getSource().link }}</span>
-      </a>
-    </v-col>
-  </v-row>
-  <v-row v-if="getAuthor()" class="news-item-meta-infos">
-    <v-col class="news-item-meta-infos-label">
-      <strong>{{ $t('assess.author') }}:</strong>
-    </v-col>
-    <v-col>
-      <span :class="[{ decorateSource: newsItem.decorateSource }]">
-        {{ getAuthor() }}
-        <v-icon v-if="newsItem.decorateSource" right small class="ml-0"
-          >mdi-seal</v-icon
-        >
-      </span>
-    </v-col>
-  </v-row>
+  <v-container column class="pa-0 pb-1">
+    <v-row v-if="newsItem">
+      <v-col>
+        <v-row>
+          <v-col style="max-width: 110px" class="py-0">
+            <strong>{{ $t('assess.collected') }}:</strong>
+          </v-col>
+          <v-col v-if="collected_date" class="py-0">
+            {{ $d(collected_date, 'long') }}
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col style="max-width: 110px" class="py-0">
+            <strong>{{ $t('assess.source') }}:</strong>
+          </v-col>
+          <v-col class="py-0">
+            {{ source?.name }}
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col style="max-width: 110px" class="py-0">
+            <strong>{{ $t('assess.author') }}:</strong>
+          </v-col>
+          <v-col class="py-0">
+            {{ author }}
+          </v-col>
+        </v-row>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
 import { getCleanHostname } from '@/utils/helpers.js'
+import { computed } from 'vue'
 
 export default {
   name: 'NewsMetaInfo',
@@ -45,34 +43,49 @@ export default {
       required: true
     }
   },
-  computed: {
-    published_date_outdated() {
-      const pub_date = this.published_date
+  setup(props) {
+    const published_date = computed(() => {
+      return props.newsItem.news_item_data.published
+        ? new Date(props.newsItem.news_item_data.published)
+        : null
+    })
+
+    const published_date_outdated = computed(() => {
+      const pub_date = published_date.value
       if (!pub_date) {
         return false
       }
       const oneWeekAgo = new Date()
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
       return oneWeekAgo > pub_date
-    }
-  },
-  methods: {
-    getAuthor() {
-      return this.newsItem.news_item_data.author
-    },
-    getSource() {
-      const source = getCleanHostname(this.newsItem.news_item_data.source)
-      // TODO: get Type (e.g. RSS, Web, Email, ...)
+    })
 
-      return {
-        name: source,
-        link: this.newsItem.news_item_data.link,
-        type: this.newsItem.news_item_data.osint_source_id
-      }
-    },
+    const author = computed(() => {
+      return props.newsItem.news_item_data?.author
+    })
 
-    getCollectedDate() {
-      return new Date(this.newsItem.news_item_data.collected)
+    const source = computed(() => {
+      return props.newsItem.news_item_data
+        ? {
+            name: getCleanHostname(props.newsItem.news_item_data.source),
+            link: props.newsItem.news_item_data.link,
+            type: props.newsItem.news_item_data.osint_source_id
+          }
+        : null
+    })
+
+    const collected_date = computed(() => {
+      return props.newsItem.news_item_data?.collected
+        ? new Date(props.newsItem.news_item_data.collected)
+        : null
+    })
+
+    return {
+      published_date,
+      published_date_outdated,
+      author,
+      source,
+      collected_date
     }
   }
 }

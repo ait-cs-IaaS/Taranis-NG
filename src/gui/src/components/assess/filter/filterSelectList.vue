@@ -1,57 +1,77 @@
 <template>
-  <v-list
-    :selected="value"
-    density="compact"
-    class="py-0"
-    color="primary"
-    @click:select="updateSelected"
+  <v-btn-toggle
+    v-model="filterAttribute"
+    class="vertical-button-group"
+    selected-class="text-primary"
+    multiple
   >
-    <v-list-item
-      v-for="item in items"
-      :key="item.type"
-      class="extra-dense"
-      :ripple="false"
-      density="compact"
-      :value="item.type"
-      :prepend-icon="item.icon"
+    <v-btn
+      v-for="button in filterAttributeOptions"
+      :key="button.value"
+      class="vertical-button mb-5"
+      :value="button.value"
+      :prepend-icon="button.icon"
+      :append-icon="
+        filterAttribute.includes(button.value) ? 'mdi-check-bold' : undefined
+      "
+      size="large"
     >
-      <v-list-item-title>
-        {{ item.label }}
-      </v-list-item-title>
-
-      <template #append="{ isActive }">
-        <v-list-item-action>
-          <v-checkbox-btn
-            :model-value="isActive"
-            density="compact"
-            false-icon=""
-            true-icon="mdi-check-bold"
-          />
-        </v-list-item-action>
-      </template>
-    </v-list-item>
-  </v-list>
+      {{ button.label }}
+    </v-btn>
+  </v-btn-toggle>
 </template>
 
 <script>
+import { computed } from 'vue'
+
 export default {
   name: 'FilterSelectList',
   props: {
-    value: {
+    modelValue: {
       type: Array,
       default: () => []
     },
-    items: {
+    filterAttributeOptions: {
       type: Array,
       default: () => []
     }
   },
   emits: ['update:modelValue'],
-  methods: {
-    updateSelected(data) {
-      console.debug('FilterSortList updateSelected', data)
-      this.$emit('update:modelValue', data.id)
+  setup(props, { emit }) {
+    const filterAttribute = computed({
+      get() {
+        return props.modelValue
+      },
+      set(value) {
+        const filterUpdate = props.filterAttributeOptions.reduce(
+          (obj, item) => {
+            obj[item.value] = value.includes(item.value) ? 'true' : undefined
+            return obj
+          },
+          {}
+        )
+
+        console.debug('filterAttributeSelections', filterUpdate)
+        emit('update:modelValue', filterUpdate)
+      }
+    })
+
+    return {
+      filterAttribute
     }
   }
 }
 </script>
+
+<style scoped>
+.vertical-button-group {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.vertical-button {
+  justify-content: flex-start;
+  text-transform: unset !important;
+}
+</style>

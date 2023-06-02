@@ -166,6 +166,7 @@
         v-for="item in story.news_items"
         :key="item.id"
         :news-item="item"
+        :detail-view="false"
         class="mt-3"
       />
     </v-col>
@@ -256,17 +257,9 @@ export default {
       emit('deleteItem', props.story.id)
     }
 
-    const addToReport = () => {
-      sharingDialog.value = true
-    }
-
     const showRelated = (event) => {
       console.log('not yet implemented')
       console.debug(event)
-    }
-
-    const updateDetailsView = (value) => {
-      viewDetails.value = value
     }
 
     const getDescription = computed(() => {
@@ -295,9 +288,7 @@ export default {
       markAsRead,
       markAsImportant,
       deleteNewsItem,
-      addToReport,
-      showRelated,
-      updateDetailsView
+      showRelated
     }
   }
 }
