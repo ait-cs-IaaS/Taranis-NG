@@ -14,22 +14,20 @@
     </v-card-text>
     <v-card-actions class="mt-1">
       <v-btn
-        color="awake-red-color darken-1"
-        varint="outlined"
-        class="text-lowercase pr-4"
+        variant="outlined"
+        class="text-lowercase text-red-darken-3 ml-3"
+        prepend-icon="mdi-close"
         @click="close()"
       >
-        <v-icon left class="red-icon">mdi-close</v-icon>
         abort
       </v-btn>
-
+      <v-spacer></v-spacer>
       <v-btn
-        color="primary"
-        varint="outlined"
-        class="text-lowercase pr-4"
+        variant="outlined"
+        class="text-lowercase text-primary mr-3"
+        prepend-icon="mdi-share-outline"
         @click="share()"
       >
-        <v-icon left>mdi-share-outline</v-icon>
         share
       </v-btn>
     </v-card-actions>

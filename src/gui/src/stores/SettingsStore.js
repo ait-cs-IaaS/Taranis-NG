@@ -125,6 +125,9 @@ export const useSettingsStore = defineStore('settings', {
       const response = await updateProfile(data)
       this.setUserProfile(response.data)
     },
+    async saveWordLists(data) {
+      await updateProfile({ word_lists: data })
+    },
     setUserProfile(profile) {
       this.spellcheck = profile.spellcheck || this.spellcheckk
       this.dark_theme = profile.dark_theme || this.dark_theme

@@ -25,6 +25,7 @@
 </template>
 
 <script>
+import { ref, onMounted } from 'vue'
 import DataTable from '@/components/common/DataTable.vue'
 import EditConfig from '@/components/config/EditConfig.vue'
 import ImportExport from '@/components/config/ImportExport.vue'
@@ -36,7 +37,6 @@ import {
   importWordList
 } from '@/api/config'
 import { notifySuccess, emptyValues, notifyFailure } from '@/utils/helpers'
-import { mapActions, mapState, mapWritableState } from 'pinia'
 import { useConfigStore } from '@/stores/ConfigStore'
 import { useMainStore } from '@/stores/MainStore'
 
@@ -47,80 +47,107 @@ export default {
     EditConfig,
     ImportExport
   },
-  data: () => ({
-    selected: [],
-    formData: {},
-    edit: false
-  }),
-  computed: {
-    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
-    ...mapState(useConfigStore, ['word_lists'])
-  },
-  mounted() {
-    this.updateData()
-  },
-  methods: {
-    ...mapActions(useConfigStore, ['loadWordLists']),
-    updateData() {
-      this.loadWordLists().then(() => {
-        this.itemCountTotal = this.word_lists.total_count
-        this.itemCountFiltered = this.word_lists.items.length
+  setup() {
+    const store = useConfigStore()
+    const mainStore = useMainStore()
+
+    const selected = ref([])
+    const formData = ref({})
+    const edit = ref(false)
+    const { word_lists } = storeToRefs(store)
+
+    const updateData = () => {
+      store.loadWordLists().then(() => {
+        mainStore.itemCountTotal = word_lists.value.total_count
+        mainStore.itemCountFiltered = word_lists.value.items.length
       })
-    },
-    addItem() {
-      this.formData = emptyValues(this.word_lists.items[0])
-      this.edit = false
-    },
-    editItem(item) {
-      this.formData = item
-      this.edit = true
-    },
-    handleSubmit(submittedData) {
+    }
+
+    const addItem = () => {
+      formData.value = emptyValues(word_lists.value.items[0])
+      edit.value = false
+    }
+
+    const editItem = (item) => {
+      formData.value = item
+      edit.value = true
+    }
+
+    const handleSubmit = (submittedData) => {
       console.log(submittedData)
-      if (this.edit) {
-        this.updateItem(submittedData)
+      if (edit.value) {
+        updateItem(submittedData)
       } else {
-        this.createItem(submittedData)
+        createItem(submittedData)
       }
-    },
-    deleteItem(item) {
+    }
+
+    const deleteItem = (item) => {
       deleteWordList(item)
         .then(() => {
           notifySuccess(`Successfully deleted ${item.name}`)
-          this.updateData()
+          updateData()
         })
         .catch(() => {
           notifyFailure(`Failed to delete ${item.name}`)
         })
-    },
-    createItem(item) {
+    }
+
+    const createItem = (item) => {
       createWordList(item)
         .then(() => {
           notifySuccess(`Successfully created ${item.name}`)
-          this.updateData()
+          updateData()
         })
         .catch(() => {
           notifyFailure(`Failed to create ${item.name}`)
         })
-    },
-    updateItem(item) {
+    }
+
+    const updateItem = (item) => {
       updateWordList(item)
         .then(() => {
           notifySuccess(`Successfully updated ${item.name}`)
-          this.updateData()
+          updateData()
         })
         .catch(() => {
           notifyFailure(`Failed to update ${item.name}`)
         })
-    },
-    importData(data) {
+    }
+
+    const importData = (data) => {
       importWordList(data)
-    },
-    exportData() {
-      exportWordList(this.selected)
-    },
-    selectionChange(selected) {
-      this.selected = selected.map((item) => item.id)
+    }
+
+    const exportData = () => {
+      exportWordList(selected.value)
+    }
+
+    const selectionChange = (selected) => {
+      selected.value = selected.map((item) => item.id)
+    }
+
+    onMounted(() => {
+      updateData()
+    })
+
+    return {
+      selected,
+      formData,
+      edit,
+      word_lists,
+      itemCountTotal,
+      itemCountFiltered,
+      updateData,
+      addItem,
+      editItem,
+      handleSubmit,
+      deleteItem,
+      createItem,
+      updateItem,
+      importData,
+      exportData,
+      selectionChange
     }
   }
 }

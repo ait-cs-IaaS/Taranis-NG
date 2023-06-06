@@ -3,7 +3,6 @@
     v-if="shouldRender"
     :options="chartOptions"
     :data="chart_data"
-    :style="chart_style"
     update-mode="active"
   />
 </template>
@@ -78,7 +77,8 @@ export default {
     chart_style() {
       return {
         height: this.chartHeight + 'px',
-        width: this.chartWidth + 'px'
+        width: this.chartWidth + 'px',
+        position: 'relative'
       }
     },
 
@@ -111,11 +111,14 @@ export default {
     chartOptions() {
       return {
         responsive: true,
-        maintainAspectRatio: true,
+        maintainAspectRatio: false,
         scales: {
           y1: {
             position: 'left',
-            beginAtZero: true
+            beginAtZero: true,
+            ticks: {
+              stepSize: 1
+            }
           },
           y2: {
             position: 'right',
@@ -124,6 +127,9 @@ export default {
             grid: {
               // display gridlines only for y1
               drawOnChartArea: false
+            },
+            ticks: {
+              stepSize: 1
             }
           }
         },

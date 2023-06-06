@@ -110,7 +110,7 @@ export const router = createRouter({
       path: '/user',
       name: 'user',
       components: {
-        default: () => import('@/views/users/UserView.vue'),
+        default: () => import('@/views/users/settings/UserView.vue'),
         nav: () => import('@/views/nav/UserNav.vue')
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.MY_ASSETS_CONFIG] }
@@ -119,7 +119,7 @@ export const router = createRouter({
       path: '/user/settings',
       name: 'user-settings',
       components: {
-        default: () => import('@/views/users/UserSettings.vue'),
+        default: () => import('@/views/users/settings/UserSettings.vue'),
         nav: () => import('@/views/nav/UserNav.vue')
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.MY_ASSETS_CONFIG] }
@@ -128,7 +128,17 @@ export const router = createRouter({
       path: '/user/templates',
       name: 'user-templates',
       components: {
-        default: () => import('@/views/users/NotificationTemplatesView.vue'),
+        default: () =>
+          import('@/views/users/settings/NotificationTemplatesView.vue'),
+        nav: () => import('@/views/nav/UserNav.vue')
+      },
+      meta: { requiresAuth: true, requiresPerm: [Permissions.MY_ASSETS_CONFIG] }
+    },
+    {
+      path: '/user/wordlists',
+      name: 'user-wordlists',
+      components: {
+        default: () => import('@/views/users/settings/UserWordLists.vue'),
         nav: () => import('@/views/nav/UserNav.vue')
       },
       meta: { requiresAuth: true, requiresPerm: [Permissions.MY_ASSETS_CONFIG] }

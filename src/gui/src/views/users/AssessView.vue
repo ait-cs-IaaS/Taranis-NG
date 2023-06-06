@@ -34,12 +34,10 @@
       </div>
     </div>
 
-    <v-expand-transition>
-      <assess-selection-toolbar
-        v-if="activeSelection"
-        :selection="newsItemsSelection"
-      ></assess-selection-toolbar>
-    </v-expand-transition>
+    <assess-selection-toolbar
+      v-if="activeSelection"
+      :selection="newsItemsSelection"
+    ></assess-selection-toolbar>
   </div>
 </template>
 

@@ -1,6 +1,6 @@
 <template>
-  <v-container column class="pa-0 pb-1">
-    <v-row>
+  <v-container column class="pa-0 py-0">
+    <v-row no-gutters>
       <v-col>
         <!-- left column -->
         <v-row>
@@ -37,21 +37,15 @@
         <!-- /left column -->
       </v-col>
       <v-col
-        :cols="detailView ? 10 : 4"
-        :style="detailView ? 'margin-left: 120px' : ''"
+        :cols="detailView ? 10 : 6"
+        :class="detailView ? 'detailView' : ''"
       >
-        <!-- right column -->
-        <v-row>
-          <v-col class="py-0 pt-2">
-            <week-chart
-              v-if="!published_date_outdated"
-              :chart-height="detailView ? 300 : 250"
-              :chart-width="detailView ? 800 : 600"
-              :story="story"
-            />
-          </v-col>
-        </v-row>
-        <!-- /right column -->
+        <week-chart
+          v-if="!published_date_outdated && lgAndUp"
+          :chart-height="detailView ? 300 : 250"
+          :chart-width="detailView ? 800 : 600"
+          :story="story"
+        />
       </v-col>
     </v-row>
   </v-container>
@@ -83,7 +77,7 @@ export default {
   emits: ['selectItem', 'deleteItem'],
   setup(props) {
     const { d, t } = useI18n()
-    const { xlAndUp, mdAndUp, name } = useDisplay()
+    const { xlAndUp, lgAndUp, mdAndUp, name } = useDisplay()
 
     const published_dates = computed(() => {
       const pub_dates = props.story.news_items
@@ -107,7 +101,7 @@ export default {
       if (props.detailView) {
         return 20
       }
-      return xlAndUp.value ? 5 : 3
+      return xlAndUp.value ? 6 : 2
     })
 
     const getPublishedDate = computed(() => {
@@ -127,6 +121,7 @@ export default {
       published_dates,
       published_date_outdated,
       getPublishedDate,
+      lgAndUp,
       mdAndUp,
       tagLimit,
       name,
@@ -135,3 +130,10 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.detailView {
+  margin-left: 120px;
+  margin-top: 30px;
+}
+</style>

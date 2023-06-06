@@ -17,7 +17,7 @@
           <v-icon :icon="link.icon" />
         </v-list-item-title>
 
-        <v-list-item-subtitle class="d-flex justify-center text-caption">
+        <v-list-item-subtitle class="d-flex text-center text-caption">
           {{ $t(link.title) }}
         </v-list-item-subtitle>
       </v-list-item>

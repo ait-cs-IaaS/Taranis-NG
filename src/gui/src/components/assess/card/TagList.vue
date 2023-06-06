@@ -2,22 +2,23 @@
   <div class="ml-0 pl-0 d-flex flex-wrap">
     <v-tooltip v-for="(tag, i) in tags.slice(0, limit)" :key="i">
       <template #activator="{ props }">
-        <a
+        <v-chip
           v-bind="props"
-          class="mr-2 d-flex"
+          class="mr-1 mt-1"
+          :color="labelcolor(i)"
+          link
+          label
+          density="compact"
+          :prepend-icon="tagIcon(tag.tag_type)"
           @click.stop="updateTags(tag.name)"
         >
-          <v-icon start size="small" :icon="tagIcon(tag.tag_type)" />
           <span
             :style="truncate ? 'max-width: 80px' : 'max-width: 120px'"
-            :class="
-              'd-inline-block text-truncate text-decoration-underline ' +
-              labelcolor(i)
-            "
+            class="d-inline-block text-truncate text-black"
           >
             {{ tag.name }}
           </span>
-        </a>
+        </v-chip>
       </template>
       <span>
         <v-icon start :icon="tagIcon(tag.tag_type)" />
@@ -43,7 +44,7 @@ export default {
     },
     limit: {
       type: Number,
-      default: 5
+      default: 6
     },
     truncate: {
       type: Boolean,
@@ -74,7 +75,7 @@ export default {
         return ''
       }
 
-      const colorList = ['text-red', 'text-blue', 'text-green', 'text-black']
+      const colorList = ['red', 'blue', 'green', 'black']
       return colorList[(this.colorStart + i) % colorList.length]
     }
   }

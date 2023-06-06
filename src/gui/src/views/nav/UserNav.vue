@@ -22,6 +22,11 @@ export default {
         icon: 'mdi-email-multiple-outline',
         title: 'nav_menu.notification_templates',
         route: '/user/templates'
+      },
+      {
+        icon: 'mdi-format-list-text',
+        title: 'nav_menu.word_lists',
+        route: '/user/wordlists'
       }
     ]
   })
