@@ -37,7 +37,7 @@
 <script>
 import { addAggregatesToReportItem } from '@/api/analyze'
 import { useAnalyzeStore } from '@/stores/AnalyzeStore'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 
 export default {
   name: 'PopupShareItems',
@@ -50,11 +50,19 @@ export default {
   },
   emits: ['close'],
   setup(props, { emit }) {
-    const reportItems = ref([])
     const reportItemSelection = ref(null)
     const store = useAnalyzeStore()
 
-    const { loadReportItems, report_items } = store
+    const { loadReportItems } = store
+
+    const reportItems = computed(() =>
+      store.report_items.items.map((item) => {
+        return {
+          title: item.title,
+          value: item.id
+        }
+      })
+    )
 
     const share = () => {
       addAggregatesToReportItem(reportItemSelection.value, props.itemIds)
@@ -65,16 +73,10 @@ export default {
       emit('close')
     }
 
-    onMounted(async () => {
+    onMounted(() => {
       console.debug('PopupShareItems mounted')
       console.debug(props.itemIds)
-      await loadReportItems()
-      reportItems.value = report_items.items.map((item) => {
-        return {
-          title: item.title,
-          value: item.id
-        }
-      })
+      loadReportItems()
     })
 
     return {

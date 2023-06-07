@@ -93,7 +93,7 @@ export default {
         return false
       }
       const oneWeekAgo = new Date()
-      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 6)
       return oneWeekAgo > pub_date
     })
 
@@ -134,6 +134,8 @@ export default {
 <style scoped>
 .detailView {
   margin-left: 120px;
+  margin-right: 30px;
+  padding-right: 30px;
   margin-top: 30px;
 }
 </style>

@@ -59,7 +59,6 @@
               :items="items_per_page"
               label="display"
               variant="solo"
-              clearable
               density="compact"
             ></v-select>
           </v-col>
@@ -69,7 +68,6 @@
               :items="offsetRange"
               label="offset"
               variant="solo"
-              clearable
               density="compact"
             ></v-select>
           </v-col>
@@ -106,7 +104,7 @@ export default {
   emits: ['update:search', 'update:limit', 'update:offset'],
   data: () => ({
     showOmniSearch: false,
-    items_per_page: [5, 15, 25, 50, 100],
+    items_per_page: [5, 10, 20, 50, 100],
     timeout: null
   }),
   computed: {

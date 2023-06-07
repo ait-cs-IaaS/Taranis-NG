@@ -3,10 +3,14 @@
     <v-row v-if="newsItem">
       <v-col>
         <v-row>
-          <v-col style="max-width: 110px" class="py-0">
-            <strong>{{ $t('assess.collected') }}:</strong>
+          <v-col class="info-title py-0">
+            <strong v-if="published_date">{{ $t('assess.published') }}:</strong>
+            <strong v-else>{{ $t('assess.collected') }}:</strong>
           </v-col>
-          <v-col v-if="collected_date" class="py-0">
+          <v-col v-if="published_date" class="py-0">
+            {{ $d(published_date, 'long') }}
+          </v-col>
+          <v-col v-else class="py-0">
             {{ $d(collected_date, 'long') }}
           </v-col>
         </v-row>
@@ -90,3 +94,9 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.info-title {
+  max-width: 110px;
+}
+</style>

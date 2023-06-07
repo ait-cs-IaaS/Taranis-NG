@@ -56,7 +56,12 @@ export const useFilterStore = defineStore('filter', {
     },
     appendTag(tag) {
       if (this.newsItemsFilter.tags) {
-        this.newsItemsFilter.tags.push(tag)
+        if (typeof this.newsItemsFilter.tags === 'string') {
+          this.newsItemsFilter.tags = [this.newsItemsFilter.tags]
+        }
+        if (!this.newsItemsFilter.tags.includes(tag)) {
+          this.newsItemsFilter.tags.push(tag)
+        }
       } else {
         this.newsItemsFilter.tags = [tag]
       }

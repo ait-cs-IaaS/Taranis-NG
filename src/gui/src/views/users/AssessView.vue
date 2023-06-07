@@ -91,12 +91,16 @@ export default {
       this.getNewsItemsFromStore()
     })
   },
+  unmounted() {
+    this.clearNewsItemSelection()
+  },
   methods: {
     ...mapActions(useAssessStore, [
       'updateNewsItems',
       'updateOSINTSourceGroupsList',
       'updateOSINTSources',
-      'selectNewsItem'
+      'selectNewsItem',
+      'clearNewsItemSelection'
     ]),
     ...mapActions(useFilterStore, ['nextPage']),
     removeAndDeleteNewsItem(id) {

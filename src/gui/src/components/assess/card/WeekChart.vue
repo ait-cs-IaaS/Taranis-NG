@@ -82,12 +82,6 @@ export default {
       }
     },
 
-    getY2MaxFromStore() {
-      if (this.chartFilter.y2max) {
-        return this.chartFilter.y2max
-      }
-      return this.max_item
-    },
     last_n_days() {
       return Array.from(Array(this.timespan).keys(), (i) => {
         const date = new Date()
@@ -109,6 +103,45 @@ export default {
       }, {})
     },
     chartOptions() {
+      if (this.chartFilter.y2max) {
+        return {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y1: {
+              position: 'left',
+              beginAtZero: true,
+              ticks: {
+                stepSize: 1
+              }
+            },
+            y2: {
+              position: 'right',
+              beginAtZero: true,
+              max: parseInt(this.chartFilter.y2max),
+              grid: {
+                // display gridlines only for y1
+                drawOnChartArea: false
+              },
+              ticks: {
+                stepSize: 1
+              }
+            }
+          },
+          plugins: {
+            filler: {
+              propagate: false
+            },
+            legend: {
+              display: false
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false
+            }
+          }
+        }
+      }
       return {
         responsive: true,
         maintainAspectRatio: false,
@@ -193,14 +226,6 @@ export default {
           }
         ]
       }
-    }
-  },
-  watch: {
-    getY2MaxFromStore: {
-      handler(newValue) {
-        this.chartOptions.scales.y2.max = parseInt(newValue)
-      },
-      immediate: true
     }
   },
   updated() {

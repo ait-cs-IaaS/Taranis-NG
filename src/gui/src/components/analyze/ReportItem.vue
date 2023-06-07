@@ -123,7 +123,6 @@ export default {
     return {
       verticalView: this.edit,
       expand_panel_groups: [],
-      modify: true,
       selected_report_type: null,
       report_types: [],
       report_types_selection: [],

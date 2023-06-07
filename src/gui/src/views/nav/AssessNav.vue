@@ -2,7 +2,7 @@
   <filter-navigation
     :search="search"
     :limit="newsItemsFilter.limit"
-    :offsest="newsItemsFilter.offset"
+    :offset="newsItemsFilter.offset"
     @update:search="(value) => (search = value)"
     @update:limit="(value) => (newsItemsFilter.limit = value)"
     @update:offset="(value) => (newsItemsFilter.offset = value)"
@@ -98,7 +98,7 @@
         /></v-col>
         <v-col cols="4" class="pt-2"> y2 Max: </v-col>
         <v-col cols="8" class="pt-2">
-          <input v-model="chartFilter.yMax" type="number" min="0" />
+          <input v-model="chartFilter.y2max" type="number" min="0" />
         </v-col>
       </v-row>
 
@@ -180,7 +180,7 @@ export default {
           .map((option) => option.value)
       },
       set(value) {
-        setFilter(value)
+        updateFilter(value)
         console.debug('filterAttributeSelections', value)
       }
     })
@@ -205,7 +205,7 @@ export default {
         return newsItemsFilter.value.search
       },
       set(value) {
-        setFilter({ search: value })
+        updateFilter({ search: value })
       }
     })
 

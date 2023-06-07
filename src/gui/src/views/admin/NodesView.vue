@@ -2,7 +2,7 @@
   <div>
     <DataTable
       v-model:items="nodes.items"
-      :add-button="true"
+      :add-button="false"
       :header-filter="['tag', 'name', 'description']"
       :action-column="true"
       @delete-item="deleteItem"
