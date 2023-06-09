@@ -151,7 +151,9 @@ export default {
   data: () => ({
     rules: {
       cve: (value) =>
-        value.match(/^$|CVE-\d{4}-\d{4,7}/) || 'Input is is not a CVE reference'
+        value.match(/^$|CVE-\d{4}-\d{4,7}/)
+          ? true
+          : 'Input is is not a CVE reference'
     }
   }),
   computed: {
