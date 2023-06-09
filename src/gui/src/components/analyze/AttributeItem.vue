@@ -23,7 +23,7 @@
       v-model="input"
       :readonly="readOnly"
       item-title="value"
-      item-value="id"
+      item-value="value"
       :items="attributeItem.attribute_enums"
       :label="attributeItem.title"
     />
@@ -57,7 +57,7 @@
     >
       <v-radio
         :label="$t('attribute.tlp_white')"
-        color="gray"
+        color="blue-grey-lighten-4"
         value="WHITE"
       ></v-radio>
       <v-radio
@@ -82,6 +82,7 @@
       :placeholder="attributeItem.title"
       :disabled="readOnly"
       value-type="format"
+      class="date-picker-style"
     />
 
     <date-picker
@@ -91,6 +92,7 @@
       type="datetime"
       :disabled="readOnly"
       value-type="format"
+      class="date-picker-style"
     />
     <date-picker
       v-if="attributeItem.type === 'TIME'"
@@ -100,9 +102,18 @@
       :show-second="false"
       :disabled="readOnly"
       value-type="format"
+      class="date-picker-style"
     />
+    <v-text-field
+      v-if="attributeItem.type === 'CVE'"
+      v-model="input"
+      :rules="[rules.cve]"
+      :readonly="readOnly"
+      :label="attributeItem.title"
+    >
+    </v-text-field>
     <v-autocomplete
-      v-if="attributeItem.type === 'CPE' || attributeItem.type === 'CVE'"
+      v-if="attributeItem.type === 'CPE'"
       v-model="input"
       :readonly="readOnly"
       :label="attributeItem.title"
@@ -110,19 +121,19 @@
     >
       <!-- TODO: Use MyAssets for Autocomplete -->
     </v-autocomplete>
-    <AttributeCVSS v-if="attributeItem.type === 'CVSS'" v-model="input" />
+    <!-- <AttributeCVSS v-if="attributeItem.type === 'CVSS'" v-model="input" /> -->
   </div>
 </template>
 
 // ATTACHMENT: 'Attachment'
 
 <script>
-import AttributeCVSS from './AttributeCVSS.vue'
+// import AttributeCVSS from './AttributeCVSS.vue'
 
 export default {
   name: 'AttributeItem',
   components: {
-    AttributeCVSS
+    // AttributeCVSS
   },
   props: {
     value: {
@@ -137,15 +148,26 @@ export default {
     readOnly: { type: Boolean, default: false }
   },
   emits: ['input'],
+  data: () => ({
+    rules: {
+      cve: (value) =>
+        value.match(/^$|CVE-\d{4}-\d{4,7}/) || 'Input is is not a CVE reference'
+    }
+  }),
   computed: {
     input: {
       get() {
         return this.value
       },
       set(value) {
-        this.$emit('input', value)
+        this.$emit('input', value || '')
       }
     }
   }
 }
 </script>
+<style>
+.date-picker-style {
+  padding-bottom: 15px;
+}
+</style>
