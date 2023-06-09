@@ -10,6 +10,7 @@ import DatePicker from 'vue-datepicker-next'
 import { vuetify } from '@/plugins/vuetify'
 import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
+import 'vue-datepicker-next/index.css'
 
 export const app = createApp(App)
 

@@ -40,14 +40,14 @@
         :value="attr_enum.value"
       ></v-radio>
     </v-radio-group>
-    <vue-editor
+    <!-- <vue-editor
       v-if="attributeItem.type === 'RICH_TEXT'"
       v-model="input"
       :disabled="readOnly"
       :editor-options="{
         height: 300
       }"
-    />
+    /> -->
     <v-radio-group
       v-if="attributeItem.type === 'TLP'"
       v-model="input"
@@ -78,24 +78,28 @@
     </v-radio-group>
     <date-picker
       v-if="attributeItem.type === 'DATE'"
-      v-model="input"
+      v-model:value="input"
       :placeholder="attributeItem.title"
       :disabled="readOnly"
+      value-type="format"
     />
+
     <date-picker
       v-if="attributeItem.type === 'DATE_TIME'"
-      v-model="input"
+      v-model:value="input"
       :placeholder="attributeItem.title"
       type="datetime"
       :disabled="readOnly"
+      value-type="format"
     />
     <date-picker
       v-if="attributeItem.type === 'TIME'"
-      v-model="input"
+      v-model:value="input"
       :placeholder="attributeItem.title"
       type="time"
       :show-second="false"
       :disabled="readOnly"
+      value-type="format"
     />
     <v-autocomplete
       v-if="attributeItem.type === 'CPE' || attributeItem.type === 'CVE'"
