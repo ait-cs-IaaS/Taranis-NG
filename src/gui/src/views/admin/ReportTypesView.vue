@@ -1,7 +1,7 @@
 <template>
   <div>
     <data-table
-      v-model:items="report_types.items"
+      v-model:items="report_item_types_config.items"
       :add-button="true"
       :header-filter="['tag', 'id', 'title', 'description']"
       sort-by-item="id"
@@ -12,18 +12,21 @@
       @update-items="updateData"
     />
     <report-type-form
-      v-if="newItem || (formData && Object.keys(formData).length > 0)"
+      v-if="showForm"
       :report-type-data="formData"
+      :edit="edit"
+      @updated="formUpdated"
     />
   </div>
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue'
+import { defineComponent, ref, onMounted } from 'vue'
 import DataTable from '@/components/common/DataTable.vue'
 import ReportTypeForm from '@/components/config/ReportTypeForm.vue'
 import { deleteReportItemType } from '@/api/config'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
+import { storeToRefs } from 'pinia'
 
 import { useConfigStore } from '@/stores/ConfigStore'
 import { useMainStore } from '@/stores/MainStore'
@@ -35,28 +38,45 @@ export default defineComponent({
     ReportTypeForm
   },
   setup() {
+    const configStore = useConfigStore()
+    const mainStore = useMainStore()
     const selected = ref([])
     const formData = ref({})
-    const newItem = ref(false)
+    const edit = ref(false)
+    const showForm = ref(false)
 
-    const report_types = useConfigStore().report_item_types_config
-    const mainStore = useMainStore()
+    const { report_item_types_config } = storeToRefs(configStore)
 
     const updateData = () => {
-      loadReportTypesConfig().then(() => {
-        mainStore.itemCountTotal = report_types.total_count
-        mainStore.itemCountFiltered = report_types.items.length
+      configStore.loadReportTypesConfig().then(() => {
+        mainStore.itemCountTotal = report_item_types_config.value.total_count
+        mainStore.itemCountFiltered =
+          report_item_types_config.value.items.length
       })
     }
 
+    const formUpdated = () => {
+      console.debug('formUpdated')
+      showForm.value = false
+      updateData()
+    }
+
     const addItem = () => {
-      formData.value = undefined
-      newItem.value = true
+      formData.value = {
+        id: -1,
+        title: '',
+        description: '',
+        attribute_groups: []
+      }
+      edit.value = false
+      showForm.value = true
     }
 
     const editItem = (item) => {
-      newItem.value = false
+      edit.value = true
+      console.debug('editItem', item)
       formData.value = item
+      showForm.value = true
     }
 
     const deleteItem = (item) => {
@@ -76,16 +96,22 @@ export default defineComponent({
       selected.value = selected.map((item) => item.id)
     }
 
+    onMounted(() => {
+      updateData()
+    })
+
     return {
       selected,
       formData,
-      newItem,
-      report_types,
+      showForm,
+      edit,
+      report_item_types_config,
       addItem,
       editItem,
       deleteItem,
       selectionChange,
-      updateData
+      updateData,
+      formUpdated
     }
   }
 })

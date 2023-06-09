@@ -98,7 +98,7 @@
       :disabled="readOnly"
     />
     <v-autocomplete
-      v-if="attributeItem.type === 'CPE' || attributeItem.type === 'CVE'"
+      v-if="attributeItem.type === 'CPE'"
       v-model="input"
       :readonly="readOnly"
       :label="attributeItem.title"

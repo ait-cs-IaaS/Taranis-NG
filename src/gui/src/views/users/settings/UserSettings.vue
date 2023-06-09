@@ -77,7 +77,7 @@
 
 <script>
 import { useSettingsStore } from '@/stores/SettingsStore'
-import { mapActions, mapState } from 'pinia'
+import { mapActions, mapState, mapWritableState } from 'pinia'
 import { useConfigStore } from '@/stores/ConfigStore'
 
 export default {
@@ -108,26 +108,22 @@ export default {
         { value: 'sk', text: 'Slovensky' }
       ]
     },
-    ...mapState(useSettingsStore, [
+    ...mapWritableState(useSettingsStore, [
       'getProfileBrowserLocale',
       'dark_theme',
       'spellcheck',
       'hotkeys'
     ]),
-    ...mapState(useConfigStore, {
-      selected_word_lists: (state) => state.word_lists.items
-    }),
-    ...mapState(useConfigStore, ['word_lists', 'setLocale'])
+    ...mapState(useConfigStore, ['setLocale'])
   },
   methods: {
-    ...mapActions(useConfigStore, ['loadWordLists']),
     ...mapActions(useSettingsStore, ['saveUserProfile']),
     save() {
       this.saveUserProfile({
         spellcheck: this.spellcheck,
         dark_theme: this.dark_theme,
         hotkeys: this.hotkeys,
-        word_lists: this.word_lists
+        language: this.browser_locale
       })
     },
 
@@ -142,13 +138,9 @@ export default {
       this.hotkeyAlias = event
     },
 
-    async loadWordList() {
-      await this.loadWordLists()
-    },
-
     pressKey(event) {
       const key = event
-      const hotkeyIndex = this.shortcuts
+      const hotkeyIndex = this.hotkeys
         .map(function (e) {
           return e.alias
         })
@@ -159,6 +151,7 @@ export default {
       this.pressKeyVisible = false
 
       // check doubles and clear
+      // TODO: FIX
       this.shortcuts.forEach((doubleKey, i) => {
         if (doubleKey.key_code === key.keyCode && i !== hotkeyIndex) {
           this.shortcuts[i].key_code = 0
@@ -167,8 +160,8 @@ export default {
       })
 
       // assigned new key
-      this.shortcuts[hotkeyIndex].key_code = key.keyCode
-      this.shortcuts[hotkeyIndex].key = key.code
+      this.hotkeys[hotkeyIndex].key_code = key.keyCode
+      this.hotkeys[hotkeyIndex].key = key.code
     }
   }
 }

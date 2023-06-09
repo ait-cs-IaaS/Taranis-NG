@@ -61,6 +61,7 @@
             v-model="user_roles"
             :headers="headers"
             :items="roles"
+            return-object
             show-select
           >
             <template #top>
@@ -76,6 +77,7 @@
             v-model="user.permissions"
             :headers="headers"
             :items="permissions"
+            return-object
             show-select
           >
             <template #top>
@@ -110,7 +112,8 @@ export default {
       default: false
     }
   },
-  setup(props) {
+  emits: ['updated'],
+  setup(props, { emit }) {
     const store = useConfigStore()
     const { loadOrganizations, loadRoles, loadPermissions } = store
     const form = ref(null)
@@ -177,6 +180,7 @@ export default {
           .then(() => {
             form.value.reset()
             notifySuccess('user.successful_edit')
+            emit('updated')
           })
           .catch(() => {
             notifyFailure('user.error')
@@ -186,6 +190,7 @@ export default {
           .then(() => {
             form.value.reset()
             notifySuccess('user.successful')
+            emit('updated')
           })
           .catch(() => {
             notifyFailure('user.error')

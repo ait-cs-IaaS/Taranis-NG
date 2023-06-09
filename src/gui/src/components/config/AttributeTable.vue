@@ -4,16 +4,20 @@
       <v-toolbar-title>{{ $t('attribute.attributes') }}</v-toolbar-title>
       <v-divider class="mx-4" inset vertical></v-divider>
       <v-spacer></v-spacer>
-      <v-dialog v-if="!disabled" v-model="dialog" max-width="500px">
-        <template #activator="{ on }">
-          <v-btn color="primary" dark class="mb-2" v-on="on">
-            <v-icon left>mdi-plus</v-icon>
-            <span>{{ $t('attribute.new_attribute') }}</span>
-          </v-btn>
-        </template>
+      <v-btn
+        color="primary"
+        dark
+        class="mb-2"
+        prepend-icon="mdi-plus"
+        @click="dialog = true"
+      >
+        {{ $t('attribute.new_attribute') }}
+      </v-btn>
+
+      <v-dialog v-model="dialog" width="auto">
         <v-card>
           <v-card-title>
-            <span class="headline">{{ formTitle }}</span>
+            {{ formTitle }}
           </v-card-title>
 
           <v-card-text>
@@ -22,19 +26,18 @@
               :items="attribute_templates"
               item-title="name"
               :label="$t('attribute.attribute')"
-            ></v-combobox>
+            />
 
             <v-text-field
               v-model="edited_attribute.title"
               :label="$t('attribute.name')"
-              :spellcheck="spellcheck"
-            ></v-text-field>
+            />
 
             <v-text-field
               v-model="edited_attribute.description"
               :label="$t('attribute.description')"
               :spellcheck="spellcheck"
-            ></v-text-field>
+            />
 
             <v-row>
               <v-col>
@@ -76,19 +79,32 @@
       </v-dialog>
     </v-toolbar>
 
-    <v-data-table
-      :headers="headers"
-      :items="attribute_contents"
-      :hide-default-footer="attribute_contents.length < 10"
-    >
+    <v-data-table :headers="headers" :items="attribute_contents">
       <template #item.actions="{ item }">
-        <v-icon v-if="!disabled" small class="mr-2" @click="editItem(item)">
-          edit
-        </v-icon>
-        <v-icon v-if="!disabled" small @click="deleteItem(item)">
-          delete
-        </v-icon>
+        <div class="d-inline-flex">
+          <v-tooltip left>
+            <template #activator="{ props }">
+              <v-icon v-bind="props" @click.stop="editItem(item.raw)">
+                mdi-pencil
+              </v-icon>
+            </template>
+            <span>Edit</span>
+          </v-tooltip>
+          <v-tooltip left>
+            <template #activator="{ props }">
+              <v-icon
+                v-bind="props"
+                color="red"
+                @click.stop="deleteItem(item.raw)"
+              >
+                mdi-delete
+              </v-icon>
+            </template>
+            <span>Delete</span>
+          </v-tooltip>
+        </div>
       </template>
+      <template v-if="attribute_contents.length < 10" #bottom />
     </v-data-table>
   </v-container>
 </template>
@@ -160,10 +176,11 @@ export default {
       return this.edited_index === -1 ? 'Add Attribute' : 'Edit Attribute'
     }
   },
-  watch: {
-    dialog(val) {
-      val || this.close()
-    }
+  mounted() {
+    this.loadAttributes().then(() => {
+      this.attribute_templates = this.store_attributes.items
+    })
+    this.edited_attribute.index = this.attribute_contents.length
   },
   methods: {
     ...mapActions(useConfigStore, ['loadAttributes']),
@@ -206,12 +223,6 @@ export default {
           attribute_template.id === this.edited_attribute.attribute_id
       )
     }
-  },
-  mounted() {
-    this.loadAttributes().then(() => {
-      this.attribute_templates = this.store_attributes.items
-    })
-    this.edited_attribute.index = this.attribute_contents.length
   }
 }
 </script>

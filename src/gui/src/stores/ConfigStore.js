@@ -23,7 +23,7 @@ import {
   getAllWordLists,
   getAllParameters
 } from '@/api/config'
-import { getAllUserProductTypes, getAllUserWordLists } from '@/api/user'
+import { getAllUserProductTypes } from '@/api/user'
 
 export const useConfigStore = defineStore('config', {
   state: () => ({
@@ -139,11 +139,6 @@ export const useConfigStore = defineStore('config', {
     },
     loadWordLists(data) {
       return getAllWordLists(data).then((response) => {
-        this.word_lists = response.data
-      })
-    },
-    loadUserWordLists(data) {
-      return getAllUserWordLists(data).then((response) => {
         this.word_lists = response.data
       })
     },

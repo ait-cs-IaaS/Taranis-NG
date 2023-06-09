@@ -188,10 +188,6 @@ export default {
               .then(() => {
                 this.$validator.reset()
                 this.visible = false
-                this.$root.$emit('notification', {
-                  type: 'success',
-                  loc: 'asset.successful_edit'
-                })
               })
               .catch(() => {
                 this.show_error = true
@@ -201,10 +197,6 @@ export default {
               .then(() => {
                 this.$validator.reset()
                 this.visible = false
-                this.$root.$emit('notification', {
-                  type: 'success',
-                  loc: 'asset.successful'
-                })
               })
               .catch(() => {
                 this.show_error = true

@@ -675,8 +675,8 @@ export const messages_en = {
     show_item: 'Show',
     read_item: 'Mark as Read',
     important_item: 'Mark as Important',
-    like_item: 'Mark as Like',
-    unlike_item: 'Mark as Unlike',
+    like_item: 'Mark as Liked',
+    dislike_item: 'Mark as Disliked',
     delete_item: 'Delete',
     spellcheck: 'Spellcheck',
     dark_theme: 'Dark Theme',
@@ -687,7 +687,16 @@ export const messages_en = {
     group: 'Group',
     ungroup: 'Ungroup',
     new_product: 'New Product',
-    aggregate_open: 'Open Aggregate'
+    story_open: 'Open Story',
+    open_search: 'Open Search',
+    end: 'End',
+    home: 'Home',
+    reload: 'Reload',
+    cluster: 'Cluster',
+    source_group_up: 'Move Source Up',
+    source_group_down: 'Move Source Down',
+    enter_filter_mode: 'Enter Filter Mode',
+    open_item_source: 'Open Source'
   },
 
   word_list: {

@@ -16,7 +16,6 @@
 import MainMenu from '@/components/MainMenu.vue'
 import Notification from '@/components/common/Notification.vue'
 import { defineComponent, onMounted } from 'vue'
-import { useSettingsStore } from '@/stores/SettingsStore'
 import { useAuthStore } from '@/stores/AuthStore'
 import { connectSSE, reconnectSSE } from '@/utils/sse'
 import { storeToRefs } from 'pinia'
@@ -32,12 +31,10 @@ export default defineComponent({
       useAuthStore()
     )
     const { refresh, logout, setAuthURLs } = useAuthStore()
-    const { loadUserProfile } = useSettingsStore()
 
     onMounted(() => {
       if (isAuthenticated) {
         setAuthURLs()
-        loadUserProfile()
         connectSSE()
       } else {
         if (jwt) {

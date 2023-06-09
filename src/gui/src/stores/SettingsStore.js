@@ -74,7 +74,7 @@ export const useSettingsStore = defineStore('settings', {
       { character: 'r', alias: 'read_item', icon: 'mdi-eye' },
       { character: 'i', alias: 'important_item', icon: 'mdi-star' },
       { character: 'u', alias: 'like_item', icon: 'mdi-thumb-up' },
-      { character: 'U', alias: 'unlike_item', icon: 'mdi-thumb-down' },
+      { character: 'U', alias: 'dislike_item', icon: 'mdi-thumb-down' },
       {
         key_code: 46,
         key: 'Delete',
@@ -92,7 +92,7 @@ export const useSettingsStore = defineStore('settings', {
       { character: 'n', alias: 'new_product', icon: 'mdi-file-outline' },
       {
         character: 'a',
-        alias: 'aggregate_open',
+        alias: 'story_open',
         icon: 'mdi-arrow-right-drop-circle'
       },
       { character: 'o', alias: 'open_item_source', icon: 'mdi-open-in-app' },

@@ -1,11 +1,11 @@
 <template>
   <filter-navigation
     :search="reportFilter.search"
-    :limit="limit"
-    :offsest="offset"
+    :limit="reportFilter.limit"
+    :offsest="reportFilter.offset"
     @update:search="(value) => (search = value)"
-    @update:limit="(value) => (limit = value)"
-    @update:offset="(value) => (offset = value)"
+    @update:limit="(value) => (reportFilter.limit = value)"
+    @update:offset="(value) => (reportFilter.offset = value)"
   >
     <template #navdrawer>
       <v-row class="my-2 mr-0 px-2 pb-5">
@@ -20,12 +20,13 @@
       <v-divider class="mt-0 mb-0"></v-divider>
       <v-row class="my-2 mr-0 px-2">
         <v-col cols="12" class="py-0">
-          <h4>this.reportFilter</h4>
+          <h4>{{ reportFilter }}</h4>
+          <h4>filter by</h4>
         </v-col>
 
         <!-- time tags -->
         <v-col cols="12" class="pb-0">
-          <date-chips v-model="range" />
+          <date-chips v-model="reportFilter.range" />
         </v-col>
 
         <v-col cols="12" class="pt-1">
@@ -43,7 +44,7 @@
         </v-col>
 
         <v-col cols="12" class="pt-2">
-          <filter-sort-list v-model="sort" :items="orderOptions" />
+          <filter-sort-list v-model="reportFilter.sort" :items="orderOptions" />
         </v-col>
       </v-row>
     </template>
@@ -51,15 +52,16 @@
 </template>
 
 <script>
+import { computed, onMounted, onUnmounted, watch } from 'vue'
 import { useAnalyzeStore } from '@/stores/AnalyzeStore'
 import { useFilterStore } from '@/stores/FilterStore'
-import { mapActions, mapState } from 'pinia'
-
 import FilterNavigation from '@/components/common/FilterNavigation.vue'
 import filterSortList from '@/components/assess/filter/filterSortList.vue'
 import dateChips from '@/components/assess/filter/dateChips.vue'
 import filterSelectList from '@/components/assess/filter/filterSelectList.vue'
-import { useMainStore } from '@/stores/MainStore'
+import { storeToRefs } from 'pinia'
+import { useRoute } from 'vue-router'
+import { router } from '@/router'
 
 export default {
   name: 'AnalyzeNav',
@@ -69,128 +71,82 @@ export default {
     filterSortList,
     FilterNavigation
   },
-  data: () => ({
-    awaitingSearch: false,
-    orderOptions: [
+  setup() {
+    const filterStore = useFilterStore()
+    const analyzeStore = useAnalyzeStore()
+    const { reportFilter } = storeToRefs(filterStore)
+    const { updateReportFilter, setReportFilter } = filterStore
+    const updateReportItems = analyzeStore.updateReportItems
+
+    const route = useRoute()
+
+    const search = computed({
+      get() {
+        return reportFilter.value.search
+      },
+      set(value) {
+        updateReportFilter({ search: value })
+      }
+    })
+    const filterAttributeOptions = [
+      { value: 'completed', label: 'completed', icon: 'mdi-progress-check' },
+      { value: 'incomplete', label: 'incomplete', icon: 'mdi-progress-close' }
+    ]
+    const orderOptions = [
       {
         label: 'date',
         icon: 'mdi-calendar-range-outline',
         type: 'DATE',
         direction: 'DESC'
       }
-    ],
-    filterAttributeOptions: [
-      { type: 'completed', label: 'completed', icon: 'mdi-progress-check' },
-      { type: 'incomplete', label: 'incomplete', icon: 'mdi-progress-close' }
-    ],
-    filterAttributeSelections: []
-  }),
-  computed: {
-    ...mapState(useMainStore, ['getItemCount']),
-    ...mapState(useFilterStore, ['reportFilter']),
-    limit: {
-      get() {
-        return this.reportFilter.limit
-      },
-      set(value) {
-        this.updateReportFilter({ limit: value })
-        this.updateReportItems()
-      }
-    },
-    sort: {
-      get() {
-        if (!this.reportFilter.order) return 'DATE_DESC'
-        return this.reportFilter.order
-      },
-      set(value) {
-        this.updateReportFilter({ sort: value })
-        this.updateReportItems()
-      }
-    },
-    offset: {
-      get() {
-        return this.reportFilter.offset
-      },
-      set(value) {
-        this.updateReportFilter({ offset: value })
-        this.updateReportItems()
-      }
-    },
-    range: {
-      get() {
-        return this.reportFilter.range
-      },
-      set(value) {
-        this.updateReportFilter({ range: value })
-        this.updateReportItems()
-      }
-    },
-    search: {
-      get() {
-        return this.reportFilter.search
-      },
-      set(value) {
-        this.updateReportFilter({ search: value })
-        if (!this.awaitingSearch) {
-          setTimeout(() => {
-            this.updateReportItems()
-            this.awaitingSearch = false
-          }, 500)
-        }
+    ]
 
-        this.awaitingSearch = true
-      }
-    },
-    filterAttribute: {
+    const filterAttribute = computed({
       get() {
-        return this.filterAttributeSelections
+        return filterAttributeOptions
+          .filter((option) => reportFilter.value[option.value])
+          .map((option) => option.value)
       },
       set(value) {
-        this.filterAttributeSelections = value
+        updateReportFilter(value)
+        console.debug('filterAttributeSelections', value)
+      }
+    })
 
-        const filterUpdate = this.filterAttributeOptions.reduce((obj, item) => {
-          obj[item.type] = value.includes(item.type) ? 'true' : undefined
-          return obj
-        }, {})
-
-        console.debug('filterAttributeSelections', filterUpdate)
-        this.updateReportFilter(filterUpdate)
-        this.updateReportItems()
-      }
-    },
-    offsetRange() {
-      const list = []
-      for (let i = 0; i <= this.getItemCount.total; i++) {
-        list.push(i)
-      }
-      return list
-    },
-    pages() {
-      const blocks = Math.ceil(
-        this.getItemCount.total / this.getItemCount.filtered
-      )
-      const list = []
-      for (let i = 0; i <= blocks; i++) {
-        list.push(i)
-      }
-      return list
-    },
-    navigation_drawer_class() {
-      return this.showOmniSearch ? 'mt-12' : ''
+    function addReport() {
+      router.push('/report/0')
     }
-  },
-  created() {
-    const query = Object.fromEntries(
-      Object.entries(this.$route.query).filter(([, v]) => v != null)
+
+    onMounted(() => {
+      const query = Object.fromEntries(
+        Object.entries(route.query).filter(([, v]) => v != null)
+      )
+      updateReportFilter(query)
+      console.debug('loaded with query', query)
+    })
+
+    onUnmounted(() => {
+      setReportFilter({})
+    })
+
+    watch(
+      reportFilter,
+      (filter, prevFilter) => {
+        console.debug('filter changed', filter, prevFilter)
+        updateReportItems()
+      },
+      { deep: true }
     )
-    this.updateReportFilter(query)
-    console.debug('loaded with query', query)
-  },
-  methods: {
-    ...mapActions(useAnalyzeStore, ['updateReportItems']),
-    ...mapActions(useFilterStore, ['updateReportFilter']),
-    addReport() {
-      this.$router.push('/report/0')
+
+    return {
+      reportFilter,
+      updateReportFilter,
+      updateReportItems,
+      search,
+      filterAttributeOptions,
+      filterAttribute,
+      orderOptions,
+      addReport
     }
   }
 }

@@ -128,7 +128,6 @@ import { computed, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useFilterStore } from '@/stores/FilterStore'
 import { useAssessStore } from '@/stores/AssessStore'
-import { useMainStore } from '@/stores/MainStore'
 import { storeToRefs } from 'pinia'
 import { watch } from 'vue'
 
@@ -144,7 +143,6 @@ export default {
   setup() {
     const assessStore = useAssessStore()
     const filterStore = useFilterStore()
-    const { drawerVisible } = storeToRefs(useMainStore())
 
     const { getOSINTSourceGroupsList, getOSINTSourcesList } =
       storeToRefs(assessStore)
@@ -232,7 +230,6 @@ export default {
 
     return {
       orderOptions,
-      drawerVisible,
       search,
       chartFilter,
       getOSINTSourceGroupsList,

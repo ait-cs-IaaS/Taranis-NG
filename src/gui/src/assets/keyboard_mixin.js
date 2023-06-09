@@ -300,7 +300,7 @@ const keyboardMixin = (targetId) => ({
               this.card.like.click()
               break
 
-            case 'unlike_item':
+            case 'dislike_item':
               this.card.unlike.click()
               if (this.multiSelectActive && this.getFilter.relevant) {
                 const selection = this.getSelection
@@ -389,7 +389,7 @@ const keyboardMixin = (targetId) => ({
               this.card.like.click()
               break
 
-            case 'unlike_item':
+            case 'dislike_item':
               this.card.unlike.click()
               break
 

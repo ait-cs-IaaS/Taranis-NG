@@ -22,7 +22,8 @@ export function notifySuccess(text) {
   const store = useMainStore()
   store.notification = {
     type: 'success',
-    loc: text
+    message: text,
+    show: true
   }
 }
 
@@ -30,7 +31,8 @@ export function notifyFailure(text) {
   const store = useMainStore()
   store.notification = {
     type: 'red',
-    loc: text
+    message: text,
+    show: true
   }
 }
 

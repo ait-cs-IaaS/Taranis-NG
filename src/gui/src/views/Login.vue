@@ -51,8 +51,8 @@
 </template>
 
 <script>
-import { mapActions, mapState } from 'pinia'
 import { useAuthStore } from '@/stores/AuthStore'
+import { useSettingsStore } from '@/stores/SettingsStore'
 import { defineComponent, ref, computed, inject } from 'vue'
 
 export default defineComponent({
@@ -71,36 +71,37 @@ export default defineComponent({
       () => !acceptPassword.value || !acceptUser.value
     )
 
+    const { isAuthenticated, login } = useAuthStore()
+    const { loadUserProfile } = useSettingsStore()
+
+    const authenticate = () => {
+      login({ username: username.value, password: password.value }).then(
+        (error) => {
+          if (isAuthenticated.value) {
+            login_error.value = undefined
+            loadUserProfile()
+            this.$router.push('/')
+            return
+          }
+          if (error) {
+            if (error.status > 500) {
+              login_error.value = 'login.backend_error'
+            } else {
+              login_error.value = 'login.error'
+            }
+          }
+        }
+      )
+    }
+
     return {
       username,
       password,
       login_error,
       acceptPassword,
       acceptUser,
-      loginButtonDisabled
-    }
-  },
-
-  methods: {
-    ...mapState(useAuthStore, ['isAuthenticated']),
-    ...mapActions(useAuthStore, ['login']),
-    authenticate() {
-      this.login({ username: this.username, password: this.password }).then(
-        (error) => {
-          if (this.isAuthenticated) {
-            this.login_error = undefined
-            this.$router.push('/')
-            return
-          }
-          if (error) {
-            if (error.status > 500) {
-              this.login_error = 'login.backend_error'
-            } else {
-              this.login_error = 'login.error'
-            }
-          }
-        }
-      )
+      loginButtonDisabled,
+      authenticate
     }
   }
 })

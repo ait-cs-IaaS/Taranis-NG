@@ -11,7 +11,6 @@
         <v-col cols="12">
           <v-text-field
             v-model="report_type.title"
-            :disabled="!canUpdate"
             :label="$t('report_type.name')"
             name="name"
           />
@@ -19,7 +18,6 @@
         <v-col cols="12">
           <v-textarea
             v-model="report_type.description"
-            :disabled="!canUpdate"
             :label="$t('report_type.description')"
             name="description"
           />
@@ -28,7 +26,7 @@
 
       <v-row no-gutters>
         <v-col cols="12">
-          <v-btn v-if="canUpdate" color="primary" @click="addAttributeGroup">
+          <v-btn color="primary" @click="addAttributeGroup">
             <v-icon icon="mdi-plus" />
             <span>{{ $t('report_type.new_group') }}</span>
           </v-btn>
@@ -41,7 +39,7 @@
           >
             <v-toolbar dark height="32px">
               <v-spacer></v-spacer>
-              <v-toolbar-items v-if="canUpdate">
+              <v-toolbar-items>
                 <v-icon @click="moveAttributeGroupUp(index)">
                   mdi-arrow-up-bold
                 </v-icon>
@@ -56,31 +54,25 @@
             <v-card-text>
               <v-text-field
                 v-model="group.title"
-                :disabled="!canUpdate"
                 :label="$t('report_type.name')"
                 name="group_title"
                 type="text"
-                :spellcheck="spellcheck"
               ></v-text-field>
               <v-textarea
                 v-model="group.description"
-                :disabled="!canUpdate"
                 :label="$t('report_type.description')"
                 name="group_description"
                 :spellcheck="spellcheck"
               ></v-textarea>
               <v-text-field
                 v-model="group.section_title"
-                :disabled="!canUpdate"
                 :label="$t('report_type.section_title')"
                 name="section_title"
-                :spellcheck="spellcheck"
               ></v-text-field>
               <AttributeTable
                 v-model:attributes="
                   report_type.attribute_groups[index].attribute_group_items
                 "
-                :disabled="!canUpdate"
                 @update="(items) => updateAttributeGroupItems(index, items)"
               />
             </v-card-text>
@@ -92,11 +84,10 @@
 </template>
 
 <script>
+import { ref } from 'vue'
 import { createReportItemType, updateReportItemType } from '@/api/config'
 import AttributeTable from './AttributeTable.vue'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
-
-import { mapState } from 'pinia'
 import { useSettingsStore } from '@/stores/SettingsStore'
 
 export default {
@@ -109,47 +100,26 @@ export default {
       type: Object || null,
       required: false,
       default: null
+    },
+    edit: {
+      type: Boolean,
+      required: false,
+      default: false
     }
   },
-  data: () => ({
-    edit: false,
-    report_type: {
-      id: -1,
-      title: '',
-      description: '',
-      attribute_groups: []
-    }
-  }),
-  computed: {
-    ...mapState(useSettingsStore, ['spellcheck']),
-    canUpdate() {
-      return !this.edit
-    }
-  },
-  methods: {
-    updateAttributeGroupItems(index, items) {
-      console.debug('RECEIVED')
-      this.report_type.attribute_groups[index].attribute_group_items = items
-    },
-    editAttributeItem(index, item) {
-      console.debug(`Edit Attribute Item ${item}`)
-    },
-    deleteAttributeItem(index, item) {
-      console.debug(`Delete Attribute Item ${item}`)
-    },
-    addReportType() {
-      this.edit = false
-      this.report_type.id = -1
-      this.report_type.title = ''
-      this.report_type.description = ''
-      this.report_type.categories = []
-      this.report_type.attribute_groups = []
-      this.$validator.reset()
-    },
+  emits: ['updated'],
+  setup(props) {
+    const store = useSettingsStore()
+    const report_type = ref(props.reportTypeData)
 
-    addAttributeGroup() {
-      this.report_type.attribute_groups.push({
-        index: this.report_type.attribute_groups.length,
+    const updateAttributeGroupItems = (index, items) => {
+      console.debug('RECEIVED')
+      report_type.value.attribute_groups[index].attribute_group_items = items
+    }
+
+    const addAttributeGroup = () => {
+      report_type.value.attribute_groups.push({
+        index: report_type.value.attribute_groups.length,
         id: -1,
         title: '',
         description: '',
@@ -157,65 +127,66 @@ export default {
         section_title: '',
         attribute_group_items: []
       })
-    },
+    }
 
-    moveAttributeGroupUp(index) {
+    const moveAttributeGroupUp = (index) => {
       if (index > 0) {
-        this.report_type.attribute_groups.splice(
+        report_type.value.attribute_groups.splice(
           index - 1,
           0,
-          this.report_type.attribute_groups.splice(index, 1)[0]
+          report_type.value.attribute_groups.splice(index, 1)[0]
         )
       }
-    },
+    }
 
-    moveAttributeGroupDown(index) {
-      if (index < this.report_type.attribute_groups.length - 1) {
-        this.report_type.attribute_groups.splice(
+    const moveAttributeGroupDown = (index) => {
+      if (index < report_type.value.attribute_groups.length - 1) {
+        report_type.value.attribute_groups.splice(
           index + 1,
           0,
-          this.report_type.attribute_groups.splice(index, 1)[0]
+          report_type.value.attribute_groups.splice(index, 1)[0]
         )
       }
-    },
+    }
 
-    deleteAttributeGroup(index) {
-      this.report_type.attribute_groups.splice(index, 1)
-    },
+    const deleteAttributeGroup = (index) => {
+      report_type.value.attribute_groups.splice(index, 1)
+    }
 
-    add() {
+    const add = () => {
       console.debug('Submitting: ')
-      console.debug(this.report_type.attribute_groups)
-      this.$validator.validateAll().then(() => {
-        if (!this.$validator.errors.any()) {
-          for (let x = 0; x < this.report_type.attribute_groups.length; x++) {
-            this.report_type.attribute_groups[x].index = x
+      console.debug(report_type.value.attribute_groups)
+      $validator.validateAll().then(() => {
+        if (!$validator.errors.any()) {
+          for (let x = 0; x < report_type.value.attribute_groups.length; x++) {
+            report_type.value.attribute_groups[x].index = x
 
             for (
               let y = 0;
               y <
-              this.report_type.attribute_groups[x].attribute_group_items.length;
+              report_type.value.attribute_groups[x].attribute_group_items
+                .length;
               y++
             ) {
-              this.report_type.attribute_groups[x].attribute_group_items[
+              report_type.value.attribute_groups[x].attribute_group_items[
                 y
               ].index = y
             }
           }
 
-          if (this.edit) {
-            updateReportItemType(this.report_type)
+          if (edit.value) {
+            updateReportItemType(report_type.value)
               .then(() => {
-                this.$validator.reset()
+                $validator.reset()
                 notifySuccess('report_type.successful_edit')
               })
               .catch(() => {
                 notifyFailure('report_type.error')
               })
           } else {
-            createReportItemType(this.report_type)
+            createReportItemType(report_type.value)
               .then(() => {
-                this.$validator.reset()
+                $validator.reset()
                 notifySuccess('report_type.successful')
               })
               .catch(() => {
@@ -226,6 +197,21 @@ export default {
           notifyFailure('report_type.validation_error')
         }
       })
+    }
+
+    return {
+      report_type,
+      updateAttributeGroupItems,
+      addAttributeGroup,
+      moveAttributeGroupUp,
+      moveAttributeGroupDown,
+      deleteAttributeGroup,
+      add
+    }
+  },
+  watch: {
+    reportTypeData(r) {
+      this.report_type = r
     }
   }
 }

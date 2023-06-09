@@ -11,7 +11,12 @@
       @add-item="addItem"
       @update-items="updateData"
     />
-    <UserForm v-if="showForm" :user-prop="user" :edit="edit"></UserForm>
+    <UserForm
+      v-if="showForm"
+      :user-prop="user"
+      :edit="edit"
+      @updated="formUpdated"
+    ></UserForm>
   </div>
 </template>
 
@@ -45,6 +50,12 @@ export default {
         mainStore.itemCountTotal = users.value.total_count
         mainStore.itemCountFiltered = users.value.items?.length || 0
       })
+    }
+
+    const formUpdated = () => {
+      console.debug('formUpdated')
+      showForm.value = false
+      updateData()
     }
 
     const addItem = () => {
@@ -124,6 +135,7 @@ export default {
       user,
       edit,
       updateData,
+      formUpdated,
       addItem,
       editItem,
       handleSubmit,
@@ -135,3 +147,4 @@ export default {
   }
 }
 </script>
+showForm = false

@@ -46,6 +46,15 @@
           :disabled="item['disabled']"
           :items="item.options"
         ></v-select>
+        <v-switch
+          v-if="item.type === 'switch'"
+          v-model="formData[item.name]"
+          :label="item.label"
+          :disabled="item['disabled']"
+          true-value="true"
+          false-value="false"
+        ></v-switch>
+
         <v-col
           v-if="item.type === 'table' && item.items !== undefined"
           cols="12"

@@ -19,13 +19,14 @@
     <EditConfig
       v-if="formData && Object.keys(formData).length > 0"
       :config-data="formData"
+      :form-format="formFormat"
       @submit="handleSubmit"
     ></EditConfig>
   </div>
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import DataTable from '@/components/common/DataTable.vue'
 import EditConfig from '@/components/config/EditConfig.vue'
 import ImportExport from '@/components/config/ImportExport.vue'
@@ -36,9 +37,10 @@ import {
   exportWordList,
   importWordList
 } from '@/api/config'
-import { notifySuccess, emptyValues, notifyFailure } from '@/utils/helpers'
+import { notifySuccess, objectFromFormat, notifyFailure } from '@/utils/helpers'
 import { useConfigStore } from '@/stores/ConfigStore'
 import { useMainStore } from '@/stores/MainStore'
+import { storeToRefs } from 'pinia'
 
 export default {
   name: 'WordLists',
@@ -56,6 +58,38 @@ export default {
     const edit = ref(false)
     const { word_lists } = storeToRefs(store)
 
+    const formFormat = computed(() => [
+      {
+        name: 'id',
+        label: 'ID',
+        type: 'text',
+        disabled: true
+      },
+      {
+        name: 'name',
+        label: 'Name',
+        type: 'text',
+        required: true
+      },
+      {
+        name: 'description',
+        label: 'Description',
+        type: 'textarea',
+        required: true
+      },
+      {
+        name: 'link',
+        label: 'Link',
+        type: 'text',
+        required: true
+      },
+      {
+        name: 'use_for_stop_words',
+        label: 'Use for stop words',
+        type: 'switch'
+      }
+    ])
+
     const updateData = () => {
       store.loadWordLists().then(() => {
         mainStore.itemCountTotal = word_lists.value.total_count
@@ -64,7 +98,7 @@ export default {
     }
 
     const addItem = () => {
-      formData.value = emptyValues(word_lists.value.items[0])
+      formData.value = objectFromFormat(formFormat.value)
       edit.value = false
     }
 
@@ -134,10 +168,9 @@ export default {
     return {
       selected,
       formData,
+      formFormat,
       edit,
       word_lists,
-      itemCountTotal,
-      itemCountFiltered,
       updateData,
       addItem,
       editItem,

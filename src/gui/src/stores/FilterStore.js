@@ -91,6 +91,9 @@ export const useFilterStore = defineStore('filter', {
         this.reportFilter[element] = filter[element]
       })
     },
+    setReportFilter(filter) {
+      this.reportFilter = filter
+    },
     updateProductFilter(filter) {
       Object.keys(filter).forEach((element) => {
         this.productFilter[element] = filter[element]
