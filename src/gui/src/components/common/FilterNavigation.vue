@@ -132,7 +132,9 @@ export default {
       set(value) {
         clearTimeout(this.timeout)
         this.timeout = setTimeout(() => {
-          this.$emit('update:search', value)
+          this.$nextTick(() => {
+            this.$emit('update:search', value)
+          })
         }, 500)
       }
     },
