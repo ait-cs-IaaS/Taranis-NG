@@ -23,7 +23,7 @@
       v-model="input"
       :readonly="readOnly"
       item-title="value"
-      item-value="id"
+      item-value="value"
       :items="attributeItem.attribute_enums"
       :label="attributeItem.title"
     />
@@ -40,14 +40,14 @@
         :value="attr_enum.value"
       ></v-radio>
     </v-radio-group>
-    <vue-editor
+    <!-- <vue-editor
       v-if="attributeItem.type === 'RICH_TEXT'"
       v-model="input"
       :disabled="readOnly"
       :editor-options="{
         height: 300
       }"
-    />
+    /> -->
     <v-radio-group
       v-if="attributeItem.type === 'TLP'"
       v-model="input"
@@ -57,7 +57,7 @@
     >
       <v-radio
         :label="$t('attribute.tlp_white')"
-        color="gray"
+        color="blue-grey-lighten-4"
         value="WHITE"
       ></v-radio>
       <v-radio
@@ -78,25 +78,40 @@
     </v-radio-group>
     <date-picker
       v-if="attributeItem.type === 'DATE'"
-      v-model="input"
+      v-model:value="input"
       :placeholder="attributeItem.title"
       :disabled="readOnly"
+      value-type="format"
+      class="date-picker-style"
     />
+
     <date-picker
       v-if="attributeItem.type === 'DATE_TIME'"
-      v-model="input"
+      v-model:value="input"
       :placeholder="attributeItem.title"
       type="datetime"
       :disabled="readOnly"
+      value-type="format"
+      class="date-picker-style"
     />
     <date-picker
       v-if="attributeItem.type === 'TIME'"
-      v-model="input"
+      v-model:value="input"
       :placeholder="attributeItem.title"
       type="time"
       :show-second="false"
       :disabled="readOnly"
+      value-type="format"
+      class="date-picker-style"
     />
+    <v-text-field
+      v-if="attributeItem.type === 'CVE'"
+      v-model="input"
+      :rules="[rules.cve]"
+      :readonly="readOnly"
+      :label="attributeItem.title"
+    >
+    </v-text-field>
     <v-autocomplete
       v-if="attributeItem.type === 'CPE'"
       v-model="input"
@@ -106,19 +121,19 @@
     >
       <!-- TODO: Use MyAssets for Autocomplete -->
     </v-autocomplete>
-    <AttributeCVSS v-if="attributeItem.type === 'CVSS'" v-model="input" />
+    <!-- <AttributeCVSS v-if="attributeItem.type === 'CVSS'" v-model="input" /> -->
   </div>
 </template>
 
 // ATTACHMENT: 'Attachment'
 
 <script>
-import AttributeCVSS from './AttributeCVSS.vue'
+// import AttributeCVSS from './AttributeCVSS.vue'
 
 export default {
   name: 'AttributeItem',
   components: {
-    AttributeCVSS
+    // AttributeCVSS
   },
   props: {
     value: {
@@ -133,15 +148,28 @@ export default {
     readOnly: { type: Boolean, default: false }
   },
   emits: ['input'],
+  data: () => ({
+    rules: {
+      cve: (value) =>
+        value.match(/^$|CVE-\d{4}-\d{4,7}/)
+          ? true
+          : 'Input is is not a CVE reference'
+    }
+  }),
   computed: {
     input: {
       get() {
         return this.value
       },
       set(value) {
-        this.$emit('input', value)
+        this.$emit('input', value || '')
       }
     }
   }
 }
 </script>
+<style>
+.date-picker-style {
+  padding-bottom: 15px;
+}
+</style>

@@ -199,7 +199,8 @@ export default {
       for (const group of attribute_groups) {
         const items = group.attribute_group_items.map((item) => ({
           ...item.attribute,
-          title: item.title
+          title: item.title,
+          id: item.id
         }))
         result[group.id] = items.reduce((acc, item) => {
           acc[item.id] = item

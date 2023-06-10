@@ -20,7 +20,6 @@
             <v-icon left dark> mdi-folder-plus-outline </v-icon>
             New Asset Group
           </v-btn>
-          {{ search }}
         </v-col>
       </v-row>
 
