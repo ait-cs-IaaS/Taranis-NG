@@ -108,8 +108,7 @@ export const useSettingsStore = defineStore('settings', {
     ],
     spellcheck: true,
     dark_theme: false,
-    browser_locale: window.navigator.language.split('-')[0],
-    word_lists: []
+    browser_locale: window.navigator.language.split('-')[0]
   }),
   getters: {
     getProfileBrowserLocale() {
@@ -125,13 +124,9 @@ export const useSettingsStore = defineStore('settings', {
       const response = await updateProfile(data)
       this.setUserProfile(response.data)
     },
-    async saveWordLists(data) {
-      await updateProfile({ word_lists: data })
-    },
     setUserProfile(profile) {
       this.spellcheck = profile.spellcheck || this.spellcheckk
       this.dark_theme = profile.dark_theme || this.dark_theme
-      this.word_lists = profile.word_lists || this.word_lists
       this.browser_locale = profile.browser_locale || this.browser_locale
       for (const hotkey of profile.hotkeys) {
         const stateHotkey = this.hotkeys.find((h) => h.alias === hotkey.alias)
@@ -140,9 +135,6 @@ export const useSettingsStore = defineStore('settings', {
           stateHotkey.key_code = hotkey.key_code
         }
       }
-    },
-    setLocale(locale) {
-      this.browser_locale = locale
     }
   }
 })

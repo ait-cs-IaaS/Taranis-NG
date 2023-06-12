@@ -36,7 +36,7 @@
         <v-row>
           <v-col cols="4">
             <v-autocomplete
-              v-model="browser_locale"
+              v-model="language"
               :items="locale_descriptions"
               :item-title="(item) => item.value + ' - ' + item.text"
               hint="Select your locale"
@@ -74,94 +74,111 @@
     </v-card>
   </v-container>
 </template>
-
 <script>
+import { ref, computed, watchEffect } from 'vue'
 import { useSettingsStore } from '@/stores/SettingsStore'
-import { mapActions, mapState, mapWritableState } from 'pinia'
-import { useConfigStore } from '@/stores/ConfigStore'
+import { useI18n } from 'vue-i18n'
+import { useTheme } from 'vuetify'
+import { storeToRefs } from 'pinia'
 
 export default {
   name: 'UserSettings',
-  data: () => ({
-    pressKeyVisible: false,
-    shortcuts: [],
-    tab: 'general',
-    hotkeyAlias: String
-  }),
-  computed: {
-    browser_locale: {
-      get() {
-        return this.getProfileBrowserLocale
-      },
-      set(value) {
-        this.$i18n.locale = value
-        this.setLocale(value)
-        console.warn('TODO: extend user profile to include locale')
-        // TODO: extend user profile to include locale
-        // this.saveUserProfile({ browser_locale: value })
+  setup() {
+    const pressKeyVisible = ref(false)
+    const hotkeyAlias = ref('')
+    const shortcuts = ref([])
+    const { locale } = useI18n({ useScope: 'global' })
+    const theme = useTheme()
+
+    const settingsStore = useSettingsStore()
+
+    const { hotkeys, dark_theme, spellcheck, browser_locale } =
+      storeToRefs(settingsStore)
+
+    const language = computed({
+      get: () => browser_locale.value,
+      set: (value) => {
+        locale.value = value
+        browser_locale.value = value
       }
-    },
-    locale_descriptions() {
-      return [
-        { value: 'en', text: 'English' },
-        { value: 'de', text: 'Deutsch' },
-        { value: 'sk', text: 'Slovensky' }
-      ]
-    },
-    ...mapWritableState(useSettingsStore, [
-      'getProfileBrowserLocale',
-      'dark_theme',
-      'spellcheck',
-      'hotkeys'
-    ]),
-    ...mapState(useConfigStore, ['setLocale'])
-  },
-  methods: {
-    ...mapActions(useSettingsStore, ['saveUserProfile']),
-    save() {
-      this.saveUserProfile({
-        spellcheck: this.spellcheck,
-        dark_theme: this.dark_theme,
-        hotkeys: this.hotkeys,
-        language: this.browser_locale
+    })
+
+    const locale_descriptions = computed(() => [
+      { value: 'en', text: 'English' },
+      { value: 'de', text: 'Deutsch' },
+      { value: 'sk', text: 'Slovensky' }
+    ])
+
+    const save = () => {
+      settingsStore.saveUserProfile({
+        spellcheck: spellcheck.value,
+        dark_theme: dark_theme.value,
+        hotkeys: hotkeys.value,
+        language: browser_locale.value
       })
-    },
+    }
 
-    darkToggle() {
-      this.$vuetify.theme.dark = this.dark_theme
-    },
+    const darkToggle = () => {
+      theme.global.name.value = dark_theme.value ? 'dark' : 'light'
+    }
 
-    pressKeyDialog(event) {
-      window.addEventListener('keydown', this.pressKey, false)
+    const pressKeyDialog = (event) => {
+      window.addEventListener('keydown', pressKey, false)
 
-      this.pressKeyVisible = true
-      this.hotkeyAlias = event
-    },
+      pressKeyVisible.value = true
+      hotkeyAlias.value = event
+    }
 
-    pressKey(event) {
+    const pressKey = (event) => {
       const key = event
-      const hotkeyIndex = this.hotkeys
+      const hotkeyIndex = hotkeys.value
         .map(function (e) {
           return e.alias
         })
-        .indexOf(this.hotkeyAlias)
+        .indexOf(hotkeyAlias.value)
 
-      window.removeEventListener('keydown', this.pressKey)
+      window.removeEventListener('keydown', pressKey)
 
-      this.pressKeyVisible = false
+      pressKeyVisible.value = false
 
       // check doubles and clear
       // TODO: FIX
-      this.shortcuts.forEach((doubleKey, i) => {
+      shortcuts.value.forEach((doubleKey, i) => {
         if (doubleKey.key_code === key.keyCode && i !== hotkeyIndex) {
-          this.shortcuts[i].key_code = 0
-          this.shortcuts[i].key = 'undefined'
+          shortcuts.value[i].key_code = 0
+          shortcuts.value[i].key = 'undefined'
         }
       })
 
       // assigned new key
-      this.hotkeys[hotkeyIndex].key_code = key.keyCode
-      this.hotkeys[hotkeyIndex].key = key.code
+      hotkeys.value[hotkeyIndex].key_code = key.keyCode
+      hotkeys.value[hotkeyIndex].key = key.code
+    }
+
+    watchEffect(() => {
+      shortcuts.value = hotkeys.value.map((shortcut) => {
+        return {
+          alias: shortcut.alias,
+          icon: shortcut.icon,
+          key: shortcut.key,
+          key_code: shortcut.key_code
+        }
+      })
+    })
+
+    return {
+      pressKeyVisible,
+      hotkeyAlias,
+      shortcuts,
+      language,
+      locale_descriptions,
+      dark_theme,
+      spellcheck,
+      hotkeys,
+      save,
+      darkToggle,
+      pressKeyDialog,
+      pressKey
     }
   }
 }

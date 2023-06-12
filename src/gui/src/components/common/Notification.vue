@@ -26,7 +26,11 @@ export default defineComponent({
 
     const { notification } = storeToRefs(useMainStore())
     const notificationContent = computed(() => {
-      if (!('message' in notification.value)) return ''
+      if (
+        !('message' in notification.value) ||
+        typeof notification.value.message != 'string'
+      )
+        return ''
       return te(notification.value.message)
         ? t(notification.value.message)
         : notification.value.message

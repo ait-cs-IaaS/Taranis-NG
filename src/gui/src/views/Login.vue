@@ -54,6 +54,7 @@
 import { useAuthStore } from '@/stores/AuthStore'
 import { useSettingsStore } from '@/stores/SettingsStore'
 import { defineComponent, ref, computed, inject } from 'vue'
+import { useRouter } from 'vue-router'
 
 export default defineComponent({
   name: 'LoginView',
@@ -63,6 +64,7 @@ export default defineComponent({
     const password = ref('')
     const login_error = ref(undefined)
     const coreAPIURL = inject('$coreAPIURL')
+    const router = useRouter()
     console.debug('coreAPIURL', coreAPIURL)
 
     const acceptPassword = computed(() => password.value.length > 0)
@@ -80,8 +82,7 @@ export default defineComponent({
           if (isAuthenticated.value) {
             login_error.value = undefined
             loadUserProfile()
-            this.$router.push('/')
-            return
+            router.push('/')
           }
           if (error) {
             if (error.status > 500) {

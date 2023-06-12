@@ -69,8 +69,8 @@ export default {
   computed: {
     container_title() {
       return this.edit
-        ? `${this.$t('title.edit')} asset`
-        : `${this.$t('title.add_new')} asset`
+        ? `${this.$t('button.edit')} asset`
+        : `${this.$t('button.add_new')} asset`
     },
     ...mapState(useSettingsStore, ['spellcheck'])
   },

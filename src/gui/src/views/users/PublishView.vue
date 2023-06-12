@@ -37,6 +37,7 @@ import { useMainStore } from '@/stores/MainStore'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
 import { storeToRefs } from 'pinia'
 import { onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 
 export default {
   name: 'ProductView',
@@ -47,6 +48,7 @@ export default {
     const mainStore = useMainStore()
     const publishStore = usePublishStore()
     const selected = ref([])
+    const router = useRouter()
     const { products } = storeToRefs(publishStore)
 
     const updateData = async () => {
@@ -56,11 +58,11 @@ export default {
     }
 
     const addItem = () => {
-      this.$router.push('/report/0')
+      router.push('/report/0')
     }
 
     const editItem = (item) => {
-      this.$router.push('/product/' + item.id)
+      router.push('/product/' + item.id)
     }
 
     const deleteItem = (item) => {

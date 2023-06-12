@@ -149,8 +149,8 @@ export default {
     },
     container_title() {
       return this.edit
-        ? `${this.$t('title.edit')} report item - ${this.report_item.title}`
-        : `${this.$t('title.add_new')} report item`
+        ? `${this.$t('button.edit')} report item - ${this.report_item.title}`
+        : `${this.$t('button.add_new')} report item`
     }
   },
   mounted() {

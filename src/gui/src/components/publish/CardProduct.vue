@@ -16,12 +16,11 @@
       <v-form id="form" ref="form" class="px-4">
         <v-row no-gutters>
           <v-col cols="6" class="pr-3">
-            {{ product_types }}
             <v-select
               v-model="product.product_type_id"
               :items="product_types"
-              item-text="title"
-              :label="$t('product.report_type')"
+              item-value="id"
+              :label="$t('product.product_type')"
             />
           </v-col>
           <v-col cols="6" class="pr-3">
@@ -49,7 +48,9 @@
             <v-select
               v-model="preset.selected"
               :items="publisher_presets"
-              :label="preset.name"
+              item-title="name"
+              item-value="id"
+              :label="$t('product.publisher')"
               multiple
             >
             </v-select>
@@ -73,6 +74,7 @@ import { ref, computed, onMounted } from 'vue'
 import { createProduct, updateProduct } from '@/api/publish'
 import { useI18n } from 'vue-i18n'
 import { useConfigStore } from '@/stores/ConfigStore'
+import { notifyFailure, notifySuccess } from '@/utils/helpers'
 
 export default {
   name: 'CardProduct',
@@ -100,23 +102,30 @@ export default {
 
     const container_title = computed(() => {
       return props.edit
-        ? `${t('title.edit')} product - ${product.value.title}`
-        : `${t('title.add_new')} product`
+        ? `${t('button.edit')} product - ${product.value.title}`
+        : `${t('button.create')} product`
     })
 
     const saveProduct = () => {
       if (props.edit) {
         updateProduct(product.value.id, product.value)
       } else {
-        createProduct(product.value).then((response) => {
-          this.$router.push('/product/' + response.data)
-          emit('productcreated', response.data)
-        })
+        createProduct(product.value)
+          .then((response) => {
+            this.$router.push('/product/' + response.data)
+            emit('productcreated', response.data)
+            notifySuccess('Product created ' + response.data)
+          })
+          .catch((error) => {
+            console.error(error)
+            notifyFailure("Couldn't create product")
+          })
       }
     }
 
     const previewProduct = () => {
       // this.$router.push('/product/' + product.value.id)
+      notifyFailure('Not implemented yet')
       console.debug('TODO: IMPLEMENT')
     }
 

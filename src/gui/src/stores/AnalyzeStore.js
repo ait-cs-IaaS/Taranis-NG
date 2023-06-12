@@ -11,7 +11,6 @@ export const useAnalyzeStore = defineStore('analyze', {
   state: () => ({
     report_items: { total_count: 0, items: [] },
     report_item_types: { total_count: 0, items: [] },
-    multi_select_report: false,
     selection_report: [],
     report_item_groups: [],
     current_report_item_group_id: null
@@ -36,11 +35,6 @@ export const useAnalyzeStore = defineStore('analyze', {
     async loadReportTypes(data) {
       const response = await getAllReportTypes(data)
       this.report_item_types = response.data
-    },
-
-    setMultiSelectReport(enable) {
-      this.multi_select_report = enable
-      this.selection_report = []
     },
 
     addSelectionReport(selected_item) {

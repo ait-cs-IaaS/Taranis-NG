@@ -59,12 +59,6 @@ export const messages_en = {
     validation_error: 'Please fill in all required fields'
   },
 
-  title: {
-    add_new: 'Add new',
-    edit: 'Edit',
-    delete: 'Delete'
-  },
-
   login: {
     title: 'Please Login',
     username: 'Username',
@@ -144,7 +138,13 @@ export const messages_en = {
   },
 
   notification: {
-    close: 'Close'
+    close: 'Close',
+    successful_delete: 'Successfully deleted',
+    successful_update: 'Successfully updated',
+    successful_create: 'Successfully created',
+    failed_delete: 'Failed to delete',
+    failed_update: 'Failed to update',
+    failed_create: 'Failed to create'
   },
 
   enter: {
@@ -535,7 +535,8 @@ export const messages_en = {
     title: 'Title',
     name: 'Name',
     description: 'Description',
-    report_type: 'Product Type',
+    product_type: 'Product Type',
+    publisher: 'Publisher',
     successful: 'New product was successfully added',
     successful_edit: 'Product was successfully saved',
     removed: 'Product was successfully removed',

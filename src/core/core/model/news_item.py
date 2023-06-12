@@ -263,7 +263,7 @@ class NewsItem(db.Model):
 
         query = ACLEntry.apply_query(query, user, True, False, False)
 
-        search = filter.get("search", None)
+        search = filter.get("search")
         if search and search != "":
             query = query.filter(
                 db.or_(
@@ -273,28 +273,29 @@ class NewsItem(db.Model):
                 )
             )
 
-        if "read" in filter and filter["read"].lower() == "true":
+        if "read" in filter and filter["read"].lower() != "false":
             query = query.filter(NewsItem.read is False)
 
-        if "important" in filter and filter["important"].lower() == "true":
+        if "important" in filter and filter["important"].lower() != "false":
             query = query.filter(NewsItem.important is True)
 
-        if "relevant" in filter and filter["relevant"].lower() == "true":
+        if "relevant" in filter and filter["relevant"].lower() != "false":
             query = query.filter(NewsItem.likes > 0)
 
-        if "in_report" in filter and filter["in_report"].lower() == "true":
+        if "in_report" in filter and filter["in_report"].lower() != "false":
             query = query.join(
                 ReportItemNewsItemAggregate,
                 NewsItemAggregate.id == ReportItemNewsItemAggregate.news_item_aggregate_id,
             )
 
-        if "range" in filter and filter["range"] != "ALL":
+        if "range" in filter and filter["range"].upper() != "ALL":
+            filter_range = filter["range"].upper()
             date_limit = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
-            if filter["range"] == "WEEK":
+            if filter_range == "WEEK":
                 date_limit -= timedelta(days=date_limit.weekday())
 
-            elif filter["range"] == "MONTH":
+            elif filter_range == "MONTH":
                 date_limit = date_limit.replace(day=1)
 
             query = query.filter(NewsItemData.collected >= date_limit)
