@@ -11,10 +11,6 @@ from core.managers.log_manager import logger
 
 class UserProfile(Resource):
     def get(self):
-        logger.debug("CALLED USER PROFILE")
-        request_headers = request.headers
-        logger.debug(f"Request headers: {request_headers}")
-
         if user := auth_manager.get_user_from_jwt():
             return User.get_profile_json(user)
         return {"message": "User not found"}, 404

@@ -53,7 +53,7 @@
 <script>
 import { useAuthStore } from '@/stores/AuthStore'
 import { useSettingsStore } from '@/stores/SettingsStore'
-import { defineComponent, ref, computed, inject } from 'vue'
+import { defineComponent, ref, computed, inject, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 export default defineComponent({
@@ -79,7 +79,7 @@ export default defineComponent({
     const authenticate = () => {
       login({ username: username.value, password: password.value }).then(
         (error) => {
-          if (isAuthenticated.value) {
+          if (isAuthenticated) {
             login_error.value = undefined
             loadUserProfile()
             router.push('/')
@@ -94,6 +94,12 @@ export default defineComponent({
         }
       )
     }
+
+    onMounted(() => {
+      if (isAuthenticated) {
+        router.push('/')
+      }
+    })
 
     return {
       username,

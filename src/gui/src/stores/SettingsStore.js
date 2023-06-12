@@ -125,7 +125,7 @@ export const useSettingsStore = defineStore('settings', {
       this.setUserProfile(response.data)
     },
     setUserProfile(profile) {
-      this.spellcheck = profile.spellcheck || this.spellcheckk
+      this.spellcheck = profile.spellcheck || this.spellcheck
       this.dark_theme = profile.dark_theme || this.dark_theme
       this.browser_locale = profile.browser_locale || this.browser_locale
       for (const hotkey of profile.hotkeys) {

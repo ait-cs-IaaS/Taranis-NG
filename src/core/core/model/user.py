@@ -51,7 +51,7 @@ class User(db.Model):
         self.organization = Organization.find(organization["id"]) if isinstance(organization, dict) else Organization.find(organization.id)
         self.roles = [Role.find(role.id) for role in roles]
         self.permissions = [Permission.find(permission.id) for permission in permissions]
-        self.profile = UserProfile(True, False, [])
+        self.profile = UserProfile(True, False, [], "en")
         self.tag = "mdi-account"
 
     @orm.reconstructor
@@ -185,13 +185,8 @@ class User(db.Model):
 
     @classmethod
     def update_profile(cls, user, data):
-        new_profile_schema = NewUserProfileSchema()
-        updated_profile = new_profile_schema.load(data)
-
-        user.profile.spellcheck = updated_profile.spellcheck
-        user.profile.dark_theme = updated_profile.dark_theme
-
-        user.profile.hotkeys = updated_profile.hotkeys
+        print(data)
+        user.profile = NewUserProfileSchema().load(data)
 
         db.session.commit()
 

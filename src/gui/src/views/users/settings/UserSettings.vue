@@ -80,6 +80,8 @@ import { useSettingsStore } from '@/stores/SettingsStore'
 import { useI18n } from 'vue-i18n'
 import { useTheme } from 'vuetify'
 import { storeToRefs } from 'pinia'
+import { onMounted } from 'vue'
+import { notifySuccess, notifyFailure } from '@/utils/helpers'
 
 export default {
   name: 'UserSettings',
@@ -110,12 +112,19 @@ export default {
     ])
 
     const save = () => {
-      settingsStore.saveUserProfile({
-        spellcheck: spellcheck.value,
-        dark_theme: dark_theme.value,
-        hotkeys: hotkeys.value,
-        language: browser_locale.value
-      })
+      settingsStore
+        .saveUserProfile({
+          spellcheck: spellcheck.value,
+          dark_theme: dark_theme.value,
+          hotkeys: shortcuts.value,
+          language: browser_locale.value
+        })
+        .then(() => {
+          notifySuccess('notification.successful_update')
+        })
+        .catch(() => {
+          notifyFailure('notification.failed_update')
+        })
     }
 
     const darkToggle = () => {
@@ -156,6 +165,18 @@ export default {
     }
 
     watchEffect(() => {
+      shortcuts.value = hotkeys.value.map((shortcut) => {
+        return {
+          alias: shortcut.alias,
+          icon: shortcut.icon,
+          key: shortcut.key,
+          key_code: shortcut.key_code
+        }
+      })
+    })
+
+    onMounted(() => {
+      settingsStore.loadUserProfile()
       shortcuts.value = hotkeys.value.map((shortcut) => {
         return {
           alias: shortcut.alias,
