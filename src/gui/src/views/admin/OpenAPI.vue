@@ -1,7 +1,5 @@
 <template>
-  <v-container fluid>
-    <iframe :src="iframeSrc" title="OpenAPI" class="openapi"></iframe>
-  </v-container>
+  <iframe :src="iframeSrc" title="OpenAPI" class="openapi"></iframe>
 </template>
 
 <script>
@@ -16,3 +14,11 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.openapi {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+</style>

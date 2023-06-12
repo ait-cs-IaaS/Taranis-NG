@@ -26,6 +26,9 @@ export const useAuthStore = defineStore('authenticator', {
       const exp = new Date((this.exp - 300) * 1000)
       const now = new Date()
       return now > exp
+    },
+    expirationDate() {
+      return new Date(this.exp * 1000)
     }
   },
   actions: {

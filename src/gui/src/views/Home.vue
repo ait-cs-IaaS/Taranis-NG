@@ -59,6 +59,7 @@ import TrendingCard from '@/components/common/TrendingCard.vue'
 import { defineComponent } from 'vue'
 import { useDashboardStore } from '@/stores/DashboardStore'
 import { storeToRefs } from 'pinia'
+import { useMainStore } from '@/stores/MainStore'
 
 export default defineComponent({
   name: 'HomeView',
@@ -67,12 +68,14 @@ export default defineComponent({
     TrendingCard
   },
   setup() {
-    const { dashboard_data, clusters } = storeToRefs(useDashboardStore())
-    const { loadDashboardData, loadClusters } = useDashboardStore()
+    const mainStore = useMainStore()
+    const dashboardStore = useDashboardStore()
+    const { dashboard_data, clusters } = storeToRefs(dashboardStore)
 
     onMounted(() => {
-      loadDashboardData()
-      loadClusters()
+      dashboardStore.loadDashboardData()
+      dashboardStore.loadClusters()
+      mainStore.resetItemCount()
     })
     return {
       dashboard_data,

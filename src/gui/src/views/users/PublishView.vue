@@ -29,53 +29,72 @@
 </template>
 
 <script>
+import { ref } from 'vue'
 import DataTable from '@/components/common/DataTable.vue'
 import { deleteProduct } from '@/api/publish'
-import { mapActions, mapState, mapWritableState } from 'pinia'
-import { notifySuccess, notifyFailure } from '@/utils/helpers'
 import { usePublishStore } from '@/stores/PublishStore'
 import { useMainStore } from '@/stores/MainStore'
+import { notifySuccess, notifyFailure } from '@/utils/helpers'
+import { storeToRefs } from 'pinia'
+import { onMounted } from 'vue'
 
 export default {
-  name: 'PruoductView',
+  name: 'ProductView',
   components: {
     DataTable
   },
-  data: function () {
-    return {
-      selected: []
+  setup() {
+    const mainStore = useMainStore()
+    const publishStore = usePublishStore()
+    const selected = ref([])
+    const { products } = storeToRefs(publishStore)
+
+    const updateData = async () => {
+      await publishStore.loadProducts()
+      mainStore.itemCountTotal = products.value.total_count
+      mainStore.itemCountFiltered = products.value.items.length
     }
-  },
-  computed: {
-    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
-    ...mapState(usePublishStore, ['products'])
-  },
-  methods: {
-    ...mapActions(usePublishStore, ['loadProducts']),
-    updateData() {
-      this.loadProducts().then(() => {
-        this.itemCountTotal = this.products.total_count
-        this.itemCountFiltered = this.products.items.length
-      })
-    },
-    addItem() {
+
+    const addItem = () => {
       this.$router.push('/report/0')
-    },
-    editItem(item) {
+    }
+
+    const editItem = (item) => {
       this.$router.push('/product/' + item.id)
-    },
-    deleteItem(item) {
+    }
+
+    const deleteItem = (item) => {
       deleteProduct(item)
         .then(() => {
           notifySuccess(`Successfully deleted ${item.name}`)
-          this.updateData()
+          updateData()
         })
         .catch(() => {
           notifyFailure(`Failed to delete ${item.name}`)
         })
-    },
-    selectionChange(selected) {
-      this.selected = selected.map((item) => item.id)
+    }
+
+    const selectionChange = (selected) => {
+      selected.value = selected.map((item) => item.id)
+    }
+
+    const createProduct = (item) => {
+      // create product logic here
+    }
+
+    onMounted(() => {
+      updateData()
+    })
+
+    return {
+      selected,
+      products,
+      updateData,
+      addItem,
+      editItem,
+      deleteItem,
+      selectionChange,
+      createProduct
     }
   }
 }

@@ -125,7 +125,7 @@ export default {
             }
           )
           return {
-            key: collector.id,
+            value: collector.id,
             title: collector.name
           }
         })

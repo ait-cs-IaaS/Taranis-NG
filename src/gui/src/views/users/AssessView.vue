@@ -42,7 +42,6 @@
 </template>
 
 <script>
-import KeyboardMixin from '../../assets/keyboard_mixin'
 import CardStory from '@/components/assess/CardStory.vue'
 import AssessSelectionToolbar from '@/components/assess/AssessSelectionToolbar.vue'
 import { mapActions, mapState, storeToRefs, mapWritableState } from 'pinia'
@@ -57,7 +56,6 @@ export default {
     CardStory,
     AssessSelectionToolbar
   },
-  mixins: [KeyboardMixin('assess')],
   data: () => ({
     reloading: false,
     items: []
@@ -93,6 +91,8 @@ export default {
   },
   unmounted() {
     this.clearNewsItemSelection()
+    this.itemCountTotal = 0
+    this.itemCountFiltered = 0
   },
   methods: {
     ...mapActions(useAssessStore, [

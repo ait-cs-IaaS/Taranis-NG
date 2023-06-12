@@ -8,16 +8,11 @@
     clipped-left
   >
     <template #prepend>
-      <v-btn
-        depressed
-        tile
-        color="primary"
-        class="burger-menu"
-        @click.stop="navClicked"
-      >
-        <v-icon :class="['menu-icon', { closed: !drawerVisible }]"
-          >mdi-menu-open</v-icon
-        >
+      <v-btn color="primary" @click.stop="navClicked">
+        <v-icon
+          :class="['menu-icon', { closed: !drawerVisible }]"
+          icon="mdi-menu-open"
+        />
       </v-btn>
     </template>
 
@@ -45,18 +40,18 @@
       </svg>
     </v-toolbar-title>
 
-    <div class="item-count mr-10">
-      <span
-        >total items: <strong>{{ getItemCount.total }}</strong>
+    <div v-if="showItemCount" class="mr-10">
+      <span>
+        total items: <strong>{{ itemCountTotal }}</strong>
       </span>
       <span v-if="isFiltered">
-        / displayed items: <strong>{{ getItemCount.filtered }}</strong>
+        / displayed items: <strong>{{ itemCountFiltered }}</strong>
       </span>
     </div>
 
     <template #append>
       <v-toolbar color="transparent">
-        <div v-for="button in getButtonList()" :key="button.route">
+        <div v-for="button in buttonList" :key="button.route">
           <v-btn variant="text" :ripple="false" :to="button.route">
             <v-icon left>{{ button.icon }}</v-icon>
             <span class="main-menu-item">
@@ -73,15 +68,33 @@
 <script>
 import UserMenu from '@/components/UserMenu.vue'
 
-import { mapActions, mapState } from 'pinia'
+import { storeToRefs } from 'pinia'
 import { useMainStore } from '@/stores/MainStore'
-import { defineComponent } from 'vue'
+import { defineComponent, computed } from 'vue'
 
 export default defineComponent({
   name: 'MainMenu',
   components: { UserMenu },
-  data: () => ({
-    buttons: [
+  setup() {
+    const store = useMainStore()
+
+    const { drawerVisible, itemCountTotal, itemCountFiltered } =
+      storeToRefs(store)
+
+    const showItemCount = computed(() => {
+      return itemCountTotal.value !== undefined && itemCountTotal.value > 0
+    })
+
+    const isFiltered = computed(() => {
+      return itemCountFiltered.value === undefined
+        ? false
+        : itemCountFiltered.value !== itemCountTotal.value
+    })
+
+    const navClicked = () => {
+      store.toggleDrawer()
+    }
+    const buttons = [
       {
         title: 'main_menu.dashboard',
         icon: 'mdi-monitor-dashboard',
@@ -132,28 +145,22 @@ export default defineComponent({
         show: true
       }
     ]
-  }),
-  computed: {
-    ...mapState(useMainStore, ['drawerVisible', 'user', 'getItemCount']),
 
-    isFiltered() {
-      return this.getItemCount.filtered === undefined
-        ? false
-        : this.getItemCount.filtered !== this.getItemCount.total
-    }
-  },
-  methods: {
-    ...mapActions(useMainStore, ['toggleDrawer']),
-
-    navClicked() {
-      this.toggleDrawer()
-    },
-
-    getButtonList() {
-      return this.buttons.filter(
+    const buttonList = computed(() => {
+      return buttons.filter(
         (button) =>
-          this.user.permissions.includes(button.permission) && button.show
+          store.user.permissions.includes(button.permission) && button.show
       )
+    })
+
+    return {
+      isFiltered,
+      showItemCount,
+      itemCountFiltered,
+      itemCountTotal,
+      drawerVisible,
+      buttonList,
+      navClicked
     }
   }
 })

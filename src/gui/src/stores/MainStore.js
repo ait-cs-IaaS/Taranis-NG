@@ -23,6 +23,10 @@ export const useMainStore = defineStore('main', {
   actions: {
     toggleDrawer() {
       this.drawerVisible = !this.drawerVisible
+    },
+    resetItemCount() {
+      this.itemCountTotal = 0
+      this.itemCountFiltered = 0
     }
   },
   persist: true
