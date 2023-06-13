@@ -22,7 +22,7 @@
 </template>
 
 <script>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 
 export default {
   name: 'FilterSelectList',
@@ -54,6 +54,10 @@ export default {
         console.debug('filterAttributeSelections', filterUpdate)
         emit('update:modelValue', filterUpdate)
       }
+    })
+
+    onMounted(() => {
+      console.debug('filterAttributeOptions', props.filterAttributeOptions)
     })
 
     return {

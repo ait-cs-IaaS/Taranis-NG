@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import { ref, computed, defineEmits } from 'vue'
+import { ref, computed } from 'vue'
 
 export default {
   name: 'DateChips',
@@ -23,7 +23,7 @@ export default {
       default: 'all'
     }
   },
-  emits: defineEmits(['update:modelValue']),
+  emits: ['update:modelValue'],
   setup(props, { emit }) {
     const selected = ref(props.modelValue)
 

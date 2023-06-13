@@ -2,7 +2,7 @@
   <filter-navigation
     :search="reportFilter.search"
     :limit="reportFilter.limit"
-    :offsest="reportFilter.offset"
+    :offset="reportFilter.offset"
     @update:search="(value) => (search = value)"
     @update:limit="(value) => (reportFilter.limit = value)"
     @update:offset="(value) => (reportFilter.offset = value)"
@@ -20,18 +20,19 @@
       <v-divider class="mt-0 mb-0"></v-divider>
       <v-row class="my-2 mr-0 px-2">
         <v-col cols="12" class="py-0">
-          <h4>filter by</h4>
+          <h4>filter</h4>
         </v-col>
 
-        <!-- time tags -->
         <v-col cols="12" class="pb-0">
           <date-chips v-model="reportFilter.range" />
         </v-col>
 
+        <v-divider class="mt-3 mb-3"></v-divider>
+
         <v-col cols="12" class="pt-1">
           <filter-select-list
             v-model="filterAttribute"
-            :items="filterAttributeOptions"
+            :filter-attribute-options="filterAttributeOptions"
           />
         </v-col>
       </v-row>
@@ -78,14 +79,6 @@ export default {
       { value: 'completed', label: 'completed', icon: 'mdi-progress-check' },
       { value: 'incomplete', label: 'incomplete', icon: 'mdi-progress-close' }
     ]
-    const orderOptions = [
-      {
-        label: 'date',
-        icon: 'mdi-calendar-range-outline',
-        type: 'DATE',
-        direction: 'DESC'
-      }
-    ]
 
     const filterAttribute = computed({
       get() {
@@ -131,7 +124,6 @@ export default {
       search,
       filterAttributeOptions,
       filterAttribute,
-      orderOptions,
       addReport
     }
   }

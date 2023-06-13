@@ -11,20 +11,6 @@
     @update-items="updateData"
     @selection-change="selectionChange"
   >
-    <template #actionColumn>
-      <v-tooltip left>
-        <template #activator="{ props }">
-          <v-icon
-            v-bind="props"
-            color="secondary"
-            @click.stop="createProduct(item)"
-          >
-            mdi-file
-          </v-icon>
-        </template>
-        <span>Create Product</span>
-      </v-tooltip>
-    </template>
   </DataTable>
 </template>
 
@@ -80,10 +66,6 @@ export default {
       selected.value = selected.map((item) => item.id)
     }
 
-    const createProduct = (item) => {
-      // create product logic here
-    }
-
     onMounted(() => {
       updateData()
     })
@@ -95,8 +77,7 @@ export default {
       addItem,
       editItem,
       deleteItem,
-      selectionChange,
-      createProduct
+      selectionChange
     }
   }
 }

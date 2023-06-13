@@ -166,8 +166,8 @@ export default {
         })
     }
 
-    const selectionChange = (selected) => {
-      selected = selected.map((item) => item.id)
+    const selectionChange = (selectedItems) => {
+      selected.value = selectedItems.map((item) => item.id)
     }
 
     const triggerWorkers = () => {

@@ -50,7 +50,7 @@ export default {
       this.edit = false
       return this.default_report_item
     },
-    reportCreated(report_item) {
+    reportCreated() {
       this.edit = true
     }
   }

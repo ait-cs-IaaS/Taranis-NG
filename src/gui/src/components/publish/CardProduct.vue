@@ -75,6 +75,7 @@ import { createProduct, updateProduct } from '@/api/publish'
 import { useI18n } from 'vue-i18n'
 import { useConfigStore } from '@/stores/ConfigStore'
 import { notifyFailure, notifySuccess } from '@/utils/helpers'
+import { useRouter } from 'vue-router'
 
 export default {
   name: 'CardProduct',
@@ -99,6 +100,7 @@ export default {
     const product = ref(props.productProp)
     const preset = ref({ selected: null, name: 'Preset' })
     const required = [(v) => !!v || 'Required']
+    const router = useRouter()
 
     const container_title = computed(() => {
       return props.edit
@@ -107,12 +109,14 @@ export default {
     })
 
     const saveProduct = () => {
+      console.debug('Creating product', product.value)
+
       if (props.edit) {
         updateProduct(product.value.id, product.value)
       } else {
         createProduct(product.value)
           .then((response) => {
-            this.$router.push('/product/' + response.data)
+            router.push('/product/' + response.data)
             emit('productcreated', response.data)
             notifySuccess('Product created ' + response.data)
           })

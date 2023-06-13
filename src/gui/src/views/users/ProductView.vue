@@ -5,6 +5,7 @@
 </template>
 
 <script>
+import { ref, onMounted } from 'vue'
 import { getProduct } from '@/api/publish'
 import CardProduct from '@/components/publish/CardProduct.vue'
 
@@ -13,28 +14,33 @@ export default {
   components: {
     CardProduct
   },
-  data: () => ({
-    default_product: {
+  setup() {
+    const defaultProduct = {
       id: null,
       uuid: null,
       title: ''
-    },
+    }
 
-    product: {},
-    edit: true
-  }),
-  async created() {
-    this.products = await this.loadProducts()
-  },
-  methods: {
-    async loadProducts() {
+    const product = ref({})
+    const edit = ref(true)
+
+    const loadProducts = async () => {
       if (this.$route.params.id && this.$route.params.id !== '0') {
-        return await getProduct(this.$route.params.id).then((response) => {
-          return response.data
-        })
+        const response = await getProduct(this.$route.params.id)
+        product.value = response.data
+      } else {
+        edit.value = false
+        product.value = defaultProduct
       }
-      this.edit = false
-      return this.default_product
+    }
+
+    onMounted(() => {
+      loadProducts()
+    })
+
+    return {
+      product,
+      edit
     }
   }
 }
