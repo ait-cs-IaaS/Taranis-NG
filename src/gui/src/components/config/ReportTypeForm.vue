@@ -88,7 +88,6 @@ import { ref } from 'vue'
 import { createReportItemType, updateReportItemType } from '@/api/config'
 import AttributeTable from './AttributeTable.vue'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
-import { useSettingsStore } from '@/stores/SettingsStore'
 
 export default {
   name: 'ReportTypeForm',
@@ -109,7 +108,6 @@ export default {
   },
   emits: ['updated'],
   setup(props) {
-    const store = useSettingsStore()
     const report_type = ref(props.reportTypeData)
 
     const updateAttributeGroupItems = (index, items) => {

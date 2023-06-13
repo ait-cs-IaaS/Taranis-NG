@@ -1,5 +1,5 @@
 <template>
-  <v-row v-bind="UI.DIALOG.ROW.WINDOW">
+  <v-row>
     <v-btn
       text
       small
@@ -8,12 +8,10 @@
     >
       <v-icon>mdi-feature-search-outline</v-icon>
     </v-btn>
-    <v-dialog v-bind="UI.DIALOG.FULLSCREEN" v-model="visible">
-      <v-card v-bind="UI.DIALOG.BASEMENT">
-        <v-toolbar v-bind="UI.DIALOG.TOOLBAR">
-          <v-btn v-bind="UI.BUTTON.CLOSE_ICON" @click="cancel">
-            <v-icon>{{ UI.ICON.CLOSE }}</v-icon>
-          </v-btn>
+    <v-dialog v-model="visible">
+      <v-card>
+        <v-toolbar>
+          <v-btn icon="mdi-close" @click="cancel"> </v-btn>
           <v-toolbar-title>{{ $t('attribute.select_enum') }}</v-toolbar-title>
         </v-toolbar>
 
@@ -25,12 +23,6 @@
               :items="attribute_enums"
               :server-items-length="attribute_enums_total_count"
               :items-per-page="25"
-              class="elevation-1 enum_selector"
-              :footer-props="{
-                showFirstLastPage: true,
-                itemsPerPageOptions: [25, 50, 100],
-                showCurrentPage: true
-              }"
               @update:options="updateOptions"
               @click:row="clickRow"
             >
@@ -49,9 +41,14 @@ import { getCPEAttributeEnums } from '@/api/assets'
 export default {
   name: 'EnumSelector',
   props: {
-    attribute_id: Number,
-    value_index: Number,
-    cpe_only: Boolean
+    attributeId: {
+      type: Number,
+      required: true
+    },
+    cpeOnly: {
+      type: Boolean,
+      default: true
+    }
   },
   emits: ['enum-selected'],
   data: () => ({
@@ -83,14 +80,13 @@ export default {
 
     clickRow(event, row) {
       this.$emit('enum-selected', {
-        index: this.value_index,
         value: row.item.value
       })
       this.visible = false
     },
 
     updateAttributeEnums() {
-      if (this.cpe_only === true) {
+      if (this.cpeOnly === true) {
         getCPEAttributeEnums({
           search: this.search,
           offset: (this.current_page - 1) * this.current_page_size,
@@ -100,7 +96,7 @@ export default {
         })
       } else {
         getAttributeEnums({
-          attribute_id: this.attribute_id,
+          attribute_id: this.attributeId,
           search: this.search,
           offset: (this.current_page - 1) * this.current_page_size,
           limit: this.current_page_size

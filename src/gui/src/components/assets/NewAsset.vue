@@ -60,7 +60,10 @@
           </v-row>
           <v-row no-gutters>
             <v-col cols="12">
-              <CPETable :asset_cpes="asset.asset_cpes" @update-cpes="update" />
+              <CPETable
+                :asset-cpes="asset.asset_cpes"
+                @update:asset-cpes="update"
+              />
             </v-col>
           </v-row>
           <v-row

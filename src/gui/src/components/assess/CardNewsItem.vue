@@ -236,7 +236,7 @@ export default {
 
           emit('refresh')
         })
-        .catch((err) => {
+        .catch(() => {
           notifyFailure('Failed to remove News Item from Story')
         })
     }

@@ -26,9 +26,8 @@
               <v-row>
                 <v-col class="mt-6" style="flex-grow: 0">
                   <EnumSelector
-                    :attribute_id="cpe_attribute_id"
-                    :value_index="0"
-                    cpe_only
+                    :attribute-id="cpe_attribute_id"
+                    cpe-only
                     @enum-selected="enumSelected"
                   />
                 </v-col>
@@ -72,18 +71,6 @@
                 v-model="csv"
                 :map-fields="['value', 'description']"
               >
-                <template #hasHeaders="{ headers, toggle }">
-                  <label>
-                    <input
-                      id="hasHeaders"
-                      type="checkbox"
-                      :value="headers"
-                      @change="toggle"
-                    />
-                    Headers?
-                  </label>
-                </template>
-
                 <template #next="{ load }">
                   <button class="load" @click.prevent="load">
                     {{ $t('asset.load_csv_file') }}
@@ -136,11 +123,15 @@ export default {
   },
   mixins: [AuthMixin],
   props: {
-    asset_cpes: Array
+    assetCpes: {
+      type: Array,
+      required: true
+    }
   },
+  emits: ['update:assetCpes'],
   data: () => ({
     csv: null,
-    cpes: this.asset_cpes,
+    cpes: this.assetCpes,
     csv_delete_exist_list: false,
     csv_preview: false,
     csv_data: null,
@@ -204,7 +195,7 @@ export default {
 
     importCSV() {
       if (this.csv_delete_exist_list) {
-        this.$emit('update-cpes', this.csv)
+        this.$emit('update:assetCpes', this.csv)
       } else {
         const arrayWithDuplicates = this.cpes.concat(this.csv)
 
@@ -225,7 +216,7 @@ export default {
         }
 
         const uniqueArray = removeDuplicates(arrayWithDuplicates, 'value')
-        this.$emit('update-cpes', uniqueArray)
+        this.$emit('update:assetCpes', uniqueArray)
       }
 
       this.dialog_csv = false

@@ -1,11 +1,9 @@
 <template>
-  <v-row v-bind="UI.DIALOG.ROW.WINDOW">
-    <v-dialog v-bind="UI.DIALOG.FULLSCREEN" v-model="dialog">
-      <v-card v-bind="UI.DIALOG.BASEMENT">
-        <v-toolbar v-bind="UI.DIALOG.TOOLBAR" :style="UI.STYLE.z10000">
-          <v-btn v-bind="UI.BUTTON.CLOSE_ICON" @click="close">
-            <v-icon>{{ UI.ICON.CLOSE }}</v-icon>
-          </v-btn>
+  <v-row>
+    <v-dialog v-model="dialog">
+      <v-card>
+        <v-toolbar>
+          <v-btn icon="mdi-close" @click="close"> </v-btn>
           <v-toolbar-title>{{ $t('report_item.select') }}</v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn text dark @click="add">
@@ -40,11 +38,11 @@
 
     <component
       :is="cardLayout()"
-      v-for="value in selector_values"
-      :key="value.id"
+      v-for="sel_value in selector_values"
+      :key="sel_value.id"
       publish_selector
       class="item-selector"
-      :card="value"
+      :card="sel_value"
       @show-report-item-detail="showReportItemDetail"
       @remove-report-item-from-selector="removeReportItemFromSelector"
     />
@@ -66,9 +64,16 @@ export default {
   },
   mixins: [AuthMixin],
   props: {
-    values: Array,
-    modify: Boolean,
-    edit: Boolean
+    values: {
+      type: Array,
+      required: true
+    },
+    modify: {
+      type: Boolean
+    },
+    edit: {
+      type: Boolean
+    }
   },
   data: () => ({
     dialog: false,
