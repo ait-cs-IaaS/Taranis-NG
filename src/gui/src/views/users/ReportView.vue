@@ -12,7 +12,6 @@
 <script>
 import { getReportItem } from '@/api/analyze'
 import ReportItem from '@/components/analyze/ReportItem.vue'
-import { notifySuccess } from '@/utils/helpers'
 import { mapActions } from 'pinia'
 import { useAssessStore } from '@/stores/AssessStore'
 export default {

@@ -108,6 +108,7 @@ import CardStory from '@/components/assess/CardStory.vue'
 import { useAnalyzeStore } from '@/stores/AnalyzeStore'
 import { notifyFailure } from '@/utils/helpers'
 import { mapActions, mapState } from 'pinia'
+import { notifySuccess } from '@/utils/helpers'
 
 export default {
   name: 'ReportItem',
