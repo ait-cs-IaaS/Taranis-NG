@@ -12,7 +12,6 @@
     @click="toggleSelection"
   >
     <v-row>
-      <!-- STORY TITLE -->
       <v-col
         cols="12"
         sm="12"
@@ -26,7 +25,6 @@
         </h2>
       </v-col>
 
-      <!-- STORY ACTIONS -->
       <v-col
         cols="12"
         sm="12"

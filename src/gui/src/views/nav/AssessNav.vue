@@ -77,10 +77,7 @@
         </v-col>
 
         <v-col cols="12" class="pt-2">
-          <filter-sort-list
-            v-model="newsItemsFilter.sort"
-            :items="orderOptions"
-          />
+          <filter-sort-list v-model="newsItemsFilter.sort" />
         </v-col>
       </v-row>
 
@@ -121,7 +118,7 @@ import tagFilter from '@/components/assess/filter/tagFilter.vue'
 import filterSelectList from '@/components/assess/filter/filterSelectList.vue'
 import filterSortList from '@/components/assess/filter/filterSortList.vue'
 import FilterNavigation from '@/components/common/FilterNavigation.vue'
-import { computed, onMounted, onUnmounted } from 'vue'
+import { computed, onUnmounted, onBeforeMount } from 'vue'
 import { useRoute } from 'vue-router'
 import { useFilterStore } from '@/stores/FilterStore'
 import { useAssessStore } from '@/stores/AssessStore'
@@ -180,21 +177,6 @@ export default {
       }
     })
 
-    const orderOptions = [
-      {
-        label: 'published date',
-        icon: 'mdi-calendar-range-outline',
-        type: 'DATE',
-        direction: 'DESC'
-      },
-      {
-        label: 'relevance',
-        icon: 'mdi-counter',
-        type: 'RELEVANCE',
-        direction: 'DESC'
-      }
-    ]
-
     const search = computed({
       get() {
         return newsItemsFilter.value.search
@@ -204,7 +186,7 @@ export default {
       }
     })
 
-    onMounted(() => {
+    onBeforeMount(() => {
       const query = Object.fromEntries(
         Object.entries(route.query).filter(([, v]) => v != null)
       )
@@ -226,7 +208,6 @@ export default {
     )
 
     return {
-      orderOptions,
       search,
       chartFilter,
       getOSINTSourceGroupsList,

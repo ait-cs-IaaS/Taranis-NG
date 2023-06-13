@@ -34,7 +34,14 @@
             />
           </v-col>
         </v-row>
-        <!-- /left column -->
+        <v-row>
+          <v-col style="max-width: 110px" class="py-0">
+            <strong>Relevance:</strong>
+          </v-col>
+          <v-col class="py-0">
+            {{ story.relevance }}
+          </v-col>
+        </v-row>
       </v-col>
       <v-col
         :cols="detailView ? 10 : 6"

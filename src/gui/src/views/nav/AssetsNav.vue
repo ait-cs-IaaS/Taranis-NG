@@ -22,18 +22,6 @@
           </v-btn>
         </v-col>
       </v-row>
-
-      <v-divider class="mt-0 mb-0"></v-divider>
-
-      <v-row class="my-2 mr-0 px-2">
-        <v-col cols="12" class="py-0">
-          <h4>sort by</h4>
-        </v-col>
-
-        <v-col cols="12" class="pt-2">
-          <filter-sort-list v-model="sort" :items="orderOptions" />
-        </v-col>
-      </v-row>
     </template>
   </filter-navigation>
 </template>
@@ -42,32 +30,16 @@
 import { mapActions, mapState } from 'pinia'
 
 import FilterNavigation from '@/components/common/FilterNavigation.vue'
-import filterSortList from '@/components/assess/filter/filterSortList.vue'
 import { useAssetsStore } from '@/stores/AssetsStore'
 import { useFilterStore } from '@/stores/FilterStore'
 
 export default {
   name: 'AssetsNav',
   components: {
-    filterSortList,
     FilterNavigation
   },
   data: () => ({
-    awaitingSearch: false,
-    orderOptions: [
-      {
-        label: 'date',
-        icon: 'mdi-calendar-range-outline',
-        type: 'DATE',
-        direction: 'DESC'
-      },
-      {
-        label: 'vulnerability',
-        icon: 'mdi-counter',
-        type: 'VULNERABILITY',
-        direction: 'ASC'
-      }
-    ]
+    awaitingSearch: false
   }),
   computed: {
     ...mapState(useFilterStore, ['assetFilter']),
