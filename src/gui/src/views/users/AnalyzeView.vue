@@ -3,7 +3,7 @@
     :items="report_items_data"
     :add-button="false"
     :search-bar="false"
-    :header-filter="['tag', 'completed', 'type', 'title', 'created']"
+    :header-filter="['completed', 'type', 'title', 'created']"
     sort-by-item="id"
     :action-column="true"
     @delete-item="deleteItem"
@@ -60,7 +60,6 @@ export default {
       return report_items.value.items.map((item) => {
         return {
           id: item.id,
-          tag: item.tag,
           completed: item.completed,
           title: item.title,
           created: item.created,

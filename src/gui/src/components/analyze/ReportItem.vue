@@ -106,6 +106,7 @@ import { createReportItem, updateReportItem } from '@/api/analyze'
 import AttributeItem from '@/components/analyze/AttributeItem.vue'
 import CardStory from '@/components/assess/CardStory.vue'
 import { useAnalyzeStore } from '@/stores/AnalyzeStore'
+import { notifyFailure } from '@/utils/helpers'
 import { mapActions, mapState } from 'pinia'
 
 export default {
@@ -223,11 +224,23 @@ export default {
     saveReportItem() {
       if (this.edit) {
         updateReportItem(this.report_item.id, this.report_item)
+          .then((response) => {
+            notifySuccess(`Report with ID ${response.data} updated`)
+          })
+          .catch(() => {
+            notifyFailure('Failed to update report item')
+          })
       } else {
-        createReportItem(this.report_item).then((response) => {
-          this.$router.push('/report/' + response.data)
-          this.$emit('reportcreated', response.data)
-        })
+        createReportItem(this.report_item)
+          .then((response) => {
+            this.$router.push('/report/' + response.data)
+            this.$emit('reportcreated', response.data)
+            notifySuccess(`Report with ID ${response.data} created`)
+            this.report_item.id = response.data
+          })
+          .catch(() => {
+            notifyFailure('Failed to create report item')
+          })
       }
     }
   }

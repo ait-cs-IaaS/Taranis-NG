@@ -52,7 +52,6 @@ export default {
       return this.default_report_item
     },
     reportCreated(report_item) {
-      notifySuccess(`Report with ID ${report_item} created`)
       this.edit = true
     }
   }
