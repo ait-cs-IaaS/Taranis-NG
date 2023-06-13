@@ -53,7 +53,6 @@ export default {
     }
 
     const formUpdated = () => {
-      console.debug('formUpdated')
       showForm.value = false
       updateData()
     }
@@ -88,6 +87,7 @@ export default {
     }
 
     const deleteItem = (item) => {
+      console.debug('deleteItem', item)
       deleteUser(item)
         .then(() => {
           notifySuccess(`Successfully deleted ${item.name}`)

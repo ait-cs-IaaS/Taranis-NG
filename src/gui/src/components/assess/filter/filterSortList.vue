@@ -49,7 +49,6 @@ export default {
   },
   methods: {
     updateSelected(data) {
-      console.debug('FilterSortList updateSelected', data)
       this.$emit('update:modelValue', data.id)
     },
     activeIcon(item) {

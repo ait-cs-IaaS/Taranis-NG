@@ -169,12 +169,9 @@ export default {
     ...mapActions(useAnalyzeStore, ['loadReportTypes']),
 
     updateSelectedReportType(value) {
-      console.debug('Report types', this.report_types)
-
       this.selected_report_type = this.report_types.find(
         (report_type) => report_type.id === value
       )
-      console.debug('update selected report type', value)
       console.debug('Selected report type', this.selected_report_type)
       this.report_item.report_item_type_id = value
       if (!this.selected_report_type) {
@@ -213,7 +210,6 @@ export default {
     },
 
     updateAttributeValues(key, values) {
-      console.debug(`updating ${key} with ${values}`)
       const attribute = this.report_item.attributes.find(
         (attr) => attr.attribute_group_item_id === parseInt(key)
       )

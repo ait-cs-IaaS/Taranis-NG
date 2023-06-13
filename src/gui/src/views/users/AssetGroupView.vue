@@ -31,7 +31,6 @@ export default {
     }
   },
   async created() {
-    console.debug('AssetGroupView created')
     this.asset = await this.loadAsset()
   },
   methods: {

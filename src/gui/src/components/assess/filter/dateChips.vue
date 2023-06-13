@@ -8,11 +8,13 @@
   >
     <v-btn variant="text" value="all">all</v-btn>
     <v-btn variant="text" value="today">today</v-btn>
-    <v-btn variant="text" value="week">one week</v-btn>
+    <v-btn variant="text" value="week">week</v-btn>
   </v-btn-toggle>
 </template>
 
 <script>
+import { ref, computed, defineEmits } from 'vue'
+
 export default {
   name: 'DateChips',
   props: {
@@ -21,16 +23,20 @@ export default {
       default: 'all'
     }
   },
-  emits: ['update:modelValue'],
-  computed: {
-    selected: {
-      get() {
-        return this.modelValue
-      },
-      set(val) {
-        console.debug('dateChips.setValue', val)
-        this.$emit('update:modelValue', val)
-      }
+  emits: defineEmits(['update:modelValue']),
+  setup(props, { emit }) {
+    const selected = ref(props.modelValue)
+
+    const updateSelected = (val) => {
+      selected.value = val
+      emit('update:modelValue', val)
+    }
+
+    return {
+      selected: computed({
+        get: () => selected.value,
+        set: updateSelected
+      })
     }
   }
 }

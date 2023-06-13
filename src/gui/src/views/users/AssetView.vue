@@ -34,7 +34,6 @@ export default {
     }
   },
   async created() {
-    console.debug('AssetView created')
     this.asset = await this.loadAsset()
   },
   methods: {

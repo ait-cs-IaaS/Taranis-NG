@@ -196,7 +196,6 @@ export default {
     }
 
     onMounted(() => {
-      console.debug('Loading ACL: ' + acl.value.id)
       loadUsers()
       loadRoles()
     })

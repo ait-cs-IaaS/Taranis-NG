@@ -118,12 +118,10 @@ export const useSettingsStore = defineStore('settings', {
   actions: {
     async loadUserProfile() {
       const response = await getProfile()
-      console.debug('loadUserProfile', response.data)
       this.setUserProfile(response.data)
     },
     async saveUserProfile(data) {
       const response = await updateProfile(data)
-      console.debug('saveUserProfile', response.data)
       this.setUserProfile(response.data)
     },
     setUserProfile(profile) {
