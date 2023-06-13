@@ -48,15 +48,15 @@ export default {
 
     const onButtonClick = (button) => {
       if (selectedButton.value === button) {
-        if (buttonState.value[button] === 'ASC') {
-          buttonState.value[button] = 'DESC'
-        } else if (buttonState.value[button] === 'DESC') {
+        if (buttonState.value[button] === 'DESC') {
+          buttonState.value[button] = 'ASC'
+        } else if (buttonState.value[button] === 'ASC') {
           buttonState.value[button] = ''
           selectedButton.value = ''
         }
       } else {
         selectedButton.value = button
-        buttonState.value[button] = 'ASC'
+        buttonState.value[button] = 'DESC'
       }
 
       if (selectedButton.value) {
@@ -70,6 +70,7 @@ export default {
     }
 
     function activeIcon(type) {
+      if (selectedButton.value !== type) return ''
       return buttonState.value[type] === 'ASC'
         ? 'mdi-arrow-up'
         : buttonState.value[type] === 'DESC'
