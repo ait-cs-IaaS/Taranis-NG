@@ -20,7 +20,6 @@
       <v-divider class="mt-0 mb-0"></v-divider>
       <v-row class="my-2 mr-0 px-2">
         <v-col cols="12" class="py-0">
-          <h4>{{ reportFilter }}</h4>
           <h4>filter by</h4>
         </v-col>
 
@@ -36,17 +35,6 @@
           />
         </v-col>
       </v-row>
-
-      <v-divider class="mt-0 mb-0"></v-divider>
-      <v-row class="my-2 mr-0 px-2">
-        <v-col cols="12" class="py-0">
-          <h4>sort by</h4>
-        </v-col>
-
-        <v-col cols="12" class="pt-2">
-          <filter-sort-list v-model="reportFilter.sort" :items="orderOptions" />
-        </v-col>
-      </v-row>
     </template>
   </filter-navigation>
 </template>
@@ -56,7 +44,6 @@ import { computed, onMounted, onUnmounted, watch } from 'vue'
 import { useAnalyzeStore } from '@/stores/AnalyzeStore'
 import { useFilterStore } from '@/stores/FilterStore'
 import FilterNavigation from '@/components/common/FilterNavigation.vue'
-import filterSortList from '@/components/assess/filter/filterSortList.vue'
 import dateChips from '@/components/assess/filter/dateChips.vue'
 import filterSelectList from '@/components/assess/filter/filterSelectList.vue'
 import { storeToRefs } from 'pinia'
@@ -68,7 +55,6 @@ export default {
   components: {
     dateChips,
     filterSelectList,
-    filterSortList,
     FilterNavigation
   },
   setup() {
