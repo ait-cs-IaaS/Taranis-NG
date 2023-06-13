@@ -118,16 +118,18 @@ export const useSettingsStore = defineStore('settings', {
   actions: {
     async loadUserProfile() {
       const response = await getProfile()
+      console.debug('loadUserProfile', response.data)
       this.setUserProfile(response.data)
     },
     async saveUserProfile(data) {
       const response = await updateProfile(data)
+      console.debug('saveUserProfile', response.data)
       this.setUserProfile(response.data)
     },
     setUserProfile(profile) {
-      this.spellcheck = profile.spellcheck || this.spellcheck
-      this.dark_theme = profile.dark_theme || this.dark_theme
-      this.browser_locale = profile.browser_locale || this.browser_locale
+      this.spellcheck = profile.spellcheck
+      this.dark_theme = profile.dark_theme
+      this.browser_locale = profile.browser_locale
       for (const hotkey of profile.hotkeys) {
         const stateHotkey = this.hotkeys.find((h) => h.alias === hotkey.alias)
         if (stateHotkey) {

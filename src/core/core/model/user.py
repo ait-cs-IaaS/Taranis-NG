@@ -185,7 +185,6 @@ class User(db.Model):
 
     @classmethod
     def update_profile(cls, user, data):
-        print(data)
         user.profile = NewUserProfileSchema().load(data)
 
         db.session.commit()

@@ -55,6 +55,7 @@ import { useAuthStore } from '@/stores/AuthStore'
 import { useSettingsStore } from '@/stores/SettingsStore'
 import { defineComponent, ref, computed, inject, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
 
 export default defineComponent({
   name: 'LoginView',
@@ -65,38 +66,44 @@ export default defineComponent({
     const login_error = ref(undefined)
     const coreAPIURL = inject('$coreAPIURL')
     const router = useRouter()
+    const authStore = useAuthStore()
     console.debug('coreAPIURL', coreAPIURL)
 
-    const acceptPassword = computed(() => password.value.length > 0)
-    const acceptUser = computed(() => username.value.length > 0)
+    const acceptPassword = computed(() =>
+      password.value.length > 0 ? true : 'Please enter a password'
+    )
+    const acceptUser = computed(() =>
+      username.value.length > 0 ? true : 'Please enter a username'
+    )
     const loginButtonDisabled = computed(
-      () => !acceptPassword.value || !acceptUser.value
+      () => password.value.length < 1 || username.value.length < 1
     )
 
-    const { isAuthenticated, login } = useAuthStore()
+    const { isAuthenticated } = storeToRefs(authStore)
     const { loadUserProfile } = useSettingsStore()
 
     const authenticate = () => {
-      login({ username: username.value, password: password.value }).then(
-        (error) => {
-          if (isAuthenticated) {
-            login_error.value = undefined
-            loadUserProfile()
-            router.push('/')
-          }
+      authStore
+        .login({ username: username.value, password: password.value })
+        .then((error) => {
           if (error) {
             if (error.status > 500) {
               login_error.value = 'login.backend_error'
             } else {
               login_error.value = 'login.error'
             }
+            return
           }
-        }
-      )
+
+          login_error.value = undefined
+          console.debug('login successful')
+          loadUserProfile()
+          router.push('/')
+        })
     }
 
     onMounted(() => {
-      if (isAuthenticated) {
+      if (isAuthenticated.value) {
         router.push('/')
       }
     })
