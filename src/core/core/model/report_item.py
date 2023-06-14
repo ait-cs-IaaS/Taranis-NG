@@ -250,7 +250,7 @@ class ReportItem(db.Model):
             query = query.filter(ReportItem.completed)
 
         if "incompleted" in filter and filter["incompleted"].lower() != "false":
-            query = query.filter(ReportItem.completed is False)
+            query = query.filter(ReportItem.completed == False)
 
         if "range" in filter and filter["range"].upper() != "ALL":
             filter_range = filter["range"].upper()
@@ -272,8 +272,6 @@ class ReportItem(db.Model):
                 query = query.order_by(db.asc(ReportItem.created))
         offset = filter.get("offset", 0)
         limit = filter.get("limit", 20)
-
-        logger.debug(query.statement.compile())
 
         return query.offset(offset).limit(limit).all(), query.count()
 

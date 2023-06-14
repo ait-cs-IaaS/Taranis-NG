@@ -76,9 +76,8 @@ export default {
       }
     })
     const filterAttributeOptions = [
-      { value: 'completed', label: 'completed', icon: 'mdi-progress-check' }
-      // Incopmlete filter not working => probably backend issue
-      // { value: 'incomplete', label: 'incomplete', icon: 'mdi-progress-close' }
+      { value: 'completed', label: 'completed', icon: 'mdi-progress-check' },
+      { value: 'incompleted', label: 'incomplete', icon: 'mdi-progress-close' }
     ]
 
     const filterAttribute = computed({

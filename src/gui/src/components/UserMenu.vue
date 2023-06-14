@@ -5,8 +5,10 @@
     </template>
     <v-list>
       <v-list-item prepend-icon="mdi-account" @click="userview">
-        <v-list-item-title>{{ username }}</v-list-item-title>
-        <v-list-item-subtitle>{{ organizationName }}</v-list-item-subtitle>
+        <v-list-item-title>{{ user.name }}</v-list-item-title>
+        <v-list-item-subtitle>{{
+          user.organization_name
+        }}</v-list-item-subtitle>
       </v-list-item>
       <v-divider></v-divider>
 
@@ -22,35 +24,36 @@
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
 import { useAuthStore } from '@/stores/AuthStore'
-import { mapActions, mapState } from 'pinia'
 import { useMainStore } from '@/stores/MainStore'
+import { useRouter } from 'vue-router'
 
-export default defineComponent({
+export default {
   name: 'UserMenu',
-  computed: {
-    ...mapState(useMainStore, ['user']),
-    username() {
-      return this.user.name
-    },
-    organizationName() {
-      return this.user.organization_name
-    }
-  },
-  methods: {
-    ...mapActions(useAuthStore, { storeLogout: 'logout' }),
-    async logout() {
-      this.storeLogout()
+  setup() {
+    const { user } = useMainStore()
+    const authStore = useAuthStore()
+    const router = useRouter()
+
+    const logout = async () => {
+      await authStore.logout()
       window.location.reload()
-    },
-    settings() {
-      this.$router.push({ path: '/user/settings' })
-    },
-    userview() {
-      this.$router.push({ path: '/user' })
+    }
+
+    const settings = () => {
+      router.push({ path: '/user/settings' })
+    }
+
+    const userview = () => {
+      router.push({ path: '/user' })
+    }
+
+    return {
+      user,
+      logout,
+      settings,
+      userview
     }
   }
-})
+}
 </script>

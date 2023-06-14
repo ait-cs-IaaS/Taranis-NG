@@ -28,7 +28,8 @@ export const useFilterStore = defineStore('filter', {
       search: undefined,
       sort: undefined,
       range: undefined,
-      completed: undefined
+      completed: undefined,
+      incompleted: undefined
     },
     productFilter: {
       offset: undefined,
