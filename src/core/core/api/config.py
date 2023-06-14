@@ -104,7 +104,12 @@ class ReportItemTypesConfig(Resource):
 
     @auth_required("CONFIG_REPORT_TYPE_CREATE")
     def post(self):
-        report_item_type.ReportItemType.add_report_item_type(request.json)
+        try:
+            item_id = report_item_type.ReportItemType.add_report_item_type(request.json)
+            return {"message": "Report item type added", "id": item_id}, 201
+        except Exception:
+            logger.exception("Failed to add report item type")
+            return {"message": "Failed to add report item type"}, 500
 
 
 class ReportItemType(Resource):

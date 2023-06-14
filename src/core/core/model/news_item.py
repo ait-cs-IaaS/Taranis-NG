@@ -674,7 +674,9 @@ class NewsItemAggregate(db.Model):
                 NewsItemTag,
                 NewsItemAggregate.id == NewsItemTag.n_i_a_id,
             )
-            query = query.filter(NewsItemTag.name.in_(tags.split(",")))
+            query = query.filter(NewsItemTag.name.in_(tags))
+            # for tag in tags:
+            #     query = query.filter(NewsItemTag.name.in_(tag))
 
         filter_range = filter.get("range", "").lower()
         if filter_range and filter_range in ["day", "week", "month"]:

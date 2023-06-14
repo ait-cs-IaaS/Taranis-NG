@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia'
 import { getProfile, updateProfile } from '@/api/user'
+import { i18n } from '@/i18n/i18n'
+import { vuetify } from '@/plugins/vuetify'
 
 export const useSettingsStore = defineStore('settings', {
   state: () => ({
@@ -108,13 +110,8 @@ export const useSettingsStore = defineStore('settings', {
     ],
     spellcheck: true,
     dark_theme: false,
-    browser_locale: window.navigator.language.split('-')[0]
+    language: 'en'
   }),
-  getters: {
-    getProfileBrowserLocale() {
-      return this.browser_locale.replace('-', '_')
-    }
-  },
   actions: {
     async loadUserProfile() {
       const response = await getProfile()
@@ -127,7 +124,11 @@ export const useSettingsStore = defineStore('settings', {
     setUserProfile(profile) {
       this.spellcheck = profile.spellcheck
       this.dark_theme = profile.dark_theme
-      this.browser_locale = profile.browser_locale
+      this.language = profile.language
+
+      i18n.global.locale.value = profile.language
+      vuetify.theme.global.name.value = profile.dark_theme ? 'dark' : 'light'
+
       for (const hotkey of profile.hotkeys) {
         const stateHotkey = this.hotkeys.find((h) => h.alias === hotkey.alias)
         if (stateHotkey) {

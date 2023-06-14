@@ -207,6 +207,7 @@ export default defineComponent({
     },
     deleteItems(items) {
       items.forEach((item) => this.deleteItem({ id: item }))
+      this.selected = []
     },
     updateItems() {
       this.$emit('update-items')

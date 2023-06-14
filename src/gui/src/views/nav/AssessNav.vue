@@ -47,7 +47,7 @@
 
       <v-row class="my-2 mr-0 px-2">
         <v-col cols="12" class="py-0">
-          <h4>filter</h4>
+          <h4>Filter</h4>
         </v-col>
 
         <v-col cols="12" class="pb-0">
@@ -73,7 +73,7 @@
 
       <v-row class="my-2 mr-0 px-2">
         <v-col cols="12" class="py-0">
-          <h4>sort</h4>
+          <h4>Sort</h4>
         </v-col>
 
         <v-col cols="12" class="pt-2">
@@ -84,13 +84,13 @@
       <v-divider class="mt-1 mb-0"></v-divider>
       <v-row class="my-2 mr-0 px-2">
         <v-col cols="12" class="py-0">
-          <h4>Set Chart properties</h4>
+          <h4>Chart Properties</h4>
         </v-col>
-        <v-col cols="4" class="pt-2"> Threshold: </v-col>
+        <v-col cols="4" class="pt-2">threshold:</v-col>
         <v-col cols="8" class="pt-2">
           <input v-model="chartFilter.threshold" type="number" min="0"
         /></v-col>
-        <v-col cols="4" class="pt-2"> y2 Max: </v-col>
+        <v-col cols="4" class="pt-2">y2 Max:</v-col>
         <v-col cols="8" class="pt-2">
           <input v-model="chartFilter.y2max" type="number" min="0" />
         </v-col>

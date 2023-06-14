@@ -29,7 +29,6 @@
             <v-switch
               v-model="dark_theme"
               :label="$t('settings.dark_theme')"
-              @change="darkToggle"
             ></v-switch>
           </v-col>
         </v-row>
@@ -41,8 +40,6 @@
               :item-title="(item) => item.value + ' - ' + item.text"
               hint="Select your locale"
               :label="$t('settings.locale')"
-              solo
-              persistent-hint
             ></v-autocomplete>
           </v-col>
         </v-row>
@@ -74,11 +71,10 @@
     </v-card>
   </v-container>
 </template>
+
 <script>
 import { ref, computed, watchEffect } from 'vue'
 import { useSettingsStore } from '@/stores/SettingsStore'
-import { useI18n } from 'vue-i18n'
-import { useTheme } from 'vuetify'
 import { storeToRefs } from 'pinia'
 import { onMounted } from 'vue'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
@@ -89,21 +85,11 @@ export default {
     const pressKeyVisible = ref(false)
     const hotkeyAlias = ref('')
     const shortcuts = ref([])
-    const { locale } = useI18n({ useScope: 'global' })
-    const theme = useTheme()
 
     const settingsStore = useSettingsStore()
 
-    const { hotkeys, dark_theme, spellcheck, browser_locale } =
+    const { hotkeys, dark_theme, spellcheck, language } =
       storeToRefs(settingsStore)
-
-    const language = computed({
-      get: () => browser_locale.value,
-      set: (value) => {
-        locale.value = value
-        browser_locale.value = value
-      }
-    })
 
     const locale_descriptions = computed(() => [
       { value: 'en', text: 'English' },
@@ -117,7 +103,7 @@ export default {
           spellcheck: spellcheck.value,
           dark_theme: dark_theme.value,
           hotkeys: shortcuts.value,
-          language: browser_locale.value
+          language: language.value
         })
         .then(() => {
           notifySuccess('notification.successful_update')
@@ -125,10 +111,6 @@ export default {
         .catch(() => {
           notifyFailure('notification.failed_update')
         })
-    }
-
-    const darkToggle = () => {
-      theme.global.name.value = dark_theme.value ? 'dark' : 'light'
     }
 
     const pressKeyDialog = (event) => {
@@ -197,7 +179,6 @@ export default {
       spellcheck,
       hotkeys,
       save,
-      darkToggle,
       pressKeyDialog,
       pressKey
     }

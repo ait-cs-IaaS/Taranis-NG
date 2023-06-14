@@ -135,15 +135,6 @@ export const router = createRouter({
       meta: { requiresAuth: true, requiresPerm: [Permissions.MY_ASSETS_CONFIG] }
     },
     {
-      path: '/user/wordlists',
-      name: 'user-wordlists',
-      components: {
-        default: () => import('@/views/users/settings/UserWordLists.vue'),
-        nav: () => import('@/views/nav/UserNav.vue')
-      },
-      meta: { requiresAuth: true, requiresPerm: [Permissions.MY_ASSETS_CONFIG] }
-    },
-    {
       path: '/config/dashboard',
       alias: '/config',
       name: 'configDashboard',

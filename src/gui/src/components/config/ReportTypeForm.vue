@@ -1,6 +1,6 @@
 <template>
   <v-container fluid class="ma-5 mt-5 pa-5 pt-0">
-    <v-form id="form" ref="form" @submit.prevent="add">
+    <v-form id="form" ref="form" validate-on="submit" @submit.prevent="add">
       <v-row no-gutters>
         <v-btn type="submit" color="success" class="mr-4"> Submit </v-btn>
       </v-row>
@@ -62,7 +62,6 @@
                 v-model="group.description"
                 :label="$t('report_type.description')"
                 name="group_description"
-                :spellcheck="spellcheck"
               ></v-textarea>
               <v-text-field
                 v-model="group.section_title"
@@ -107,7 +106,7 @@ export default {
     }
   },
   emits: ['updated'],
-  setup(props) {
+  setup(props, { emit }) {
     const report_type = ref(props.reportTypeData)
 
     const updateAttributeGroupItems = (index, items) => {
@@ -154,47 +153,39 @@ export default {
     const add = () => {
       console.debug('Submitting: ')
       console.debug(report_type.value.attribute_groups)
-      $validator.validateAll().then(() => {
-        if (!$validator.errors.any()) {
-          for (let x = 0; x < report_type.value.attribute_groups.length; x++) {
-            report_type.value.attribute_groups[x].index = x
+      for (let x = 0; x < report_type.value.attribute_groups.length; x++) {
+        report_type.value.attribute_groups[x].index = x
 
-            for (
-              let y = 0;
-              y <
-              report_type.value.attribute_groups[x].attribute_group_items
-                .length;
-              y++
-            ) {
-              report_type.value.attribute_groups[x].attribute_group_items[
-                y
-              ].index = y
-            }
-          }
-
-          if (edit.value) {
-            updateReportItemType(report_type.value)
-              .then(() => {
-                $validator.reset()
-                notifySuccess('report_type.successful_edit')
-              })
-              .catch(() => {
-                notifyFailure('report_type.error')
-              })
-          } else {
-            createReportItemType(report_type.value)
-              .then(() => {
-                $validator.reset()
-                notifySuccess('report_type.successful')
-              })
-              .catch(() => {
-                notifyFailure('report_type.error')
-              })
-          }
-        } else {
-          notifyFailure('report_type.validation_error')
+        for (
+          let y = 0;
+          y <
+          report_type.value.attribute_groups[x].attribute_group_items.length;
+          y++
+        ) {
+          report_type.value.attribute_groups[x].attribute_group_items[y].index =
+            y
         }
-      })
+      }
+
+      if (props.edit) {
+        updateReportItemType(report_type.value)
+          .then(() => {
+            notifySuccess('report_type.successful_edit')
+            emit('updated')
+          })
+          .catch(() => {
+            notifyFailure('report_type.error')
+          })
+      } else {
+        createReportItemType(report_type.value)
+          .then(() => {
+            notifySuccess('report_type.successful')
+            emit('updated')
+          })
+          .catch(() => {
+            notifyFailure('report_type.error')
+          })
+      }
     }
 
     return {
