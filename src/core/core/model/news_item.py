@@ -50,7 +50,7 @@ class NewsItemData(db.Model):
     published = db.Column(db.DateTime, default=datetime.now())
     updated = db.Column(db.DateTime, default=datetime.now())
 
-    attributes = db.relationship("NewsItemAttribute", secondary="news_item_data_news_item_attribute")
+    attributes = db.relationship("NewsItemAttribute", secondary="news_item_data_news_item_attribute", cascade="all, delete")
 
     osint_source_id = db.Column(db.String, db.ForeignKey("osint_source.id"), nullable=True)
     osint_source = db.relationship("OSINTSource")
@@ -218,7 +218,7 @@ class NewsItem(db.Model):
     relevance = db.Column(db.Integer, default=0)
 
     news_item_data_id = db.Column(db.String, db.ForeignKey("news_item_data.id"))
-    news_item_data = db.relationship("NewsItemData")
+    news_item_data = db.relationship("NewsItemData", cascade="all, delete")
 
     news_item_aggregate_id = db.Column(db.Integer, db.ForeignKey("news_item_aggregate.id"))
 
@@ -763,6 +763,10 @@ class NewsItemAggregate(db.Model):
 
         NewsItemAggregateSearchIndex.prepare(aggregate)
 
+        db.session.commit()
+
+        return aggregate
+
     @classmethod
     def add_news_items(cls, news_items_data_list):
         try:
@@ -914,8 +918,8 @@ class NewsItemAggregate(db.Model):
         return "success", 200
 
     @classmethod
-    def delete(cls, id, user):
-        if cls.is_assigned_to_report({id}):
+    def delete_by_id(cls, id, user):
+        if cls.is_assigned_to_report([id]):
             return "aggregate_in_use", 500
 
         aggregate = cls.find(id)
@@ -930,6 +934,9 @@ class NewsItemAggregate(db.Model):
 
         return "success", 200
 
+    def delete(self, user):
+        return self.delete_by_id(self.id, user)
+
     @classmethod
     def is_assigned_to_report(cls, aggregate_ids: list) -> bool:
         return any(ReportItemNewsItemAggregate.assigned(aggregate_id) for aggregate_id in aggregate_ids)
@@ -937,7 +944,10 @@ class NewsItemAggregate(db.Model):
     @classmethod
     def update_tags(cls, news_item_aggregate_id: int, tags: list) -> tuple[str, int]:
         try:
+            print(news_item_aggregate_id)
             n_i_a = cls.find(news_item_aggregate_id)
+            if not n_i_a:
+                return "not_found", 404
             for tag in tags:
                 if type(tag) is dict:
                     tag_name = tag["name"]
@@ -1179,8 +1189,8 @@ class NewsItemTag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255))
     tag_type = db.Column(db.String(255))
-    n_i_a_id = db.Column(db.ForeignKey(NewsItemAggregate.id, ondelete="CASCADE"), nullable=False)
-    n_i_a = db.relationship(NewsItemAggregate, backref="tags")
+    n_i_a_id = db.Column(db.ForeignKey(NewsItemAggregate.id))
+    n_i_a = db.relationship(NewsItemAggregate, backref=orm.backref("tags", cascade="all, delete-orphan"))
 
     def __init__(self, name, tag_type):
         self.id = None
@@ -1205,7 +1215,7 @@ class NewsItemTag(db.Model):
             .subquery()
         )
 
-        if db.session.bind.dialect.name == "sqlite":
+        if db.session.get_bind().dialect.name == "sqlite":
             group_concat_fn = func.group_concat(subquery.c.created)
         else:
             group_concat_fn = func.array_agg(subquery.c.created)
@@ -1222,7 +1232,7 @@ class NewsItemTag(db.Model):
             return []
         results = []
         for cluster in clusters:
-            if db.session.bind.dialect.name == "sqlite":
+            if db.session.get_bind().dialect.name == "sqlite":
                 published = list(cluster[2].split(","))
             else:
                 published = [dt.isoformat() for dt in cluster[2]]
