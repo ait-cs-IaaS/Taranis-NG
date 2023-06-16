@@ -19,6 +19,18 @@ def client(app):
     yield app.test_client()
 
 
+@pytest.fixture
+def db_persistent_session(app):
+    """
+    Do not delete the dbsession automatically.
+    Use this fixture for debugging the database
+    """
+    with app.app_context():
+        from core.managers.db_manager import db
+
+        yield db.session
+
+
 @pytest.fixture()
 def _db(app):
     with app.app_context():
