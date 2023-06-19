@@ -12,16 +12,14 @@
         </v-col>
       </v-row>
 
-      <v-infinite-scroll :items="items" :on-load="loadMore">
-        <template v-for="newsItem in items" :key="newsItem.id">
-          <card-story
-            :story="newsItem"
-            :selected="newsItemsSelection.includes(newsItem.id)"
-            @delete-item="removeAndDeleteNewsItem(newsItem.id)"
-            @select-item="selectNewsItem(newsItem.id)"
-          />
-        </template>
-      </v-infinite-scroll>
+      <card-story
+        v-for="newsItem in items"
+        :key="newsItem.id"
+        :story="newsItem"
+        :selected="newsItemsSelection.includes(newsItem.id)"
+        @delete-item="removeAndDeleteNewsItem(newsItem.id)"
+        @select-item="selectNewsItem(newsItem.id)"
+      />
     </v-container>
 
     <!-- TODO: Loader not working -->
@@ -73,6 +71,7 @@ export default defineComponent({
     const { newsItems, newsItemsSelection } = storeToRefs(assessStore)
     const {
       updateNewsItems,
+      selectNewsItem,
       updateOSINTSourceGroupsList,
       updateOSINTSources,
       clearNewsItemSelection
@@ -138,6 +137,7 @@ export default defineComponent({
       activeSelection,
       removeAndDeleteNewsItem,
       loadNext,
+      selectNewsItem,
       loadMore
     }
   }
