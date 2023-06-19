@@ -1,6 +1,7 @@
 from marshmallow import fields, post_load
 from sqlalchemy import or_, orm
 from werkzeug.security import generate_password_hash
+from typing import Any
 
 from core.managers.db_manager import db
 from core.model.role import Role
@@ -43,11 +44,11 @@ class User(db.Model):
     profile_id = db.Column(db.Integer, db.ForeignKey("user_profile.id"))
     profile = db.relationship("UserProfile", cascade="all")
 
-    def __init__(self, id, username, name, password, organization, roles, permissions):
-        self.id = id if id > 0 else None
+    def __init__(self, username, name, password, organization, roles, permissions, id=None):
+        self.id = id
         self.username = username
         self.name = name
-        self.password = password
+        self.password = generate_password_hash(password, method="sha256")
         self.organization = Organization.find(organization["id"]) if isinstance(organization, dict) else Organization.find(organization.id)
         self.roles = [Role.find(role.id) for role in roles]
         self.permissions = [Permission.find(permission.id) for permission in permissions]
@@ -94,21 +95,75 @@ class User(db.Model):
     @classmethod
     def get_all_json(cls, search=None):
         users, count = cls.get(search, None)
-        user_schema = UserPresentationSchema(many=True)
-        return {"total_count": count, "items": user_schema.dump(users)}
+        items = [user.to_dict() for user in users]
+        return {"total_count": count, "items": items}
+
+    @classmethod
+    def load_multiple(cls, json_data: list[dict[str, Any]]) -> list["Role"]:
+        return [cls.from_dict(data) for data in json_data]
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "Role":
+        return cls(**data)
+
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+    @classmethod
+    def add_new(cls, data):
+        user = cls.from_dict(data)
+        db.session.add(user)
+        db.session.commit()
+        return
+
+    @classmethod
+    def update(cls, user_id, data) -> tuple[str, int]:
+        user = cls.query.get(user_id)
+        if user is None:
+            return f"User {user_id} not found", 404
+        updated_user = cls.from_dict(data)
+        for key, value in vars(updated_user).items():
+            if hasattr(user, key) and key != "id":
+                setattr(user, key, value)
+
+        db.session.commit()
+        return f"User {user_id} updated", 200
+
+    def get_permissions(self):
+        all_permissions = {permission.id for permission in self.permissions}
+
+        for role in self.roles:
+            all_permissions.update(role.get_permissions())
+        return list(all_permissions)
+
+    def get_current_organization_name(self):
+        return self.organization.name if self.organization else ""
+
+    @classmethod
+    def get_profile_json(cls, user):
+        return UserProfileSchema().dump(user.profile)
+
+    @classmethod
+    def update_profile(cls, user, data):
+        user.profile = NewUserProfileSchema().load(data)
+        db.session.commit()
+        return cls.get_profile_json(user)
+
+    @classmethod
+    def delete(cls, id):
+        user = cls.query.get(id)
+        db.session.delete(user)
+        db.session.commit()
+
+    ##
+    # External User Management - TODO: Check if this is still needed
+    ##
 
     @classmethod
     def get_all_external_json(cls, user, search):
         users, count = cls.get(search, user.organization)
         user_schema = UserPresentationSchema(many=True)
         return {"total_count": count, "items": user_schema.dump(users)}
-
-    @classmethod
-    def add_new(cls, data):
-        user = NewUserSchema().load(data)
-        user.password = generate_password_hash(user.password, method="sha256")
-        db.session.add(user)
-        db.session.commit()
 
     @classmethod
     def add_new_external(cls, user, permissions, data):
@@ -120,22 +175,6 @@ class User(db.Model):
                 new_user.permissions.remove(permission)
 
         db.session.add(new_user)
-        db.session.commit()
-
-    @classmethod
-    def update(cls, user_id, data):
-        schema = NewUserSchema()
-        user = cls.query.get(user_id)
-        if "password" not in data:
-            data["password"] = ""
-        updated_user = schema.load(data)
-        if updated_user.password:
-            user.password = generate_password_hash(updated_user.password, method="sha256")
-        user.username = updated_user.username
-        user.name = updated_user.name
-        user.organization = updated_user.organization
-        user.roles = updated_user.roles
-        user.permissions = updated_user.permissions
         db.session.commit()
 
     @classmethod
@@ -157,39 +196,11 @@ class User(db.Model):
             db.session.commit()
 
     @classmethod
-    def delete(cls, id):
-        user = cls.query.get(id)
-        db.session.delete(user)
-        db.session.commit()
-
-    @classmethod
     def delete_external(cls, user, id):
         existing_user = cls.query.get(id)
         if user.organization == existing_user.organization:
             db.session.delete(existing_user)
             db.session.commit()
-
-    def get_permissions(self):
-        all_permissions = {permission.id for permission in self.permissions}
-
-        for role in self.roles:
-            all_permissions.update(role.get_permissions())
-        return list(all_permissions)
-
-    def get_current_organization_name(self):
-        return self.organization.name if self.organization else ""
-
-    @classmethod
-    def get_profile_json(cls, user):
-        return UserProfileSchema().dump(user.profile)
-
-    @classmethod
-    def update_profile(cls, user, data):
-        user.profile = NewUserProfileSchema().load(data)
-
-        db.session.commit()
-
-        return cls.get_profile_json(user)
 
 
 class UserRole(db.Model):

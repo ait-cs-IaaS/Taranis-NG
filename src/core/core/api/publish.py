@@ -38,7 +38,7 @@ class Product(Resource):
 
     @auth_required("PUBLISH_UPDATE", ACLCheck.PRODUCT_TYPE_MODIFY)
     def put(self, product_id):
-        product.Product.update_product(product_id, request.json)
+        product.Product.update(product_id, request.json)
 
     @auth_required("PUBLISH_DELETE", ACLCheck.PRODUCT_TYPE_MODIFY)
     def delete(self, product_id):

@@ -2,6 +2,7 @@ from sqlalchemy import func, or_
 
 from core.managers.db_manager import db
 from shared.schema.role import PermissionSchema
+from typing import Any
 
 
 class Permission(db.Model):
@@ -38,11 +39,10 @@ class Permission(db.Model):
         query = cls.query
 
         if search is not None:
-            search_string = f"%{search.lower()}%"
             query = query.filter(
                 or_(
-                    func.lower(Permission.name).like(search_string),
-                    func.lower(Permission.description).like(search_string),
+                    Permission.name.ilike(f"%{search}%"),
+                    Permission.description.ilike(f"%{search}%"),
                 )
             )
 
@@ -51,5 +51,16 @@ class Permission(db.Model):
     @classmethod
     def get_all_json(cls, search):
         permissions, count = cls.get(search)
-        permissions_schema = PermissionSchema(many=True)
-        return {"total_count": count, "items": permissions_schema.dump(permissions)}
+        items = [permission.to_dict() for permission in permissions]
+        return {"total_count": count, "items": items}
+
+    @classmethod
+    def load_multiple(cls, json_data: list[dict[str, Any]]) -> list["Permission"]:
+        return [cls.from_dict(data) for data in json_data]
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "Permission":
+        return cls(**data)
+
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}

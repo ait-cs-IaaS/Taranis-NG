@@ -37,11 +37,10 @@ class Publisher(db.Model):
         query = cls.query
 
         if search is not None:
-            search_string = f"%{search}%"
             query = query.filter(
                 or_(
-                    Publisher.name.ilike(search_string),
-                    Publisher.description.ilike(search_string),
+                    Publisher.name.ilike(f"%{search}%"),
+                    Publisher.description.ilike(f"%{search}%"),
                 )
             )
 
@@ -51,7 +50,6 @@ class Publisher(db.Model):
     def get_all_json(cls, search):
         publishers, count = cls.get(search)
         items = [publisher.to_dict() for publisher in publishers]
-
         return {"total_count": count, "items": items}
 
     def to_dict(self):
@@ -67,15 +65,15 @@ class Publisher(db.Model):
         return cls(parameters=parameters, **data)
 
     @classmethod
-    def add(cls, data):
+    def add(cls, data) -> tuple[str, int]:
         if cls.find_by_type(data["type"]):
-            return "Publisher type already exists"
+            return "Publisher type already exists", 400
 
         publisher = cls.from_dict(data)
 
         db.session.add(publisher)
         db.session.commit()
-        return publisher.id
+        return f"Updated publisher {publisher.id}", 200
 
     @classmethod
     def get_first(cls):

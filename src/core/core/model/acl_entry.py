@@ -1,6 +1,7 @@
 from sqlalchemy import func, or_, orm, and_
 from marshmallow import fields, post_load
 from flask_sqlalchemy import query
+from typing import Any
 
 from core.managers.db_manager import db
 from core.model.role import Role
@@ -70,11 +71,10 @@ class ACLEntry(db.Model):
         query = cls.query
 
         if search is not None:
-            search_string = f"%{search.lower()}%"
             query = query.filter(
                 or_(
-                    func.lower(ACLEntry.name).like(search_string),
-                    func.lower(ACLEntry.description).like(search_string),
+                    ACLEntry.name.ilike(f"%{search}%"),
+                    ACLEntry.description.ilike(f"%{search}%"),
                 )
             )
 
@@ -83,15 +83,26 @@ class ACLEntry(db.Model):
     @classmethod
     def get_all_json(cls, search):
         acls, count = cls.get(search)
-        acl_schema = ACLEntryPresentationSchema(many=True)
-        return {"total_count": count, "items": acl_schema.dump(acls)}
+        items = [acl.to_dict() for acl in acls]
+        return {"total_count": count, "items": items}
+
+    @classmethod
+    def load_multiple(cls, json_data: list[dict[str, Any]]) -> list["ACLEntry"]:
+        return [cls.from_dict(data) for data in json_data]
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "ACLEntry":
+        return cls(**data)
+
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
     @classmethod
     def add_new(cls, data):
-        new_acl_schema = NewACLEntrySchema()
-        acl = new_acl_schema.load(data)
+        acl = cls.from_dict(data)
         db.session.add(acl)
         db.session.commit()
+        return f"Successfully Added {acl.id}", 201
 
     @classmethod
     def update(cls, acl_id, data):

@@ -1,5 +1,6 @@
 from marshmallow import post_load, fields
 from sqlalchemy import func, or_, orm
+from typing import Any
 
 from core.managers.db_manager import db
 from core.model.address import NewAddressSchema
@@ -46,11 +47,10 @@ class Organization(db.Model):
         query = cls.query
 
         if search is not None:
-            search_string = f"%{search.lower()}%"
             query = query.filter(
                 or_(
-                    func.lower(Organization.name).like(search_string),
-                    func.lower(Organization.description).like(search_string),
+                    Organization.name.ilike(f"%{search}%"),
+                    Organization.description.ilike(f"%{search}%"),
                 )
             )
 
@@ -59,29 +59,42 @@ class Organization(db.Model):
     @classmethod
     def get_all_json(cls, search):
         organizations, count = cls.get(search)
-        organizations_schema = OrganizationPresentationSchema(many=True)
-        return {"total_count": count, "items": organizations_schema.dump(organizations)}
+        items = [organization.to_dict() for organization in organizations]
+        return {"total_count": count, "items": items}
+
+    @classmethod
+    def load_multiple(cls, json_data: list[dict[str, Any]]) -> list["Organization"]:
+        return [cls.from_dict(data) for data in json_data]
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "Organization":
+        return cls(**data)
+
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
     @classmethod
     def add_new(cls, data):
-        new_organization_schema = NewOrganizationSchema()
-        organization = new_organization_schema.load(data, partial=True)
-        db.session.add(organization.address)
+        # if "address" in data:
+        #    address = data["address"]
+        #    del data["address"]
+        organization = cls.from_dict(data)
         db.session.add(organization)
         db.session.commit()
 
     @classmethod
-    def update(cls, organization_id, data):
-        schema = NewOrganizationSchema()
-        updated_organization = schema.load(data)
+    def update(cls, organization_id, data) -> tuple[str, int]:
         organization = cls.query.get(organization_id)
-        organization.name = updated_organization.name
-        organization.description = updated_organization.description
-        organization.address.street = updated_organization.address.street
-        organization.address.city = updated_organization.address.city
-        organization.address.zip = updated_organization.address.zip
-        organization.address.country = updated_organization.address.country
+        if organization is None:
+            return f"Organization with id {organization_id} not found", 404
+
+        new_organization = cls.from_dict(data)
+        for key, value in vars(new_organization).items():
+            if hasattr(organization, key) and key != "id":
+                setattr(organization, key, value)
+
         db.session.commit()
+        return f"Successfully updated {organization.id}", 200
 
     @classmethod
     def delete(cls, id):

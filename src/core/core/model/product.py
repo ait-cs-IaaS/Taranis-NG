@@ -153,16 +153,17 @@ class Product(db.Model):
         return cls(**data)
 
     @classmethod
-    def update_product(cls, product_id, product_data):
+    def update(cls, product_id, data) -> tuple[str, int]:
         product = Product.find(product_id)
         if product is None:
-            return None
-        new_product = cls.from_dict(product_data)
+            return f"Product {product_id} not found", 404
+        new_product = cls.from_dict(data)
         for key, value in vars(new_product).items():
             if hasattr(product, key) and key != "id":
                 setattr(product, key, value)
 
         db.session.commit()
+        return f"Product {product_id} updated", 200
 
     @classmethod
     def delete(cls, id):

@@ -163,7 +163,7 @@ paths:
                     type: boolean
                     example: True
 
-  /users/my-profile:
+  /users/profile:
     get:
       tags: [users]
       summary: get the user's profile

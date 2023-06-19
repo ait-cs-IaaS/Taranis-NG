@@ -53,11 +53,12 @@ class Role(db.Model):
     @classmethod
     def get_all_json(cls, search):
         roles, count = cls.get(search)
-        return {"total_count": count, "items": cls.to_dict(roles)}
+        items = [role.to_dict() for role in roles]
+        return {"total_count": count, "items": items}
 
     @classmethod
-    def load_multiple(cls, data: list[dict[str, Any]]) -> list["Role"]:
-        return [cls.from_dict(publisher_data) for publisher_data in data]
+    def load_multiple(cls, json_data: list[dict[str, Any]]) -> list["Role"]:
+        return [cls.from_dict(data) for data in json_data]
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Role":
