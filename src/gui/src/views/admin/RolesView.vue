@@ -86,6 +86,7 @@ export default {
 
     const addItem = () => {
       formData.value = objectFromFormat(formFormat.value)
+      delete formData.value['id']
       edit.value = false
     }
 
