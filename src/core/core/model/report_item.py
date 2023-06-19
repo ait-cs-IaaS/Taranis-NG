@@ -57,14 +57,14 @@ class ReportItemAttribute(db.Model):
 
     def __init__(
         self,
-        id,
         value,
         binary_mime_type,
         binary_description,
         attribute_group_item_id,
         attribute_group_item_title,
+        id=None,
     ):
-        self.id = None
+        self.id = id
         self.value = value
         self.binary_mime_type = binary_mime_type
         self.binary_description = binary_description
@@ -78,6 +78,17 @@ class ReportItemAttribute(db.Model):
     @staticmethod
     def sort(report_item_attribute):
         return report_item_attribute.last_updated
+
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+    @classmethod
+    def from_dict(cls, data) -> "ReportItemAttribute":
+        return cls(**data)
+
+    @classmethod
+    def load_multiple(cls, data: list[dict[str, Any]]) -> list["ReportItemAttribute"]:
+        return [cls.from_dict(item) for item in data]
 
 
 class NewReportItemSchema(ReportItemBaseSchema):
@@ -132,7 +143,6 @@ class ReportItem(db.Model):
 
     def __init__(
         self,
-        id,
         uuid,
         title,
         title_prefix,
@@ -141,6 +151,7 @@ class ReportItem(db.Model):
         remote_report_items,
         attributes,
         completed,
+        id=None,
     ):
         self.id = id
 
@@ -329,7 +340,7 @@ class ReportItem(db.Model):
 
     @classmethod
     def add_report_item(cls, report_item_data, user):
-        report_item = NewReportItemSchema().load(report_item_data)
+        report_item = cls.from_dict(report_item_data)
 
         if not ReportItemType.allowed_with_acl(report_item.report_item_type_id, user, False, False, True):
             return report_item, 401
@@ -367,11 +378,10 @@ class ReportItem(db.Model):
             return None, 404
 
         if not ReportItemType.allowed_with_acl(report_item.report_item_type_id, user, False, False, True):
-            return report_item, 401
+            return f"User {user.id} is not allowed to update Report {report_item.id}", 401
 
         for aggregate_id in aggregate_ids:
-            aggregate = NewsItemAggregate.find(aggregate_id)
-            report_item.news_item_aggregates.append(aggregate)
+            report_item.news_item_aggregates.append(NewsItemAggregate.find(aggregate_id))
 
         db.session.commit()
 
@@ -402,6 +412,19 @@ class ReportItem(db.Model):
         db.session.commit()
 
         return f"Successfully updated: {report_item.id}", 200
+
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+    @classmethod
+    def from_dict(cls, data) -> "ReportItem":
+        logger.debug(f"Creating ReportItem from {data}")
+        attributes = ReportItemAttribute.load_multiple(data["attributes"])
+        return cls(attributes=attributes, **data)
+
+    @classmethod
+    def load_multiple(cls, data: list[dict[str, Any]]) -> list["ReportItem"]:
+        return [cls.from_dict(report_item) for report_item in data]
 
     @classmethod
     def get_updated_data(cls, id, data):
@@ -445,7 +468,7 @@ class ReportItem(db.Model):
                             data["attribute_value"] = attribute.value
                             data["binary_mime_type"] = attribute.binary_mime_type
                             data["binary_description"] = attribute.binary_description
-                            data["attribute_last_updated"] = attribute.last_updated.strftime("%d.%m.%Y - %H:%M")
+                            data["attribute_last_updated"] = attribute.last_updated.isoformat()
                             break
 
         return data
@@ -455,14 +478,13 @@ class ReportItem(db.Model):
         report_item = cls.query.get(id)
         file_data = file.read()
         new_attribute = ReportItemAttribute(
-            None,
-            file.filename,
-            file.mimetype,
-            len(file_data),
-            description,
-            attribute_group_item_id,
-            None,
+            value=file.filename,
+            binary_description=file.filename,
+            binary_mime_type=file.mimetype,
+            attribute_group_item_title=description,
+            attribute_group_item_id=attribute_group_item_id,
         )
+
         new_attribute.binary_data = file_data
         report_item.attributes.append(new_attribute)
 
@@ -513,7 +535,7 @@ class ReportItem(db.Model):
 
     def update_cpes(self):
         self.report_item_cpes = []
-        if self.completed is True:
+        if self.completed:
             for attribute in self.attributes:
                 attribute_group = AttributeGroupItem.find(attribute.attribute_group_item_id)
                 if attribute_group.attribute.type == AttributeType.CPE:

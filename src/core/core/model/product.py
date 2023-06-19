@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import sqlalchemy
 from marshmallow import fields
 from marshmallow import post_load
@@ -36,19 +36,17 @@ class Product(db.Model):
 
     report_items = db.relationship("ReportItem", secondary="product_report_item")
 
-    def __init__(self, id, title, description, product_type_id, report_items):
-        self.id = id if id != -1 else None
+    def __init__(self, title, description, product_type_id, report_items, id=None):
+        self.id = id
         self.title = title
         self.description = description
         self.product_type_id = product_type_id
-        self.subtitle = ""
         self.tag = ""
 
         self.report_items = [ReportItem.find(report_item.id) for report_item in report_items]
 
     @orm.reconstructor
     def reconstruct(self):
-        self.subtitle = self.description
         self.tag = "mdi-file-pdf-outline"
 
     @classmethod
@@ -57,8 +55,7 @@ class Product(db.Model):
 
     @classmethod
     def find(cls, product_id):
-        product = cls.query.get(product_id)
-        return product
+        return cls.query.get(product_id)
 
     @classmethod
     def get_detail_json(cls, product_id):
@@ -67,13 +64,13 @@ class Product(db.Model):
         return products_schema.dump(product)
 
     @classmethod
-    def get(cls, filter, offset, limit, user):
+    def get(cls, filter, user):
         query = (
             db.session.query(
                 Product,
-                func.count().filter(ACLEntry.id > 0).label("acls"),
-                func.count().filter(ACLEntry.access is True).label("access"),
-                func.count().filter(ACLEntry.modify is True).label("modify"),
+                func.count().filter(ACLEntry.id is not None).label("acls"),
+                func.count().filter(ACLEntry.access).label("access"),
+                func.count().filter(ACLEntry.modify).label("modify"),
             )
             .distinct()
             .group_by(Product.id)
@@ -88,31 +85,24 @@ class Product(db.Model):
         )
         query = ACLEntry.apply_query(query, user, True, False, False)
 
-        if "search" in filter and filter["search"] != "":
-            search_string = "%" + filter["search"].lower() + "%"
+        search = filter.get("search")
+        if search and search != "":
             query = query.filter(
                 or_(
-                    func.lower(Product.title).like(search_string),
-                    func.lower(Product.description).like(search_string),
+                    Product.title.ilike(f"%{search}%"),
+                    Product.description.ilike(f"%{search}%"),
                 )
             )
 
-        if "range" in filter and filter["range"] != "ALL":
-            date_limit = datetime.now()
-            if filter["range"] == "TODAY":
-                date_limit = date_limit.replace(hour=0, minute=0, second=0, microsecond=0)
+        if "range" in filter and filter["range"].upper() != "ALL":
+            filter_range = filter["range"].upper()
+            date_limit = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
-            if filter["range"] == "WEEK":
-                date_limit = date_limit.replace(
-                    day=date_limit.day - date_limit.weekday(),
-                    hour=0,
-                    minute=0,
-                    second=0,
-                    microsecond=0,
-                )
+            if filter_range == "WEEK":
+                date_limit -= timedelta(days=date_limit.weekday())
 
-            if filter["range"] == "MONTH":
-                date_limit = date_limit.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            elif filter_range == "MONTH":
+                date_limit = date_limit.replace(day=1)
 
             query = query.filter(Product.created >= date_limit)
 
@@ -123,11 +113,13 @@ class Product(db.Model):
             elif filter["sort"] == "DATE_ASC":
                 query = query.order_by(db.asc(Product.created))
 
+        offset = filter.get("offset", 0)
+        limit = filter.get("limit", 20)
         return query.offset(offset).limit(limit).all(), query.count()
 
     @classmethod
-    def get_json(cls, filter, offset, limit, user):
-        results, count = cls.get(filter, offset, limit, user)
+    def get_json(cls, filter, user):
+        results, count = cls.get(filter, user)
         products = []
         for result in results:
             product = result.Product
@@ -146,26 +138,29 @@ class Product(db.Model):
 
     @classmethod
     def add_product(cls, product_data, user_id):
-        product_schema = NewProductSchema()
-        product = product_schema.load(product_data)
-
+        product = cls.from_dict(product_data)
         product.user_id = user_id
         db.session.add(product)
         db.session.commit()
 
-        return product
+        return product.id
+
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(**data)
 
     @classmethod
     def update_product(cls, product_id, product_data):
-        product_schema = NewProductSchema()
-        product = product_schema.load(product_data)
-
-        original_product = Product.find(product_id)
-        original_product.title = product.title
-        original_product.description = product.description
-        original_product.product_type_id = product.product_type_id
-        original_product.report_items = []
-        original_product.report_items.extend(product.report_items)
+        product = Product.find(product_id)
+        if product is None:
+            return None
+        new_product = cls.from_dict(product_data)
+        for key, value in vars(new_product).items():
+            if hasattr(product, key) and key != "id":
+                setattr(product, key, value)
 
         db.session.commit()
 

@@ -20,7 +20,7 @@ def get_publishers_info(node: PublishersNodeSchema):
     if status_code != 200:
         return None, status_code
 
-    return Publisher.create_all(publishers_info), status_code
+    return Publisher.load_multiple(publishers_info), status_code
 
 
 def add_publishers_node(data):
@@ -33,7 +33,7 @@ def add_publishers_node(data):
         return str(e), 500
 
     try:
-        publishers = Publisher.create_all(publishers_info)
+        publishers = Publisher.load_multiple(publishers_info)
         PublishersNode.add_new(data, publishers)
     except Exception:
         logger.log_debug_trace(f"Couldn't add Publisher Node: {node.name}")
@@ -44,6 +44,8 @@ def add_publishers_node(data):
 
 def update_publishers_node(node_id, data):
     node = PublishersNodeSchema.create(data)
+    if node is None:
+        return "Invalid node data", 400
     publishers, status_code = get_publishers_info(node)
 
     if status_code != 200:

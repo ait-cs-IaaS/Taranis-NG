@@ -30,8 +30,7 @@ class RSSCollector(BaseCollector):
             if not response.ok:
                 return None
         except Exception:
-            logger.exception()
-            logger.info(f"Could not get article content for: {url}")
+            logger.exception(f"Could not get article content for: {url}")
             return None
 
         return response

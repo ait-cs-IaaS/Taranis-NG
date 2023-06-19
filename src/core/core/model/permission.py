@@ -13,8 +13,7 @@ class Permission(db.Model):
 
     @classmethod
     def find(cls, permission_id):
-        permission = cls.query.get(permission_id)
-        return permission
+        return cls.query.get(permission_id)
 
     @classmethod
     def add(cls, id, name, description):

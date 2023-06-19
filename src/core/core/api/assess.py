@@ -64,7 +64,6 @@ class NewsItems(Resource):
 class NewsItemAggregates(Resource):
     @auth_required("ASSESS_ACCESS")
     def get(self):
-        user = auth_manager.get_user_from_jwt()
         try:
             filter_keys = ["search", "read", "unread", "important", "relevant", "in_report", "range", "sort", "source"]
             filter_args: dict[str, str | int | list] = {k: v for k, v in request.args.items() if k in filter_keys}
@@ -75,9 +74,9 @@ class NewsItemAggregates(Resource):
             page = int(request.args.get("page", 0))
             filter_args["offset"] = int(request.args.get("offset", page * filter_args["limit"]))
 
-            return news_item.NewsItemAggregate.get_by_filter_json(filter_args, user)
-        except Exception as ex:
-            logger.log_debug(ex)
+            return news_item.NewsItemAggregate.get_by_filter_json(filter_args, auth_manager.get_user_from_jwt())
+        except Exception:
+            logger.exception("Failed to get Stories")
             return "Failed to get Stories", 400
 
 

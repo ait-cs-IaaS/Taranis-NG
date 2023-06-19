@@ -1,19 +1,17 @@
-from marshmallow import post_load
+from dataclasses import dataclass
 import uuid
 from sqlalchemy import or_, func
+from typing import Any
 
 from core.managers.db_manager import db
 from core.model.parameter import Parameter
-from shared.schema.publisher import PublisherSchema
+from core.managers.log_manager import logger
 
 
-class NewPublisherSchema(PublisherSchema):
-    @post_load
-    def make(self, data, **kwargs):
-        return Publisher(**data)
-
-
+@dataclass
 class Publisher(db.Model):
+    __tablename__ = "publisher"
+
     id = db.Column(db.String(64), primary_key=True)
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())
@@ -35,15 +33,15 @@ class Publisher(db.Model):
         self.parameters = parameters
 
     @classmethod
-    def get(cls, search):
+    def get(cls, search) -> tuple[list["Publisher"], int]:
         query = cls.query
 
         if search is not None:
-            search_string = f"%{search.lower()}%"
+            search_string = f"%{search}%"
             query = query.filter(
                 or_(
-                    func.lower(Publisher.name).like(search_string),
-                    func.lower(Publisher.description).like(search_string),
+                    Publisher.name.ilike(search_string),
+                    Publisher.description.ilike(search_string),
                 )
             )
 
@@ -51,30 +49,33 @@ class Publisher(db.Model):
 
     @classmethod
     def get_all_json(cls, search):
-        publisher, count = cls.get(search)
-        node_schema = PublisherSchema(many=True)
-        items = node_schema.dump(publisher)
+        publishers, count = cls.get(search)
+        items = [publisher.to_dict() for publisher in publishers]
 
         return {"total_count": count, "items": items}
 
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
     @classmethod
-    def create_all(cls, publishers_data):
-        new_publisher_schema = NewPublisherSchema(many=True)
-        return new_publisher_schema.load(publishers_data)
+    def load_multiple(cls, data: list[dict[str, Any]]) -> list["Publisher"]:
+        return [cls.from_dict(publisher_data) for publisher_data in data]
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "Publisher":
+        parameters = [Parameter.find_by_key(param_id) for param_id in data.pop("parameters", [])]
+        return cls(parameters=parameters, **data)
 
     @classmethod
     def add(cls, data):
         if cls.find_by_type(data["type"]):
-            return None
-        schema = NewPublisherSchema()
+            return "Publisher type already exists"
 
-        parameters = [Parameter.find_by_key(p) for p in data["parameters"] if p is not None]
-        data["parameters"] = []
-        publisher = schema.load(data)
-        publisher.parameters = parameters
+        publisher = cls.from_dict(data)
 
         db.session.add(publisher)
         db.session.commit()
+        return publisher.id
 
     @classmethod
     def get_first(cls):
