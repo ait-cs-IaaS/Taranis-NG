@@ -3,7 +3,6 @@ from sqlalchemy import func, or_, orm
 
 from core.managers.db_manager import db
 from core.model.permission import Permission
-from shared.schema.role import RolePresentationSchema
 from typing import Any
 
 
@@ -56,9 +55,6 @@ class Role(db.Model):
         roles, count = cls.get(search)
         return {"total_count": count, "items": cls.to_dict(roles)}
 
-    def to_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
     @classmethod
     def load_multiple(cls, data: list[dict[str, Any]]) -> list["Role"]:
         return [cls.from_dict(publisher_data) for publisher_data in data]
@@ -67,11 +63,15 @@ class Role(db.Model):
     def from_dict(cls, data: dict[str, Any]) -> "Role":
         return cls(**data)
 
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
     @classmethod
     def add_new(cls, data):
         role = cls.from_dict(data)
         db.session.add(role)
         db.session.commit()
+        return f"Successfully Added {role.id}", 201
 
     def get_permissions(self):
         return {permission.id for permission in self.permissions}
@@ -86,7 +86,7 @@ class Role(db.Model):
         role.description = data["description"]
         role.permissions = permissions
         db.session.commit()
-        return str(role.id), 201
+        return f"Succussfully updated {role.id}", 201
 
     @classmethod
     def delete(cls, id):
