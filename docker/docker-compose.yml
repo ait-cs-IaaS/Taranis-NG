@@ -10,12 +10,12 @@ services:
         condition: on-failure
         max_attempts: 3
     environment:
-      POSTGRES_DB: "${DB_DATABASE}"
-      POSTGRES_USER: "${DB_USER}"
+      POSTGRES_DB: "${DB_DATABASE:-taranis}"
+      POSTGRES_USER: "${DB_USER:-taranis}"
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
     command: ["postgres", "-c", "shared_buffers=${DB_SHARED_BUFFERS:-64MB}", "-c", "max_connections=${DB_MAX_CONNECTIONS:-1000}"]
     healthcheck:
-      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${DB_USER} -d ${DB_DATABASE}'"]
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${DB_USER:-taranis} -d ${DB_DATABASE:-taranis}'"]
       interval: 10s
       timeout: 3s
       retries: 3
