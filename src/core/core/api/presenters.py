@@ -1,4 +1,4 @@
-from flask_restx import Resource
+from flask_restx import Resource, Namespace
 from flask import request
 
 from core.managers import presenters_manager
@@ -26,4 +26,6 @@ class PresentersNode(Resource):
 
 
 def initialize(api):
-    api.add_resource(PresentersNode, "/api/presenters/nodes", "/api/presenters/node", "/api/presenters/node/<id>")
+    namespace = Namespace("presenters", description="Presenters related operations", path="/api/v1/presenters")
+    namespace.add_resource(PresentersNode, "/nodes", "/node", "/node/<id>")
+    api.add_namespace(namespace)

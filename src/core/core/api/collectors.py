@@ -1,12 +1,11 @@
 from flask import request
-from flask_restx import Resource
+from flask_restx import Resource, Namespace
 
 from core.managers import collectors_manager
 from core.managers.sse_manager import sse_manager
 from core.managers.auth_manager import api_key_required
 from core.managers.log_manager import logger
 from core.model import osint_source, news_item, collectors_node
-from shared.schema.osint_source import OSINTSourceUpdateStatusSchema
 
 
 class OSINTSourcesForCollectors(Resource):
@@ -45,31 +44,12 @@ class CollectorsNode(Resource):
         collectors_node.CollectorsNode.delete(node_id)
 
 
-class OSINTSourceStatusUpdate(Resource):
-    @api_key_required
-    def put(self, osint_source_id):
-        source = osint_source.OSINTSource.get_by_id(osint_source_id)
-        if not source:
-            return {}, 404
-
-        try:
-            osint_source_status = OSINTSourceUpdateStatusSchema().load(request.json)
-            logger.debug(f"osint_source_status: ${osint_source_status}")
-        except Exception:
-            logger.log_debug_trace()
-            return {}, 400
-
-        return {}, 200
-
-
 def initialize(api):
-    api.add_resource(
+    namespace = Namespace("Collectors", description="Collectors related operations", path="/api/v1/collectors")
+    namespace.add_resource(
         OSINTSourcesForCollectors,
-        "/api/v1/collectors/osint-sources/<string:collector_type>",
+        "/osint-sources/<string:collector_type>",
     )
-    api.add_resource(
-        OSINTSourceStatusUpdate,
-        "/api/v1/collectors/osint-sources/<string:osint_source_id>",
-    )
-    api.add_resource(AddNewsItems, "/api/v1/collectors/news-items")
-    api.add_resource(CollectorsNode, "/api/v1/collectors/node/<string:node_id>", "/api/v1/collectors/node")
+    namespace.add_resource(AddNewsItems, "/news-items")
+    namespace.add_resource(CollectorsNode, "/node/<string:node_id>", "/node")
+    api.add_namespace(namespace)

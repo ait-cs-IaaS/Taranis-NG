@@ -1,4 +1,4 @@
-from flask_restx import Resource, reqparse
+from flask_restx import Resource, reqparse, Namespace
 from flask import request
 
 from core.managers import publishers_manager
@@ -60,7 +60,8 @@ class PublishersNode(Resource):
 
 
 def initialize(api):
-    api.add_resource(PublishersNode, "/api/publishers/nodes", "/api/publishers/node", "/api/publishers/node/<id>")
-
-    api.add_resource(PublisherPresets, "/api/publishers/presets")
-    api.add_resource(PublisherPreset, "/api/publishers/preset", "/api/publishers/preset/<id>")
+    namespace = Namespace("publishers", description="Publishers API", path="/api/v1/publishers")
+    namespace.add_resource(PublishersNode, "/nodes", "/node", "/node/<id>")
+    namespace.add_resource(PublisherPresets, "/presets")
+    namespace.add_resource(PublisherPreset, "/preset", "/preset/<id>")
+    api.add_namespace(namespace)

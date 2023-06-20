@@ -1,6 +1,6 @@
 import io
 from flask import request, send_file
-from flask_restx import Resource
+from flask_restx import Resource, Namespace
 
 from core.managers import auth_manager
 from core.managers.sse_manager import sse_manager
@@ -223,31 +223,33 @@ class DownloadAttachment(Resource):
 
 
 def initialize(api):
-    api.add_resource(OSINTSourceGroupsAssess, "/api/v1/assess/osint-source-groups")
-    api.add_resource(OSINTSourceGroupsList, "/api/v1/assess/osint-source-group-list")
-    api.add_resource(OSINTSourcesList, "/api/v1/assess/osint-sources-list")
-    api.add_resource(ManualOSINTSources, "/api/v1/assess/manual-osint-sources")
-    api.add_resource(AddNewsItem, "/api/v1/assess/news-items")
-    api.add_resource(
+    namespace = Namespace("Assess", description="Assess related operations", path="/api/v1/assess")
+    namespace.add_resource(OSINTSourceGroupsAssess, "/osint-source-groups")
+    namespace.add_resource(OSINTSourceGroupsList, "/osint-source-group-list")
+    namespace.add_resource(OSINTSourcesList, "/osint-sources-list")
+    namespace.add_resource(ManualOSINTSources, "/manual-osint-sources")
+    namespace.add_resource(AddNewsItem, "/news-items")
+    namespace.add_resource(
         NewsItemAggregatesByGroup,
-        "/api/v1/assess/news-item-aggregates-by-group/<string:group_id>",
+        "/news-item-aggregates-by-group/<string:group_id>",
     )
-    api.add_resource(
+    namespace.add_resource(
         NewsItemAggregates,
-        "/api/v1/assess/news-item-aggregates",
+        "/news-item-aggregates",
     )
-    api.add_resource(
+    namespace.add_resource(
         NewsItems,
-        "/api/v1/assess/news-items",
+        "/news-items",
     )
-    api.add_resource(NewsItemAggregateTags, "/api/v1/assess/tags")
-    api.add_resource(NewsItemAggregateTagList, "/api/v1/assess/taglist")
+    namespace.add_resource(NewsItemAggregateTags, "/tags")
+    namespace.add_resource(NewsItemAggregateTagList, "/taglist")
 
-    api.add_resource(NewsItem, "/api/v1/assess/news-items/<int:item_id>")
-    api.add_resource(NewsItemAggregate, "/api/v1/assess/news-item-aggregates/<int:aggregate_id>")
-    api.add_resource(GroupAction, "/api/v1/assess/news-item-aggregates/group")
-    api.add_resource(UnGroupAction, "/api/v1/assess/news-item-aggregates/ungroup")
-    api.add_resource(
+    namespace.add_resource(NewsItem, "/news-items/<int:item_id>")
+    namespace.add_resource(NewsItemAggregate, "/news-item-aggregates/<int:aggregate_id>")
+    namespace.add_resource(GroupAction, "/news-item-aggregates/group")
+    namespace.add_resource(UnGroupAction, "/news-item-aggregates/ungroup")
+    namespace.add_resource(
         DownloadAttachment,
-        "/api/v1/assess/news-item-data/<string:item_data_id>/attributes/<int:attribute_id>/file",
+        "/news-item-data/<string:item_data_id>/attributes/<int:attribute_id>/file",
     )
+    api.add_namespace(namespace)

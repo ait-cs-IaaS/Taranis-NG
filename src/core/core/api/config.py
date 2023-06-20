@@ -1,7 +1,7 @@
 import io
 
 from flask import request, send_file
-from flask_restx import Resource
+from flask_restx import Resource, Namespace
 
 from core.managers import (
     auth_manager,
@@ -590,71 +590,73 @@ class BotNodes(Resource):
 
 
 def initialize(api):
-    api.add_resource(
+    namespace = api.namespace("config", description="Configuration operations", path="/api/v1/config")
+    namespace.add_resource(
         DictionariesReload,
-        "/api/v1/config/reload-enum-dictionaries/<string:dictionary_type>",
+        "/reload-enum-dictionaries/<string:dictionary_type>",
     )
-    api.add_resource(Attributes, "/api/v1/config/attributes")
-    api.add_resource(Attribute, "/api/v1/config/attributes/<int:attribute_id>")
-    api.add_resource(AttributeEnums, "/api/v1/config/attributes/<int:attribute_id>/enums")
-    api.add_resource(
+    namespace.add_resource(Attributes, "/attributes")
+    namespace.add_resource(Attribute, "/attributes/<int:attribute_id>")
+    namespace.add_resource(AttributeEnums, "/attributes/<int:attribute_id>/enums")
+    namespace.add_resource(
         AttributeEnum,
-        "/api/v1/config/attributes/<int:attribute_id>/enums/<int:enum_id>",
+        "/attributes/<int:attribute_id>/enums/<int:enum_id>",
     )
 
-    api.add_resource(ReportItemTypesConfig, "/api/v1/config/report-item-types")
-    api.add_resource(ReportItemType, "/api/v1/config/report-item-types/<int:type_id>")
+    namespace.add_resource(ReportItemTypesConfig, "/report-item-types")
+    namespace.add_resource(ReportItemType, "/report-item-types/<int:type_id>")
 
-    api.add_resource(ProductTypes, "/api/v1/config/product-types")
-    api.add_resource(ProductType, "/api/v1/config/product-types/<int:type_id>")
+    namespace.add_resource(ProductTypes, "/product-types")
+    namespace.add_resource(ProductType, "/product-types/<int:type_id>")
 
-    api.add_resource(Permissions, "/api/v1/config/permissions")
-    api.add_resource(ExternalPermissions, "/api/v1/config/external-permissions")
-    api.add_resource(Roles, "/api/v1/config/roles")
-    api.add_resource(Role, "/api/v1/config/roles/<int:role_id>")
-    api.add_resource(ACLEntries, "/api/v1/config/acls")
-    api.add_resource(ACLEntry, "/api/v1/config/acls/<int:acl_id>")
+    namespace.add_resource(Permissions, "/permissions")
+    namespace.add_resource(ExternalPermissions, "/external-permissions")
+    namespace.add_resource(Roles, "/roles")
+    namespace.add_resource(Role, "/roles/<int:role_id>")
+    namespace.add_resource(ACLEntries, "/acls")
+    namespace.add_resource(ACLEntry, "/acls/<int:acl_id>")
 
-    api.add_resource(Organizations, "/api/v1/config/organizations")
-    api.add_resource(Organization, "/api/v1/config/organizations/<int:organization_id>")
+    namespace.add_resource(Organizations, "/organizations")
+    namespace.add_resource(Organization, "/organizations/<int:organization_id>")
 
-    api.add_resource(Users, "/api/v1/config/users")
-    api.add_resource(User, "/api/v1/config/users/<int:user_id>")
+    namespace.add_resource(Users, "/users")
+    namespace.add_resource(User, "/users/<int:user_id>")
 
-    api.add_resource(ExternalUsers, "/api/v1/config/external-users")
-    api.add_resource(ExternalUser, "/api/v1/config/external-users/<int:user_id>")
+    namespace.add_resource(ExternalUsers, "/external-users")
+    namespace.add_resource(ExternalUser, "/external-users/<int:user_id>")
 
-    api.add_resource(WordLists, "/api/v1/config/word-lists")
-    api.add_resource(WordList, "/api/v1/config/word-lists/<int:word_list_id>")
+    namespace.add_resource(WordLists, "/word-lists")
+    namespace.add_resource(WordList, "/word-lists/<int:word_list_id>")
 
-    api.add_resource(CollectorsNodes, "/api/v1/config/collectors-nodes", "/api/v1/config/collectors-nodes/<string:node_id>")
-    api.add_resource(RefreshWorkers, "/api/v1/config/workers/refresh")
-    api.add_resource(Collectors, "/api/v1/config/collectors", "/api/v1/config/collectors/<string:collector_type>")
-    api.add_resource(Bots, "/api/v1/config/bots", "/api/v1/config/bots/<string:bot_id>")
-    api.add_resource(Parameters, "/api/v1/config/parameters")
+    namespace.add_resource(CollectorsNodes, "/collectors-nodes", "/collectors-nodes/<string:node_id>")
+    namespace.add_resource(RefreshWorkers, "/workers/refresh")
+    namespace.add_resource(Collectors, "/collectors", "/collectors/<string:collector_type>")
+    namespace.add_resource(Bots, "/bots", "/bots/<string:bot_id>")
+    namespace.add_resource(Parameters, "/parameters")
 
-    api.add_resource(OSINTSources, "/api/v1/config/osint-sources")
-    api.add_resource(OSINTSource, "/api/v1/config/osint-sources/<string:source_id>")
-    api.add_resource(OSINTSourceRefresh, "/api/v1/config/osint-sources/<string:source_id>/refresh")
-    api.add_resource(OSINTSourcesExport, "/api/v1/config/export-osint-sources")
-    api.add_resource(OSINTSourcesImport, "/api/v1/config/import-osint-sources")
-    api.add_resource(OSINTSourceGroups, "/api/v1/config/osint-source-groups")
-    api.add_resource(OSINTSourceGroup, "/api/v1/config/osint-source-groups/<string:group_id>")
+    namespace.add_resource(OSINTSources, "/osint-sources")
+    namespace.add_resource(OSINTSource, "/osint-sources/<string:source_id>")
+    namespace.add_resource(OSINTSourceRefresh, "/osint-sources/<string:source_id>/refresh")
+    namespace.add_resource(OSINTSourcesExport, "/export-osint-sources")
+    namespace.add_resource(OSINTSourcesImport, "/import-osint-sources")
+    namespace.add_resource(OSINTSourceGroups, "/osint-source-groups")
+    namespace.add_resource(OSINTSourceGroup, "/osint-source-groups/<string:group_id>")
 
-    api.add_resource(RemoteAccesses, "/api/v1/config/remote-accesses")
-    api.add_resource(RemoteAccess, "/api/v1/config/remote-accesses/<int:remote_access_id>")
+    namespace.add_resource(RemoteAccesses, "/remote-accesses")
+    namespace.add_resource(RemoteAccess, "/remote-accesses/<int:remote_access_id>")
 
-    api.add_resource(RemoteNodes, "/api/v1/config/remote-nodes")
-    api.add_resource(RemoteNode, "/api/v1/config/remote-nodes/<int:remote_node_id>")
-    api.add_resource(RemoteNodeConnect, "/api/v1/config/remote-nodes/<int:remote_node_id>/connect")
+    namespace.add_resource(RemoteNodes, "/remote-nodes")
+    namespace.add_resource(RemoteNode, "/remote-nodes/<int:remote_node_id>")
+    namespace.add_resource(RemoteNodeConnect, "/remote-nodes/<int:remote_node_id>/connect")
 
-    api.add_resource(Presenters, "/api/v1/config/presenters")
-    api.add_resource(Publishers, "/api/v1/config/publishers")
-    api.add_resource(PresentersNodes, "/api/v1/config/presenters-nodes", "/api/v1/config/presenters-nodes/<string:node_id>")
-    api.add_resource(PublisherNodes, "/api/v1/config/publishers-nodes", "/api/v1/config/publishers-nodes/<string:node_id>")
-    api.add_resource(PublisherPresets, "/api/v1/config/publishers-presets")
-    api.add_resource(PublisherPreset, "/api/v1/config/publishers-presets/<string:preset_id>")
+    namespace.add_resource(Presenters, "/presenters")
+    namespace.add_resource(Publishers, "/publishers")
+    namespace.add_resource(PresentersNodes, "/presenters-nodes", "/presenters-nodes/<string:node_id>")
+    namespace.add_resource(PublisherNodes, "/publishers-nodes", "/publishers-nodes/<string:node_id>")
+    namespace.add_resource(PublisherPresets, "/publishers-presets")
+    namespace.add_resource(PublisherPreset, "/publishers-presets/<string:preset_id>")
 
-    api.add_resource(BotNodes, "/api/v1/config/bots-nodes", "/api/v1/config/bots-nodes/<string:node_id>")
+    namespace.add_resource(BotNodes, "/bots-nodes", "/bots-nodes/<string:node_id>")
 
-    api.add_resource(Nodes, "/api/v1/config/nodes", "/api/v1/config/nodes/<string:node_id>")
+    namespace.add_resource(Nodes, "/nodes", "/nodes/<string:node_id>")
+    api.add_namespace(namespace)

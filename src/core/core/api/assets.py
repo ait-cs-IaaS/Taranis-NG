@@ -1,5 +1,5 @@
 from flask import request
-from flask_restx import Resource
+from flask_restx import Resource, Namespace
 
 from core.managers import auth_manager
 from core.managers.auth_manager import auth_required
@@ -112,22 +112,24 @@ class AttributeCPEEnums(Resource):
 
 
 def initialize(api):
-    api.add_resource(AssetGroups, "/api/v1/asset-groups")
-    api.add_resource(AssetGroup, "/api/v1/asset-groups/<string:group_id>")
+    namespace = Namespace("Assets", description="Assets related operations", path="/api/v1")
+    namespace.add_resource(AssetGroups, "/asset-groups")
+    namespace.add_resource(AssetGroup, "/asset-groups/<string:group_id>")
 
-    api.add_resource(NotificationTemplates, "/api/v1/asset-notification-templates")
-    api.add_resource(
+    namespace.add_resource(NotificationTemplates, "/asset-notification-templates")
+    namespace.add_resource(
         NotificationTemplate,
-        "/api/v1/asset-notification-templates/<int:template_id>",
+        "/asset-notification-templates/<int:template_id>",
     )
 
-    api.add_resource(Assets, "/api/v1/assets")
-    api.add_resource(Asset, "/api/v1/assets/<int:asset_id>")
+    namespace.add_resource(Assets, "/assets")
+    namespace.add_resource(Asset, "/assets/<int:asset_id>")
 
-    api.add_resource(
+    namespace.add_resource(
         AssetVulnerability,
-        "/api/v1/assets/<int:asset_id>/vulnerabilities/<int:vulnerability_id>",
+        "/assets/<int:asset_id>/vulnerabilities/<int:vulnerability_id>",
     )
 
-    api.add_resource(GetAttributeCPE, "/api/v1/asset-attributes/cpe")
-    api.add_resource(AttributeCPEEnums, "/api/v1/asset-attributes/cpe/enums")
+    namespace.add_resource(GetAttributeCPE, "/asset-attributes/cpe")
+    namespace.add_resource(AttributeCPEEnums, "/asset-attributes/cpe/enums")
+    api.add_namespace(namespace)

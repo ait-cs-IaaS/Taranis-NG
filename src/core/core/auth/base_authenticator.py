@@ -31,11 +31,11 @@ class BaseAuthenticator:
         pass
 
     @staticmethod
-    def generate_error():
+    def generate_error() -> tuple[dict[str, str], int]:
         return {"error": "Authentication failed"}, 401
 
     @staticmethod
-    def generate_jwt(username):
+    def generate_jwt(username: str) -> tuple[dict[str, str], int]:
         if user := User.find(username):
             logger.store_user_activity(user, "LOGIN", "Successful")
             access_token = create_access_token(

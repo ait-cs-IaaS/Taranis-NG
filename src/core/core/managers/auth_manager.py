@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from enum import Enum, auto
 from functools import wraps
 from flask import request
+from typing import Any
 from flask_jwt_extended import (
     JWTManager,
     get_jwt,
@@ -62,8 +63,7 @@ def get_required_credentials():
     return current_authenticator.get_required_credentials()
 
 
-def authenticate(credentials):
-    logger.log_debug(f"credentials: {credentials}")
+def authenticate(credentials: dict[str, str]) -> tuple[dict[str, Any], int]:
     return current_authenticator.authenticate(credentials)
 
 
