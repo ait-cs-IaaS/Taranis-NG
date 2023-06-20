@@ -1,7 +1,6 @@
 from sqlalchemy import func, or_
 
 from core.managers.db_manager import db
-from shared.schema.role import PermissionSchema
 from typing import Any
 
 
@@ -64,3 +63,17 @@ class Permission(db.Model):
 
     def to_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+    @staticmethod
+    def get_external_permissions_ids():
+        return ["MY_ASSETS_ACCESS", "MY_ASSETS_CREATE", "MY_ASSETS_CONFIG"]
+
+    @classmethod
+    def get_external_permissions(cls):
+        return [cls.find(permission_id) for permission_id in cls.get_external_permissions_ids()]
+
+    @classmethod
+    def get_external_permissions_json(cls):
+        permissions = cls.get_external_permissions()
+        items = [permission.to_dict() for permission in permissions]
+        return {"total_count": len(items), "items": items}

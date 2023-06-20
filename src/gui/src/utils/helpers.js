@@ -56,7 +56,7 @@ export function emptyValues(obj) {
 export function objectFromFormat(format) {
   const newObject = {}
   format.map(function (item) {
-    if (item === undefined) {
+    if (item === undefined || item.disabled) {
       return
     }
     if (item.type === 'checkbox') {
@@ -66,7 +66,14 @@ export function objectFromFormat(format) {
       item.type === 'textarea' ||
       item.type === 'select'
     ) {
-      newObject[item.name] = ''
+      if (item.parent) {
+        if (!newObject[item.parent]) {
+          newObject[item.parent] = {}
+        }
+        newObject[item.parent][item.name] = ''
+      } else {
+        newObject[item.name] = ''
+      }
     } else if (item.type === 'number') {
       newObject[item.name] = 0
     } else if (item.type === 'table') {

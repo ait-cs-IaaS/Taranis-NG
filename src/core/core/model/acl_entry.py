@@ -48,11 +48,6 @@ class ACLEntry(db.Model):
         self.modify = modify
         self.users = [User.find_by_id(user.id) for user in users]
         self.roles = [Role.find(role.id) for role in roles]
-        self.tag = "mdi-lock-check"
-
-    @orm.reconstructor
-    def reconstruct(self):
-        self.tag = "mdi-lock-check"
 
     @classmethod
     def find(cls, id):
@@ -95,7 +90,11 @@ class ACLEntry(db.Model):
         return cls(**data)
 
     def to_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        data["roles"] = [role.id for role in self.roles]
+        data["users"] = [user.id for user in self.users]
+        data["tag"] = "mdi-lock-check"
+        return data
 
     @classmethod
     def add_new(cls, data):

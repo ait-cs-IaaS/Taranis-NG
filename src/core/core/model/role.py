@@ -1,9 +1,8 @@
-from marshmallow import fields, post_load
-from sqlalchemy import func, or_, orm
+from sqlalchemy import or_
+from typing import Any
 
 from core.managers.db_manager import db
 from core.model.permission import Permission
-from typing import Any
 
 
 class Role(db.Model):
@@ -18,11 +17,6 @@ class Role(db.Model):
         self.description = description
         self.permissions = []
         self.permissions.extend(Permission.find(permission) for permission in permissions)
-        self.tag = "mdi-account-arrow-right"
-
-    @orm.reconstructor
-    def reconstruct(self):
-        self.tag = "mdi-account-arrow-right"
 
     @classmethod
     def find(cls, role_id):
@@ -65,7 +59,10 @@ class Role(db.Model):
         return cls(**data)
 
     def to_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        data["permissions"] = [permission.id for permission in self.permissions]
+        data["tag"] = "mdi-account-arrow-right"
+        return data
 
     @classmethod
     def add_new(cls, data):

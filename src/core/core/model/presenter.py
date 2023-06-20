@@ -1,6 +1,7 @@
 from marshmallow import post_load
 import uuid
 from sqlalchemy import or_, func
+from typing import Any
 
 from core.managers.db_manager import db
 from core.model.parameter import Parameter
@@ -52,10 +53,20 @@ class Presenter(db.Model):
     @classmethod
     def get_all_json(cls, search):
         presenters, count = cls.get(search)
-        node_schema = PresenterSchema(many=True)
-        items = node_schema.dump(presenters)
-
+        items = [presenter.to_dict() for presenter in presenters]
         return {"total_count": count, "items": items}
+
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+    @classmethod
+    def load_multiple(cls, data: list[dict[str, Any]]) -> list["Presenter"]:
+        return [cls.from_dict(publisher_data) for publisher_data in data]
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "Presenter":
+        parameters = [Parameter.find_by_key(param_id) for param_id in data.pop("parameters", [])]
+        return cls(parameters=parameters, **data)
 
     @classmethod
     def create_all(cls, presenters_data):
@@ -63,23 +74,15 @@ class Presenter(db.Model):
         return new_presenter_schema.load(presenters_data)
 
     @classmethod
-    def to_dict(cls):
-        presenter_schema = PresenterSchema()
-        return presenter_schema.dump(Presenter(None, None, None, []))
-
-    @classmethod
-    def add(cls, data):
+    def add(cls, data) -> tuple[str, int]:
         if cls.find_by_type(data["type"]):
-            return None
-        schema = NewPresenterSchema()
+            return "Presenter type already exists", 400
 
-        parameters = [Parameter.find_by_key(p) for p in data["parameters"] if p is not None]
-        data["parameters"] = []
-        presenter = schema.load(data)
-        presenter.parameters = parameters
+        presenter = cls.from_dict(data)
 
         db.session.add(presenter)
         db.session.commit()
+        return f"Updated presenter {presenter.id}", 200
 
     @classmethod
     def get_first(cls):

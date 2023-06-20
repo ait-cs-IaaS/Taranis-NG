@@ -170,7 +170,7 @@ def auth_required(permissions: list | str, acl=None):
                 logger.store_user_auth_error_activity(
                     user,
                     "",
-                    "Insufficient permissions in JWT for identity: {}".format(identity),
+                    f"Insufficient permissions in JWT for identity: {identity}",
                 )
                 return error
 
@@ -179,7 +179,7 @@ def auth_required(permissions: list | str, acl=None):
                 logger.store_user_auth_error_activity(
                     user,
                     "",
-                    "Access denied by ACL in JWT for identity: {}".format(identity),
+                    f"Access denied by ACL in JWT for identity: {identity}",
                 )
                 return error
 
@@ -256,11 +256,3 @@ def get_user_from_jwt() -> User | None:
     identity = get_jwt_identity()
 
     return User.find(identity) if identity else None
-
-
-def get_external_permissions_ids():
-    return ["MY_ASSETS_ACCESS", "MY_ASSETS_CREATE", "MY_ASSETS_CONFIG"]
-
-
-def get_external_permissions():
-    return [Permission.find(permission_id) for permission_id in get_external_permissions_ids()]

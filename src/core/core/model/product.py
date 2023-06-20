@@ -1,24 +1,13 @@
 from datetime import datetime, timedelta
 import sqlalchemy
-from marshmallow import fields
-from marshmallow import post_load
-from sqlalchemy import orm, func, or_, and_
+from sqlalchemy import func, or_, and_
 from sqlalchemy.sql.expression import cast
 
 from core.managers.db_manager import db
 from core.model.acl_entry import ACLEntry
 from core.model.report_item import ReportItem
 from shared.schema.acl_entry import ItemType
-from shared.schema.product import ProductPresentationSchema, ProductSchemaBase
-from shared.schema.report_item import ReportItemIdSchema
-
-
-class NewProductSchema(ProductSchemaBase):
-    report_items = fields.Nested(ReportItemIdSchema, many=True)
-
-    @post_load
-    def make(self, data, **kwargs):
-        return Product(**data)
+from shared.schema.product import ProductPresentationSchema
 
 
 class Product(db.Model):
@@ -41,13 +30,7 @@ class Product(db.Model):
         self.title = title
         self.description = description
         self.product_type_id = product_type_id
-        self.tag = ""
-
         self.report_items = [ReportItem.find(report_item.id) for report_item in report_items]
-
-    @orm.reconstructor
-    def reconstruct(self):
-        self.tag = "mdi-file-pdf-outline"
 
     @classmethod
     def count_all(cls):
@@ -146,7 +129,10 @@ class Product(db.Model):
         return product.id
 
     def to_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        data["report_items"] = [report_item.id for report_item in self.report_items]
+        data["tag"] = "mdi-file-pdf-outline"
+        return data
 
     @classmethod
     def from_dict(cls, data):

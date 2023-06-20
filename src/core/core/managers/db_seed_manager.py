@@ -1306,7 +1306,6 @@ def pre_seed_wordlists():
 
 
 def pre_seed_default_user():
-    from werkzeug.security import generate_password_hash
     from core.model.organization import Organization
     from core.model.user import User
 
@@ -1328,7 +1327,6 @@ def pre_seed_default_user():
     if not User.find(username="admin") and not User.find_by_role(1):
         User.add_new(
             {
-                "id": -1,
                 "username": "admin",
                 "name": "Arthur Dent",
                 "roles": [
@@ -1338,7 +1336,7 @@ def pre_seed_default_user():
                 ],
                 "permissions": [],
                 "organization": {"id": 1},
-                "password": generate_password_hash(Config.PRE_SEED_PASSWORD_ADMIN, method="sha256"),
+                "password": Config.PRE_SEED_PASSWORD_ADMIN,
             }
         )
 
@@ -1360,7 +1358,6 @@ def pre_seed_default_user():
     if not User.find(username="user"):
         User.add_new(
             {
-                "id": -1,
                 "username": "user",
                 "name": "Terry Pratchett",
                 "roles": [
@@ -1370,7 +1367,7 @@ def pre_seed_default_user():
                 ],
                 "permissions": [],
                 "organization": {"id": 2},
-                "password": generate_password_hash(Config.PRE_SEED_PASSWORD_USER, method="sha256"),
+                "password": Config.PRE_SEED_PASSWORD_USER,
             }
         )
 

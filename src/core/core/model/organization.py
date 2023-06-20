@@ -1,18 +1,9 @@
-from marshmallow import post_load, fields
 from sqlalchemy import func, or_, orm
 from typing import Any
 
 from core.managers.db_manager import db
-from core.model.address import NewAddressSchema
-from shared.schema.organization import OrganizationSchema, OrganizationPresentationSchema
-
-
-class NewOrganizationSchema(OrganizationSchema):
-    address = fields.Nested(NewAddressSchema)
-
-    @post_load
-    def make(self, data, **kwargs):
-        return Organization(**data)
+from core.model.address import Address
+from core.managers.log_manager import logger
 
 
 class Organization(db.Model):
@@ -33,6 +24,12 @@ class Organization(db.Model):
     @orm.reconstructor
     def reconstruct(self):
         self.tag = "mdi-office-building"
+
+    def to_dict(self):
+        data = {c.name: getattr(self, c.name) for c in self.__table__.columns if c.name != "address"}
+        data["address"] = self.address.to_dict() if self.address else None
+        data.pop("address_id")
+        return data
 
     @classmethod
     def find(cls, organization_id):
@@ -68,17 +65,15 @@ class Organization(db.Model):
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Organization":
-        return cls(**data)
-
-    def to_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        address_data = data.pop("address", None)
+        address = Address.from_dict(address_data) if address_data else None
+        return cls(address=address, **data)
 
     @classmethod
     def add_new(cls, data):
-        # if "address" in data:
-        #    address = data["address"]
-        #    del data["address"]
+        address = Address.from_dict(data.pop("address"))
         organization = cls.from_dict(data)
+        organization.address = address
         db.session.add(organization)
         db.session.commit()
 
@@ -88,8 +83,12 @@ class Organization(db.Model):
         if organization is None:
             return f"Organization with id {organization_id} not found", 404
 
-        new_organization = cls.from_dict(data)
-        for key, value in vars(new_organization).items():
+        if address_data := data.pop("address", None):
+            address_update_message, status_code = organization.address.update(address_data)
+            if status_code != 200:
+                return address_update_message, status_code
+
+        for key, value in data.items():
             if hasattr(organization, key) and key != "id":
                 setattr(organization, key, value)
 

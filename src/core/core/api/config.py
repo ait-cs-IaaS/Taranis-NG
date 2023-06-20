@@ -38,7 +38,6 @@ from core.model import (
 )
 from core.model.news_item import NewsItemAggregate
 from core.model.permission import Permission
-from shared.schema.role import PermissionSchema
 
 
 class DictionariesReload(Resource):
@@ -153,12 +152,7 @@ class Permissions(Resource):
 class ExternalPermissions(Resource):
     @auth_required("MY_ASSETS_CONFIG")
     def get(self):
-        permissions = auth_manager.get_external_permissions()
-        permissions_schema = PermissionSchema(many=True)
-        return {
-            "total_count": len(permissions),
-            "items": permissions_schema.dump(permissions),
-        }
+        return Permission.get_external_permissions_json()
 
 
 class Roles(Resource):
@@ -278,15 +272,13 @@ class ExternalUsers(Resource):
 
     @auth_required("MY_ASSETS_CONFIG")
     def post(self):
-        permissions = auth_manager.get_external_permissions_ids()
-        user.User.add_new_external(auth_manager.get_user_from_jwt(), permissions, request.json)
+        user.User.add_new_external(auth_manager.get_user_from_jwt(), request.json)
 
 
 class ExternalUser(Resource):
     @auth_required("CONFIG_USER_ACCESS")
     def put(self, user_id):
-        permissions = auth_manager.get_external_permissions_ids()
-        user.User.update_external(auth_manager.get_user_from_jwt(), permissions, user_id, request.json)
+        user.User.update_external(auth_manager.get_user_from_jwt(), user_id, request.json)
 
     @auth_required("MY_ASSETS_CONFIG")
     def delete(self, user_id):

@@ -62,9 +62,7 @@ export default {
         id: -1,
         username: '',
         name: '',
-        organization: {
-          id: undefined
-        },
+        organization_id: undefined,
         roles: [],
         permissions: []
       }
@@ -73,6 +71,7 @@ export default {
     }
 
     const editItem = (item) => {
+      console.debug(item)
       user.value = item
       edit.value = true
       showForm.value = true
