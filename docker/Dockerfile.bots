@@ -25,6 +25,7 @@ RUN apt-get install --no-install-recommends -y \
       python3-dev \
       git \
       cmake && \
+    pip install torch --index-url https://download.pytorch.org/whl/cpu && \
     pip install -e /app/ && \
     apt-get purge -y build-essential python3-dev && \
     apt-get autoremove -y --purge &&\
@@ -42,7 +43,7 @@ EXPOSE 80
 # setup environment variables
 ENV PYTHONPATH=/app
 ENV APP_MODULE run:app
-ENV GUNICORN_CMD_ARGS --timeout 120
+ENV GUNICORN_CMD_ARGS --timeout 600
 ENV WORKERS_PER_CORE 4
 
 ENTRYPOINT ["/entrypoint.sh"]
