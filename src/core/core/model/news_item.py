@@ -1251,16 +1251,31 @@ class NewsItemTag(db.Model):
         return results
 
     @classmethod
-    def get_json(cls, filter_args: dict):
+    def get_filtered_query(cls, filter_args: dict):
         query = cls.query
 
         if search := filter_args.get("search"):
             query = query.filter(cls.name.ilike(f"%{search}%"))
 
+        return query
+
+    @classmethod
+    def get_rows(cls, query, filter_args: dict):
         offset = filter_args.get("offset", 0)
         limit = filter_args.get("limit", 20)
-        rows = query.offset(offset).limit(limit).distinct(cls.name).all()
-        # count = query.count()
+
+        if db.session.get_bind().dialect.name == "sqlite":
+            query = query.group_by(cls.name)
+        else:
+            query = query.distinct(cls.name)
+
+        return query.offset(offset).limit(limit).all()
+
+    @classmethod
+    def get_json(cls, filter_args: dict):
+        query = cls.get_filtered_query(filter_args)
+
+        rows = cls.get_rows(query, filter_args)
         return [{"name": row.name, "tag_type": row.tag_type} for row in rows]
 
     @classmethod
