@@ -48,7 +48,7 @@ class User(db.Model):
         self.id = id
         self.username = username
         self.name = name
-        self.password = generate_password_hash(password, method="sha256")
+        self.password = generate_password_hash(password)
         self.organization = Organization.find(organization["id"]) if isinstance(organization, dict) else Organization.find(organization)
         self.roles = [Role.find(role["id"]) for role in roles]
         self.permissions = [Permission.find(permission["id"]) for permission in permissions]
