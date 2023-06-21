@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime
+from typing import Any
 
 from marshmallow import post_load, fields
 from sqlalchemy import orm, func, or_, and_
@@ -17,7 +18,6 @@ from shared.schema.osint_source import (
     OSINTSourceGroupSchema,
     OSINTSourceIdSchema,
     OSINTSourcePresentationSchema,
-    OSINTSourceGroupPresentationSchema,
     OSINTSourceGroupIdSchema,
     OSINTSourceGroupSchemaBase,
     OSINTSourceCollectorSchema,
@@ -312,12 +312,7 @@ class OSINTSourceGroup(db.Model):
         self.name = name
         self.description = description
         self.default = default
-        self.tag = ""
         self.osint_sources = [OSINTSource.find(osint_source.id) for osint_source in osint_sources]
-
-    @orm.reconstructor
-    def reconstruct(self):
-        self.tag = "mdi-folder-multiple"
 
     @classmethod
     def find(cls, group_id):
@@ -385,26 +380,21 @@ class OSINTSourceGroup(db.Model):
     @classmethod
     def get_all_json(cls, search, user, acl_check):
         groups, count = cls.get(search, user, acl_check)
-        group_schema = OSINTSourceGroupPresentationSchema(many=True)
-        return {"total_count": count, "items": group_schema.dump(groups)}
+        items = [group.to_dict() for group in groups]
+        return {"total_count": count, "items": items}
 
     @classmethod
-    def get_list_json(cls, user, acl_check):
-        groups, count = cls.get(None, user, acl_check)
-        group_schema = OSINTSourceGroupSchemaBase(many=True)
-        return {"total_count": count, "items": group_schema.dump(groups)}
+    def load_multiple(cls, json_data: list[dict[str, Any]]) -> list["OSINTSourceGroup"]:
+        return [cls.from_dict(data) for data in json_data]
 
     @classmethod
-    def get_all_with_source(cls, osint_source_id):
-        all_groups = cls.get_all()
-        groups = []
-        for group in all_groups:
-            for source in group.osint_sources:
-                if source.id == osint_source_id:
-                    groups.append(group)
-                    break
+    def from_dict(cls, data: dict[str, Any]) -> "OSINTSourceGroup":
+        return cls(**data)
 
-        return groups
+    def to_dict(self):
+        data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        data["osint_sources"] = [osint_source.id for osint_source in self.osint_sources]
+        return data
 
     @classmethod
     def add(cls, data):
@@ -430,7 +420,7 @@ class OSINTSourceGroup(db.Model):
             return {"message": "could_not_delete_default_group"}, 400
         db.session.delete(osint_source_group)
         db.session.commit()
-        return "", 200
+        return {"message": f"Successfully created {osint_source_group.id}"}, 200
 
     @classmethod
     def update(cls, osint_source_group_id, data):

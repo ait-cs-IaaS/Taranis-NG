@@ -644,10 +644,17 @@ class NewsItemAggregate(db.Model):
             query = query.filter(OSINTSource.id == source)
 
         if search := filter.get("search"):
+            search = search.strip()
+            if search.startswith('"') and search.endswith('"'):
+                words = [search[1:-1]]
+            else:
+                words = search.split()
             query = query.join(
                 NewsItemAggregateSearchIndex,
                 NewsItemAggregate.id == NewsItemAggregateSearchIndex.news_item_aggregate_id,
-            ).filter(NewsItemAggregateSearchIndex.data.ilike(f"%{search}%"))
+            )
+            for word in words:
+                query = query.filter(NewsItemAggregateSearchIndex.data.ilike(f"%{word}%"))
 
         if "read" in filter:
             query = query.filter(NewsItemAggregate.read)
