@@ -59,24 +59,21 @@ class Assets(Resource):
 
     @auth_required("MY_ASSETS_CREATE")
     def post(self):
-        group = request.args.get("group")
-        return "", asset.Asset.add(auth_manager.get_user_from_jwt(), group, request.json)
+        return "", asset.Asset.add(auth_manager.get_user_from_jwt(), request.json)
 
 
 class Asset(Resource):
     @auth_required("MY_ASSETS_ACCESS")
     def get(self, asset_id):
-        return asset.Asset.get_json(auth_manager.get_user_from_jwt(), asset_id)
+        return asset.Asset.get_json(auth_manager.get_user_from_jwt().organization, asset_id)
 
     @auth_required("MY_ASSETS_CREATE")
     def put(self, asset_id):
-        group = request.args.get("group")
-        asset.Asset.update(auth_manager.get_user_from_jwt(), group, asset_id, request.json)
+        return asset.Asset.update(auth_manager.get_user_from_jwt(), asset_id, request.json)
 
     @auth_required("MY_ASSETS_CREATE")
     def delete(self, asset_id):
-        group = request.args.get("group")
-        return asset.Asset.delete(auth_manager.get_user_from_jwt(), group, asset_id)
+        return asset.Asset.delete(auth_manager.get_user_from_jwt(), asset_id)
 
 
 class AssetVulnerability(Resource):

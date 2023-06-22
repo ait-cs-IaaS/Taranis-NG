@@ -26,7 +26,7 @@ class Organization(db.Model):
         self.tag = "mdi-office-building"
 
     def to_dict(self):
-        data = {c.name: getattr(self, c.name) for c in self.__table__.columns if c.name != "address"}
+        data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
         data["address"] = self.address.to_dict() if self.address else None
         data.pop("address_id")
         return data
