@@ -29,6 +29,10 @@ class Collector(db.Model):
         self.parameters = parameters
 
     @classmethod
+    def find(cls, collector_id):
+        return cls.query.get(collector_id)
+
+    @classmethod
     def create_all(cls, collectors_data):
         new_collector_schema = NewCollectorSchema(many=True)
         return new_collector_schema.load(collectors_data)

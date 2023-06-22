@@ -11,23 +11,23 @@ class Permission(db.Model):
 
     roles = db.relationship("Role", secondary="role_permission")
 
+    def __init__(self, id, name, description):
+        self.id = id
+        self.name = name
+        self.description = description
+
     @classmethod
     def find(cls, permission_id):
         return cls.query.get(permission_id)
 
     @classmethod
-    def add(cls, id, name, description):
-        permission = cls.find(id)
-        if permission is None:
-            permission = Permission()
-            permission.id = id
-            permission.name = name
-            permission.description = description
-            db.session.add(permission)
-        else:
-            permission.name = name
-            permission.description = description
+    def add(cls, id, name, description) -> str:
+        if permission := cls.find(id):
+            return f"{permission.name} already exists."
+        permission = cls(id=id, name=name, description=description)
+        db.session.add(permission)
         db.session.commit()
+        return f"Successfully created {permission.id}"
 
     @classmethod
     def get_all(cls):

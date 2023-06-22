@@ -1,23 +1,23 @@
-from sqlalchemy import func, or_, orm, and_
+from sqlalchemy import or_, and_
 from marshmallow import fields, post_load
 from flask_sqlalchemy import query
 from typing import Any
+from enum import Enum, auto
 
 from core.managers.db_manager import db
 from core.model.role import Role
 from core.model.user import User
-from shared.schema.role import RoleIdSchema
-from shared.schema.user import UserIdSchema
-from shared.schema.acl_entry import ACLEntrySchema, ACLEntryPresentationSchema, ItemType
 
 
-class NewACLEntrySchema(ACLEntrySchema):
-    users = fields.Nested(UserIdSchema, many=True)
-    roles = fields.Nested(RoleIdSchema, many=True)
-
-    @post_load
-    def make(self, data, **kwargs):
-        return ACLEntry(**data)
+class ItemType(Enum):
+    COLLECTOR = auto()
+    OSINT_SOURCE = auto()
+    OSINT_SOURCE_GROUP = auto()
+    WORD_LIST = auto()
+    REPORT_ITEM = auto()
+    REPORT_ITEM_TYPE = auto()
+    PRODUCT_TYPE = auto()
+    DELEGATION = auto()
 
 
 class ACLEntry(db.Model):
@@ -104,15 +104,15 @@ class ACLEntry(db.Model):
         return f"Successfully Added {acl.id}", 201
 
     @classmethod
-    def update(cls, acl_id, data):
-        schema = NewACLEntrySchema()
-        updated_acl = schema.load(data)
-        if not updated_acl:
-            return
+    def update(cls, acl_id: int, data) -> tuple[str, int]:
         acl = cls.query.get(acl_id)
-        for key in vars(updated_acl):
-            setattr(acl, key, getattr(updated_acl, key))
+        if acl is None:
+            return "ACL not found", 404
+        for key, value in data.items():
+            if hasattr(acl, key) and key != "id":
+                setattr(acl, key, value)
         db.session.commit()
+        return f"Succussfully updated {acl.id}", 201
 
     @classmethod
     def delete(cls, id):

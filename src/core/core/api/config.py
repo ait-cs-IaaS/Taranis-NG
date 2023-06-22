@@ -388,8 +388,7 @@ class OSINTSourceRefresh(Resource):
 class OSINTSourcesExport(Resource):
     @auth_required("CONFIG_OSINT_SOURCE_ACCESS")
     def get(self):
-        ids = request.args.getlist(key="ids")
-        data = collectors_manager.export_osint_sources(ids)
+        data = collectors_manager.export_osint_sources()
         if data is None:
             return "", 400
         return send_file(
@@ -421,13 +420,7 @@ class OSINTSourceGroups(Resource):
 class OSINTSourceGroup(Resource):
     @auth_required("CONFIG_OSINT_SOURCE_GROUP_UPDATE")
     def put(self, group_id):
-        sources_in_default_group, message, code = osint_source.OSINTSourceGroup.update(group_id, request.json)
-        if sources_in_default_group is not None:
-            default_group = osint_source.OSINTSourceGroup.get_default()
-            for source in sources_in_default_group:
-                NewsItemAggregate.reassign_to_new_groups(source.id, default_group.id)
-
-        return message, code
+        return osint_source.OSINTSourceGroup.update(group_id, request.json)
 
     @auth_required("CONFIG_OSINT_SOURCE_GROUP_DELETE")
     def delete(self, group_id):

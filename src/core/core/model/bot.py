@@ -41,7 +41,6 @@ class Bot(db.Model):
             bot = cls.find_by_id(bot_id)
             if not bot:
                 return None
-            # parameter_values = [NewParameterValueSchema().load(pv) for pv in data["parameter_values"]]
             for pv in bot.parameter_values:
                 for updated_value in data["parameter_values"]:
                     if pv.parameter.key == updated_value["parameter"]:

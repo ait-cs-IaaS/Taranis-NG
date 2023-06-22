@@ -97,8 +97,8 @@ def refresh_collectors():
         logger.critical("Connection error: Could not reach Collector")
 
 
-def export_osint_sources(ids: list[str]):
-    data = OSINTSource.get_all_by_id(ids) if ids else OSINTSource.get_all()
+def export_osint_sources():
+    data = OSINTSource.get_all()
     data = cleanup_paramaters(data)
     export_data = OSINTSourceExportRootSchema().dump(OSINTSourceExportRoot(1, data))
     if "data" not in export_data:
@@ -117,7 +117,4 @@ def cleanup_paramaters(osint_sources: list) -> list:
 def import_osint_sources(file):
     file_data = file.read()
     json_data = json.loads(file_data.decode("utf8"))
-    import_data = OSINTSourceExportRootSchema().load(json_data).data
-
-    for osint_source in import_data:
-        OSINTSource.import_new(osint_source)
+    return OSINTSource.load_multiple(json_data)

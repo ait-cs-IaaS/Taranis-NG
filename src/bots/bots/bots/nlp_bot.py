@@ -111,7 +111,7 @@ class NLPBot(BaseBot):
     def extract_ner(self, text):
         ner_model = self.ner_model
         doc = ner_model(text)
-        return [{"name": ent.text, "type": ent.label_} for ent in doc.ents]
+        return [{"name": ent.text, "type": ent.label_} for ent in doc.ents if len(ent.text) > 2]
 
     def generateKeywords(self, text):
         stop_words = "german" if self.language == "de" else "english"

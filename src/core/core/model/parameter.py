@@ -1,13 +1,14 @@
-from marshmallow import post_load
+from typing import Any
+from enum import Enum, auto
 
 from core.managers.db_manager import db
-from shared.schema.parameter import ParameterType, ParameterSchema
 
 
-class NewParameterSchema(ParameterSchema):
-    @post_load
-    def make_parameter(self, data, **kwargs):
-        return Parameter(**data)
+class ParameterType(Enum):
+    STRING = auto()
+    NUMBER = auto()
+    BOOLEAN = auto()
+    LIST = auto()
 
 
 class Parameter(db.Model):
@@ -24,30 +25,32 @@ class Parameter(db.Model):
 
     @classmethod
     def add(cls, data):
-        if cls.get_by_key(data["key"]):
-            return None
-        schema = NewParameterSchema()
-        param = schema.load(data)
-        db.session.add(param)
+        if cls.find_by_key(data["key"]):
+            return f"{data['key']} already exists."
+        parameter = cls.from_dict(data)
+        db.session.add(parameter)
         db.session.commit()
+        return f"Successfully created {parameter.key}"
 
     @classmethod
     def find_by_key(cls, key):
         return cls.query.get(key)
 
     @classmethod
-    def filter_by_key(cls, key):
-        return cls.query.filter_by(key=key).first()
-
-    @classmethod
-    def get_by_key(cls, key):
-        param = cls.query.get(key)
-        return ParameterSchema().dump(param) if param else None
-
-    @classmethod
     def get_all_json(cls):
-        param, count = cls.query.all(), cls.query.count()
-        schema = ParameterSchema(many=True)
-        items = schema.dump(param)
-
+        parameters, count = cls.query.all(), cls.query.count()
+        items = [parameter.to_dict() for parameter in parameters]
         return {"total_count": count, "items": items}
+
+    @classmethod
+    def load_multiple(cls, json_data: list[dict[str, Any]]) -> list["Parameter"]:
+        return [cls.from_dict(data) for data in json_data]
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "Parameter":
+        return cls(**data)
+
+    def to_dict(self):
+        data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        data["type"] = self.type.name
+        return data
