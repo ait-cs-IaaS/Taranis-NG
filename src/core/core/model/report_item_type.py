@@ -1,26 +1,11 @@
-from marshmallow import fields, post_load
-from sqlalchemy import orm, func, or_, and_
+from sqlalchemy import orm, or_, and_
 import sqlalchemy
+from typing import Any
 from sqlalchemy.sql.expression import cast
 
 from core.managers.db_manager import db
-from core.model.acl_entry import ACLEntry
+from core.model.acl_entry import ACLEntry, ItemType
 from core.model.attribute import Attribute
-from shared.schema.acl_entry import ItemType
-from shared.schema.report_item_type import (
-    AttributeGroupItemSchema,
-    AttributeGroupBaseSchema,
-    ReportItemTypeBaseSchema,
-    ReportItemTypePresentationSchema,
-)
-
-
-class NewAttributeGroupItemSchema(AttributeGroupItemSchema):
-    attribute_id = fields.Integer()
-
-    @post_load
-    def make_attribute_group_item(self, data, **kwargs):
-        return AttributeGroupItem(**data)
 
 
 class AttributeGroupItem(db.Model):
@@ -38,17 +23,8 @@ class AttributeGroupItem(db.Model):
     attribute_id = db.Column(db.Integer, db.ForeignKey("attribute.id"))
     attribute = db.relationship("Attribute")
 
-    def __init__(
-        self,
-        id,
-        title,
-        description,
-        index,
-        min_occurrence,
-        max_occurrence,
-        attribute_id,
-    ):
-        self.id = id if id is not None and id != -1 else None
+    def __init__(self, title, description, index, attribute_id, min_occurrence, max_occurrence, id=None):
+        self.id = id
         self.title = title
         self.description = description
         self.index = index
@@ -63,14 +39,6 @@ class AttributeGroupItem(db.Model):
     @staticmethod
     def sort(attribute_group_item):
         return attribute_group_item.index
-
-
-class NewAttributeGroupSchema(AttributeGroupBaseSchema):
-    attribute_group_items = fields.Nested(NewAttributeGroupItemSchema, many=True)
-
-    @post_load
-    def make_attribute_group(self, data, **kwargs):
-        return AttributeGroup(**data)
 
 
 class AttributeGroup(db.Model):
@@ -91,27 +59,14 @@ class AttributeGroup(db.Model):
         cascade="all, delete-orphan",
     )
 
-    def __init__(
-        self,
-        id,
-        title,
-        description,
-        section,
-        section_title,
-        index,
-        attribute_group_items,
-    ):
-        self.id = id if id is not None and id != -1 else None
+    def __init__(self, title, description, section, section_title, index, attribute_group_items, id=None):
+        self.id = id
         self.title = title
         self.description = description
         self.section = section
         self.section_title = section_title
         self.index = index
         self.attribute_group_items = attribute_group_items
-
-    @orm.reconstructor
-    def reconstruct(self):
-        self.attribute_group_items.sort(key=AttributeGroupItem.sort)
 
     @staticmethod
     def sort(attribute_group):
@@ -142,22 +97,12 @@ class AttributeGroup(db.Model):
                 self.attribute_group_items.append(updated_attribute_group_item)
 
         for attribute_group_item in self.attribute_group_items[:]:
-            found = False
-            for updated_attribute_group_item in updated_attribute_group.attribute_group_items:
-                if updated_attribute_group_item.id == attribute_group_item.id:
-                    found = True
-                    break
-
-            if found is False:
+            found = any(
+                updated_attribute_group_item.id == attribute_group_item.id
+                for updated_attribute_group_item in updated_attribute_group.attribute_group_items
+            )
+            if not found:
                 self.attribute_group_items.remove(attribute_group_item)
-
-
-class NewReportItemTypeSchema(ReportItemTypeBaseSchema):
-    attribute_groups = fields.Nested(NewAttributeGroupSchema, many=True)
-
-    @post_load
-    def make_report_item_type(self, data, **kwargs):
-        return ReportItemType(**data)
 
 
 class ReportItemType(db.Model):
@@ -176,11 +121,6 @@ class ReportItemType(db.Model):
         self.title = title
         self.description = description
         self.attribute_groups = attribute_groups
-        self.tag = "mdi-file-table-outline"
-
-    @orm.reconstructor
-    def reconstruct(self):
-        self.attribute_groups.sort(key=AttributeGroup.sort)
 
     @classmethod
     def find(cls, id):
@@ -234,57 +174,40 @@ class ReportItemType(db.Model):
     @classmethod
     def get_all_json(cls, search, user, acl_check):
         report_item_types, count = cls.get(search, user, acl_check)
-        for report_item_type in report_item_types:
-            for attribute_group in report_item_type.attribute_groups:
-                for attribute_group_item in attribute_group.attribute_group_items:
-                    attribute_group_item.attribute_id = attribute_group_item.attribute.id
-                    attribute_group_item.attribute_name = attribute_group_item.attribute.name
-                    attribute_group_item.attribute.attribute_enums = Attribute.get_enums(attribute_group_item.attribute)
-
-        report_item_type_schema = ReportItemTypePresentationSchema(many=True)
-        return {
-            "total_count": count,
-            "items": report_item_type_schema.dump(report_item_types),
-        }
+        items = [report_item_type.to_dict() for report_item_type in report_item_types]
+        return {"total_count": count, "items": items}
 
     @classmethod
-    def add_report_item_type(cls, report_item_type_data):
-        report_item_type_schema = NewReportItemTypeSchema()
-        report_item_type = report_item_type_schema.load(report_item_type_data)
+    def from_dict(cls, data: dict[str, Any]) -> "ReportItemType":
+        return cls(**data)
+
+    def to_dict(self):
+        data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        data["attribute_groups"] = [attribute_group.to_dict() for attribute_group in self.attribute_groups]
+        data["tag"] = "mdi-file-table-outline"
+        return data
+
+    @classmethod
+    def load_multiple(cls, json_data: list[dict[str, Any]]) -> list["ReportItemType"]:
+        return [cls.from_dict(data) for data in json_data]
+
+    @classmethod
+    def add_report_item_type(cls, data):
+        report_item_type = cls.from_dict(data)
         db.session.add(report_item_type)
         db.session.commit()
         return report_item_type.id
 
     @classmethod
-    def update(cls, report_type_id, data):
-        schema = NewReportItemTypeSchema()
-        updated_report_type = schema.load(data)
+    def update(cls, report_type_id, data) -> tuple[str, int]:
         report_type = cls.query.get(report_type_id)
-        report_type.title = updated_report_type.title
-        report_type.description = updated_report_type.description
-        for updated_attribute_group in updated_report_type.attribute_groups:
-            found = False
-            for attribute_group in report_type.attribute_groups:
-                if updated_attribute_group.id is not None and updated_attribute_group.id == attribute_group.id:
-                    attribute_group.update(updated_attribute_group)
-                    found = True
-                    break
-
-            if found is False:
-                updated_attribute_group.report_item_type = None
-                report_type.attribute_groups.append(updated_attribute_group)
-
-        for attribute_group in report_type.attribute_groups[:]:
-            found = False
-            for updated_attribute_group in updated_report_type.attribute_groups:
-                if updated_attribute_group.id == attribute_group.id:
-                    found = True
-                    break
-
-            if found is False:
-                report_type.attribute_groups.remove(attribute_group)
-
+        if not report_type:
+            return "Report Type not found", 404
+        for key, value in data.items():
+            if hasattr(report_type, key) and key != "id":
+                setattr(report_type, key, value)
         db.session.commit()
+        return f"Report Type {report_type.title} updated", 200
 
     @classmethod
     def delete_report_item_type(cls, id):

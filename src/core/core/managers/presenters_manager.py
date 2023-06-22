@@ -19,7 +19,7 @@ def get_presenters_info(node: PresentersNodeSchema):
     if status_code != 200:
         return None, status_code
 
-    return Presenter.create_all(presenters_info), status_code
+    return Presenter.load_multiple(presenters_info), status_code
 
 
 def add_presenters_node(data):
@@ -32,7 +32,7 @@ def add_presenters_node(data):
         return str(e), 500
 
     try:
-        presenters = Presenter.create_all(presenters_info)
+        presenters = Presenter.load_multiple(presenters_info)
         PresentersNode.add_new(data, presenters)
     except Exception:
         logger.log_debug_trace(f"Couldn't add Presenter Node: {node.name}")

@@ -69,11 +69,6 @@ class Presenter(db.Model):
         return cls(parameters=parameters, **data)
 
     @classmethod
-    def create_all(cls, presenters_data):
-        new_presenter_schema = NewPresenterSchema(many=True)
-        return new_presenter_schema.load(presenters_data)
-
-    @classmethod
     def add(cls, data) -> tuple[str, int]:
         if cls.find_by_type(data["type"]):
             return "Presenter type already exists", 400

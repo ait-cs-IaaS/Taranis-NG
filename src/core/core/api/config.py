@@ -69,7 +69,7 @@ class Attribute(Resource):
 
     @auth_required("CONFIG_ATTRIBUTE_DELETE")
     def delete(self, attribute_id):
-        return attribute.Attribute.delete_attribute(attribute_id)
+        return attribute.Attribute.delete(attribute_id)
 
 
 class AttributeEnums(Resource):

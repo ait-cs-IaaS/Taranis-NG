@@ -1,28 +1,11 @@
 import uuid as uuid_generator
 from datetime import datetime
-from marshmallow import post_load, fields
 from sqlalchemy import orm, func, or_, and_
+from typing import Any
 
 from core.managers.db_manager import db
 from core.model.osint_source import OSINTSource
 from core.model.report_item_type import ReportItemType
-from shared.schema.osint_source import OSINTSourceIdSchema
-from shared.schema.remote import (
-    RemoteAccessSchema,
-    RemoteAccessPresentationSchema,
-    RemoteNodeSchema,
-    RemoteNodePresentationSchema,
-)
-from shared.schema.report_item_type import ReportItemTypeIdSchema
-
-
-class NewRemoteAccessSchema(RemoteAccessSchema):
-    osint_sources = fields.Nested(OSINTSourceIdSchema, many=True)
-    report_item_types = fields.Nested(ReportItemTypeIdSchema, many=True)
-
-    @post_load
-    def make(self, data, **kwargs):
-        return RemoteAccess(**data)
 
 
 class RemoteAccess(db.Model):
@@ -57,27 +40,18 @@ class RemoteAccess(db.Model):
         self.enabled = enabled
         self.access_key = access_key
         self.event_id = str(uuid_generator.uuid4())
-        self.title = ""
-        self.subtitle = ""
-        self.tag = ""
         self.status = ""
 
         self.osint_sources = []
-        for osint_source in osint_sources:
-            self.osint_sources.append(OSINTSource.find(osint_source.id))
-
+        self.osint_sources.extend(OSINTSource.find(osint_source.id) for osint_source in osint_sources)
         self.report_item_types = []
-        for report_item_type in report_item_types:
-            self.report_item_types.append(ReportItemType.find(report_item_type.id))
+        self.report_item_types.extend(ReportItemType.find(report_item_type.id) for report_item_type in report_item_types)
 
     @orm.reconstructor
     def reconstruct(self):
-        self.title = self.name
-        self.subtitle = self.description
-        self.tag = "mdi-remote-desktop"
-        if self.enabled is False:
+        if not self.enabled:
             self.status = "red"
-        elif self.connected is True:
+        elif self.connected:
             self.status = "green"
         else:
             self.status = "orange"
@@ -107,8 +81,8 @@ class RemoteAccess(db.Model):
     @classmethod
     def get_all_json(cls, search):
         remote_accesses, count = cls.get(search)
-        schema = RemoteAccessPresentationSchema(many=True)
-        return {"total_count": count, "items": schema.dump(remote_accesses)}
+        items = [remote_access.to_dict() for remote_access in remote_accesses]
+        return {"total_count": count, "items": items}
 
     @classmethod
     def get_relevant_for_news_items(cls, osint_source_ids) -> set[int]:
@@ -137,48 +111,31 @@ class RemoteAccess(db.Model):
         return {rows.id for rows in response}
 
     @classmethod
-    def add(cls, data):
-        schema = NewRemoteAccessSchema()
-        remote_access = schema.load(data)
+    def add(cls, data) -> tuple[str, int]:
+        remote_access = cls.from_dict(data)
         db.session.add(remote_access)
         db.session.commit()
+        return f"Remote access {remote_access.name} added", 200
 
     @classmethod
-    def delete(cls, remote_access_id):
+    def delete(cls, remote_access_id) -> tuple[str, int]:
         remote_access = cls.query.get(remote_access_id)
+        if not remote_access:
+            return "Remote access not found", 404
         db.session.delete(remote_access)
         db.session.commit()
+        return "Remote access deleted", 200
 
     @classmethod
-    def update(cls, remote_access_id, data):
-        schema = NewRemoteAccessSchema()
-        updated_remote_access = schema.load(data)
+    def update(cls, remote_access_id, data) -> tuple[str, int]:
         remote_access = cls.query.get(remote_access_id)
-        remote_access.name = updated_remote_access.name
-        remote_access.description = updated_remote_access.description
-        remote_access.osint_sources = updated_remote_access.osint_sources
-        remote_access.report_item_types = updated_remote_access.report_item_types
-
-        disconnect = False
-        event_id = remote_access.event_id
-
-        if remote_access.enabled and not updated_remote_access.enabled:
-            remote_access.enabled = False
-            if remote_access.connected:
-                remote_access.connected = False
-                disconnect = True
-        else:
-            remote_access.enabled = updated_remote_access.enabled
-
-        if remote_access.access_key != updated_remote_access.access_key or not remote_access.enabled:
-            disconnect = True
-            remote_access.connected = False
-            remote_access.event_id = str(uuid_generator.uuid4())
-
-        remote_access.access_key = updated_remote_access.access_key
+        if not remote_access:
+            return "Remote access not found", 404
+        for key, value in data.items():
+            if hasattr(remote_access, key) and key != "id":
+                setattr(remote_access, key, value)
         db.session.commit()
-
-        return event_id, disconnect
+        return "Remote access updated", 200
 
     @classmethod
     def connect(cls, access_key):
@@ -210,6 +167,28 @@ class RemoteAccess(db.Model):
         self.last_synced_report_items = datetime.strptime(data["last_sync_time"], "%Y-%m-%d %H:%M:%S.%f")
         db.session.commit()
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "RemoteAccess":
+        return cls(**data)
+
+    def to_dict(self):
+        data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        data["osint_sources"] = [osint_source.id for osint_source in self.osint_sources]
+        data["report_item_types"] = [report_item_type.id for report_item_type in self.report_item_types]
+        data["tag"] = "mdi-remote-desktop"
+        if not self.enabled:
+            data["status"] = "red"
+        elif self.connected:
+            data["status"] = "green"
+        else:
+            data["status"] = "orange"
+
+        return data
+
+    @classmethod
+    def load_multiple(cls, json_data: list[dict[str, Any]]) -> list["RemoteAccess"]:
+        return [cls.from_dict(data) for data in json_data]
+
 
 class RemoteAccessOSINTSource(db.Model):
     remote_access_id = db.Column(db.Integer, db.ForeignKey("remote_access.id"), primary_key=True)
@@ -219,12 +198,6 @@ class RemoteAccessOSINTSource(db.Model):
 class RemoteAccessReportItemType(db.Model):
     remote_access_id = db.Column(db.Integer, db.ForeignKey("remote_access.id"), primary_key=True)
     report_item_type_id = db.Column(db.Integer, db.ForeignKey("report_item_type.id"), primary_key=True)
-
-
-class NewRemoteNodeSchema(RemoteNodeSchema):
-    @post_load
-    def make(self, data, **kwargs):
-        return RemoteNode(**data)
 
 
 class RemoteNode(db.Model):
@@ -268,19 +241,6 @@ class RemoteNode(db.Model):
         self.sync_news_items = sync_news_items
         self.sync_report_items = sync_report_items
         self.osint_source_group_id = osint_source_group_id
-        self.title = ""
-        self.subtitle = ""
-        self.tag = "mdi-share-variant"
-        self.status = ""
-
-    @orm.reconstructor
-    def reconstruct(self):
-        self.title = self.name
-        self.subtitle = self.description
-        if self.enabled is False or not self.event_id:
-            self.status = "red"
-        else:
-            self.status = "green"
 
     @classmethod
     def find(cls, node_id):
@@ -291,11 +251,11 @@ class RemoteNode(db.Model):
         query = cls.query
 
         if search is not None:
-            search_string = f"%{search.lower()}%"
+            search_string = f"%{search}%"
             query = query.filter(
                 or_(
-                    func.lower(RemoteNode.name).like(search_string),
-                    func.lower(RemoteNode.description).like(search_string),
+                    RemoteNode.name.ilike(search_string),
+                    RemoteNode.description.ilike(search_string),
                 )
             )
 
@@ -304,47 +264,58 @@ class RemoteNode(db.Model):
     @classmethod
     def get_all_json(cls, search):
         remote_nodes, count = cls.get(search)
-        schema = RemoteNodePresentationSchema(many=True)
-        return {"total_count": count, "items": schema.dump(remote_nodes)}
+        items = [remote_node.to_dict() for remote_node in remote_nodes]
+        return {"total_count": count, "items": items}
 
     @classmethod
-    def add(cls, data):
-        schema = NewRemoteNodeSchema()
-        remote_node = schema.load(data)
+    def add(cls, data) -> tuple[str, int]:
+        remote_node = cls.from_dict(data)
         db.session.add(remote_node)
         db.session.commit()
+        return f"Remote node {remote_node.name} added", 201
 
     @classmethod
-    def delete(cls, remote_node_id):
+    def delete(cls, remote_node_id) -> tuple[str, int]:
         remote_node = cls.query.get(remote_node_id)
         db.session.delete(remote_node)
         db.session.commit()
+        return f"Remote node {remote_node.name} deleted", 200
 
     @classmethod
-    def update(cls, remote_node_id, data):
-        schema = NewRemoteNodeSchema()
-        updated_remote_node = schema.load(data)
+    def update(cls, remote_node_id, data) -> tuple[str, int]:
         remote_node = cls.query.get(remote_node_id)
-        remote_node.name = updated_remote_node.name
-        remote_node.description = updated_remote_node.description
-        remote_node.enabled = updated_remote_node.enabled
-        remote_node.remote_url = updated_remote_node.remote_url
-        remote_node.events_url = updated_remote_node.events_url
-        remote_node.access_key = updated_remote_node.access_key
-        remote_node.sync_news_items = updated_remote_node.sync_news_items
-        remote_node.sync_report_items = updated_remote_node.sync_report_items
-        remote_node.osint_source_group_id = updated_remote_node.osint_source_group_id
-        if remote_node.enabled is False:
-            remote_node.event_id = None
+        if not remote_node:
+            return "Remote node not found", 404
+        for key, value in data.items():
+            if hasattr(remote_node, key) and key != "id":
+                setattr(remote_node, key, value)
         db.session.commit()
-        return remote_node.enabled
+        return f"Remote node {remote_node.name} updated", 200
 
     def connect(self, access_info):
         self.event_id = access_info["event_id"]
-        self.last_synced_news_items = datetime.strptime(access_info["last_synced_news_items"], "%Y-%m-%d %H:%M:%S.%f")
-        self.last_synced_report_items = datetime.strptime(access_info["last_synced_report_items"], "%Y-%m-%d %H:%M:%S.%f")
+        self.last_synced_news_items = datetime.fromisoformat(access_info["last_synced_news_items"])
+        self.last_synced_report_items = datetime.fromisoformat(access_info["last_synced_report_items"])
         db.session.commit()
 
     def disconnect(self):
         self.event_id = None
         db.session.commit()
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "RemoteAccess":
+        return cls(**data)
+
+    def to_dict(self):
+        data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        for key, value in data.items():
+            if isinstance(value, datetime):
+                data[key] = value.isoformat()
+
+        data["tag"] = "mdi-share-variant"
+        data["status"] = "red" if not self.enabled or not self.event_id else "green"
+        return data
+
+    @classmethod
+    def load_multiple(cls, json_data: list[dict[str, Any]]) -> list["RemoteAccess"]:
+        return [cls.from_dict(data) for data in json_data]

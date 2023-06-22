@@ -14,8 +14,8 @@ from core.model.report_item_type import AttributeGroupItem
 from core.model.report_item_type import ReportItemType
 from core.model.acl_entry import ACLEntry
 from core.model.user import User
-from shared.schema.acl_entry import ItemType
-from shared.schema.attribute import AttributeType
+from core.model.acl_entry import ItemType
+from core.model.attribute import AttributeType
 from shared.schema.news_item import NewsItemAggregateIdSchema, NewsItemAggregateSchema
 from shared.schema.report_item import (
     ReportItemAttributeBaseSchema,

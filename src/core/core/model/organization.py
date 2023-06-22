@@ -1,12 +1,13 @@
-from sqlalchemy import func, or_, orm
+from sqlalchemy import or_
 from typing import Any
 
 from core.managers.db_manager import db
 from core.model.address import Address
+from core.model.base_model import BaseModel
 from core.managers.log_manager import logger
 
 
-class Organization(db.Model):
+class Organization(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())
@@ -19,16 +20,12 @@ class Organization(db.Model):
         self.name = name
         self.description = description
         self.address = address
-        self.tag = "mdi-office-building"
-
-    @orm.reconstructor
-    def reconstruct(self):
-        self.tag = "mdi-office-building"
 
     def to_dict(self):
         data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
         data["address"] = self.address.to_dict() if self.address else None
         data.pop("address_id")
+        data["tag"] = "mdi-office-building"
         return data
 
     @classmethod
@@ -43,7 +40,7 @@ class Organization(db.Model):
     def get(cls, search):
         query = cls.query
 
-        if search is not None:
+        if search:
             query = query.filter(
                 or_(
                     Organization.name.ilike(f"%{search}%"),
@@ -58,10 +55,6 @@ class Organization(db.Model):
         organizations, count = cls.get(search)
         items = [organization.to_dict() for organization in organizations]
         return {"total_count": count, "items": items}
-
-    @classmethod
-    def load_multiple(cls, json_data: list[dict[str, Any]]) -> list["Organization"]:
-        return [cls.from_dict(data) for data in json_data]
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Organization":
@@ -94,9 +87,3 @@ class Organization(db.Model):
 
         db.session.commit()
         return f"Successfully updated {organization.id}", 200
-
-    @classmethod
-    def delete(cls, id):
-        organization = cls.query.get(id)
-        db.session.delete(organization)
-        db.session.commit()

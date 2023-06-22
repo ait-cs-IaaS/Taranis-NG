@@ -1,30 +1,11 @@
 import sqlalchemy
-from marshmallow import post_load, fields
-from sqlalchemy import orm, func, or_, and_
+from typing import Any
+from sqlalchemy import func, or_, and_
 from sqlalchemy.sql.expression import cast
 
 from core.managers.db_manager import db
 from core.model.acl_entry import ACLEntry
-from shared.schema.acl_entry import ItemType
-from shared.schema.word_list import (
-    WordListEntrySchema,
-    WordListSchema,
-    WordListPresentationSchema,
-)
-
-
-class NewWordListEntrySchema(WordListEntrySchema):
-    @post_load
-    def make(self, data, **kwargs):
-        return WordListEntry(**data)
-
-
-class NewWordListSchema(WordListSchema):
-    entries = fields.Nested(WordListEntrySchema, many=True)
-
-    @post_load
-    def make(self, data, **kwargs):
-        return WordList(**data)
+from core.model.acl_entry import ItemType
 
 
 class WordList(db.Model):
@@ -35,14 +16,13 @@ class WordList(db.Model):
     link = db.Column(db.String(), nullable=True, default=None)
     entries = db.relationship("WordListEntry", cascade="all, delete-orphan")
 
-    def __init__(self, id, name, description="", use_for_stop_words=False, link=None, entries=None):
-        self.id = None
+    def __init__(self, name, description="", use_for_stop_words=False, link=None, entries=None, id=None):
+        self.id = id
         self.name = name
         self.description = description
         self.use_for_stop_words = use_for_stop_words
         self.link = link
         self.entries = entries
-        self.tag = "mdi-format-list-bulleted-square"
 
     @classmethod
     def find(cls, id):
@@ -100,32 +80,50 @@ class WordList(db.Model):
     @classmethod
     def get_all_json(cls, search, user, acl_check):
         word_lists, count = cls.get(search, user, acl_check)
-        schema = WordListPresentationSchema(many=True)
-        return {"total_count": count, "items": schema.dump(word_lists)}
+        items = [word_list.to_dict() for word_list in word_lists]
+        return {"total_count": count, "items": items}
 
     @classmethod
-    def add_new(cls, data):
-        schema = NewWordListSchema()
-        word_list = schema.load(data)
+    def load_multiple(cls, json_data: list[dict[str, Any]]) -> list["WordList"]:
+        return [cls.from_dict(data) for data in json_data]
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "WordList":
+        return cls(**data)
+
+    def to_dict(self):
+        data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        data["entries"] = [entry.to_dict() for entry in self.entries]
+        data["tag"] = "mdi-format-list-bulleted-square"
+        return data
+
+    @classmethod
+    def add_new(cls, data) -> tuple[str, int]:
+        word_list = cls.from_dict(data)
         db.session.add(word_list)
         db.session.commit()
+        return f"Successfully Added {word_list.id}", 201
 
     @classmethod
-    def update(cls, word_list_id, data):
-        schema = NewWordListSchema()
-        updated_word_list = schema.load(data)
+    def update(cls, word_list_id, data) -> tuple[str, int]:
         word_list = cls.query.get(word_list_id)
-        word_list.name = updated_word_list.name
-        word_list.description = updated_word_list.description
-        word_list.use_for_stop_words = updated_word_list.use_for_stop_words
-        word_list.entries = updated_word_list.entries
+        if word_list is None:
+            return "WordList not found", 404
+        word_list.entries = [WordListEntry.from_dict(entry) for entry in data.pop("entries")]
+        for key, value in data.items():
+            if hasattr(word_list, key) and key != "id" and key != "entries":
+                setattr(word_list, key, value)
         db.session.commit()
+        return "Word list updated", 200
 
     @classmethod
-    def delete(cls, id):
+    def delete(cls, id) -> tuple[str, int]:
         word_list = cls.query.get(id)
+        if not word_list:
+            return "Word list not found", 404
         db.session.delete(word_list)
         db.session.commit()
+        return "Word list deleted", 200
 
 
 class WordListEntry(db.Model):
@@ -151,27 +149,22 @@ class WordListEntry(db.Model):
         db.session.commit()
 
     @classmethod
-    def update_word_list_entries(cls, id, entries):
+    def update_word_list_entries(cls, id, entries_data):
         word_list = WordList.find(id)
 
-        entries_schema = NewWordListEntrySchema(many=True)
-        entries = entries_schema.load(entries)
-
+        entries = cls.load_multiple(entries_data)
         for entry in entries:
-            if not WordListEntry.identical(entry.value, word_list.id):
+            if not cls.identical(entry.value, word_list.id):
                 word_list.entries.append(entry)
                 db.session.commit()
 
     @classmethod
-    def stopwords_subquery(cls):
-        return (
-            db.session.query(func.lower(WordListEntry.value))
-            .distinct()
-            .group_by(WordListEntry.value)
-            .join(
-                WordList,
-                WordList.id == WordList.word_list_id,
-            )
-            .filter(WordList.use_for_stop_words is True)
-            .subquery()
-        )
+    def from_dict(cls, data: dict[str, Any]) -> "WordListEntry":
+        return cls(**data)
+
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+    @classmethod
+    def load_multiple(cls, json_data: list[dict[str, Any]]) -> list["WordListEntry"]:
+        return [cls.from_dict(data) for data in json_data]

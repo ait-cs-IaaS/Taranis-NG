@@ -13,20 +13,10 @@ from shared.schema.user import (
     HotkeySchema,
 )
 
+from core.model.base_model import BaseModel
 from shared.schema.role import RoleIdSchema, PermissionIdSchema
 from shared.schema.organization import OrganizationSchema
 from core.managers.log_manager import logger
-
-
-class NewUserSchema(UserSchemaBase):
-    password = fields.Str(required=False)
-    roles = fields.Nested(RoleIdSchema, many=True, only=["id"])
-    permissions = fields.Nested(PermissionIdSchema, many=True)
-    organization = fields.Nested(OrganizationSchema, only=["id"])
-
-    @post_load
-    def make(self, data, **kwargs):
-        return User(**data)
 
 
 class User(db.Model):
@@ -94,11 +84,11 @@ class User(db.Model):
         return {"total_count": count, "items": items}
 
     @classmethod
-    def load_multiple(cls, json_data: list[dict[str, Any]]) -> list["Role"]:
+    def load_multiple(cls, json_data: list[dict[str, Any]]) -> list["User"]:
         return [cls.from_dict(data) for data in json_data]
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "Role":
+    def from_dict(cls, data: dict[str, Any]) -> "User":
         return cls(**data)
 
     def to_dict(self):
@@ -140,19 +130,13 @@ class User(db.Model):
 
     @classmethod
     def get_profile_json(cls, user):
-        return UserProfileSchema().dump(user.profile)
+        return user.profile.to_dict()
 
     @classmethod
-    def update_profile(cls, user, data):
-        user.profile = NewUserProfileSchema().load(data)
+    def update_profile(cls, user, data) -> tuple[str, int]:
+        user.profile = user.profile.from_dict(data)
         db.session.commit()
-        return cls.get_profile_json(user)
-
-    @classmethod
-    def delete(cls, id):
-        user = cls.query.get(id)
-        db.session.delete(user)
-        db.session.commit()
+        return f"User {user.id} profile updated", 200
 
     ##
     # External User Management - TODO: Check if this is still needed
@@ -218,21 +202,7 @@ class UserPermission(db.Model):
     permission_id = db.Column(db.String, db.ForeignKey("permission.id"), primary_key=True)
 
 
-class NewHotkeySchema(HotkeySchema):
-    @post_load
-    def make(self, data, **kwargs):
-        return Hotkey(**data)
-
-
-class NewUserProfileSchema(UserProfileSchema):
-    hotkeys = fields.List(fields.Nested(NewHotkeySchema))
-
-    @post_load
-    def make(self, data, **kwargs):
-        return UserProfile(**data)
-
-
-class UserProfile(db.Model):
+class UserProfile(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
 
     spellcheck = db.Column(db.Boolean, default=True)
@@ -249,7 +219,7 @@ class UserProfile(db.Model):
         self.language = language
 
 
-class Hotkey(db.Model):
+class Hotkey(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     key_code = db.Column(db.Integer)
     key = db.Column(db.String)

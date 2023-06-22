@@ -1,23 +1,39 @@
 import os
 from xml.etree.ElementTree import iterparse
 from marshmallow import fields, post_load
-from sqlalchemy import orm, func, or_
+from sqlalchemy import func, or_
+from enum import Enum, auto
+from typing import Any
 
 from core.managers.log_manager import logger
 from core.managers.db_manager import db
-from shared.schema.attribute import (
-    AttributeBaseSchema,
-    AttributeEnumSchema,
-    AttributeType,
-    AttributeValidator,
-    AttributePresentationSchema,
-)
 
 
-class NewAttributeEnumSchema(AttributeEnumSchema):
-    @post_load
-    def make_attribute_enum(self, data, **kwargs):
-        return AttributeEnum(**data)
+class AttributeType(Enum):
+    STRING = auto()
+    NUMBER = auto()
+    BOOLEAN = auto()
+    RADIO = auto()
+    ENUM = auto()
+    TEXT = auto()
+    RICH_TEXT = auto()
+    DATE = auto()
+    TIME = auto()
+    DATE_TIME = auto()
+    LINK = auto()
+    ATTACHMENT = auto()
+    TLP = auto()
+    CPE = auto()
+    CVE = auto()
+    CVSS = auto()
+
+
+class AttributeValidator(Enum):
+    NONE = auto()
+    EMAIL = auto()
+    NUMBER = auto()
+    RANGE = auto()
+    REGEXP = auto()
 
 
 class AttributeEnum(db.Model):
@@ -27,36 +43,32 @@ class AttributeEnum(db.Model):
     description = db.Column(db.String())
     imported = db.Column(db.Boolean, default=False)
 
-    attribute_id = db.Column(db.Integer, db.ForeignKey("attribute.id"))
-    attribute = db.relationship("Attribute")
+    attribute_id = db.Column(db.Integer, db.ForeignKey("attribute.id", ondelete="CASCADE"))
+    attribute = db.relationship("Attribute", cascade="all, delete")
 
-    def __init__(self, id, index, value, description):
-        if id is not None and id != -1:
-            self.id = id
-        else:
-            self.id = None
-
+    def __init__(self, index, value, description, id=None):
+        self.id = id
         self.index = index
         self.value = value
         self.description = description
 
     @classmethod
-    def count_for_attribute(cls, attribute_id):
+    def count_for_attribute(cls, attribute_id) -> int:
         return cls.query.filter_by(attribute_id=attribute_id).count()
 
     @classmethod
     def get_all_for_attribute(cls, attribute_id):
-        return cls.query.filter_by(attribute_id=attribute_id).order_by(db.asc(AttributeEnum.index)).all()
+        return cls.query.filter_by(attribute_id=attribute_id).order_by(db.asc(cls.index)).all()
 
     @classmethod
     def get_for_attribute(cls, attribute_id, search, offset, limit):
         query = cls.query.filter_by(attribute_id=attribute_id)
         if search:
-            search_string = "%" + search + "%"
+            search_string = f"%{search}%"
             query = query.filter(
                 or_(
-                    AttributeEnum.value.like(search_string),
-                    AttributeEnum.description.like(search_string),
+                    AttributeEnum.value.ilike(search_string),
+                    AttributeEnum.description.ilike(search_string),
                 )
             )
 
@@ -71,10 +83,10 @@ class AttributeEnum(db.Model):
     @classmethod
     def get_for_attribute_json(cls, attribute_id, search, offset, limit):
         attribute_enums, total_count = cls.get_for_attribute(attribute_id, search, offset, limit)
-        attribute_enums_schema = AttributeEnumSchema(many=True)
+        items = [attribute_enum.to_dict() for attribute_enum in attribute_enums]
         return {
             "total_count": total_count,
-            "items": attribute_enums_schema.dump(attribute_enums),
+            "items": items,
         }
 
     @classmethod
@@ -88,53 +100,41 @@ class AttributeEnum(db.Model):
         db.session.commit()
 
     @classmethod
-    def add(cls, attribute_id, data):
-        count = 0
-        if data["delete_existing"] is True:
-            cls.delete_for_attribute(attribute_id)
-        else:
-            count = cls.count_for_attribute(attribute_id)
-
-        attribute_enums_schema = NewAttributeEnumSchema(many=True)
-        attribute_enums = attribute_enums_schema.load(data["items"])
-
-        for attribute_enum in attribute_enums:
-            original_attribute_enum = cls.find_by_value(attribute_id, attribute_enum.value)
-            if original_attribute_enum is None:
-                attribute_enum.attribute_id = attribute_id
-                attribute_enum.index = count
-                count += 1
-                db.session.add(attribute_enum)
-            else:
-                original_attribute_enum.value = attribute_enum.value
-                original_attribute_enum.description = attribute_enum.description
-
+    def add(cls, attribute_id, data) -> tuple[str, int]:
+        count = cls.count_for_attribute(attribute_id) + 1
+        attribute_enum = cls.from_dict(data["items"])
+        attribute_enum.index = count
+        db.session.add(attribute_enum)
         db.session.commit()
+        return f"Added {attribute_enum.value}", 201
 
     @classmethod
-    def update(cls, enum_id, data):
-        attribute_enums_schema = NewAttributeEnumSchema(many=True)
-        attribute_enums = attribute_enums_schema.load(data)
-        for attribute_enum in attribute_enums:
-            original_attribute_enum = cls.query.get(enum_id)
-            original_attribute_enum.value = attribute_enum.value
-            original_attribute_enum.description = attribute_enum.description
-            original_attribute_enum.imported = False
-
+    def update(cls, enum_id, data) -> tuple[str, int]:
+        attribute_enum = cls.query.get(enum_id)
+        if not attribute_enum:
+            return "Attribute Enum not found", 404
+        for key, value in data.items():
+            if hasattr(attribute_enum, key) and key != "id":
+                setattr(attribute_enum, key, value)
         db.session.commit()
+        return f"Attribute Enum {attribute_enum.id} updated", 200
 
     @classmethod
-    def delete(cls, attribute_enum_id):
-        db.session.delete(cls.query.get(attribute_enum_id))
+    def delete(cls, attribute_enum_id) -> tuple[str, int]:
+        cls.query.get(attribute_enum_id).delete()
         db.session.commit()
+        return f"Attribute Enum {attribute_enum_id} deleted", 200
 
+    @classmethod
+    def load_multiple(cls, json_data: list[dict[str, Any]]) -> list["AttributeEnum"]:
+        return [cls.from_dict(data) for data in json_data]
 
-class NewAttributeSchema(AttributeBaseSchema):
-    attribute_enums = fields.Nested(NewAttributeEnumSchema, many=True)
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "AttributeEnum":
+        return cls(**data)
 
-    @post_load
-    def make_attribute(self, data, **kwargs):
-        return Attribute(**data)
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
 class Attribute(db.Model):
@@ -147,18 +147,8 @@ class Attribute(db.Model):
     validator = db.Column(db.Enum(AttributeValidator))
     validator_parameter = db.Column(db.String())
 
-    def __init__(
-        self,
-        id,
-        name,
-        description,
-        type,
-        default_value,
-        validator,
-        validator_parameter,
-        attribute_enums,
-    ):
-        self.id = None
+    def __init__(self, name, description, type, default_value, validator, validator_parameter, attribute_enums, id=None):
+        self.id = id
         self.name = name
         self.description = description
         self.type = type
@@ -166,34 +156,6 @@ class Attribute(db.Model):
         self.validator = validator
         self.validator_parameter = validator_parameter
         self.attribute_enums = attribute_enums
-        self.title = ""
-        self.subtitle = ""
-        self.tag = ""
-
-    @orm.reconstructor
-    def reconstruct(self):
-        self.title = self.name
-        self.subtitle = self.description
-
-        switcher = {
-            AttributeType.STRING: "mdi-form-textbox",
-            AttributeType.NUMBER: "mdi-numeric",
-            AttributeType.BOOLEAN: "mdi-checkbox-marked-outline",
-            AttributeType.RADIO: "mdi-radiobox-marked",
-            AttributeType.ENUM: "mdi-format-list-bulleted-type",
-            AttributeType.TEXT: "mdi-form-textarea",
-            AttributeType.RICH_TEXT: "mdi-format-font",
-            AttributeType.DATE: "mdi-calendar-blank-outline",
-            AttributeType.TIME: "clock-outline",
-            AttributeType.DATE_TIME: "calendar-clock",
-            AttributeType.LINK: "mdi-link",
-            AttributeType.ATTACHMENT: "mdi-paperclip",
-            AttributeType.TLP: "mdi-traffic-light",
-            AttributeType.CPE: "mdi-laptop",
-            AttributeType.CVE: "mdi-hazard-lights",
-            AttributeType.CVSS: "mdi-counter",
-        }
-        self.tag = switcher.get(self.type, "mdi-textbox")
 
     @classmethod
     def get_all(cls):
@@ -211,7 +173,7 @@ class Attribute(db.Model):
     def get(cls, search):
         query = cls.query
 
-        if search is not None:
+        if search:
             search_string = f"%{search}%"
             query = query.filter(
                 or_(
@@ -225,21 +187,8 @@ class Attribute(db.Model):
     @classmethod
     def get_all_json(cls, search):
         attributes, total_count = cls.get(search)
-        for attribute in attributes:
-            if attribute.type == AttributeType.CPE or attribute.type == AttributeType.CVE:
-                attribute.attribute_enums = []
-            else:
-                attribute.attribute_enums = AttributeEnum.get_all_for_attribute(attribute.id)
-
-        attribute_schema = AttributePresentationSchema(many=True)
-        return {"total_count": total_count, "items": attribute_schema.dump(attributes)}
-
-    @classmethod
-    def get_enums(cls, attribute):
-        if attribute.type == AttributeType.RADIO or attribute.type == AttributeType.ENUM:
-            return AttributeEnum.get_all_for_attribute(attribute.id)
-        else:
-            return []
+        items = [attribute.to_dict() for attribute in attributes]
+        return {"total_count": total_count, "items": items}
 
     @classmethod
     def create_attribute(cls, attribute):
@@ -255,42 +204,30 @@ class Attribute(db.Model):
         db.session.commit()
 
     @classmethod
-    def add_attribute(cls, attribute_data):
-        attribute_schema = NewAttributeSchema()
-        attribute = attribute_schema.load(attribute_data)
+    def add_attribute(cls, data) -> tuple[str, int]:
+        attribute = cls.from_dict(data)
         db.session.add(attribute)
         db.session.commit()
-
-        count = 0
-        for attribute_enum in attribute.attribute_enums:
-            attribute_enum.attribute_id = attribute.id
-            attribute_enum.index = count
-            count += 1
-            db.session.add(attribute_enum)
-
-        attribute.attribute_enums = []
-
-        db.session.commit()
+        return f"Added {attribute.name}", 201
 
     @classmethod
-    def update(cls, attribute_id, data):
-        schema = NewAttributeSchema()
-        updated_attribute = schema.load(data)
+    def update(cls, attribute_id, data) -> tuple[str, int]:
         attribute = cls.query.get(attribute_id)
-        attribute.name = updated_attribute.name
-        attribute.description = updated_attribute.description
-        attribute.type = updated_attribute.type
-        attribute.default_value = updated_attribute.default_value
-        attribute.validator = updated_attribute.validator
-        attribute.validator_parameter = updated_attribute.validator_parameter
+        if not attribute:
+            return "Attribute not found", 404
+        for key, value in data.items():
+            if hasattr(attribute, key) and key != "id":
+                setattr(attribute, key, value)
         db.session.commit()
+        return f"Attribute {attribute.name} updated", 200
 
     @classmethod
-    def delete_attribute(cls, id):
-        attribute = cls.query.get(id)
-        AttributeEnum.delete_for_attribute(id)
-        db.session.delete(attribute)
-        db.session.commit()
+    def delete(cls, id) -> tuple[str, int]:
+        if cls.query.filter_by(id=id).delete():
+            db.session.commit()
+            return f"Attribute {id} deleted", 200
+
+        return f"Attribute {id} not found", 404
 
     @classmethod
     def load_cve_from_file(cls, file_path):
@@ -314,11 +251,11 @@ class Attribute(db.Model):
                     element.clear()
                     desc = ""
                     if block_item_count == 1000:
-                        logger.log_debug("Processed CVE items: " + str(item_count))
+                        logger.log_debug(f"Processed CVE items: {item_count}")
                         block_item_count = 0
                         db.session.commit()
 
-        logger.log_debug("Processed CVE items: " + str(item_count))
+        logger.log_debug(f"Processed CVE items: {str(item_count)}")
         db.session.commit()
 
     @classmethod
@@ -331,7 +268,7 @@ class Attribute(db.Model):
         desc = ""
         for event, element in iterparse(file_path, events=("start", "end")):
             if event == "end":
-                logger.log_debug("Element: {}".format(element))
+                logger.log_debug(f"Element: {element}")
                 if element.tag == "{http://cpe.mitre.org/dictionary/2.0}title":
                     desc = element.text
                 elif element.tag == "{http://cpe.mitre.org/dictionary/2.0}cpe-item":
@@ -344,11 +281,11 @@ class Attribute(db.Model):
                     element.clear()
                     desc = ""
                     if block_item_count == 1000:
-                        logger.log_debug("Processed CPE items: " + str(item_count))
+                        logger.log_debug(f"Processed CPE items: {item_count}")
                         block_item_count = 0
                         db.session.commit()
 
-        logger.log_debug("Processed CPE items: " + str(item_count))
+        logger.log_debug(f"Processed CPE items: {str(item_count)}")
         db.session.commit()
 
     @classmethod
@@ -362,3 +299,38 @@ class Attribute(db.Model):
             cpe_update_file = os.getenv("CPE_UPDATE_FILE")
             if cpe_update_file is not None and os.path.exists(cpe_update_file):
                 Attribute.load_cpe_from_file(cpe_update_file)
+
+    @classmethod
+    def load_multiple(cls, json_data: list[dict[str, Any]]) -> list["Attribute"]:
+        return [cls.from_dict(data) for data in json_data]
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "Attribute":
+        return cls(**data)
+
+    def get_tag(self):
+        switcher = {
+            AttributeType.STRING: "mdi-form-textbox",
+            AttributeType.NUMBER: "mdi-numeric",
+            AttributeType.BOOLEAN: "mdi-checkbox-marked-outline",
+            AttributeType.RADIO: "mdi-radiobox-marked",
+            AttributeType.ENUM: "mdi-format-list-bulleted-type",
+            AttributeType.TEXT: "mdi-form-textarea",
+            AttributeType.RICH_TEXT: "mdi-format-font",
+            AttributeType.DATE: "mdi-calendar-blank-outline",
+            AttributeType.TIME: "clock-outline",
+            AttributeType.DATE_TIME: "calendar-clock",
+            AttributeType.LINK: "mdi-link",
+            AttributeType.ATTACHMENT: "mdi-paperclip",
+            AttributeType.TLP: "mdi-traffic-light",
+            AttributeType.CPE: "mdi-laptop",
+            AttributeType.CVE: "mdi-hazard-lights",
+            AttributeType.CVSS: "mdi-counter",
+        }
+        return switcher.get(self.type, "mdi-textbox")
+
+    def to_dict(self):
+        data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        data["attribute_enums"] = [attribute_enum.to_dict() for attribute_enum in self.attribute_enums]
+        data["tag"] = self.get_tag()
+        return data
