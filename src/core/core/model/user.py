@@ -1,5 +1,4 @@
-from marshmallow import fields, post_load
-from sqlalchemy import or_, orm
+from sqlalchemy import or_
 from werkzeug.security import generate_password_hash
 from typing import Any
 
@@ -7,19 +6,12 @@ from core.managers.db_manager import db
 from core.model.role import Role
 from core.model.permission import Permission
 from core.model.organization import Organization
-from shared.schema.user import (
-    UserSchemaBase,
-    UserProfileSchema,
-    HotkeySchema,
-)
 
 from core.model.base_model import BaseModel
-from shared.schema.role import RoleIdSchema, PermissionIdSchema
-from shared.schema.organization import OrganizationSchema
 from core.managers.log_manager import logger
 
 
-class User(db.Model):
+class User(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), unique=True, nullable=False)
     name = db.Column(db.String(), nullable=False)
@@ -192,12 +184,12 @@ class User(db.Model):
         return f"User {id} deleted", 200
 
 
-class UserRole(db.Model):
+class UserRole(BaseModel):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), primary_key=True)
     role_id = db.Column(db.Integer, db.ForeignKey("role.id"), primary_key=True)
 
 
-class UserPermission(db.Model):
+class UserPermission(BaseModel):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), primary_key=True)
     permission_id = db.Column(db.String, db.ForeignKey("permission.id"), primary_key=True)
 

@@ -1,10 +1,10 @@
-from sqlalchemy import func, or_
+from sqlalchemy import or_
 
 from core.managers.db_manager import db
-from typing import Any
+from core.model.base_model import BaseModel
 
 
-class Permission(db.Model):
+class Permission(BaseModel):
     id = db.Column(db.String, primary_key=True)
     name = db.Column(db.String(), unique=True, nullable=False)
     description = db.Column(db.String())
@@ -52,17 +52,6 @@ class Permission(db.Model):
         permissions, count = cls.get(search)
         items = [permission.to_dict() for permission in permissions]
         return {"total_count": count, "items": items}
-
-    @classmethod
-    def load_multiple(cls, json_data: list[dict[str, Any]]) -> list["Permission"]:
-        return [cls.from_dict(data) for data in json_data]
-
-    @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "Permission":
-        return cls(**data)
-
-    def to_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
     @staticmethod
     def get_external_permissions_ids():

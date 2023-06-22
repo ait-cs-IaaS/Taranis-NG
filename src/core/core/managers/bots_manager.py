@@ -17,17 +17,10 @@ def get_bots_info(node: BotsNodeSchema):
     if status_code != 200:
         return None, status_code
 
-    return Bot.create_all(bots_info), status_code
+    return Bot.load_multiple(bots_info), status_code
 
 
 def add_bots_node(data):
-    try:
-        logger.log_info(data)
-        node = BotsNodeSchema.create(data)
-    except Exception as e:
-        logger.log_debug_trace()
-        return str(e), 500
-
     try:
         BotsNode.add_new(data)
     except Exception:

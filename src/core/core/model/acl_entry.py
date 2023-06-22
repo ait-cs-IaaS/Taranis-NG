@@ -6,6 +6,7 @@ from enum import Enum, auto
 from core.managers.db_manager import db
 from core.model.role import Role
 from core.model.user import User
+from core.model.base_model import BaseModel
 
 
 class ItemType(Enum):
@@ -19,7 +20,7 @@ class ItemType(Enum):
     DELEGATION = auto()
 
 
-class ACLEntry(db.Model):
+class ACLEntry(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=True, nullable=False)
     description = db.Column(db.String())
@@ -88,19 +89,12 @@ class ACLEntry(db.Model):
     def from_dict(cls, data: dict[str, Any]) -> "ACLEntry":
         return cls(**data)
 
-    def to_dict(self):
-        data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+    def to_dict(self) -> dict[str, Any]:
+        data = super().to_dict()
         data["roles"] = [role.id for role in self.roles]
         data["users"] = [user.id for user in self.users]
         data["tag"] = "mdi-lock-check"
         return data
-
-    @classmethod
-    def add_new(cls, data):
-        acl = cls.from_dict(data)
-        db.session.add(acl)
-        db.session.commit()
-        return f"Successfully Added {acl.id}", 201
 
     @classmethod
     def update(cls, acl_id: int, data) -> tuple[str, int]:
@@ -112,12 +106,6 @@ class ACLEntry(db.Model):
                 setattr(acl, key, value)
         db.session.commit()
         return f"Succussfully updated {acl.id}", 201
-
-    @classmethod
-    def delete(cls, id):
-        acl = cls.query.get(id)
-        db.session.delete(acl)
-        db.session.commit()
 
     @classmethod
     def apply_query(cls, query: query.Query, user: User, see: bool, access: bool, modify: bool) -> query.Query:
@@ -188,11 +176,11 @@ class ACLEntry(db.Model):
         )
 
 
-class ACLEntryUser(db.Model):
+class ACLEntryUser(BaseModel):
     acl_entry_id = db.Column(db.Integer, db.ForeignKey("acl_entry.id"), primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), primary_key=True)
 
 
-class ACLEntryRole(db.Model):
+class ACLEntryRole(BaseModel):
     acl_entry_id = db.Column(db.Integer, db.ForeignKey("acl_entry.id"), primary_key=True)
     role_id = db.Column(db.Integer, db.ForeignKey("role.id"), primary_key=True)

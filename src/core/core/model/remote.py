@@ -4,11 +4,12 @@ from sqlalchemy import orm, func, or_, and_
 from typing import Any
 
 from core.managers.db_manager import db
+from core.model.base_model import BaseModel
 from core.model.osint_source import OSINTSource
 from core.model.report_item_type import ReportItemType
 
 
-class RemoteAccess(db.Model):
+class RemoteAccess(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())

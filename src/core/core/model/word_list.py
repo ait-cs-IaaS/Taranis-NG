@@ -4,11 +4,11 @@ from sqlalchemy import func, or_, and_
 from sqlalchemy.sql.expression import cast
 
 from core.managers.db_manager import db
-from core.model.acl_entry import ACLEntry
-from core.model.acl_entry import ItemType
+from core.model.base_model import BaseModel
+from core.model.acl_entry import ACLEntry, ItemType
 
 
-class WordList(db.Model):
+class WordList(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String(), nullable=False)
@@ -91,8 +91,8 @@ class WordList(db.Model):
     def from_dict(cls, data: dict[str, Any]) -> "WordList":
         return cls(**data)
 
-    def to_dict(self):
-        data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+    def to_dict(self) -> dict[str, Any]:
+        data = super().to_dict()
         data["entries"] = [entry.to_dict() for entry in self.entries]
         data["tag"] = "mdi-format-list-bulleted-square"
         return data
@@ -116,17 +116,8 @@ class WordList(db.Model):
         db.session.commit()
         return "Word list updated", 200
 
-    @classmethod
-    def delete(cls, id) -> tuple[str, int]:
-        word_list = cls.query.get(id)
-        if not word_list:
-            return "Word list not found", 404
-        db.session.delete(word_list)
-        db.session.commit()
-        return "Word list deleted", 200
 
-
-class WordListEntry(db.Model):
+class WordListEntry(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     value = db.Column(db.String(), nullable=False)
     description = db.Column(db.String(), nullable=False)
@@ -157,14 +148,3 @@ class WordListEntry(db.Model):
             if not cls.identical(entry.value, word_list.id):
                 word_list.entries.append(entry)
                 db.session.commit()
-
-    @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "WordListEntry":
-        return cls(**data)
-
-    def to_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
-    @classmethod
-    def load_multiple(cls, json_data: list[dict[str, Any]]) -> list["WordListEntry"]:
-        return [cls.from_dict(data) for data in json_data]

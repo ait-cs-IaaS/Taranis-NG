@@ -1,16 +1,17 @@
 from datetime import datetime, timedelta
-import sqlalchemy
-from sqlalchemy import func, or_, and_
+from typing import Any
+from sqlalchemy import func, or_, and_, String as SQLString
 from sqlalchemy.sql.expression import cast
 
 from core.managers.db_manager import db
 from core.model.acl_entry import ACLEntry
 from core.model.report_item import ReportItem
+from core.model.base_model import BaseModel
 from shared.schema.acl_entry import ItemType
 from shared.schema.product import ProductPresentationSchema
 
 
-class Product(db.Model):
+class Product(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())
@@ -62,7 +63,7 @@ class Product(db.Model):
         query = query.outerjoin(
             ACLEntry,
             and_(
-                cast(Product.product_type_id, sqlalchemy.String) == ACLEntry.item_id,
+                cast(Product.product_type_id, SQLString) == ACLEntry.item_id,
                 ACLEntry.item_type == ItemType.PRODUCT_TYPE,
             ),
         )
@@ -111,13 +112,8 @@ class Product(db.Model):
             product.modify = result.modify > 0 or result.acls == 0
             products.append(product)
 
-            for report_item in product.report_items:
-                report_item.see = True
-                report_item.access = True
-                report_item.modify = False
-
-        products_schema = ProductPresentationSchema(many=True)
-        return {"total_count": count, "items": products_schema.dump(products)}
+        items = [product.to_dict() for product in products]
+        return {"total_count": count, "items": items}
 
     @classmethod
     def add_product(cls, product_data, user_id):
@@ -128,15 +124,11 @@ class Product(db.Model):
 
         return product.id
 
-    def to_dict(self):
-        data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+    def to_dict(self) -> dict[str, Any]:
+        data = super().to_dict()
         data["report_items"] = [report_item.id for report_item in self.report_items]
         data["tag"] = "mdi-file-pdf-outline"
         return data
-
-    @classmethod
-    def from_dict(cls, data):
-        return cls(**data)
 
     @classmethod
     def update(cls, product_id, data) -> tuple[str, int]:
@@ -151,14 +143,7 @@ class Product(db.Model):
         db.session.commit()
         return f"Product {product_id} updated", 200
 
-    @classmethod
-    def delete(cls, id):
-        product = cls.query.get(id)
-        if product is not None:
-            db.session.delete(product)
-            db.session.commit()
 
-
-class ProductReportItem(db.Model):
+class ProductReportItem(BaseModel):
     product_id = db.Column(db.Integer, db.ForeignKey("product.id"), primary_key=True)
     report_item_id = db.Column(db.Integer, db.ForeignKey("report_item.id"), primary_key=True)

@@ -1,22 +1,13 @@
-from marshmallow import fields, post_load
+from typing import Any
 from sqlalchemy import or_, func
 import uuid
 
 from core.managers.db_manager import db
-from core.model.parameter_value import ParameterValueImportSchema
 from core.managers.log_manager import logger
-from shared.schema.bot import BotSchema
+from core.model.base_model import BaseModel
 
 
-class NewBotSchema(BotSchema):
-    parameter_values = fields.List(fields.Nested(ParameterValueImportSchema), load_default=[])
-
-    @post_load
-    def make(self, data, **kwargs):
-        return Bot(**data)
-
-
-class Bot(db.Model):
+class Bot(BaseModel):
     id = db.Column(db.String(64), primary_key=True)
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())
@@ -29,11 +20,6 @@ class Bot(db.Model):
         self.description = description
         self.type = type
         self.parameter_values = parameter_values
-
-    @classmethod
-    def create_all(cls, bots_data):
-        new_bot_schema = NewBotSchema(many=True)
-        return new_bot_schema.load(bots_data)
 
     @classmethod
     def update_bot_parameters(cls, bot_id, data):
@@ -54,13 +40,13 @@ class Bot(db.Model):
             logger.log_debug_trace("Update Bot Parameters Failed")
 
     @classmethod
-    def add(cls, data):
+    def add(cls, data) -> tuple[str, int]:
         if cls.find_by_type(data["type"]):
-            return None
-        schema = NewBotSchema()
-        bot = schema.load(data)
+            return f"Bot with type {data['type']} already exists", 409
+        bot = cls.from_dict(data)
         db.session.add(bot)
         db.session.commit()
+        return f"Bot {bot.name} added", 201
 
     @classmethod
     def get_first(cls):
@@ -96,12 +82,15 @@ class Bot(db.Model):
     @classmethod
     def get_all_json(cls, search):
         bots, count = cls.get(search)
-        node_schema = BotSchema(many=True)
-        items = node_schema.dump(bots)
-
+        items = [bot.to_dict() for bot in bots]
         return {"total_count": count, "items": items}
 
+    def to_dict(self) -> dict[str, Any]:
+        data = super().to_dict()
+        data["parameter_values"] = [pv.to_dict() for pv in self.parameter_values]
+        return data
 
-class BotParameterValue(db.Model):
+
+class BotParameterValue(BaseModel):
     bot_id = db.Column(db.String, db.ForeignKey("bot.id"), primary_key=True)
     parameter_value_id = db.Column(db.Integer, db.ForeignKey("parameter_value.id"), primary_key=True)

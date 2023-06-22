@@ -1,19 +1,12 @@
-from marshmallow import fields, post_load
-from sqlalchemy import or_, func
+from sqlalchemy import or_
 import uuid
 
 from core.managers.db_manager import db
-from shared.schema.collector import CollectorSchema
 from core.model.parameter import Parameter
+from core.model.base_model import BaseModel
 
 
-class NewCollectorSchema(CollectorSchema):
-    @post_load
-    def make_collector(self, data, **kwargs):
-        return Collector(**data)
-
-
-class Collector(db.Model):
+class Collector(BaseModel):
     id = db.Column(db.String(64), primary_key=True)
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())
@@ -33,21 +26,14 @@ class Collector(db.Model):
         return cls.query.get(collector_id)
 
     @classmethod
-    def create_all(cls, collectors_data):
-        new_collector_schema = NewCollectorSchema(many=True)
-        return new_collector_schema.load(collectors_data)
-
-    @classmethod
-    def add(cls, data):
+    def add(cls, data) -> tuple[str, int]:
         if cls.find_by_type(data["type"]):
-            return None
-        schema = NewCollectorSchema()
-        parameters = [Parameter.find_by_key(p) for p in data["parameters"] if p is not None]
-        data["parameters"] = []
-        collector = schema.load(data)
-        collector.parameters = parameters
+            return f"Collector with type {data['type']} already exists", 409
+        collector = cls.from_dict(data)
+        collector.parameters = [Parameter.find_by_key(p) for p in data.pop("parameters") if p is not None]
         db.session.add(collector)
         db.session.commit()
+        return f"Collector {collector.name} added", 201
 
     @classmethod
     def get_first(cls):
@@ -58,11 +44,10 @@ class Collector(db.Model):
         query = cls.query
 
         if search is not None:
-            search_string = f"%{search.lower()}%"
             query = query.filter(
                 or_(
-                    func.lower(Collector.name).like(search_string),
-                    func.lower(Collector.description).like(search_string),
+                    Collector.name.ilike(f"%{search}%"),
+                    Collector.description.ilike(f"%{search}%"),
                 )
             )
 
@@ -75,12 +60,10 @@ class Collector(db.Model):
     @classmethod
     def get_all_json(cls, search):
         collectors, count = cls.get(search)
-        node_schema = CollectorSchema(many=True)
-        items = node_schema.dump(collectors)
-
+        items = [collector.to_dict() for collector in collectors]
         return {"total_count": count, "items": items}
 
 
-class CollectorParameter(db.Model):
+class CollectorParameter(BaseModel):
     collector_id = db.Column(db.String, db.ForeignKey("collector.id", ondelete="CASCADE"), primary_key=True)
     parameter_id = db.Column(db.String, db.ForeignKey("parameter.key", ondelete="CASCADE"), primary_key=True)

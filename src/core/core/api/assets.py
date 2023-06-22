@@ -15,7 +15,7 @@ class AssetGroups(Resource):
 
     @auth_required("MY_ASSETS_CONFIG")
     def post(self):
-        return "", asset.AssetGroup.add(auth_manager.get_user_from_jwt(), request.json)
+        return asset.AssetGroup.add(auth_manager.get_user_from_jwt(), request.json)
 
 
 class AssetGroup(Resource):

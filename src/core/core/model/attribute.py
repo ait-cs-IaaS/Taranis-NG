@@ -1,12 +1,12 @@
 import os
 from xml.etree.ElementTree import iterparse
-from marshmallow import fields, post_load
 from sqlalchemy import func, or_
 from enum import Enum, auto
 from typing import Any
 
 from core.managers.log_manager import logger
 from core.managers.db_manager import db
+from core.model.base_model import BaseModel
 
 
 class AttributeType(Enum):
@@ -36,7 +36,7 @@ class AttributeValidator(Enum):
     REGEXP = auto()
 
 
-class AttributeEnum(db.Model):
+class AttributeEnum(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     index = db.Column(db.Integer)
     value = db.Column(db.String(), nullable=False)
@@ -137,7 +137,7 @@ class AttributeEnum(db.Model):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
-class Attribute(db.Model):
+class Attribute(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())

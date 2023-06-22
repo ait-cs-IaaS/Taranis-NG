@@ -5,9 +5,10 @@ from sqlalchemy import func
 from sqlalchemy.sql import label
 
 from core.managers.db_manager import db
+from core.model.base_model import BaseModel
 
 
-class TagCloud(db.Model):
+class TagCloud(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     word = db.Column(db.String())
     word_quantity = db.Column(db.BigInteger)
@@ -114,13 +115,9 @@ class TagCloud(db.Model):
         tag_cloud_words = [TagCloud.create_tag_cloud(word_item) for word_item in set(news_items_words)]
         cls.add_tag_clouds(tag_cloud_words)
 
-    @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "TagCloud":
-        return cls(**data)
-
-    def to_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
-    @classmethod
-    def load_multiple(cls, json_data: list[dict[str, Any]]) -> list["TagCloud"]:
-        return [cls.from_dict(data) for data in json_data]
+    def to_dict(self) -> dict[str, Any]:
+        data = super().to_dict()
+        for key, value in data.items():
+            if isinstance(value, datetime):
+                data[key] = value.isoformat()
+        return data

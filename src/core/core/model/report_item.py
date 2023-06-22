@@ -8,6 +8,7 @@ from typing import Any
 import sqlalchemy
 
 from core.managers.db_manager import db
+from core.model.base_model import BaseModel
 from core.managers.log_manager import logger
 from core.model.news_item import NewsItemAggregate
 from core.model.report_item_type import AttributeGroupItem
@@ -35,7 +36,7 @@ class NewReportItemAttributeSchema(ReportItemAttributeBaseSchema):
         return ReportItemAttribute(**data)
 
 
-class ReportItemAttribute(db.Model):
+class ReportItemAttribute(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     value = db.Column(db.String(), nullable=False)
     binary_mime_type = db.Column(db.String())
@@ -82,17 +83,6 @@ class ReportItemAttribute(db.Model):
     def sort(report_item_attribute):
         return report_item_attribute.last_updated
 
-    def to_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
-    @classmethod
-    def from_dict(cls, data) -> "ReportItemAttribute":
-        return cls(**data)
-
-    @classmethod
-    def load_multiple(cls, data: list[dict[str, Any]]) -> list["ReportItemAttribute"]:
-        return [cls.from_dict(item) for item in data]
-
     def update(self, new_item: dict[str, Any]) -> tuple[str, int]:
         for key, value in new_item.items():
             if hasattr(self, key) and key != "id":
@@ -112,12 +102,12 @@ class NewReportItemSchema(ReportItemBaseSchema):
         return ReportItem(**data)
 
 
-class ReportItemRemoteReportItem(db.Model):
+class ReportItemRemoteReportItem(BaseModel):
     report_item_id = db.Column(db.Integer, db.ForeignKey("report_item.id"), primary_key=True)
     remote_report_item_id = db.Column(db.Integer, db.ForeignKey("report_item.id"), primary_key=True)
 
 
-class ReportItem(db.Model):
+class ReportItem(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     uuid = db.Column(db.String(64))
 
@@ -218,8 +208,8 @@ class ReportItem(db.Model):
         groups = {row[0] for row in result if row[0] is not None}
         return list(groups)
 
-    def to_dict(self):
-        data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+    def to_dict(self) -> dict[str, Any]:
+        data = super().to_dict()
         for key, value in data.items():
             if isinstance(value, datetime):
                 data[key] = value.isoformat()
@@ -561,7 +551,7 @@ class ReportItem(db.Model):
         db.session.commit()
 
 
-class ReportItemCpe(db.Model):
+class ReportItemCpe(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     value = db.Column(db.String())
 

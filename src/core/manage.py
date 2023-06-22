@@ -255,7 +255,7 @@ def collector_manager(
             print("Response from collector: {}".format(collectors_info))
             abort()
 
-        collectors = collector.Collector.create_all(collectors_info)
+        collectors = collector.Collector.load_multiple(collectors_info)
         node = collectors_node.CollectorsNode.add_new(data, collectors)
         collectors_info, status_code = CollectorsApi(api_url, api_key).get_collectors_info(node.id)
 
@@ -325,7 +325,7 @@ def collector_manager(
                 print("Response from collector: {}".format(collectors_info))
                 abort()
 
-            collectors = collector.Collector.create_all(collectors_info)
+            collectors = collector.Collector.load_multiple(collectors_info)
             node = collectors_node.CollectorsNode.add_new(data, collectors)
             collectors_info, status_code = CollectorsApi(opt_api_url, opt_api_key).get_collectors_info(node.id)
 

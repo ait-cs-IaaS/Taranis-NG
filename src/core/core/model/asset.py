@@ -4,20 +4,15 @@ from sqlalchemy import orm, or_
 from typing import Any
 
 from core.managers.db_manager import db
+from core.model.base_model import BaseModel
 from core.model.report_item import ReportItem
 from core.model.user import User
 from core.model.organization import Organization
 from core.model.notification_template import NotificationTemplate
-from shared.schema.asset import (
-    AssetGroupSchema,
-    AssetGroupPresentationSchema,
-)
-from shared.schema.user import UserIdSchema
-from shared.schema.notification_template import NotificationTemplateIdSchema
 from core.managers.log_manager import logger
 
 
-class AssetCpe(db.Model):
+class AssetCpe(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     value = db.Column(db.String())
 
@@ -29,7 +24,7 @@ class AssetCpe(db.Model):
         self.value = value
 
 
-class Asset(db.Model):
+class Asset(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), nullable=False)
     serial = db.Column(db.String())
@@ -218,7 +213,7 @@ class Asset(db.Model):
         return f"Successfully deleted {asset.id}", 200
 
 
-class AssetVulnerability(db.Model):
+class AssetVulnerability(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     solved = db.Column(db.Boolean, default=False)
 
@@ -238,16 +233,7 @@ class AssetVulnerability(db.Model):
         return cls.query.filter_by(report_item_id=report_id).all()
 
 
-class NewAssetGroupGroupSchema(AssetGroupSchema):
-    users = fields.Nested(UserIdSchema, many=True)
-    templates = fields.Nested(NotificationTemplateIdSchema, many=True)
-
-    @post_load
-    def make(self, data, **kwargs):
-        return AssetGroup(**data)
-
-
-class AssetGroup(db.Model):
+class AssetGroup(BaseModel):
     id = db.Column(db.String(64), primary_key=True)
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())
@@ -260,16 +246,8 @@ class AssetGroup(db.Model):
         self.id = id or str(uuid.uuid4())
         self.name = name
         self.description = description
-        try:
-            self.organization = Organization.find(organization_id)
-            self.templates = [NotificationTemplate.find(template.id) for template in templates] if templates else []
-            self.tag = "mdi-folder-multiple"
-        except Exception:
-            logger.exception("Error creating asset group")
-
-    @orm.reconstructor
-    def reconstruct(self):
-        self.tag = "mdi-folder-multiple"
+        self.organization = Organization.find(organization_id)
+        self.templates = [NotificationTemplate.find(template.id) for template in templates]
 
     @classmethod
     def find(cls, group_id):
@@ -303,8 +281,8 @@ class AssetGroup(db.Model):
     @classmethod
     def get_all_json(cls, user, search):
         groups, count = cls.get(search, user.organization)
-        group_schema = AssetGroupPresentationSchema(many=True)
-        return {"total_count": count, "items": group_schema.dump(groups)}
+        items = [group.to_dict() for group in groups]
+        return {"total_count": count, "items": items}
 
     @classmethod
     def create(cls, name: str, description: str, organization_id: int, templates: list | None = None, id: str | None = None):
@@ -312,15 +290,11 @@ class AssetGroup(db.Model):
         db.session.add(group)
         db.session.commit()
 
-    @classmethod
-    def add(cls, user, data):
-        group = NewAssetGroupGroupSchema().load(data)
-        if not group:
-            return "Invalid group data", 400
-        group.organization = user.organization
-        db.session.add(group)
-        db.session.commit()
-        return "Group added", 200
+    def to_dict(self) -> dict[str, Any]:
+        data = super().to_dict()
+        data["templates"] = [template.to_dict() for template in self.templates]
+        data["tag"] = "mdi-folder-multiple"
+        return data
 
     @classmethod
     def delete(cls, user, group_id):
@@ -340,7 +314,7 @@ class AssetGroup(db.Model):
         if not cls.access_allowed(user, group_id):
             return "Access denied", 403
 
-        updated_group = NewAssetGroupGroupSchema().load(data)
+        updated_group = cls.from_dict(data)
         if not updated_group:
             return "Invalid group data", 400
         group = cls.query.get(group_id)
@@ -351,6 +325,6 @@ class AssetGroup(db.Model):
         return "Group updated", 200
 
 
-class AssetGroupNotificationTemplate(db.Model):
+class AssetGroupNotificationTemplate(BaseModel):
     asset_group_id = db.Column(db.String, db.ForeignKey("asset_group.id"), primary_key=True)
     notification_template_id = db.Column(db.Integer, db.ForeignKey("notification_template.id"), primary_key=True)

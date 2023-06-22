@@ -1,9 +1,11 @@
-from core.managers.db_manager import db
 from typing import Any
+
+from core.managers.db_manager import db
+from core.model.base_model import BaseModel
 from core.managers.log_manager import logger
 
 
-class Address(db.Model):
+class Address(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     street = db.Column(db.String())
     city = db.Column(db.String())
@@ -20,13 +22,6 @@ class Address(db.Model):
     @classmethod
     def find(cls, address_id):
         return cls.query.get(address_id)
-
-    def to_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
-    @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "Address":
-        return cls(**data)
 
     def update(self, new_item: dict[str, Any]) -> tuple[str, int]:
         for key, value in new_item.items():

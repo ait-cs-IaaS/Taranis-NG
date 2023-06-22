@@ -2,10 +2,11 @@ from sqlalchemy import or_
 from typing import Any
 
 from core.managers.db_manager import db
+from core.model.base_model import BaseModel
 from core.model.permission import Permission
 
 
-class Role(db.Model):
+class Role(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=True, nullable=False)
     description = db.Column(db.String())
@@ -86,13 +87,7 @@ class Role(db.Model):
         db.session.commit()
         return f"Succussfully updated {role.id}", 201
 
-    @classmethod
-    def delete(cls, id):
-        role = cls.query.get(id)
-        db.session.delete(role)
-        db.session.commit()
 
-
-class RolePermission(db.Model):
+class RolePermission(BaseModel):
     role_id = db.Column(db.Integer, db.ForeignKey("role.id"), primary_key=True)
     permission_id = db.Column(db.String, db.ForeignKey("permission.id"), primary_key=True)

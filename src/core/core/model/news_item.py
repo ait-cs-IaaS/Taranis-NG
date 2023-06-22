@@ -2,11 +2,13 @@ import base64
 import uuid
 from datetime import datetime, timedelta
 import dateutil.parser as dateparser
+from typing import Any
 
 from marshmallow import post_load, fields, ValidationError
 from sqlalchemy import orm, and_, or_, func
 
 from core.managers.db_manager import db
+from core.model.base_model import BaseModel
 from core.managers.log_manager import logger
 from core.model.user import User
 from core.model.acl_entry import ACLEntry
@@ -17,7 +19,6 @@ from shared.schema.news_item import (
     NewsItemAggregateSchema,
     NewsItemAttributeSchema,
     NewsItemSchema,
-    NewsItemRemoteSchema,
 )
 
 
@@ -35,7 +36,7 @@ class NewNewsItemDataSchema(NewsItemDataSchema):
         return NewsItemData(**data)
 
 
-class NewsItemData(db.Model):
+class NewsItemData(BaseModel):
     id = db.Column(db.String(64), primary_key=True)
     hash = db.Column(db.String())
 
@@ -56,21 +57,7 @@ class NewsItemData(db.Model):
     osint_source = db.relationship("OSINTSource")
     remote_source = db.Column(db.String())
 
-    def __init__(
-        self,
-        id,
-        hash,
-        title,
-        review,
-        source,
-        link,
-        published,
-        author,
-        collected,
-        content,
-        osint_source_id,
-        attributes,
-    ):
+    def __init__(self, hash, title, review, source, link, published, author, collected, content, osint_source_id, attributes, id=None):
         self.id = id or str(uuid.uuid4())
         self.hash = hash
         self.title = title
@@ -179,10 +166,7 @@ class NewsItemData(db.Model):
 
     @classmethod
     def get_for_sync(cls, last_synced, osint_sources):
-        osint_source_ids = set()
-        for osint_source in osint_sources:
-            osint_source_ids.add(osint_source.id)
-
+        osint_source_ids = {osint_source.id for osint_source in osint_sources}
         last_sync_time = datetime.now()
 
         query = cls.query.filter(
@@ -192,7 +176,6 @@ class NewsItemData(db.Model):
         )
 
         news_items = query.all()
-        news_item_remote_schema = NewsItemRemoteSchema(many=True)
         for news_item in news_items:
             total_relevance = NewsItem.get_total_relevance(news_item.id)
             if total_relevance > 0:
@@ -202,12 +185,19 @@ class NewsItemData(db.Model):
             else:
                 news_item.relevance = 0
 
-        items = news_item_remote_schema.dump(news_items)
-
+        items = [news_item.to_dict() for news_item in news_items]
         return items, last_sync_time
 
+    def to_dict(self) -> dict[str, Any]:
+        data = super().to_dict()
+        for key, value in data.items():
+            if isinstance(value, datetime):
+                data[key] = value.isoformat()
+        data["tag"] = "mdi-file-table-outline"
+        return data
 
-class NewsItem(db.Model):
+
+class NewsItem(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
 
     read = db.Column(db.Boolean, default=False)
@@ -520,7 +510,7 @@ class NewsItem(db.Model):
         db.session.delete(news_item)
 
 
-class NewsItemVote(db.Model):
+class NewsItemVote(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     like = db.Column(db.Boolean)
     dislike = db.Column(db.Boolean)
@@ -556,7 +546,7 @@ class NewsItemVote(db.Model):
         return 1 if vote.like else -1
 
 
-class NewsItemAggregate(db.Model):
+class NewsItemAggregate(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String())
     description = db.Column(db.String())
@@ -1095,7 +1085,7 @@ class NewsItemAggregate(db.Model):
         return NewsItemAggregateSchema(many=True).dumps(news_item_aggregates)
 
 
-class NewsItemAggregateSearchIndex(db.Model):
+class NewsItemAggregateSearchIndex(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     data = db.Column(db.String)
     news_item_aggregate_id = db.Column(db.Integer, db.ForeignKey("news_item_aggregate.id"))
@@ -1135,7 +1125,7 @@ class NewsItemAggregateSearchIndex(db.Model):
         db.session.commit()
 
 
-class NewsItemAttribute(db.Model):
+class NewsItemAttribute(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     key = db.Column(db.String(), nullable=False)
     value = db.Column(db.String(), nullable=False)
@@ -1161,7 +1151,7 @@ class NewsItemAttribute(db.Model):
         return cls.query.get(attribute_id)
 
 
-class NewsItemDataNewsItemAttribute(db.Model):
+class NewsItemDataNewsItemAttribute(BaseModel):
     news_item_data_id = db.Column(db.String, db.ForeignKey("news_item_data.id"), primary_key=True)
     news_item_attribute_id = db.Column(db.Integer, db.ForeignKey("news_item_attribute.id"), primary_key=True)
 
@@ -1170,12 +1160,12 @@ class NewsItemDataNewsItemAttribute(db.Model):
         return cls.query.filter(NewsItemDataNewsItemAttribute.news_item_attribute_id == attribute_id).scalar()
 
 
-class NewsItemAggregateNewsItemAttribute(db.Model):
+class NewsItemAggregateNewsItemAttribute(BaseModel):
     news_item_aggregate_id = db.Column(db.Integer, db.ForeignKey("news_item_aggregate.id"), primary_key=True)
     news_item_attribute_id = db.Column(db.Integer, db.ForeignKey("news_item_attribute.id"), primary_key=True)
 
 
-class ReportItemNewsItemAggregate(db.Model):
+class ReportItemNewsItemAggregate(BaseModel):
     report_item_id = db.Column(db.Integer, db.ForeignKey("report_item.id"), primary_key=True)
     news_item_aggregate_id = db.Column(db.Integer, db.ForeignKey("news_item_aggregate.id"), primary_key=True)
 
@@ -1188,7 +1178,7 @@ class ReportItemNewsItemAggregate(db.Model):
         return cls.query.filter_by(news_item_aggregate_id=aggregate_id).count()
 
 
-class NewsItemTag(db.Model):
+class NewsItemTag(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255))
     tag_type = db.Column(db.String(255))

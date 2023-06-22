@@ -22,7 +22,7 @@ def get_collectors_info(node: CollectorNodeSchema):
     if status_code != 200:
         return None, status_code
 
-    return Collector.create_all(collectors_info), status_code
+    return Collector.load_multiple(collectors_info), status_code
 
 
 def add_collectors_node(data):

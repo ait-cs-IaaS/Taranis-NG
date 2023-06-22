@@ -21,6 +21,13 @@ class BaseModel(db.Model):
         return f"{cls.__name__} {id} not found", 404
 
     @classmethod
+    def add(cls, data) -> tuple[str, int]:
+        item = cls.from_dict(data)
+        db.session.add(item)
+        db.session.commit()
+        return f"{cls.__name__} {item.id} created", 201
+
+    @classmethod
     def from_dict(cls: Type[T], data: dict[str, Any]) -> T:
         return cls(**data)
 

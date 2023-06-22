@@ -4,6 +4,7 @@ from sqlalchemy import or_, func
 from typing import Any
 
 from core.managers.db_manager import db
+from core.model.base_model import BaseModel
 from core.model.parameter import Parameter
 from shared.schema.presenter import PresenterSchema
 
@@ -14,7 +15,7 @@ class NewPresenterSchema(PresenterSchema):
         return Presenter(**data)
 
 
-class Presenter(db.Model):
+class Presenter(BaseModel):
     id = db.Column(db.String(64), primary_key=True)
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())
@@ -92,6 +93,6 @@ class Presenter(db.Model):
         return cls.query.filter_by(type=type).first()
 
 
-class PresenterParameter(db.Model):
+class PresenterParameter(BaseModel):
     presenter_id = db.Column(db.String, db.ForeignKey("presenter.id"), primary_key=True)
     parameter_key = db.Column(db.String, db.ForeignKey("parameter.key"), primary_key=True)

@@ -1,14 +1,14 @@
-from sqlalchemy import orm, or_, and_
+from sqlalchemy import or_, and_
 import sqlalchemy
 from typing import Any
 from sqlalchemy.sql.expression import cast
 
 from core.managers.db_manager import db
+from core.model.base_model import BaseModel
 from core.model.acl_entry import ACLEntry, ItemType
-from core.model.attribute import Attribute
 
 
-class AttributeGroupItem(db.Model):
+class AttributeGroupItem(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String())
     description = db.Column(db.String())
@@ -41,7 +41,7 @@ class AttributeGroupItem(db.Model):
         return attribute_group_item.index
 
 
-class AttributeGroup(db.Model):
+class AttributeGroup(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String())
     description = db.Column(db.String())
@@ -105,7 +105,7 @@ class AttributeGroup(db.Model):
                 self.attribute_group_items.remove(attribute_group_item)
 
 
-class ReportItemType(db.Model):
+class ReportItemType(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String())
     description = db.Column(db.String())

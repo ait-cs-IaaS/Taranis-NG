@@ -2,37 +2,18 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from marshmallow import post_load, fields
-from sqlalchemy import orm, func, or_, and_
-from sqlalchemy.types import JSON
+from sqlalchemy import or_, and_
 
 from core.managers.db_manager import db
 from core.managers.log_manager import logger
-from core.model.acl_entry import ACLEntry
+from core.model.acl_entry import ACLEntry, ItemType
 from core.model.collector import Collector
-from core.model.parameter_value import ParameterValue, ParameterValueImportSchema
+from core.model.parameter_value import ParameterValue
 from core.model.word_list import WordList
-from shared.schema.acl_entry import ItemType
-from shared.schema.osint_source import (
-    OSINTSourceSchema,
-    OSINTSourcePresentationSchema,
-    OSINTSourceGroupIdSchema,
-    OSINTSourceCollectorSchema,
-)
-from shared.schema.word_list import WordListSchema
+from core.model.base_model import BaseModel
 
 
-class NewOSINTSourceSchema(OSINTSourceSchema):
-    parameter_values = fields.List(fields.Nested(ParameterValueImportSchema), load_default=[])
-    word_lists = fields.List(fields.Nested(WordListSchema), load_default=[])
-    osint_source_groups = fields.List(fields.Nested(OSINTSourceGroupIdSchema), load_default=[])
-
-    @post_load
-    def make_osint_source(self, data, **kwargs):
-        return OSINTSource(**data)
-
-
-class OSINTSource(db.Model):
+class OSINTSource(BaseModel):
     id = db.Column(db.String(64), primary_key=True)
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())
@@ -48,16 +29,7 @@ class OSINTSource(db.Model):
     state = db.Column(db.SmallInteger, default=0)
     last_error_message = db.Column(db.String, default=None)
 
-    def __init__(
-        self,
-        id,
-        name,
-        description,
-        collector_id,
-        parameter_values,
-        word_lists,
-        osint_source_groups,
-    ):
+    def __init__(self, name, description, collector_id, parameter_values, word_lists, osint_source_groups, id=None):
         self.id = id or str(uuid.uuid4())
         self.name = name
         self.description = description
@@ -66,11 +38,11 @@ class OSINTSource(db.Model):
 
         self.word_lists = []
         self.word_lists.extend(WordList.find(word_list.id) for word_list in word_lists)
-        self.osint_source_groups = [OSINTSourceGroup.get_default()] if osint_source_groups is None else []
-        for osint_source_group in osint_source_groups:
-            group = OSINTSourceGroup.find(osint_source_group.id)
-            if not group.default:
-                self.osint_source_groups.append(group)
+        self.osint_source_groups = (
+            [OSINTSourceGroup.get_default()]
+            if osint_source_groups is None
+            else [OSINTSourceGroup.find(osint_source_group.id) for osint_source_group in osint_source_groups]
+        )
 
     @classmethod
     def find(cls, source_id):
@@ -83,28 +55,6 @@ class OSINTSource(db.Model):
     @classmethod
     def get_all(cls):
         return cls.query.order_by(OSINTSource.name).all()
-
-    @classmethod
-    def get_all_manual(cls, user):
-        query = cls.query.join(Collector, OSINTSource.collector_id == Collector.id).filter(Collector.type == "MANUAL_COLLECTOR")
-
-        query = query.outerjoin(
-            ACLEntry,
-            or_(
-                and_(
-                    OSINTSource.id == ACLEntry.item_id,
-                    ACLEntry.item_type == ItemType.OSINT_SOURCE,
-                ),
-                and_(
-                    OSINTSource.collector_id == ACLEntry.item_id,
-                    ACLEntry.item_type == ItemType.COLLECTOR,
-                ),
-            ),
-        )
-
-        query = ACLEntry.apply_query(query, user, False, True, False)
-
-        return query.order_by(db.asc(OSINTSource.name)).all()
 
     @classmethod
     def get(cls, search=None):
@@ -164,30 +114,19 @@ class OSINTSource(db.Model):
             .all(),
             query.count(),
         )
-        sources_schema = OSINTSourceCollectorSchema(many=True)
-        return {"total_count": count, "items": sources_schema.dump(sources)}
+        items = [source.to_dict() for source in sources]
+        return {"total_count": count, "items": items}
 
     @classmethod
     def get_all_by_type(cls, collector_type: str):
         query = cls.query.join(Collector, OSINTSource.collector_id == Collector.id).filter(Collector.type == collector_type)
-        # query = query.options(db.joinedload(OSINTSource.parameter_values), db.joinedload(OSINTSource.word_lists))
         sources = query.order_by(db.asc(OSINTSource.name)).all()
-        sources_schema = OSINTSourceSchema(many=True)
-        return sources_schema.dump(sources)
-
-    @classmethod
-    def get_all_manual_json(cls, user):
-        sources = cls.get_all_manual(user)
-        for source in sources:
-            source.osint_source_groups = OSINTSourceGroup.get_for_osint_source(source.id)
-        sources_schema = OSINTSourcePresentationSchema(many=True)
-        return sources_schema.dump(sources)
+        return [source.to_dict() for source in sources]
 
     @classmethod
     def get_all_for_collector(cls, collector):
         sources = cls.query.filter_by(collector_type=collector).all()
-        sources_schema = OSINTSourceSchema(many=True)
-        return sources_schema.dump(sources)
+        return [source.to_dict() for source in sources]
 
     @classmethod
     def add_new(cls, data):
@@ -223,15 +162,9 @@ class OSINTSource(db.Model):
         return source_id
 
     @classmethod
-    def delete(cls, osint_source_id):
-        osint_source = cls.query.get(osint_source_id)
-        db.session.delete(osint_source)
-        db.session.commit()
-
-    @classmethod
     def update(cls, osint_source_id, data):
-        updated_osint_source = NewOSINTSourceSchema().load(data)
         osint_source = cls.query.get(osint_source_id)
+        updated_osint_source = cls.from_dict(data)
         osint_source.name = updated_osint_source.name
         osint_source.description = updated_osint_source.description
 
@@ -276,17 +209,17 @@ class OSINTSource(db.Model):
         self.last_error_message = status_schema.last_error_message
 
 
-class OSINTSourceParameterValue(db.Model):
+class OSINTSourceParameterValue(BaseModel):
     osint_source_id = db.Column(db.String, db.ForeignKey("osint_source.id"), primary_key=True)
     parameter_value_id = db.Column(db.Integer, db.ForeignKey("parameter_value.id"), primary_key=True)
 
 
-class OSINTSourceWordList(db.Model):
+class OSINTSourceWordList(BaseModel):
     osint_source_id = db.Column(db.String, db.ForeignKey("osint_source.id"), primary_key=True)
     word_list_id = db.Column(db.Integer, db.ForeignKey("word_list.id"), primary_key=True)
 
 
-class OSINTSourceGroup(db.Model):
+class OSINTSourceGroup(BaseModel):
     id = db.Column(db.String(64), primary_key=True)
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())
@@ -426,6 +359,6 @@ class OSINTSourceGroup(db.Model):
         #         NewsItemAggregate.reassign_to_new_groups(source.id, default_group.id)
 
 
-class OSINTSourceGroupOSINTSource(db.Model):
+class OSINTSourceGroupOSINTSource(BaseModel):
     osint_source_group_id = db.Column(db.String, db.ForeignKey("osint_source_group.id", ondelete="CASCADE"), primary_key=True)
     osint_source_id = db.Column(db.String, db.ForeignKey("osint_source.id", ondelete="CASCADE"), primary_key=True)

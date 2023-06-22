@@ -2,6 +2,7 @@ from typing import Any
 from enum import Enum, auto
 
 from core.managers.db_manager import db
+from core.model.base_model import BaseModel
 
 
 class ParameterType(Enum):
@@ -11,7 +12,7 @@ class ParameterType(Enum):
     LIST = auto()
 
 
-class Parameter(db.Model):
+class Parameter(BaseModel):
     key = db.Column(db.String(), primary_key=True)
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())
@@ -41,14 +42,6 @@ class Parameter(db.Model):
         parameters, count = cls.query.all(), cls.query.count()
         items = [parameter.to_dict() for parameter in parameters]
         return {"total_count": count, "items": items}
-
-    @classmethod
-    def load_multiple(cls, json_data: list[dict[str, Any]]) -> list["Parameter"]:
-        return [cls.from_dict(data) for data in json_data]
-
-    @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "Parameter":
-        return cls(**data)
 
     def to_dict(self):
         data = {c.name: getattr(self, c.name) for c in self.__table__.columns}

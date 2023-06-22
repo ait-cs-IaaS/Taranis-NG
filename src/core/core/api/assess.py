@@ -30,7 +30,7 @@ class OSINTSourcesList(Resource):
 class ManualOSINTSources(Resource):
     @auth_required(["ASSESS_ACCESS"])
     def get(self):
-        return osint_source.OSINTSource.get_all_manual_json(auth_manager.get_user_from_jwt())
+        return osint_source.OSINTSource.get_all_by_type("MANUAL_COLLECTOR")
 
 
 class AddNewsItem(Resource):
