@@ -70,14 +70,14 @@ def update_osint_source(osint_source_id, data):
 
 
 def delete_osint_source(osint_source_id):
-    osint_source = OSINTSource.find(osint_source_id)
+    osint_source = OSINTSource.get(osint_source_id)
     collector = osint_source.collector
     OSINTSource.delete(osint_source_id)
     refresh_collector(collector)
 
 
 def refresh_osint_source(osint_source_id):
-    osint_source = OSINTSource.find(osint_source_id)
+    osint_source = OSINTSource.get(osint_source_id)
     refresh_collector(osint_source.collector)
 
 

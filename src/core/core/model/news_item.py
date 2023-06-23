@@ -386,6 +386,11 @@ class NewsItem(BaseModel):
         NewsItemVote.delete_all(news_item.id)
         db.session.delete(news_item)
 
+    def to_dict(self) -> dict[str, Any]:
+        data = super().to_dict()
+        data["news_item_data"] = self.news_item_data.to_dict()
+        return data
+
 
 class NewsItemVote(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
@@ -474,14 +479,14 @@ class NewsItemAggregate(BaseModel):
         ]
 
     @classmethod
-    def _add_filters_to_query(cls, filter: dict, query):
-        if group := filter.get("group"):
+    def _add_filters_to_query(cls, filter_args: dict, query):
+        if group := filter_args.get("group"):
             query = query.filter(NewsItemAggregate.osint_source_group_id == group)
 
-        if source := filter.get("source"):
+        if source := filter_args.get("source"):
             query = query.filter(OSINTSource.id == source)
 
-        if search := filter.get("search"):
+        if search := filter_args.get("search"):
             search = search.strip()
             if search.startswith('"') and search.endswith('"'):
                 words = [search[1:-1]]
@@ -494,33 +499,33 @@ class NewsItemAggregate(BaseModel):
             for word in words:
                 query = query.filter(NewsItemAggregateSearchIndex.data.ilike(f"%{word}%"))
 
-        if "read" in filter:
+        if "read" in filter_args:
             query = query.filter(NewsItemAggregate.read)
 
-        if "unread" in filter:
+        if "unread" in filter_args:
             query = query.filter(NewsItemAggregate.read == False)
 
-        if "important" in filter:
+        if "important" in filter_args:
             query = query.filter(NewsItemAggregate.important)
 
-        if "unimportant" in filter:
+        if "unimportant" in filter_args:
             query = query.filter(NewsItemAggregate.important == False)
 
-        if "relevant" in filter:
+        if "relevant" in filter_args:
             query = query.filter(NewsItemAggregate.relevance > 0)
 
-        if "in_report" in filter:
+        if "in_report" in filter_args:
             query = query.join(
                 ReportItemNewsItemAggregate,
                 NewsItemAggregate.id == ReportItemNewsItemAggregate.news_item_aggregate_id,
             )
 
-        if tags := filter.get("tags"):
+        if tags := filter_args.get("tags"):
             for tag in tags:
                 alias = orm.aliased(NewsItemTag)
                 query = query.join(alias, NewsItemAggregate.id == alias.n_i_a_id).filter(alias.name == tag)
 
-        filter_range = filter.get("range", "").lower()
+        filter_range = filter_args.get("range", "").lower()
         if filter_range and filter_range in ["day", "week", "month"]:
             date_limit = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
@@ -538,8 +543,8 @@ class NewsItemAggregate(BaseModel):
         return query
 
     @classmethod
-    def _add_sorting_to_query(cls, filter: dict, query):
-        if sort := filter.get("sort", "date_desc").lower():
+    def _add_sorting_to_query(cls, filter_args: dict, query):
+        if sort := filter_args.get("sort", "date_desc").lower():
             if sort == "date_desc":
                 query = query.order_by(db.desc(cls.created), db.desc(cls.id))
 
@@ -558,9 +563,9 @@ class NewsItemAggregate(BaseModel):
         return query
 
     @classmethod
-    def _add_paging_to_query(cls, filter: dict, query):
-        offset = filter.get("offset", 0)
-        limit = filter.get("limit", 20)
+    def _add_paging_to_query(cls, filter_args: dict, query):
+        offset = filter_args.get("offset", 0)
+        limit = filter_args.get("limit", 20)
         return query.offset(offset).limit(limit)
 
     @classmethod
@@ -595,9 +600,9 @@ class NewsItemAggregate(BaseModel):
         if user:
             query = cls._add_ACL_check(query, user)
 
-        query = cls._add_filters_to_query(filter, query)
-        query = cls._add_sorting_to_query(filter, query)
-        query = cls._add_paging_to_query(filter, query)
+        query = cls._add_filters_to_query(filter_args, query)
+        query = cls._add_sorting_to_query(filter_args, query)
+        query = cls._add_paging_to_query(filter_args, query)
 
         return query.all(), query.count()
 
@@ -888,6 +893,16 @@ class NewsItemAggregate(BaseModel):
             db.session.commit()
         except Exception:
             logger.log_debug_trace(f"Update News Aggregate Summary Failed for {aggregate_id}")
+
+    def to_dict(self) -> dict[str, Any]:
+        data = super().to_dict()
+        for key, value in data.items():
+            if isinstance(value, datetime):
+                data[key] = value.isoformat()
+        data["news_items"] = [news_item.to_dict() for news_item in self.news_items]
+        if self.news_item_attributes:
+            data["news_item_attributes"] = [news_item_attribute.to_dict() for news_item_attribute in self.news_item_attributes]
+        return data
 
 
 class NewsItemAggregateSearchIndex(BaseModel):

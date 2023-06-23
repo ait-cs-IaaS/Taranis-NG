@@ -37,30 +37,22 @@ class OSINTSource(BaseModel):
         self.parameter_values = parameter_values
 
         self.word_lists = []
-        self.word_lists.extend(WordList.find(word_list.id) for word_list in word_lists)
+        self.word_lists.extend(WordList.get(word_list.id) for word_list in word_lists)
         self.osint_source_groups = (
             [OSINTSourceGroup.get_default()]
             if osint_source_groups is None
-            else [OSINTSourceGroup.find(osint_source_group.id) for osint_source_group in osint_source_groups]
+            else [OSINTSourceGroup.get(osint_source_group.id) for osint_source_group in osint_source_groups]
         )
-
-    @classmethod
-    def find(cls, source_id):
-        return cls.query.get(source_id)
-
-    @classmethod
-    def get_by_id(cls, id: str):
-        return cls.query.get(id)
 
     @classmethod
     def get_all(cls):
         return cls.query.order_by(OSINTSource.name).all()
 
     @classmethod
-    def get(cls, search=None):
+    def get_by_filter(cls, search=None):
         query = cls.query
 
-        if search is not None:
+        if search:
             search_string = f"%{search}%"
             query = query.join(Collector, OSINTSource.collector_id == Collector.id).filter(
                 or_(
@@ -74,7 +66,7 @@ class OSINTSource(BaseModel):
 
     @classmethod
     def get_all_json(cls, search):
-        sources, count = cls.get(search)
+        sources, count = cls.get_by_filter(search)
         items = [source.to_dict() for source in sources]
         return {"total_count": count, "items": items}
 
@@ -85,7 +77,7 @@ class OSINTSource(BaseModel):
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "OSINTSource":
         parameter_values = [parameter_value.to_dict() for parameter_value in data.pop("parameter_values", [])]
-        word_lists = [WordList.find(word_list_id) for word_list_id in data.pop("word_lists", [])]
+        word_lists = [WordList.get(word_list_id) for word_list_id in data.pop("word_lists", [])]
         return cls(parameter_values=parameter_values, word_lists=word_lists, **data)
 
     def to_dict(self):
@@ -100,22 +92,12 @@ class OSINTSource(BaseModel):
 
     @classmethod
     def get_all_with_type(cls):
-        query = cls.query
-
-        sources, count = (
-            query.join(Collector, OSINTSource.collector_id == Collector.id)
-            .with_entities(
-                Collector.type.label("collector_type"),
-                OSINTSource.id,
-                OSINTSource.name,
-                OSINTSource.description,
-            )
-            .order_by(db.asc(OSINTSource.name))
-            .all(),
-            query.count(),
-        )
-        items = [source.to_dict() for source in sources]
+        sources, count = cls.get_by_filter(None)
+        items = [source.to_list() for source in sources]
         return {"total_count": count, "items": items}
+
+    def to_list(self):
+        return {"id": self.id, "name": self.name, "description": self.description, "collector_type": self.collector.type}
 
     @classmethod
     def get_all_by_type(cls, collector_type: str):
@@ -232,11 +214,7 @@ class OSINTSourceGroup(BaseModel):
         self.name = name
         self.description = description
         self.default = default
-        self.osint_sources = [OSINTSource.find(osint_source.id) for osint_source in osint_sources]
-
-    @classmethod
-    def find(cls, group_id):
-        return cls.query.get(group_id)
+        self.osint_sources = [OSINTSource.get(osint_source.id) for osint_source in osint_sources]
 
     @classmethod
     def get_all(cls):
@@ -274,7 +252,7 @@ class OSINTSourceGroup(BaseModel):
         return acl_check_result
 
     @classmethod
-    def get(cls, search, user, acl_check):
+    def get_by_filter(cls, search, user, acl_check):
         query = cls.query.distinct().group_by(OSINTSourceGroup.id)
 
         if acl_check:
@@ -283,7 +261,7 @@ class OSINTSourceGroup(BaseModel):
             )
             query = ACLEntry.apply_query(query, user, True, False, False)
 
-        if search is not None:
+        if search:
             search_string = f"%{search}%"
             query = query.filter(
                 or_(
@@ -299,7 +277,7 @@ class OSINTSourceGroup(BaseModel):
 
     @classmethod
     def get_all_json(cls, search, user, acl_check):
-        groups, count = cls.get(search, user, acl_check)
+        groups, count = cls.get_by_filter(search, user, acl_check)
         items = [group.to_dict() for group in groups]
         return {"total_count": count, "items": items}
 
@@ -325,7 +303,7 @@ class OSINTSourceGroup(BaseModel):
 
     @classmethod
     def create(cls, group_id, name, description, default=False):
-        if osint_source_group := cls.find(group_id):
+        if osint_source_group := cls.get(group_id):
             return {"message": f"OSINT Source Group {osint_source_group.id} already exists"}, 400
         osint_source_group = OSINTSourceGroup(group_id, name, description, default, [])
         db.session.add(osint_source_group)
@@ -348,7 +326,7 @@ class OSINTSourceGroup(BaseModel):
             return "OSINT Source Group not found", 404
         osint_source_group.name = data["name"]
         osint_source_group.description = data["description"]
-        osint_source_group.osint_sources = [OSINTSource.find(osint_source) for osint_source in data.pop("osint_sources", [])]
+        osint_source_group.osint_sources = [OSINTSource.get(osint_source) for osint_source in data.pop("osint_sources", [])]
         db.session.commit()
         return f"Succussfully updated {osint_source_group.id}", 201
 

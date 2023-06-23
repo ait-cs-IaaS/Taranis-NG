@@ -25,10 +25,6 @@ class WordList(BaseModel):
         self.entries = entries
 
     @classmethod
-    def find(cls, id):
-        return cls.query.get(id)
-
-    @classmethod
     def find_by_name(cls, name):
         return cls.query.filter_by(name=name).first()
 
@@ -53,7 +49,7 @@ class WordList(BaseModel):
         return cls.query.order_by(db.asc(WordList.name)).all()
 
     @classmethod
-    def get(cls, search, user, acl_check):
+    def get_by_filter(cls, search, user, acl_check):
         query = cls.query.distinct().group_by(WordList.id)
 
         if acl_check:
@@ -78,7 +74,7 @@ class WordList(BaseModel):
 
     @classmethod
     def get_all_json(cls, search, user, acl_check):
-        word_lists, count = cls.get(search, user, acl_check)
+        word_lists, count = cls.get_by_filter(search, user, acl_check)
         items = [word_list.to_dict() for word_list in word_lists]
         return {"total_count": count, "items": items}
 
@@ -105,7 +101,7 @@ class WordList(BaseModel):
 
     @classmethod
     def update(cls, word_list_id, data) -> tuple[str, int]:
-        word_list = cls.query.get(word_list_id)
+        word_list = cls.get(word_list_id)
         if word_list is None:
             return "WordList not found", 404
         word_list.entries = [WordListEntry.from_dict(entry) for entry in data.pop("entries")]
@@ -134,13 +130,13 @@ class WordListEntry(BaseModel):
 
     @classmethod
     def delete_entries(cls, id, value):
-        word_list = WordList.find(id)
+        word_list = WordList.get(id)
         cls.query.filter_by(word_list_id=word_list.id).filter_by(value=value).delete()
         db.session.commit()
 
     @classmethod
     def update_word_list_entries(cls, id, entries_data):
-        word_list = WordList.find(id)
+        word_list = WordList.get(id)
 
         entries = cls.load_multiple(entries_data)
         for entry in entries:

@@ -366,7 +366,7 @@ class OSINTSources(Resource):
 class OSINTSource(Resource):
     @auth_required("CONFIG_OSINT_SOURCE_ACCESS")
     def get(self, source_id):
-        return osint_source.OSINTSource.get_by_id(source_id)
+        return osint_source.OSINTSource.get(source_id)
 
     @auth_required("CONFIG_OSINT_SOURCE_UPDATE")
     def put(self, source_id):
