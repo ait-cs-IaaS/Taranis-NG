@@ -22,7 +22,7 @@ class WordList(BaseModel):
         self.description = description
         self.use_for_stop_words = use_for_stop_words
         self.link = link
-        self.entries = entries
+        self.entries = entries or []
 
     @classmethod
     def find_by_name(cls, name):
@@ -91,13 +91,6 @@ class WordList(BaseModel):
         data["entries"] = [entry.to_dict() for entry in self.entries]
         data["tag"] = "mdi-format-list-bulleted-square"
         return data
-
-    @classmethod
-    def add_new(cls, data) -> tuple[str, int]:
-        word_list = cls.from_dict(data)
-        db.session.add(word_list)
-        db.session.commit()
-        return f"Successfully Added {word_list.id}", 201
 
     @classmethod
     def update(cls, word_list_id, data) -> tuple[str, int]:

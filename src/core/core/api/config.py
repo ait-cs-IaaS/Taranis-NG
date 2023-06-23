@@ -55,7 +55,7 @@ class Attributes(Resource):
 
     @auth_required("CONFIG_ATTRIBUTE_CREATE")
     def post(self):
-        attribute.Attribute.add_attribute(request.json)
+        attribute.Attribute.add(request.json)
 
 
 class Attribute(Resource):
@@ -118,7 +118,7 @@ class ReportItemType(Resource):
 
     @auth_required("CONFIG_REPORT_TYPE_DELETE")
     def delete(self, type_id):
-        return report_item_type.ReportItemType.delete_report_item_type(type_id)
+        return report_item_type.ReportItemType.delete(type_id)
 
 
 class ProductTypes(Resource):
@@ -163,7 +163,7 @@ class Roles(Resource):
 
     @auth_required("CONFIG_ROLE_CREATE")
     def post(self):
-        role.Role.add_new(request.json)
+        role.Role.add(request.json)
 
 
 class Role(Resource):
@@ -293,7 +293,7 @@ class WordLists(Resource):
 
     @auth_required("CONFIG_WORD_LIST_CREATE")
     def post(self):
-        word_list.WordList.add_new(request.json)
+        word_list.WordList.add(request.json)
 
 
 class WordList(Resource):

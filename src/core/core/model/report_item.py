@@ -528,7 +528,7 @@ class ReportItem(BaseModel):
         self.report_item_cpes = []
         if self.completed:
             for attribute in self.attributes:
-                attribute_group = AttributeGroupItem.find(attribute.attribute_group_item_id)
+                attribute_group = AttributeGroupItem.get(attribute.attribute_group_item_id)
                 if attribute_group.attribute.type == AttributeType.CPE:
                     self.report_item_cpes.append(ReportItemCpe(attribute.value))
 

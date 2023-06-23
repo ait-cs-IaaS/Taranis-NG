@@ -100,15 +100,6 @@ class AttributeEnum(BaseModel):
         db.session.commit()
 
     @classmethod
-    def add(cls, attribute_id, data) -> tuple[str, int]:
-        count = cls.count_for_attribute(attribute_id) + 1
-        attribute_enum = cls.from_dict(data["items"])
-        attribute_enum.index = count
-        db.session.add(attribute_enum)
-        db.session.commit()
-        return f"Added {attribute_enum.value}", 201
-
-    @classmethod
     def update(cls, enum_id, data) -> tuple[str, int]:
         attribute_enum = cls.query.get(enum_id)
         if not attribute_enum:
@@ -131,10 +122,14 @@ class AttributeEnum(BaseModel):
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "AttributeEnum":
+        if attribute_data := data.pop("attribute", None):
+            data["attribute"] = Attribute.from_dict(attribute_data)
         return cls(**data)
 
     def to_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        data["attribute"] = self.attribute.to_dict()
+        return data
 
 
 class Attribute(BaseModel):
@@ -142,12 +137,12 @@ class Attribute(BaseModel):
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())
     type = db.Column(db.Enum(AttributeType))
-    default_value = db.Column(db.String())
+    default_value = db.Column(db.String(), default="")
 
-    validator = db.Column(db.Enum(AttributeValidator))
+    validator = db.Column(db.Enum(AttributeValidator), default=AttributeValidator.NONE)
     validator_parameter = db.Column(db.String())
 
-    def __init__(self, name, description, type, default_value, validator, validator_parameter, id=None):
+    def __init__(self, name, description, type, validator_parameter, default_value="", validator=AttributeValidator.NONE, id=None):
         self.id = id
         self.name = name
         self.description = description
@@ -159,6 +154,10 @@ class Attribute(BaseModel):
     @classmethod
     def filter_by_type(cls, attribute_type):
         return cls.query.filter_by(type=attribute_type).first()
+
+    @classmethod
+    def filter_by_name(cls, name):
+        return cls.query.filter_by(name=name).first()
 
     @classmethod
     def get_by_filter(cls, search):
@@ -182,24 +181,16 @@ class Attribute(BaseModel):
         return {"total_count": total_count, "items": items}
 
     @classmethod
-    def create_attribute(cls, attribute):
-        db.session.add(attribute)
-        db.session.commit()
+    def create_attribute_with_enum(cls, data):
+        attribute_enmus = data.pop("attribute_enums", [])
+        cls.add(data)
 
-        for attribute_enum in attribute.attribute_enums:
+        attribute = cls.filter_by_name(data["name"])
+        attribute_enums = AttributeEnum.load_multiple(attribute_enmus)
+        for attribute_enum in attribute_enums:
             attribute_enum.attribute_id = attribute.id
             db.session.add(attribute_enum)
-
-        attribute.attribute_enums = []
-
         db.session.commit()
-
-    @classmethod
-    def add_attribute(cls, data) -> tuple[str, int]:
-        attribute = cls.from_dict(data)
-        db.session.add(attribute)
-        db.session.commit()
-        return f"Added {attribute.name}", 201
 
     @classmethod
     def update(cls, attribute_id, data) -> tuple[str, int]:
@@ -282,10 +273,6 @@ class Attribute(BaseModel):
             cpe_update_file = os.getenv("CPE_UPDATE_FILE")
             if cpe_update_file is not None and os.path.exists(cpe_update_file):
                 Attribute.load_cpe_from_file(cpe_update_file)
-
-    @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "Attribute":
-        return cls(**data)
 
     def get_tag(self):
         switcher = {

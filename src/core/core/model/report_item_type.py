@@ -1,6 +1,6 @@
 from sqlalchemy import or_, and_
 import sqlalchemy
-from typing import Any
+from typing import Any, Type
 from sqlalchemy.sql.expression import cast
 
 from core.managers.db_manager import db
@@ -14,8 +14,8 @@ class AttributeGroupItem(BaseModel):
     description = db.Column(db.String())
 
     index = db.Column(db.Integer)
-    min_occurrence = db.Column(db.Integer)
-    max_occurrence = db.Column(db.Integer)
+    min_occurrence = db.Column(db.Integer, default=1)
+    max_occurrence = db.Column(db.Integer, default=1)
 
     attribute_group_id = db.Column(db.Integer, db.ForeignKey("attribute_group.id"))
     attribute_group = db.relationship("AttributeGroup")
@@ -23,7 +23,7 @@ class AttributeGroupItem(BaseModel):
     attribute_id = db.Column(db.Integer, db.ForeignKey("attribute.id"))
     attribute = db.relationship("Attribute")
 
-    def __init__(self, title, description, index, attribute_id, min_occurrence, max_occurrence, id=None):
+    def __init__(self, title, description, index, attribute_id, min_occurrence=1, max_occurrence=1, id=None):
         self.id = id
         self.title = title
         self.description = description
@@ -31,10 +31,6 @@ class AttributeGroupItem(BaseModel):
         self.min_occurrence = min_occurrence
         self.max_occurrence = max_occurrence
         self.attribute_id = attribute_id
-
-    @classmethod
-    def find(cls, id):
-        return cls.query.get(id)
 
     @staticmethod
     def sort(attribute_group_item):
@@ -46,8 +42,8 @@ class AttributeGroup(BaseModel):
     title = db.Column(db.String())
     description = db.Column(db.String())
 
-    section = db.Column(db.Integer)
-    section_title = db.Column(db.String())
+    section = db.Column(db.Integer, default=0)
+    section_title = db.Column(db.String(), default="")
     index = db.Column(db.Integer)
 
     report_item_type_id = db.Column(db.Integer, db.ForeignKey("report_item_type.id"))
@@ -59,7 +55,7 @@ class AttributeGroup(BaseModel):
         cascade="all, delete-orphan",
     )
 
-    def __init__(self, title, description, section, section_title, index, attribute_group_items, id=None):
+    def __init__(self, title, description, index, attribute_group_items, section=0, section_title="", id=None):
         self.id = id
         self.title = title
         self.description = description
@@ -67,6 +63,13 @@ class AttributeGroup(BaseModel):
         self.section_title = section_title
         self.index = index
         self.attribute_group_items = attribute_group_items
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "AttributeGroup":
+        attribute_group_items = [
+            AttributeGroupItem.from_dict(attribute_group_item) for attribute_group_item in data.pop("attribute_group_items")
+        ]
+        return cls(attribute_group_items=attribute_group_items, **data)
 
     @staticmethod
     def sort(attribute_group):
@@ -116,19 +119,19 @@ class ReportItemType(BaseModel):
         cascade="all, delete-orphan",
     )
 
-    def __init__(self, id, title, description, attribute_groups):
-        self.id = None
+    def __init__(self, title, description, attribute_groups, id=None):
+        self.id = id
         self.title = title
         self.description = description
         self.attribute_groups = attribute_groups
 
     @classmethod
-    def find(cls, id):
-        return cls.query.get(id)
-
-    @classmethod
     def get_all(cls):
         return cls.query.order_by(ReportItemType.title).all()
+
+    @classmethod
+    def get_by_title(cls, title):
+        return cls.query.filter_by(title=title).first()
 
     @classmethod
     def allowed_with_acl(cls, report_item_type_id, user, see, access, modify):
@@ -147,10 +150,10 @@ class ReportItemType(BaseModel):
         return query.scalar() is not None
 
     @classmethod
-    def get(cls, search, user, acl_check):
+    def get_by_filter(cls, search, user, acl_check):
         query = cls.query.distinct().group_by(ReportItemType.id)
 
-        if acl_check is True:
+        if acl_check:
             query = query.outerjoin(
                 ACLEntry,
                 and_(
@@ -160,7 +163,7 @@ class ReportItemType(BaseModel):
             )
             query = ACLEntry.apply_query(query, user, True, False, False)
 
-        if search is not None:
+        if search:
             search_string = f"%{search}%"
             query = query.filter(
                 or_(
@@ -173,7 +176,7 @@ class ReportItemType(BaseModel):
 
     @classmethod
     def get_all_json(cls, search, user, acl_check):
-        report_item_types, count = cls.get(search, user, acl_check)
+        report_item_types, count = cls.get_by_filter(search, user, acl_check)
         items = [report_item_type.to_dict() for report_item_type in report_item_types]
         return {"total_count": count, "items": items}
 
@@ -186,10 +189,6 @@ class ReportItemType(BaseModel):
         data["attribute_groups"] = [attribute_group.to_dict() for attribute_group in self.attribute_groups]
         data["tag"] = "mdi-file-table-outline"
         return data
-
-    @classmethod
-    def load_multiple(cls, json_data: list[dict[str, Any]]) -> list["ReportItemType"]:
-        return [cls.from_dict(data) for data in json_data]
 
     @classmethod
     def add_report_item_type(cls, data):
@@ -208,9 +207,3 @@ class ReportItemType(BaseModel):
                 setattr(report_type, key, value)
         db.session.commit()
         return f"Report Type {report_type.title} updated", 200
-
-    @classmethod
-    def delete_report_item_type(cls, id):
-        report_item_type = cls.query.get(id)
-        db.session.delete(report_item_type)
-        db.session.commit()

@@ -76,9 +76,14 @@ class OSINTSource(BaseModel):
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "OSINTSource":
-        parameter_values = [parameter_value.to_dict() for parameter_value in data.pop("parameter_values", [])]
+        parameter_values = [ParameterValue.from_dict(parameter_value) for parameter_value in data.pop("parameter_values", [])]
         word_lists = [WordList.get(word_list_id) for word_list_id in data.pop("word_lists", [])]
-        return cls(parameter_values=parameter_values, word_lists=word_lists, **data)
+        collector_type = data.pop("collector")["type"]
+        logger.debug(f"Loading OSINTSource with collector type {collector_type}")
+        collector = Collector.find_by_type(collector_type)
+        logger.debug(f"Loaded collector {collector}")
+        collector_id = collector.id
+        return cls(parameter_values=parameter_values, word_lists=word_lists, collector_id=collector_id, **data)
 
     def to_dict(self):
         data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
@@ -280,14 +285,6 @@ class OSINTSourceGroup(BaseModel):
         groups, count = cls.get_by_filter(search, user, acl_check)
         items = [group.to_dict() for group in groups]
         return {"total_count": count, "items": items}
-
-    @classmethod
-    def load_multiple(cls, json_data: list[dict[str, Any]]) -> list["OSINTSourceGroup"]:
-        return [cls.from_dict(data) for data in json_data]
-
-    @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "OSINTSourceGroup":
-        return cls(**data)
 
     def to_dict(self):
         data = {c.name: getattr(self, c.name) for c in self.__table__.columns}

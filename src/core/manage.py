@@ -57,7 +57,7 @@ def account_manager(opt_list, create, edit, delete, username, name, password, ro
             app.logger.critical("Username, password or role not specified!")
             abort()
 
-        if user.User.find(username):
+        if user.User.get(username):
             app.logger.critical("User already exists!")
             abort()
 
@@ -67,7 +67,7 @@ def account_manager(opt_list, create, edit, delete, username, name, password, ro
         for ro in roles:
             r = None
             try:
-                r = role.Role.find(int(ro))
+                r = role.Role.get_by_filter(int(ro))
             except Exception:
                 r = role.Role.find_by_name(ro)
 
@@ -86,7 +86,7 @@ def account_manager(opt_list, create, edit, delete, username, name, password, ro
             app.logger.critical("Please specify a new password or role id!")
             abort()
 
-        if not user.User.find(username):
+        if not user.User.get(username):
             app.logger.critical("User does not exist!")
             abort()
 
@@ -97,7 +97,7 @@ def account_manager(opt_list, create, edit, delete, username, name, password, ro
             for ro in roles:
                 r = None
                 try:
-                    r = role.Role.find(int(ro))
+                    r = role.Role.get_by_filter(int(ro))
                 except Exception:
                     r = role.Role.find_by_name(ro)
 
@@ -114,7 +114,7 @@ def account_manager(opt_list, create, edit, delete, username, name, password, ro
             app.logger.critical("Username not specified!")
             abort()
 
-        if not user.User.find(username):
+        if not user.User.get(username):
             app.logger.critical("User does not exist!")
             abort()
 
@@ -139,7 +139,7 @@ def role_manager(opt_list, create, edit, delete, filter, id, name, description, 
 
     if opt_list:
         roles = None
-        roles = role.Role.get(filter)[0] if filter else role.Role.get_all()
+        roles = role.Role.get_by_filter(filter)[0] if filter else role.Role.get_all()
         for ro in roles:
             perms = [p.id for p in ro.permissions]
             print(f"Id: {ro.id}\n\tName: {ro.name}\n\tDescription: {ro.description}\n\tPermissions: {perms}")
@@ -154,7 +154,7 @@ def role_manager(opt_list, create, edit, delete, filter, id, name, description, 
         perms = []
 
         for pe in permissions:
-            p = permission.Permission.find(pe)
+            p = permission.Permission.get(pe)
 
             if not p:
                 app.logger.critical("The specified permission '{}' does not exist!".format(pe))

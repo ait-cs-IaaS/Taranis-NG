@@ -17,12 +17,8 @@ class Permission(BaseModel):
         self.description = description
 
     @classmethod
-    def find(cls, permission_id):
-        return cls.query.get(permission_id)
-
-    @classmethod
     def add(cls, id, name, description) -> str:
-        if permission := cls.find(id):
+        if permission := cls.get(id):
             return f"{permission.name} already exists."
         permission = cls(id=id, name=name, description=description)
         db.session.add(permission)
@@ -34,7 +30,11 @@ class Permission(BaseModel):
         return cls.query.order_by(db.asc(Permission.id)).all()
 
     @classmethod
-    def get(cls, search):
+    def get_all_ids(cls):
+        return [permission.id for permission in cls.get_all()]
+
+    @classmethod
+    def get_by_filter(cls, search):
         query = cls.query
 
         if search is not None:
@@ -49,7 +49,7 @@ class Permission(BaseModel):
 
     @classmethod
     def get_all_json(cls, search):
-        permissions, count = cls.get(search)
+        permissions, count = cls.get_by_filter(search)
         items = [permission.to_dict() for permission in permissions]
         return {"total_count": count, "items": items}
 
@@ -59,7 +59,7 @@ class Permission(BaseModel):
 
     @classmethod
     def get_external_permissions(cls):
-        return [cls.find(permission_id) for permission_id in cls.get_external_permissions_ids()]
+        return [cls.get(permission_id) for permission_id in cls.get_external_permissions_ids()]
 
     @classmethod
     def get_external_permissions_json(cls):

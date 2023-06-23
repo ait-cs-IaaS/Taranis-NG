@@ -32,8 +32,8 @@ class User(BaseModel):
         self.name = name
         self.password = generate_password_hash(password)
         self.organization = Organization.find(organization["id"]) if isinstance(organization, dict) else Organization.find(organization)
-        self.roles = [Role.find(role["id"]) for role in roles]
-        self.permissions = [Permission.find(permission["id"]) for permission in permissions]
+        self.roles = [Role.get(role["id"]) for role in roles]
+        self.permissions = [Permission.get(permission["id"]) for permission in permissions]
         self.profile = UserProfile(True, False, [], "en")
 
     @classmethod

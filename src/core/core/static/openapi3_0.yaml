@@ -5132,14 +5132,6 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/attribute_enum'
-    attribute.presentation:
-      allOf:
-        - $ref: '#/components/schemas/attribute'
-        - $ref: '#/components/schemas/presentation'
-        - type: object
-          properties:
-            attribute_enums_total_count:
-              type: integer
 
     news_item_attribute.new:
       allOf:

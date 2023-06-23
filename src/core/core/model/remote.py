@@ -46,7 +46,7 @@ class RemoteAccess(BaseModel):
         self.osint_sources = []
         self.osint_sources.extend(OSINTSource.get(osint_source.id) for osint_source in osint_sources)
         self.report_item_types = []
-        self.report_item_types.extend(ReportItemType.find(report_item_type.id) for report_item_type in report_item_types)
+        self.report_item_types.extend(ReportItemType.get(report_item_type.id) for report_item_type in report_item_types)
 
     @orm.reconstructor
     def reconstruct(self):

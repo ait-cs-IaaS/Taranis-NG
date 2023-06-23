@@ -47,7 +47,7 @@ class ACLEntry(BaseModel):
         self.access = access
         self.modify = modify
         self.users = [User.find_by_id(user.id) for user in users]
-        self.roles = [Role.find(role.id) for role in roles]
+        self.roles = [Role.get(role.id) for role in roles]
 
     @classmethod
     def has_rows(cls) -> bool:

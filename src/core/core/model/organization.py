@@ -37,7 +37,7 @@ class Organization(BaseModel):
         return cls.query.order_by(db.asc(Organization.name)).all()
 
     @classmethod
-    def get(cls, search):
+    def get_by_filter(cls, search):
         query = cls.query
 
         if search:
@@ -52,7 +52,7 @@ class Organization(BaseModel):
 
     @classmethod
     def get_all_json(cls, search):
-        organizations, count = cls.get(search)
+        organizations, count = cls.get_by_filter(search)
         items = [organization.to_dict() for organization in organizations]
         return {"total_count": count, "items": items}
 
