@@ -1,20 +1,10 @@
 from typing import Any
-from marshmallow import post_load
-from sqlalchemy import func, or_, orm
+from sqlalchemy import or_
 import uuid
 
 from core.managers.db_manager import db
 from core.model.base_model import BaseModel
-from shared.schema.presenters_node import (
-    PresentersNodeSchema,
-    PresentersNodePresentationSchema,
-)
-
-
-class NewPresentersNodeSchema(PresentersNodeSchema):
-    @post_load
-    def make(self, data, **kwargs):
-        return PresentersNode(**data)
+from core.model.presenter import Presenter
 
 
 class PresentersNode(BaseModel):
@@ -67,18 +57,9 @@ class PresentersNode(BaseModel):
         return {"total_count": count, "items": items}
 
     @classmethod
-    def add_new(cls, node_data, presenters):
-        new_node_schema = NewPresentersNodeSchema()
-        node = new_node_schema.load(node_data)
-        node.presenters = presenters
-        db.session.add(node)
-        db.session.commit()
-
-    @classmethod
     def update(cls, node_id, node_data, presenters):
-        new_node_schema = NewPresentersNodeSchema()
-        updated_node = new_node_schema.load(node_data)
         node = cls.query.get(node_id)
+        updated_node = cls.from_dict(node_data)
         node.name = updated_node.name
         node.description = updated_node.description
         node.api_url = updated_node.api_url
@@ -96,3 +77,11 @@ class PresentersNode(BaseModel):
         data["tag"] = "mdi-file-table-outline"
         data["type"] = "presenter"
         return data
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "PresentersNode":
+        presenter_data = data.pop("presenters", None)
+        node = cls(**data)
+        if presenter_data:
+            node.presenters = [Presenter.from_dict(p) for p in presenter_data]
+        return node

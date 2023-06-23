@@ -25,10 +25,7 @@ class Products(Resource):
 
     @auth_required("PUBLISH_CREATE")
     def post(self):
-        user = auth_manager.get_user_from_jwt()
-        if user is None:
-            return "Creating Product Failed", 401
-        return product.Product.add_product(request.json, user.id), 201
+        return product.Product.add(request.json)
 
 
 class Product(Resource):

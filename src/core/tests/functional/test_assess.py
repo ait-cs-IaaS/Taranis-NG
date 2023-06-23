@@ -5,7 +5,6 @@ import pytest
 def fake_source(app):
     with app.app_context():
         from core.model.osint_source import OSINTSource
-        from shared.schema.osint_source import OSINTSourceExportSchema
 
         ossi = {
             "description": "",
@@ -19,14 +18,13 @@ def fake_source(app):
             "collector": {"type": "RSS_COLLECTOR"},
         }
 
-        osint_source = OSINTSourceExportSchema().load(ossi)
-        yield OSINTSource.import_new(osint_source)
+        yield OSINTSource.import_new(OSINTSource.from_dict(ossi))
 
 
 @pytest.fixture
 def news_items_data(app, fake_source):
     with app.app_context():
-        from core.model.news_item import NewNewsItemDataSchema
+        from core.model.news_item import NewsItemData
 
         news_items_data_list = [
             {
@@ -60,8 +58,7 @@ def news_items_data(app, fake_source):
             },
         ]
 
-        news_item_data_schema = NewNewsItemDataSchema(many=True)
-        yield news_item_data_schema.load(news_items_data_list)
+        yield NewsItemData.load_multiple(news_items_data_list)
 
 
 @pytest.fixture

@@ -22,25 +22,6 @@ def get_presenters_info(node: PresentersNodeSchema):
     return Presenter.load_multiple(presenters_info), status_code
 
 
-def add_presenters_node(data):
-    try:
-        logger.log_info(data)
-        presenters_info = data.pop("presenters_info")
-        node = PresentersNodeSchema.create(data)
-    except Exception as e:
-        logger.log_debug_trace()
-        return str(e), 500
-
-    try:
-        presenters = Presenter.load_multiple(presenters_info)
-        PresentersNode.add_new(data, presenters)
-    except Exception:
-        logger.log_debug_trace(f"Couldn't add Presenter Node: {node.name}")
-        return f"Couldn't add Presenter Node: {node.name}", 500
-
-    return node.id, 200
-
-
 def update_presenters_node(node_id, data):
     node = PresentersNodeSchema.create(data)
     presenters, status_code = get_presenters_info(node)
@@ -58,7 +39,7 @@ def update_presenters_node(node_id, data):
 
 
 def generate_product(product_id):
-    product = Product.find(product_id)
+    product = Product.get(product_id)
     presenter = product.product_type.presenter
     node = presenter.node
 

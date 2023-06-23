@@ -4,11 +4,9 @@ from sqlalchemy import func, or_, and_, String as SQLString
 from sqlalchemy.sql.expression import cast
 
 from core.managers.db_manager import db
-from core.model.acl_entry import ACLEntry
+from core.model.acl_entry import ACLEntry, ItemType
 from core.model.report_item import ReportItem
 from core.model.base_model import BaseModel
-from shared.schema.acl_entry import ItemType
-from shared.schema.product import ProductPresentationSchema
 
 
 class Product(BaseModel):
@@ -38,17 +36,11 @@ class Product(BaseModel):
         return cls.query.count()
 
     @classmethod
-    def find(cls, product_id):
-        return cls.query.get(product_id)
-
-    @classmethod
     def get_detail_json(cls, product_id):
-        product = cls.query.get(product_id)
-        products_schema = ProductPresentationSchema()
-        return products_schema.dump(product)
+        return cls.get(product_id).to_dict()
 
     @classmethod
-    def get(cls, filter, user):
+    def get_by_filter(cls, filter, user):
         query = (
             db.session.query(
                 Product,
@@ -103,7 +95,7 @@ class Product(BaseModel):
 
     @classmethod
     def get_json(cls, filter, user):
-        results, count = cls.get(filter, user)
+        results, count = cls.get_by_filter(filter, user)
         products = []
         for result in results:
             product = result.Product
@@ -115,15 +107,6 @@ class Product(BaseModel):
         items = [product.to_dict() for product in products]
         return {"total_count": count, "items": items}
 
-    @classmethod
-    def add_product(cls, product_data, user_id):
-        product = cls.from_dict(product_data)
-        product.user_id = user_id
-        db.session.add(product)
-        db.session.commit()
-
-        return product.id
-
     def to_dict(self) -> dict[str, Any]:
         data = super().to_dict()
         data["report_items"] = [report_item.id for report_item in self.report_items]
@@ -132,7 +115,7 @@ class Product(BaseModel):
 
     @classmethod
     def update(cls, product_id, data) -> tuple[str, int]:
-        product = Product.find(product_id)
+        product = Product.get(product_id)
         if product is None:
             return f"Product {product_id} not found", 404
         new_product = cls.from_dict(data)
@@ -142,6 +125,14 @@ class Product(BaseModel):
 
         db.session.commit()
         return f"Product {product_id} updated", 200
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "Product":
+        report_items = data.pop("report_items", None)
+        product = cls(**data)
+        if report_items:
+            product.report_items = [ReportItem.get(r) for r in report_items]
+        return product
 
 
 class ProductReportItem(BaseModel):

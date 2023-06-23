@@ -497,7 +497,7 @@ class PresentersNodes(Resource):
 
     @auth_required("CONFIG_PRESENTERS_NODE_CREATE")
     def post(self):
-        return "", presenters_manager.add_presenters_node(request.json)
+        return "", presenters_node.PresentersNode.add(request.json)
 
     @auth_required("CONFIG_PRESENTERS_NODE_UPDATE")
     def put(self, node_id):

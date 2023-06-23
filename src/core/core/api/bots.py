@@ -117,8 +117,7 @@ class GetDefaultNewsItemsAggregate(Resource):
     @api_key_required
     def get(self):
         limit = request.args.get("limit", "")
-        resp_str = news_item.NewsItemAggregate.get_default_news_items_aggregate(limit)
-        return json.loads(resp_str)
+        return news_item.NewsItemAggregate.get_for_worker(limit), 200
 
 
 class WordListEntries(Resource):
