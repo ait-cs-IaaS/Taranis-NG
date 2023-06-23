@@ -1,18 +1,10 @@
-from marshmallow import post_load
 import uuid
-from sqlalchemy import or_, func
+from sqlalchemy import or_
 from typing import Any
 
 from core.managers.db_manager import db
 from core.model.base_model import BaseModel
 from core.model.parameter import Parameter
-from shared.schema.presenter import PresenterSchema
-
-
-class NewPresenterSchema(PresenterSchema):
-    @post_load
-    def make(self, data, **kwargs):
-        return Presenter(**data)
 
 
 class Presenter(BaseModel):
@@ -41,11 +33,10 @@ class Presenter(BaseModel):
         query = cls.query
 
         if search is not None:
-            search_string = f"%{search.lower()}%"
             query = query.filter(
                 or_(
-                    func.lower(Presenter.name).like(search_string),
-                    func.lower(Presenter.description).like(search_string),
+                    Presenter.name.ilike(f"%{search}%"),
+                    Presenter.description.ilike(f"%{search}%"),
                 )
             )
 
@@ -56,9 +47,6 @@ class Presenter(BaseModel):
         presenters, count = cls.get(search)
         items = [presenter.to_dict() for presenter in presenters]
         return {"total_count": count, "items": items}
-
-    def to_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
     @classmethod
     def load_multiple(cls, data: list[dict[str, Any]]) -> list["Presenter"]:
@@ -91,6 +79,12 @@ class Presenter(BaseModel):
     @classmethod
     def find_by_type(cls, type):
         return cls.query.filter_by(type=type).first()
+
+    def to_dict(self) -> dict[str, Any]:
+        data = super().to_dict()
+        data["parameters"] = [parameter.key for parameter in self.parameters]
+        data["product_types"] = [product_type.id for product_type in self.product_types]
+        return data
 
 
 class PresenterParameter(BaseModel):

@@ -50,34 +50,26 @@ class ACLEntry(BaseModel):
         self.roles = [Role.find(role.id) for role in roles]
 
     @classmethod
-    def find(cls, id):
-        return cls.query.get(id)
-
-    @classmethod
-    def get_all(cls):
-        return cls.query.order_by(db.asc(ACLEntry.name)).all()
-
-    @classmethod
     def has_rows(cls) -> bool:
         return cls.query.count() > 0
 
     @classmethod
-    def get(cls, search):
+    def get_by_filter(cls, filter_params: dict[str, Any]):
         query = cls.query
 
-        if search is not None:
+        if search := filter_params.get("search"):
             query = query.filter(
                 or_(
-                    ACLEntry.name.ilike(f"%{search}%"),
-                    ACLEntry.description.ilike(f"%{search}%"),
+                    cls.name.ilike(f"%{search}%"),
+                    cls.description.ilike(f"%{search}%"),
                 )
             )
 
-        return query.order_by(db.asc(ACLEntry.name)).all(), query.count()
+        return query.all(), query.count()
 
     @classmethod
     def get_all_json(cls, search):
-        acls, count = cls.get(search)
+        acls, count = cls.get_by_filter({"search": search})
         items = [acl.to_dict() for acl in acls]
         return {"total_count": count, "items": items}
 
@@ -126,9 +118,9 @@ class ACLEntry(BaseModel):
                 or_(
                     ACLEntry.id is not None,
                     and_(
-                        ACLEntry.see is True,
+                        ACLEntry.see,
                         or_(
-                            ACLEntry.everyone is True,
+                            ACLEntry.everyone,
                             ACLEntryUser.user_id == user.id,
                             ACLEntryRole.role_id.in_(roles),
                         ),
@@ -141,9 +133,9 @@ class ACLEntry(BaseModel):
                 or_(
                     ACLEntry.id is not None,
                     and_(
-                        ACLEntry.access is True,
+                        ACLEntry.access,
                         or_(
-                            ACLEntry.everyone is True,
+                            ACLEntry.everyone,
                             ACLEntryUser.user_id == user.id,
                             ACLEntryRole.role_id.in_(roles),
                         ),
@@ -156,9 +148,9 @@ class ACLEntry(BaseModel):
                 or_(
                     ACLEntry.id is not None,
                     and_(
-                        ACLEntry.modify is True,
+                        ACLEntry.modify,
                         or_(
-                            ACLEntry.everyone is True,
+                            ACLEntry.everyone,
                             ACLEntryUser.user_id == user.id,
                             ACLEntryRole.role_id.in_(roles),
                         ),
@@ -169,7 +161,7 @@ class ACLEntry(BaseModel):
         return query.filter(
             or_(
                 ACLEntry.id is not None,
-                ACLEntry.everyone is True,
+                ACLEntry.everyone,
                 ACLEntryUser.user_id == user.id,
                 ACLEntryRole.role_id.in_(roles),
             )

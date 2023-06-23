@@ -28,6 +28,14 @@ class BaseModel(db.Model):
         return f"{cls.__name__} {item.id} created", 201
 
     @classmethod
+    def add_multiple(cls, data) -> tuple[str, int]:
+        items = cls.load_multiple(data)
+        for item in items:
+            db.session.add(item)
+        db.session.commit()
+        return f"{cls.__name__} {len(items)} items created", 201
+
+    @classmethod
     def from_dict(cls: Type[T], data: dict[str, Any]) -> T:
         return cls(**data)
 
@@ -40,3 +48,11 @@ class BaseModel(db.Model):
 
     def to_json(self) -> str:
         return json.dumps(self.to_dict())
+
+    @classmethod
+    def get(cls: Type[T], id) -> T | None:
+        return cls.query.get(id)
+
+    @classmethod
+    def get_all(cls: Type[T]) -> list[T] | None:
+        return cls.query.all()

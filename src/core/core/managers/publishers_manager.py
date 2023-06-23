@@ -61,7 +61,7 @@ def update_publishers_node(node_id, data):
 
 
 def add_publisher_preset(data):
-    PublisherPreset.add_new(data)
+    PublisherPreset.add(data)
 
 
 def publish(preset, data, message_title, message_body, recipients):

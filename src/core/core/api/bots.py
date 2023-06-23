@@ -94,12 +94,23 @@ class UpdateNewsItemsAggregateSummary(Resource):
         news_item.NewsItemAggregate.update_news_items_aggregate_summary(aggregate_id, request.json)
 
 
-class GetNewsItemsAggregate(Resource):
+class BotNewsItemAggregates(Resource):
     @api_key_required
     def get(self, group_id):
-        limit = request.args.get("limit", "")
-        resp_str = news_item.NewsItemAggregate.get_news_items_aggregate(group_id, limit)
-        return json.loads(resp_str)
+        try:
+            filter_keys = ["search", "read", "unread", "important", "relevant", "in_report", "range", "sort", "source"]
+            filter_args: dict[str, str | int | list] = {k: v for k, v in request.args.items() if k in filter_keys}
+
+            filter_args["group"] = request.args.get("group", osint_source.OSINTSourceGroup.get_default().id) or "default"
+            filter_args["limit"] = min(int(request.args.get("limit", 20)), 200)
+            filter_args["tags"] = request.args.getlist("tags")
+            page = int(request.args.get("page", 0))
+            filter_args["offset"] = int(request.args.get("offset", page * filter_args["limit"]))
+
+            return news_item.NewsItemAggregate.get_by_filter_json(filter_args, auth_manager.get_user_from_jwt())
+        except Exception:
+            logger.exception("Failed to get Stories")
+            return "Failed to get Stories", 400
 
 
 class GetDefaultNewsItemsAggregate(Resource):
@@ -153,9 +164,10 @@ def initialize(api):
     )
     namespace.add_resource(BotGroupAction, "/news-item-aggregates/group")
     namespace.add_resource(BotUnGroupAction, "/news-item-aggregates/ungroup")
+
     namespace.add_resource(
-        GetNewsItemsAggregate,
-        "/news-item-aggregates-by-group/<string:group_id>",
+        BotNewsItemAggregates,
+        "/news-item-aggregates",
     )
     namespace.add_resource(
         UpdateNewsItemsAggregateSummary,

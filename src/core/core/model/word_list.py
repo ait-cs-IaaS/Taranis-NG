@@ -56,7 +56,7 @@ class WordList(BaseModel):
     def get(cls, search, user, acl_check):
         query = cls.query.distinct().group_by(WordList.id)
 
-        if acl_check is True:
+        if acl_check:
             query = query.outerjoin(
                 ACLEntry,
                 and_(
@@ -66,12 +66,11 @@ class WordList(BaseModel):
             )
             query = ACLEntry.apply_query(query, user, True, False, False)
 
-        if search is not None:
-            search_string = f"%{search.lower()}%"
+        if search:
             query = query.filter(
                 or_(
-                    func.lower(WordList.name).like(search_string),
-                    func.lower(WordList.description).like(search_string),
+                    WordList.name.ilike(f"%{search}%"),
+                    WordList.description.ilike(f"%{search}%"),
                 )
             )
 

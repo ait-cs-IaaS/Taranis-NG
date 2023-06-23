@@ -1,8 +1,10 @@
+from typing import Any
 from marshmallow import post_load
 from sqlalchemy import func, or_, orm
 import uuid
 
 from core.managers.db_manager import db
+from core.model.base_model import BaseModel
 from shared.schema.presenters_node import (
     PresentersNodeSchema,
     PresentersNodePresentationSchema,
@@ -15,7 +17,7 @@ class NewPresentersNodeSchema(PresentersNodeSchema):
         return PresentersNode(**data)
 
 
-class PresentersNode(db.Model):
+class PresentersNode(BaseModel):
     id = db.Column(db.String(64), primary_key=True)
     name = db.Column(db.String(), unique=True, nullable=False)
     description = db.Column(db.String())
@@ -31,15 +33,6 @@ class PresentersNode(db.Model):
         self.description = description
         self.api_url = api_url
         self.api_key = api_key
-        self.title = ""
-        self.subtitle = ""
-        self.tag = ""
-
-    @orm.reconstructor
-    def reconstruct(self):
-        self.title = self.name
-        self.subtitle = self.description
-        self.tag = "mdi-file-table-outline"
 
     @classmethod
     def exists_by_api_key(cls, api_key):
@@ -58,11 +51,10 @@ class PresentersNode(db.Model):
         query = cls.query
 
         if search is not None:
-            search_string = f"%{search.lower()}%"
             query = query.filter(
                 or_(
-                    func.lower(PresentersNode.name).like(search_string),
-                    func.lower(PresentersNode.description).like(search_string),
+                    PresentersNode.name.ilike(f"%{search}%"),
+                    PresentersNode.description.ilike(f"%{search}%"),
                 )
             )
 
@@ -71,8 +63,8 @@ class PresentersNode(db.Model):
     @classmethod
     def get_all_json(cls, search):
         nodes, count = cls.get(search)
-        node_schema = PresentersNodePresentationSchema(many=True)
-        return {"total_count": count, "items": node_schema.dump(nodes)}
+        items = [node.to_dict() for node in nodes]
+        return {"total_count": count, "items": items}
 
     @classmethod
     def add_new(cls, node_data, presenters):
@@ -92,23 +84,15 @@ class PresentersNode(db.Model):
         node.api_url = updated_node.api_url
         node.api_key = updated_node.api_key
         for presenter in presenters:
-            found = False
-            for existing_presenter in node.presenters:
-                if presenter.type == existing_presenter.type:
-                    found = True
-                    break
-
-            if found is False:
+            found = any(presenter.type == existing_presenter.type for existing_presenter in node.presenters)
+            if not found:
                 node.presenters.append(presenter)
 
         db.session.commit()
 
-    @classmethod
-    def delete(cls, node_id):
-        node = cls.query.get(node_id)
-        for presenter in node.presenters:
-            if len(presenter.product_types) > 0:
-                raise Exception("Presenters has mapped product types")
-
-        db.session.delete(node)
-        db.session.commit()
+    def to_dict(self) -> dict[str, Any]:
+        data = super().to_dict()
+        data["presenters"] = [presenter.to_dict() for presenter in self.presenters]
+        data["tag"] = "mdi-file-table-outline"
+        data["type"] = "presenter"
+        return data

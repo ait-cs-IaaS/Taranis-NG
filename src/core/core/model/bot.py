@@ -68,12 +68,11 @@ class Bot(BaseModel):
     def get(cls, search):
         query = cls.query
 
-        if search is not None:
-            search_string = f"%{search.lower()}%"
+        if search:
             query = query.filter(
                 or_(
-                    func.lower(Bot.name).like(search_string),
-                    func.lower(Bot.description).like(search_string),
+                    Bot.name.ilike(f"%{search}%"),
+                    Bot.description.ilike(f"%{search}%"),
                 )
             )
 

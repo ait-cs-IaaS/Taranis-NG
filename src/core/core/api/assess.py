@@ -50,7 +50,7 @@ class NewsItems(Resource):
             filter_keys = ["search" "read", "important", "relevant", "in_analyze", "range", "sort"]
             filter_args: dict[str, str | int] = {k: v for k, v in request.args.items() if k in filter_keys}
 
-            group_id = request.args.get("group", osint_source.OSINTSourceGroup.get_default().id)
+            filter_args["group"] = request.args.get("group", osint_source.OSINTSourceGroup.get_default().id)
             filter_args["limit"] = min(int(request.args.get("limit", 20)), 200)
             page = int(request.args.get("page", 0))
             filter_args["offset"] = int(request.args.get("offset", page * filter_args["limit"]))
@@ -58,7 +58,7 @@ class NewsItems(Resource):
             logger.log_debug(ex)
             return "", 400
 
-        return news_item.NewsItem.get_by_group_json(group_id, filter_args, user)
+        return news_item.NewsItem.get_by_filter_json(filter_args, user)
 
 
 class NewsItemAggregates(Resource):
@@ -108,30 +108,10 @@ class NewsItemAggregateTagList(Resource):
             return "Failed to get Tags", 400
 
 
-class NewsItemAggregatesByGroup(Resource):
-    # DEPRECATED IN FAVOR OF NewsItemAggregates
-    @auth_required("ASSESS_ACCESS")
-    def get(self, group_id):
-        user = auth_manager.get_user_from_jwt()
-
-        try:
-            filter_keys = ["search", "read", "unread", "important", "relevant", "in_report", "range", "sort"]
-            filter_args: dict[str, str | int] = {k: v for k, v in request.args.items() if k in filter_keys}
-
-            filter_args["limit"] = min(int(request.args.get("limit", 20)), 200)
-            page = int(request.args.get("page", 0))
-            filter_args["offset"] = int(request.args.get("offset", page * filter_args["limit"]))
-        except Exception as ex:
-            logger.log_debug(ex)
-            return "", 400
-
-        return news_item.NewsItemAggregate.get_by_group_json(group_id, filter_args, user)
-
-
 class NewsItem(Resource):
     @auth_required("ASSESS_ACCESS", ACLCheck.NEWS_ITEM_ACCESS)
     def get(self, item_id):
-        return news_item.NewsItem.get_detail_json(item_id)
+        return news_item.NewsItem.get(item_id).to_dict()
 
     @auth_required("ASSESS_UPDATE", ACLCheck.NEWS_ITEM_MODIFY)
     def put(self, item_id):
@@ -229,10 +209,6 @@ def initialize(api):
     namespace.add_resource(OSINTSourcesList, "/osint-sources-list")
     namespace.add_resource(ManualOSINTSources, "/manual-osint-sources")
     namespace.add_resource(AddNewsItem, "/news-items")
-    namespace.add_resource(
-        NewsItemAggregatesByGroup,
-        "/news-item-aggregates-by-group/<string:group_id>",
-    )
     namespace.add_resource(
         NewsItemAggregates,
         "/news-item-aggregates",

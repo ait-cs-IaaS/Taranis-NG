@@ -74,7 +74,7 @@ class NewsItemData(BaseModel):
     @classmethod
     def allowed_with_acl(cls, news_item_data_id, user, see, access, modify):
         news_item_data = cls.query.get(news_item_data_id)
-        if news_item_data.remote_source is not None:
+        if news_item_data.remote_source:
             return True
         query = db.session.query(NewsItemData.id).distinct().group_by(NewsItemData.id).filter(NewsItemData.id == news_item_data_id)
 
@@ -99,20 +99,12 @@ class NewsItemData(BaseModel):
         return query.scalar() is not None
 
     @classmethod
-    def identical(cls, hash):
+    def identical(cls, hash) -> bool:
         return db.session.query(db.exists().where(NewsItemData.hash == hash)).scalar()
-
-    @classmethod
-    def find(cls, id):
-        return cls.query.get(id)
 
     @classmethod
     def find_by_hash(cls, hash):
         return cls.query.filter(NewsItemData.hash == hash).all()
-
-    @classmethod
-    def count_all(cls):
-        return cls.query.count()
 
     @classmethod
     def latest_collected(cls):
@@ -128,41 +120,37 @@ class NewsItemData(BaseModel):
         return news_items_data_schema.dump(news_items_data)
 
     @classmethod
-    def attribute_value_identical(cls, id, value):
+    def attribute_value_identical(cls, id, value) -> bool:
         return (
             NewsItemAttribute.query.join(NewsItemDataNewsItemAttribute)
-            .join(NewsItemData)
-            .filter(NewsItemData.id == id)
+            .join(cls)
+            .filter(cls.id == id)
             .filter(NewsItemAttribute.value == value)
             .scalar()
         )
 
+    def has_attribute_value(self, value) -> bool:
+        return any(attribute.value == value for attribute in self.attributes)
+
     @classmethod
     def update_news_item_lang(cls, news_item_id, lang):
-        news_item = cls.find(news_item_id)
-
+        news_item = cls.get(news_item_id)
         news_item.language = lang
         db.session.commit()
 
     @classmethod
-    def update_news_item_attributes(cls, news_item_id, attributes):
-        news_item = cls.query.filter_by(id=news_item_id).first()
+    def update_news_item_attributes(cls, news_item_id, attributes) -> tuple[str, int]:
+        news_item = cls.get(news_item_id)
 
-        attributes_schema = NewNewsItemAttributeSchema(many=True)
-        attributes = attributes_schema.load(attributes)
+        attributes = NewsItemAttribute.load_multiple(attributes)
         if attributes is None:
-            return
+            return "Invalid attributes", 400
 
         for attribute in attributes:
-            if not cls.attribute_value_identical(news_item_id, attribute.value):
+            if not news_item.has_attribute_value(attribute.value):
                 news_item.attributes.append(attribute)
-                db.session.commit()
 
-    @classmethod
-    def get_news_item_data(cls, news_item_id):
-        query = cls.query.join(NewsItem, NewsItemData.id == NewsItem.news_item_data_id)
-        query = query.filter(NewsItem.id == news_item_id)
-        return query
+        return "Attributes updated", 200
 
     @classmethod
     def get_for_sync(cls, last_synced, osint_sources):
@@ -176,15 +164,6 @@ class NewsItemData(BaseModel):
         )
 
         news_items = query.all()
-        for news_item in news_items:
-            total_relevance = NewsItem.get_total_relevance(news_item.id)
-            if total_relevance > 0:
-                news_item.relevance = 1
-            elif total_relevance < 0:
-                news_item.relevance = -1
-            else:
-                news_item.relevance = 0
-
         items = [news_item.to_dict() for news_item in news_items]
         return items, last_sync_time
 
@@ -213,30 +192,17 @@ class NewsItem(BaseModel):
     news_item_aggregate_id = db.Column(db.Integer, db.ForeignKey("news_item_aggregate.id"))
 
     @classmethod
-    def find(cls, news_item_id):
-        return cls.query.get(news_item_id)
-
-    @classmethod
     def get_all_with_data(cls, news_item_data_id):
         return cls.query.filter_by(news_item_data_id=news_item_data_id).all()
 
     @classmethod
-    def get_total_count(cls):
-        return {"total_count": cls.query.get.count()}
-
-    @classmethod
-    def get_detail_json(cls, id):
-        news_item = cls.query.get(id)
-        news_item_schema = NewsItemSchema()
-        return news_item_schema.dump(news_item)
-
-    @classmethod
-    def get_by_group(cls, group_id, filter, user):
+    def get_by_filter(cls, filter, user):
         query = cls.query.distinct().group_by(NewsItem.id)
         query = query.join(NewsItemData, NewsItem.news_item_data_id == NewsItemData.id)
         query = query.join(OSINTSourceGroupOSINTSource, OSINTSourceGroupOSINTSource.osint_source_id == OSINTSource.id)
         query = query.outerjoin(OSINTSource, NewsItemData.osint_source_id == OSINTSource.id)
-        query = query.filter(OSINTSourceGroupOSINTSource.osint_source_group_id == group_id)
+        if group := filter.get("group"):
+            query = query.filter(OSINTSourceGroupOSINTSource.osint_source_group_id == group)
 
         query = query.outerjoin(
             ACLEntry,
@@ -254,8 +220,7 @@ class NewsItem(BaseModel):
 
         query = ACLEntry.apply_query(query, user, True, False, False)
 
-        search = filter.get("search")
-        if search and search != "":
+        if search := filter.get("search"):
             query = query.filter(
                 db.or_(
                     NewsItemData.content.ilike(f"%{search}%"),
@@ -268,7 +233,7 @@ class NewsItem(BaseModel):
             query = query.filter(NewsItem.read is False)
 
         if "important" in filter and filter["important"].lower() != "false":
-            query = query.filter(NewsItem.important is True)
+            query = query.filter(NewsItem.important)
 
         if "relevant" in filter and filter["relevant"].lower() != "false":
             query = query.filter(NewsItem.likes > 0)
@@ -282,6 +247,9 @@ class NewsItem(BaseModel):
         if "range" in filter and filter["range"].upper() != "ALL":
             filter_range = filter["range"].upper()
             date_limit = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+
+            if filter_range == "DAY":
+                date_limit -= timedelta(days=1)
 
             if filter_range == "WEEK":
                 date_limit -= timedelta(days=date_limit.weekday())
@@ -309,32 +277,11 @@ class NewsItem(BaseModel):
         return query.offset(offset).limit(limit).all(), query.count()
 
     @classmethod
-    def get_by_group_json(cls, group_id, filter, user):
-        news_items, count = cls.get_by_group(group_id, filter, user)
-
-        for news_item in news_items:
-            see, access, modify = NewsItem.get_acl_status(news_item.id, user)
-            news_item.see = see
-            news_item.access = access
-            news_item.modify = modify
-            vote = NewsItemVote.find(news_item.id, user.id)
-            if vote is not None:
-                news_item.me_like = vote.like
-                news_item.me_dislike = vote.dislike
-            else:
-                news_item.me_like = False
-                news_item.me_dislike = False
-
-        news_item_schema = NewsItemSchema(many=True)
-        items = news_item_schema.dump(news_items)
+    def get_by_filter_json(cls, filter, user):
+        news_items, count = cls.get_by_filter(filter, user)
+        items = [news_item.to_dict() for news_item in news_items]
 
         return {"total_count": count, "items": items}
-
-    @classmethod
-    def get_total_relevance(cls, news_item_data_id):
-        query = db.session.query(NewsItem.relevance).filter(NewsItem.news_item_data_id == news_item_data_id)
-        result = query.all()
-        return sum(int(row[0]) for row in result)
 
     @classmethod
     def get_all_by_group_and_source_query(cls, group_id, source_id, time_limit):
@@ -374,50 +321,6 @@ class NewsItem(BaseModel):
         query = ACLEntry.apply_query(query, user, see, access, modify)
 
         return query.scalar() is not None
-
-    @classmethod
-    def get_acl_status(cls, news_item_id: int, user) -> tuple[bool, bool, bool]:
-        news_item = cls.query.get(news_item_id)
-        if news_item.news_item_data.remote_source is not None:
-            return True, True, True
-        query = (
-            db.session.query(
-                NewsItem.id,
-                func.count().filter(ACLEntry.id != None).label("acls"),
-                func.count().filter(ACLEntry.see).label("see"),
-                func.count().filter(ACLEntry.access).label("access"),
-                func.count().filter(ACLEntry.modify).label("modify"),
-            )
-            .distinct()
-            .group_by(NewsItem.id)
-            .filter(NewsItem.id == news_item_id)
-        )
-
-        query = query.join(NewsItemData, NewsItem.news_item_data_id == NewsItemData.id)
-        query = query.outerjoin(OSINTSource, NewsItemData.osint_source_id == OSINTSource.id)
-
-        query = query.outerjoin(
-            ACLEntry,
-            or_(
-                and_(
-                    NewsItemData.osint_source_id == ACLEntry.item_id,
-                    ACLEntry.item_type == ItemType.OSINT_SOURCE,
-                ),
-                and_(
-                    OSINTSource.collector_id == ACLEntry.item_id,
-                    ACLEntry.item_type == ItemType.COLLECTOR,
-                ),
-            ),
-        )
-
-        query = ACLEntry.apply_query(query, user, False, False, False)
-
-        result = query.all()
-        see = result[0].see > 0 or result[0].acls == 0
-        access = result[0].access > 0 or result[0].acls == 0
-        modify = result[0].modify > 0 or result[0].acls == 0
-
-        return see, access, modify
 
     def vote(self, data, user_id):
         if "vote" not in data:
@@ -602,33 +505,9 @@ class NewsItemAggregate(BaseModel):
         ]
 
     @classmethod
-    def get_by_filter(cls, filter: dict, user: User):
-        logger.debug(f"Getting NewsItems Filtered: {filter}")
-        query = cls.query.distinct().group_by(NewsItemAggregate.id)
-
+    def _add_filters_to_query(cls, filter: dict, query):
         if group := filter.get("group"):
             query = query.filter(NewsItemAggregate.osint_source_group_id == group)
-
-        query = query.join(NewsItem, NewsItem.news_item_aggregate_id == NewsItemAggregate.id)
-        query = query.join(NewsItemData, NewsItem.news_item_data_id == NewsItemData.id)
-        query = query.outerjoin(OSINTSource, NewsItemData.osint_source_id == OSINTSource.id)
-
-        if ACLEntry.has_rows():
-            query = query.outerjoin(
-                ACLEntry,
-                or_(
-                    and_(
-                        NewsItemData.osint_source_id == ACLEntry.item_id,
-                        ACLEntry.item_type == ItemType.OSINT_SOURCE,
-                    ),
-                    and_(
-                        OSINTSource.collector_id == ACLEntry.item_id,
-                        ACLEntry.item_type == ItemType.COLLECTOR,
-                    ),
-                ),
-            )
-
-            query = ACLEntry.apply_query(query, user, True, False, False)
 
         if source := filter.get("source"):
             query = query.filter(OSINTSource.id == source)
@@ -677,7 +556,7 @@ class NewsItemAggregate(BaseModel):
             date_limit = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
             if filter_range == "day":
-                pass
+                date_limit -= timedelta(days=1)
 
             elif filter_range == "week":
                 date_limit -= timedelta(days=date_limit.weekday())
@@ -687,6 +566,10 @@ class NewsItemAggregate(BaseModel):
 
             query = query.filter(NewsItemAggregate.created >= date_limit)
 
+        return query
+
+    @classmethod
+    def _add_sorting_to_query(cls, filter: dict, query):
         if sort := filter.get("sort", "date_desc").lower():
             if sort == "date_desc":
                 query = query.order_by(db.desc(NewsItemAggregate.created), db.desc(NewsItemAggregate.id))
@@ -703,9 +586,50 @@ class NewsItemAggregate(BaseModel):
             elif sort == "source":
                 query = query.order_by(db.desc(OSINTSource.name), db.desc(NewsItemAggregate.created), db.desc(NewsItemAggregate.id))
 
+        return query
+
+    @classmethod
+    def _add_paging_to_query(cls, filter: dict, query):
         offset = filter.get("offset", 0)
         limit = filter.get("limit", 20)
-        return query.offset(offset).limit(limit).all(), query.count()
+        return query.offset(offset).limit(limit)
+
+    @classmethod
+    def _add_ACL_check(cls, query, user: User):
+        if not ACLEntry.has_rows() or not user:
+            return query
+
+        query = query.join(NewsItem, NewsItem.news_item_aggregate_id == NewsItemAggregate.id)
+        query = query.join(NewsItemData, NewsItem.news_item_data_id == NewsItemData.id)
+        query = query.outerjoin(OSINTSource, NewsItemData.osint_source_id == OSINTSource.id)
+        query = query.outerjoin(
+            ACLEntry,
+            or_(
+                and_(
+                    NewsItemData.osint_source_id == ACLEntry.item_id,
+                    ACLEntry.item_type == ItemType.OSINT_SOURCE,
+                ),
+                and_(
+                    OSINTSource.collector_id == ACLEntry.item_id,
+                    ACLEntry.item_type == ItemType.COLLECTOR,
+                ),
+            ),
+        )
+        query = ACLEntry.apply_query(query, user, True, False, False)
+        return query
+
+    @classmethod
+    def get_by_filter(cls, filter: dict, user: User):
+        logger.debug(f"Getting NewsItems Filtered: {filter}")
+        query = cls.query.distinct().group_by(NewsItemAggregate.id)
+
+        query = cls._add_ACL_check(query, user)
+
+        query = cls._add_filters_to_query(filter, query)
+        query = cls._add_sorting_to_query(filter, query)
+        query = cls._add_paging_to_query(filter, query)
+
+        return query.all(), query.count()
 
     @classmethod
     def get_by_filter_json(cls, filter, user):
@@ -810,7 +734,7 @@ class NewsItemAggregate(BaseModel):
 
     @classmethod
     def add_remote_news_items(cls, news_items_data_list, remote_node, osint_source_group_id):
-        news_items_data = NewNewsItemDataSchema(many=True).load(news_items_data_list)
+        news_items_data = cls.load_multiple(news_items_data_list)
         news_item_data_ids = set()
         if not news_items_data:
             return
@@ -879,7 +803,6 @@ class NewsItemAggregate(BaseModel):
     @classmethod
     def update(cls, id, data, user):
         aggregate = cls.find(id)
-        logger.debug(f"Updating news item aggregate {id} with data {data}")
 
         all_important = all(news_item.important is not False for news_item in aggregate.news_items)
 
@@ -1109,7 +1032,6 @@ class NewsItemAggregateSearchIndex(BaseModel):
         data += f" {aggregate.description}"
         data += f" {aggregate.comments}"
         data += f" {aggregate.summary}"
-        data += f" {aggregate.tags}"
 
         for news_item in aggregate.news_items:
             data += f" {news_item.news_item_data.title}"
@@ -1137,7 +1059,6 @@ class NewsItemAttribute(BaseModel):
     remote_user = db.Column(db.String())
 
     def __init__(self, key, value, binary_mime_type, binary_value):
-        # self.id = id
         self.id = None
         self.key = key
         self.value = value
@@ -1191,14 +1112,6 @@ class NewsItemTag(BaseModel):
         self.tag_type = tag_type
 
     @classmethod
-    def find(cls, tag_id):
-        return cls.query.get(tag_id)
-
-    @classmethod
-    def search(cls, tag_name=""):
-        return cls.query.filter(cls.name.ilike(f"%{tag_name}%"))
-
-    @classmethod
     def find_largest_tag_clusters(cls, days: int = 7, limit: int = 12):
         start_date = datetime.now() - timedelta(days=days)
         subquery = (
@@ -1241,13 +1154,20 @@ class NewsItemTag(BaseModel):
         return results
 
     @classmethod
-    def get_filtered_query(cls, filter_args: dict):
+    def get_filtered_tags(cls, filter_args: dict):
         query = cls.query
 
         if search := filter_args.get("search"):
             query = query.filter(cls.name.ilike(f"%{search}%"))
 
-        return query
+        if tag_type := filter_args.get("tag_type"):
+            query = query.filter(cls.tag_type == tag_type)
+
+        if min_size := filter_args.get("min_size"):
+            # returns only tags where the name appears at least min_size times in the database
+            query = query.group_by(cls.name).having(func.count(cls.name) >= min_size)
+
+        return cls.get_rows(query, filter_args)
 
     @classmethod
     def get_rows(cls, query, filter_args: dict):
@@ -1263,29 +1183,13 @@ class NewsItemTag(BaseModel):
 
     @classmethod
     def get_json(cls, filter_args: dict):
-        query = cls.get_filtered_query(filter_args)
-
-        rows = cls.get_rows(query, filter_args)
+        rows = cls.get_filtered_tags(filter_args)
         return [{"name": row.name, "tag_type": row.tag_type} for row in rows]
 
     @classmethod
     def get_list(cls, filter_args: dict):
-        query = cls.query
-
-        if search := filter_args.get("search"):
-            query = query.filter(cls.name.ilike(f"%{search}%"))
-
-        offset = filter_args.get("offset", 0)
-        limit = filter_args.get("limit", 20)
-        rows = query.offset(offset).limit(limit).all()
-        # count = query.count()
+        rows = cls.get_filtered_tags(filter_args)
         return [row.name for row in rows]
-
-    @classmethod
-    def remove(cls, tag):
-        if tag := cls.find(tag.id):
-            db.session.delete(tag)
-            db.session.commit()
 
     @classmethod
     def remove_by_aggregate(cls, aggregate):
