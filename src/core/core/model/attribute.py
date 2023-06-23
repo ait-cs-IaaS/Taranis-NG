@@ -147,7 +147,7 @@ class Attribute(BaseModel):
     validator = db.Column(db.Enum(AttributeValidator))
     validator_parameter = db.Column(db.String())
 
-    def __init__(self, name, description, type, default_value, validator, validator_parameter, attribute_enums, id=None):
+    def __init__(self, name, description, type, default_value, validator, validator_parameter, id=None):
         self.id = id
         self.name = name
         self.description = description
@@ -155,22 +155,13 @@ class Attribute(BaseModel):
         self.default_value = default_value
         self.validator = validator
         self.validator_parameter = validator_parameter
-        self.attribute_enums = attribute_enums
 
     @classmethod
-    def get_all(cls):
-        return cls.query.order_by(Attribute.name).all()
-
-    @classmethod
-    def find_by_type(cls, attribute_type):
+    def filter_by_type(cls, attribute_type):
         return cls.query.filter_by(type=attribute_type).first()
 
     @classmethod
-    def find_by_id(cls, attribute_id):
-        return cls.query.get(attribute_id)
-
-    @classmethod
-    def get(cls, search):
+    def get_by_filter(cls, search):
         query = cls.query
 
         if search:
@@ -186,7 +177,7 @@ class Attribute(BaseModel):
 
     @classmethod
     def get_all_json(cls, search):
-        attributes, total_count = cls.get(search)
+        attributes, total_count = cls.get_by_filter(search)
         items = [attribute.to_dict() for attribute in attributes]
         return {"total_count": total_count, "items": items}
 
@@ -220,14 +211,6 @@ class Attribute(BaseModel):
                 setattr(attribute, key, value)
         db.session.commit()
         return f"Attribute {attribute.name} updated", 200
-
-    @classmethod
-    def delete(cls, id) -> tuple[str, int]:
-        if cls.query.filter_by(id=id).delete():
-            db.session.commit()
-            return f"Attribute {id} deleted", 200
-
-        return f"Attribute {id} not found", 404
 
     @classmethod
     def load_cve_from_file(cls, file_path):
@@ -301,10 +284,6 @@ class Attribute(BaseModel):
                 Attribute.load_cpe_from_file(cpe_update_file)
 
     @classmethod
-    def load_multiple(cls, json_data: list[dict[str, Any]]) -> list["Attribute"]:
-        return [cls.from_dict(data) for data in json_data]
-
-    @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Attribute":
         return cls(**data)
 
@@ -330,7 +309,11 @@ class Attribute(BaseModel):
         return switcher.get(self.type, "mdi-textbox")
 
     def to_dict(self):
-        data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
-        data["attribute_enums"] = [attribute_enum.to_dict() for attribute_enum in self.attribute_enums]
+        data = {
+            c.name: getattr(self, c.name).name if isinstance(getattr(self, c.name), Enum) else getattr(self, c.name)
+            for c in self.__table__.columns
+        }
+        attribute_enums = AttributeEnum.get_all_for_attribute(self.id)
+        data["attribute_enums"] = [attribute_enum.to_dict() for attribute_enum in attribute_enums]
         data["tag"] = self.get_tag()
         return data
