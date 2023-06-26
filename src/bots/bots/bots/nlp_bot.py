@@ -59,13 +59,13 @@ class NLPBot(BaseBot):
                 return
 
             for aggregate in data:
+                existing_tags = aggregate.get("tags", [])
+                keywords = []
+                content_list = []
+
                 if aggregate.get("summary", None) and aggregate.get("tags", None):
                     logger.debug(f"Skipping aggregate: {aggregate['id']}")
                     continue
-
-                keywords = []
-                content_list = []
-                existing_tags = aggregate["tags"] or []
 
                 logger.debug(f"NLP processing aggregate: {aggregate['id']}")
 
@@ -93,7 +93,7 @@ class NLPBot(BaseBot):
                         if summary := self.predict_summary(content_list):
                             self.core_api.update_news_items_aggregate_summary(aggregate["id"], summary)
                     except Exception:
-                        logger.error(f"Could not generate summary for {aggregate['id']}")
+                        logger.log_debug_trace(f"Could not generate summary for {aggregate['id']}")
                 if keywords:
                     self.core_api.update_news_item_tags(aggregate["id"], keywords)
 

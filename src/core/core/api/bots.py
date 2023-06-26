@@ -6,8 +6,8 @@ from datetime import datetime, timedelta
 from core.managers import bots_manager
 from core.managers.sse_manager import sse_manager
 from core.managers.log_manager import logger
-from core.managers.auth_manager import api_key_required
-from core.model import news_item, word_list, bots_node, bot
+from core.managers.auth_manager import api_key_required, get_user_from_jwt
+from core.model import news_item, word_list, bots_node, bot, osint_source
 
 
 class BotGroupAction(Resource):
@@ -68,7 +68,7 @@ class BotsNode(Resource):
 
     @api_key_required
     def post(self):
-        return bots_manager.add_bots_node(request.json)
+        return bots_node.BotsNode.add(request.json)
 
     @api_key_required
     def delete(self, node_id):
@@ -96,18 +96,14 @@ class UpdateNewsItemsAggregateSummary(Resource):
 
 class BotNewsItemAggregates(Resource):
     @api_key_required
-    def get(self, group_id):
+    def get(self):
         try:
-            filter_keys = ["search", "read", "unread", "important", "relevant", "in_report", "range", "sort", "source"]
-            filter_args: dict[str, str | int | list] = {k: v for k, v in request.args.items() if k in filter_keys}
+            filter_args = {
+                "group": request.args.get("group", default=osint_source.OSINTSourceGroup.get_default().id),
+                "timestamp": datetime.fromisoformat(request.args.get("timestamp", datetime.now().isoformat())),
+            }
 
-            filter_args["group"] = request.args.get("group", osint_source.OSINTSourceGroup.get_default().id) or "default"
-            filter_args["limit"] = min(int(request.args.get("limit", 20)), 200)
-            filter_args["tags"] = request.args.getlist("tags")
-            page = int(request.args.get("page", 0))
-            filter_args["offset"] = int(request.args.get("offset", page * filter_args["limit"]))
-
-            return news_item.NewsItemAggregate.get_by_filter_json(filter_args, auth_manager.get_user_from_jwt())
+            return news_item.NewsItemAggregate.get_by_timestamp_json(filter_args)
         except Exception:
             logger.exception("Failed to get Stories")
             return "Failed to get Stories", 400
@@ -138,7 +134,7 @@ class BotsInfo(Resource):
 
 class BotInfo(Resource):
     def get(self, bot_id):
-        return bot.Bot.get_by_id(bot_id)
+        return bot.Bot.get_by_filter(bot_id)
 
     def put(self, bot_id):
         return bot.Bot.update_bot_parameters(bot_id, request.json)

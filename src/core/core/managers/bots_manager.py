@@ -20,16 +20,6 @@ def get_bots_info(node: BotsNodeSchema):
     return Bot.load_multiple(bots_info), status_code
 
 
-def add_bots_node(data):
-    try:
-        BotsNode.add_new(data)
-    except Exception:
-        logger.log_debug_trace(f"Couldn't add Bot Node: {node.name}")
-        return f"Couldn't add Bot Node: {node.name}", 500
-
-    return node.id, 200
-
-
 def refresh_bots():
     try:
         if node := BotsNode.get_first():

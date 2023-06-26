@@ -29,15 +29,11 @@ class BotsNode(BaseModel):
         return cls.query.filter_by(api_key=api_key).first()
 
     @classmethod
-    def get_by_id(cls, id):
-        return cls.query.filter_by(id=id).first()
-
-    @classmethod
     def get_all(cls):
         return cls.query.order_by(db.asc(BotsNode.name)).all()
 
     @classmethod
-    def get(cls, search):
+    def get_by_filter(cls, search):
         query = cls.query
 
         if search is not None:
@@ -52,19 +48,13 @@ class BotsNode(BaseModel):
 
     @classmethod
     def get_json_by_id(cls, id):
-        return cls.get_by_id(id).to_dict()
+        return cls.get(id).to_dict()
 
     @classmethod
     def get_all_json(cls, search):
-        nodes, count = cls.get(search)
+        nodes, count = cls.get_by_filter(search)
         items = [node.to_dict() for node in nodes]
         return {"total_count": count, "items": items}
-
-    @classmethod
-    def add_new(cls, node_data):
-        node = cls.from_dict(node_data)
-        db.session.add(node)
-        db.session.commit()
 
     @classmethod
     def update(cls, node_id, node_data):

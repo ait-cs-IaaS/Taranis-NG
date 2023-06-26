@@ -71,10 +71,6 @@ class OSINTSource(BaseModel):
         return {"total_count": count, "items": items}
 
     @classmethod
-    def load_multiple(cls, json_data: list[dict[str, Any]]) -> list["OSINTSource"]:
-        return [cls.from_dict(data) for data in json_data]
-
-    @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "OSINTSource":
         parameter_values = [ParameterValue.from_dict(parameter_value) for parameter_value in data.pop("parameter_values", [])]
         word_lists = [WordList.get(word_list_id) for word_list_id in data.pop("word_lists", [])]
@@ -104,11 +100,20 @@ class OSINTSource(BaseModel):
     def to_list(self):
         return {"id": self.id, "name": self.name, "description": self.description, "collector_type": self.collector.type}
 
+    def to_collector_dict(self):
+        data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        for key, value in data.items():
+            if isinstance(value, datetime):
+                data[key] = value.isoformat()
+
+        data["parameter_values"] = {parameter_value.parameter.key: parameter_value.value for parameter_value in self.parameter_values}
+        return data
+
     @classmethod
     def get_all_by_type(cls, collector_type: str):
         query = cls.query.join(Collector, OSINTSource.collector_id == Collector.id).filter(Collector.type == collector_type)
         sources = query.order_by(db.asc(OSINTSource.name)).all()
-        return [source.to_dict() for source in sources]
+        return [source.to_collector_dict() for source in sources]
 
     @classmethod
     def get_all_for_collector(cls, collector):

@@ -571,7 +571,7 @@ class BotNodes(Resource):
 
     @auth_required("CONFIG_BOTS_NODE_CREATE")
     def post(self):
-        return bots_manager.add_bots_node(request.json)
+        return bots_node.BotsNode.add(request.json)
 
     @auth_required("CONFIG_BOTS_NODE_UPDATE")
     def put(self, node_id):

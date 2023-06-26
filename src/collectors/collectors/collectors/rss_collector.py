@@ -53,14 +53,14 @@ class RSSCollector(BaseCollector):
         return " ".join([w.replace("\xa0", " ") for w in content_text])
 
     def collect(self, source):
-        feed_url = source.parameter_values.get("FEED_URL", None)
+        feed_url = source["parameter_values"].get("FEED_URL", None)
         if not feed_url:
             logger.warning("No FEED_URL set")
             return
 
-        logger.log_collector_activity("rss", source.id, f"Starting collector for url: {feed_url}")
+        logger.log_collector_activity("rss", source["id"], f"Starting collector for url: {feed_url}")
 
-        if user_agent := source.parameter_values.get("USER_AGENT", None):
+        if user_agent := source["parameter_values"].get("USER_AGENT", None):
             self.headers = {"User-Agent": user_agent}
 
         try:
@@ -104,9 +104,9 @@ class RSSCollector(BaseCollector):
         published = self.get_published_date(feed_entry)
 
         # if published > limit: TODO: uncomment after testing, we need some initial data now
-        logger.log_collector_activity("rss", source.id, f"Processing entry [{link}]")
+        logger.log_collector_activity("rss", source["id"], f"Processing entry [{link}]")
 
-        content_location = source.parameter_values.get("CONTENT_LOCATION", None)
+        content_location = source["parameter_values"].get("CONTENT_LOCATION", None)
         content_from_feed, content_location = self.content_from_feed(feed_entry, content_location)
         if content_from_feed:
             content = str(feed_entry[content_location])
@@ -125,18 +125,18 @@ class RSSCollector(BaseCollector):
             author,
             datetime.datetime.now(),
             content,
-            source.id,
+            source["id"],
             [],
         )
 
     def rss_collector(self, feed_url: str, source):
         feed_content = self.make_request(feed_url)
         if not feed_content:
-            logger.log_collector_activity("rss", source.id, "RSS returned no content")
+            logger.log_collector_activity("rss", source['id'], "RSS returned no content")
             return
         feed = feedparser.parse(feed_content.content)
 
-        logger.log_collector_activity("rss", source.id, f'RSS returned feed with {len(feed["entries"])} entries')
+        logger.log_collector_activity("rss", source["id"], f'RSS returned feed with {len(feed["entries"])} entries')
 
         news_items = [self.parse_feed(feed_entry, feed_url, source) for feed_entry in feed["entries"]]
 

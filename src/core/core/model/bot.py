@@ -21,10 +21,19 @@ class Bot(BaseModel):
         self.type = type
         self.parameter_values = parameter_values
 
+    def to_bot_info_dict(self) -> dict[str, Any]:
+        return {
+            "id": self.id,
+            "name": self.name,
+            "description": self.description,
+            "type": self.type,
+            self.type: {parameter_value.parameter.key: parameter_value.value for parameter_value in self.parameter_values},
+        }
+
     @classmethod
     def update_bot_parameters(cls, bot_id, data):
         try:
-            bot = cls.find_by_id(bot_id)
+            bot = cls.get(bot_id)
             if not bot:
                 return None
             for pv in bot.parameter_values:
@@ -41,7 +50,7 @@ class Bot(BaseModel):
 
     @classmethod
     def add(cls, data) -> tuple[str, int]:
-        if cls.find_by_type(data["type"]):
+        if cls.filter_by_type(data["type"]):
             return f"Bot with type {data['type']} already exists", 409
         bot = cls.from_dict(data)
         db.session.add(bot)
@@ -53,11 +62,7 @@ class Bot(BaseModel):
         return cls.query.first()
 
     @classmethod
-    def find_by_id(cls, id):
-        return cls.query.filter_by(id=id).first()
-
-    @classmethod
-    def find_by_type(cls, type):
+    def filter_by_type(cls, type):
         return cls.query.filter_by(type=type).first()
 
     @classmethod
@@ -65,7 +70,7 @@ class Bot(BaseModel):
         return cls.query.filter_by(type=type).all()
 
     @classmethod
-    def get(cls, search):
+    def get_by_filter(cls, search):
         query = cls.query
 
         if search:
@@ -80,8 +85,8 @@ class Bot(BaseModel):
 
     @classmethod
     def get_all_json(cls, search):
-        bots, count = cls.get(search)
-        items = [bot.to_dict() for bot in bots]
+        bots, count = cls.get_by_filter(search)
+        items = [bot.to_bot_info_dict() for bot in bots]
         return {"total_count": count, "items": items}
 
     def to_dict(self) -> dict[str, Any]:

@@ -1778,15 +1778,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/resp.auth.error'
 
-  /bots/news-item-aggregates-by-group/{group_id}:
+  /bots/news-item-aggregates:
     parameters:
-      - name: group_id
-        in: path
-        required: true
+      - name: group
+        in: query
         schema:
           type: string
-          parameters:
-      - name: limit
+      - name: timestamp
         in: query
         schema:
           type: string
@@ -1796,30 +1794,6 @@ paths:
       responses:
         '200':
           description: the IDs of the OSINT sources
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/news_item_aggregate'
-        '401':
-          description: authorization error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/resp.auth.error'
-  /bots/news-item-aggregates:
-    get:
-      tags: [bots]
-      summary: get default news item aggregate
-      parameters:
-        - name: limit
-          in: query
-          schema:
-            type: string
-      responses:
-        '200':
-          description: the default news item aggregate
           content:
             application/json:
               schema:

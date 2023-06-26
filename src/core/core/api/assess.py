@@ -38,7 +38,6 @@ class AddNewsItem(Resource):
     def post(self):
         osint_source_ids = news_item.NewsItemAggregate.add_news_item(request.json)
         sse_manager.news_items_updated()
-        sse_manager.remote_access_news_items_updated(osint_source_ids)
 
 
 class NewsItems(Resource):
