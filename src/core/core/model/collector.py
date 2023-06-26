@@ -22,10 +22,6 @@ class Collector(BaseModel):
         self.parameters = parameters
 
     @classmethod
-    def find(cls, collector_id):
-        return cls.query.get(collector_id)
-
-    @classmethod
     def add(cls, data) -> tuple[str, int]:
         if cls.find_by_type(data["type"]):
             return f"Collector with type {data['type']} already exists", 409
@@ -40,7 +36,7 @@ class Collector(BaseModel):
         return cls.query.first()
 
     @classmethod
-    def get(cls, search):
+    def get_by_filter(cls, search):
         query = cls.query
 
         if search is not None:
@@ -59,7 +55,7 @@ class Collector(BaseModel):
 
     @classmethod
     def get_all_json(cls, search):
-        collectors, count = cls.get(search)
+        collectors, count = cls.get_by_filter(search)
         items = [collector.to_dict() for collector in collectors]
         return {"total_count": count, "items": items}
 

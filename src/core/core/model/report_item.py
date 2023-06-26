@@ -1,4 +1,3 @@
-from marshmallow import post_load, fields
 from datetime import datetime, timedelta
 
 import uuid as uuid_generator
@@ -17,23 +16,6 @@ from core.model.acl_entry import ACLEntry
 from core.model.user import User
 from core.model.acl_entry import ItemType
 from core.model.attribute import AttributeType
-from shared.schema.news_item import NewsItemAggregateIdSchema, NewsItemAggregateSchema
-from shared.schema.report_item import (
-    ReportItemAttributeBaseSchema,
-    ReportItemBaseSchema,
-    ReportItemIdSchema,
-    RemoteReportItemSchema,
-)
-from shared.schema.report_item import (
-    ReportItemRemoteSchema,
-    ReportItemSchema,
-)
-
-
-class NewReportItemAttributeSchema(ReportItemAttributeBaseSchema):
-    @post_load
-    def make_report_item_attribute(self, data, **kwargs):
-        return ReportItemAttribute(**data)
 
 
 class ReportItemAttribute(BaseModel):
@@ -72,10 +54,6 @@ class ReportItemAttribute(BaseModel):
         self.attribute_group_item_title = attribute_group_item_title
 
     @classmethod
-    def find(cls, attribute_id):
-        return cls.query.get(attribute_id)
-
-    @classmethod
     def find_by_attribute_group(cls, attribute_group_id, report_item_id=None):
         return cls.query.filter_by(attribute_group_item_id=attribute_group_id).filter_by(report_item_id=report_item_id).first()
 
@@ -90,16 +68,6 @@ class ReportItemAttribute(BaseModel):
 
         db.session.commit()
         return f"Successfully updated {self.id}", 200
-
-
-class NewReportItemSchema(ReportItemBaseSchema):
-    news_item_aggregates = fields.Nested(NewsItemAggregateIdSchema, many=True, load_default=[])
-    remote_report_items = fields.Nested(ReportItemIdSchema, many=True, load_default=[])
-    attributes = fields.Nested(NewReportItemAttributeSchema, many=True)
-
-    @post_load
-    def make(self, data, **kwargs):
-        return ReportItem(**data)
 
 
 class ReportItemRemoteReportItem(BaseModel):
@@ -164,17 +132,13 @@ class ReportItem(BaseModel):
         self.completed = completed
         self.report_item_cpes = []
 
-        self.news_item_aggregates = [NewsItemAggregate.find(news_item_aggregate.id) for news_item_aggregate in news_item_aggregates]
+        self.news_item_aggregates = [NewsItemAggregate.get(news_item_aggregate.id) for news_item_aggregate in news_item_aggregates]
 
-        self.remote_report_items = [ReportItem.find(remote_report_item.id) for remote_report_item in remote_report_items]
+        self.remote_report_items = [ReportItem.get(remote_report_item.id) for remote_report_item in remote_report_items]
 
     @classmethod
     def count_all(cls, is_completed):
         return cls.query.filter_by(completed=is_completed).count()
-
-    @classmethod
-    def find(cls, report_item_id):
-        return cls.query.get(report_item_id)
 
     @classmethod
     def find_by_uuid(cls, report_item_uuid):
@@ -182,7 +146,7 @@ class ReportItem(BaseModel):
 
     @classmethod
     def get_json(cls, filter, user):
-        reports, count = cls.get(filter, user, True)
+        reports, count = cls.get_by_filter(filter, user, True)
         items = [report.to_dict() for report in reports]
         return {"total_count": count, "items": items}
 
@@ -193,8 +157,7 @@ class ReportItem(BaseModel):
 
     @classmethod
     def get_detail_json(cls, id):
-        report_item = cls.query.get(id)
-        return ReportItemSchema().dump(report_item)
+        return cls.query.get(id).to_dict()
 
     @classmethod
     def get_groups(cls):
@@ -287,13 +250,10 @@ class ReportItem(BaseModel):
             for attribute in report_item.attributes:
                 attribute.attribute_group_item_title = attribute.attribute_group_item.title
 
-        report_item_remote_schema = ReportItemRemoteSchema(many=True)
-        items = report_item_remote_schema.dump(report_items)
-
-        return items, last_sync_time
+        return [report_item.to_dict() for report_item in report_items], last_sync_time
 
     @classmethod
-    def get(cls, filter: dict, user, acl_check: bool):
+    def get_by_filter(cls, filter: dict, user, acl_check: bool):
         query = cls.query
 
         if acl_check:
@@ -382,7 +342,7 @@ class ReportItem(BaseModel):
             return f"User {user.id} is not allowed to update Report {report_item.id}", 401
 
         for aggregate_id in aggregate_ids:
-            report_item.news_item_aggregates.append(NewsItemAggregate.find(aggregate_id))
+            report_item.news_item_aggregates.append(NewsItemAggregate.get(aggregate_id))
 
         db.session.commit()
 
@@ -410,7 +370,7 @@ class ReportItem(BaseModel):
 
         if "aggregate_ids" in data:
             for aggregate_id in data["aggregate_ids"]:
-                aggregate = NewsItemAggregate.find(aggregate_id)
+                aggregate = NewsItemAggregate.get(aggregate_id)
                 report_item.news_item_aggregates.append(aggregate)
 
         db.session.commit()
@@ -440,17 +400,14 @@ class ReportItem(BaseModel):
 
             if "add" in data:
                 if "aggregate_ids" in data:
-                    schema = NewsItemAggregateSchema()
                     data["news_item_aggregates"] = []
                     for aggregate_id in data["aggregate_ids"]:
-                        aggregate = NewsItemAggregate.find(aggregate_id)
-                        data["news_item_aggregates"].append(schema.dump(aggregate))
+                        data["news_item_aggregates"].append(NewsItemAggregate.get(aggregate_id).to_dict())
 
                 if "remote_report_item_ids" in data:
-                    schema = RemoteReportItemSchema()
                     data["remote_report_items"] = []
                     for remote_report_item_id in data["remote_report_item_ids"]:
-                        remote_report_item = ReportItem.find(remote_report_item_id)
+                        remote_report_item = ReportItem.get(remote_report_item_id).to_dict()
                         data["remote_report_items"].append(schema.dump(remote_report_item))
 
                 if "attribute_id" in data:

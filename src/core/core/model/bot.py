@@ -5,6 +5,7 @@ import uuid
 from core.managers.db_manager import db
 from core.managers.log_manager import logger
 from core.model.base_model import BaseModel
+from core.model.parameter_value import ParameterValue
 
 
 class Bot(BaseModel):
@@ -93,6 +94,13 @@ class Bot(BaseModel):
         data = super().to_dict()
         data["parameter_values"] = [pv.to_dict() for pv in self.parameter_values]
         return data
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "Bot":
+        if parameter_values := data.pop("parameter_values", None):
+            data["parameter_values"] = [ParameterValue(**pv) for pv in parameter_values]
+
+        return cls(**data)
 
 
 class BotParameterValue(BaseModel):

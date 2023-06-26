@@ -1,6 +1,5 @@
 import uuid
-from marshmallow import fields, post_load
-from sqlalchemy import orm, or_
+from sqlalchemy import or_
 from typing import Any
 
 from core.managers.db_manager import db
@@ -246,12 +245,8 @@ class AssetGroup(BaseModel):
         self.id = id or str(uuid.uuid4())
         self.name = name
         self.description = description
-        self.organization = Organization.find(organization_id)
-        self.templates = [NotificationTemplate.find(template.id) for template in templates]
-
-    @classmethod
-    def find(cls, group_id):
-        return cls.query.get(group_id)
+        self.organization = Organization.get(organization_id)
+        self.templates = [NotificationTemplate.get(template_id) for template_id in templates]
 
     @classmethod
     def access_allowed(cls, user: User, group_id: str):
@@ -262,7 +257,7 @@ class AssetGroup(BaseModel):
         return cls.query.get("default")
 
     @classmethod
-    def get(cls, search: str | None, organization: Organization | None = None):
+    def get_by_filter(cls, search: str | None, organization: Organization | None = None):
         query = cls.query
 
         if organization:
@@ -280,7 +275,7 @@ class AssetGroup(BaseModel):
 
     @classmethod
     def get_all_json(cls, user, search):
-        groups, count = cls.get(search, user.organization)
+        groups, count = cls.get_by_filter(search, user.organization)
         items = [group.to_dict() for group in groups]
         return {"total_count": count, "items": items}
 

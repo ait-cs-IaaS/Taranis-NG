@@ -36,10 +36,6 @@ class PublisherPreset(BaseModel):
         self.use_for_notifications = use_for_notifications
 
     @classmethod
-    def find(cls, preset_id):
-        return cls.query.get(preset_id)
-
-    @classmethod
     def find_for_notifications(cls):
         return cls.query.filter_by(use_for_notifications=True).first()
 
@@ -48,7 +44,7 @@ class PublisherPreset(BaseModel):
         return cls.query.order_by(db.asc(PublisherPreset.name)).all()
 
     @classmethod
-    def get(cls, search=None):
+    def get_by_filter(cls, search=None):
         query = cls.query
 
         if search:
@@ -63,7 +59,7 @@ class PublisherPreset(BaseModel):
 
     @classmethod
     def get_all_json(cls, search):
-        publishers, count = cls.get(search)
+        publishers, count = cls.get_by_filter(search)
         items = [publisher.to_dict() for publisher in publishers]
         return {"total_count": count, "items": items}
 

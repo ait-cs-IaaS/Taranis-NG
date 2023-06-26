@@ -23,7 +23,7 @@ class DatabaseAuthenticator(BaseAuthenticator):
         if "username" not in credentials or "password" not in credentials:
             return BaseAuthenticator.generate_error()
 
-        user = User.find(credentials["username"])
+        user = User.find_by_name(credentials["username"])
         if user and check_password_hash(user.password, credentials["password"]):
             return BaseAuthenticator.generate_jwt(credentials["username"])
 

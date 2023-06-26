@@ -36,7 +36,7 @@ class CollectorsNode(Resource):
 
     @api_key_required
     def post(self):
-        return collectors_manager.add_collectors_node(request.json)
+        return collectors_node.CollectorsNode.add(request.json)
 
     @api_key_required
     def delete(self, node_id):

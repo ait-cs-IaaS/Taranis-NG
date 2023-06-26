@@ -1,4 +1,3 @@
-from marshmallow import post_load
 from typing import Any
 from core.managers.log_manager import logger
 

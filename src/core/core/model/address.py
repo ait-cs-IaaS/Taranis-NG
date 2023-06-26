@@ -19,10 +19,6 @@ class Address(BaseModel):
         self.zip = zip
         self.country = country
 
-    @classmethod
-    def find(cls, address_id):
-        return cls.query.get(address_id)
-
     def update(self, new_item: dict[str, Any]) -> tuple[str, int]:
         for key, value in new_item.items():
             if hasattr(self, key) and key != "id":

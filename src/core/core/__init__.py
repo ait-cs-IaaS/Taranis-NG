@@ -4,8 +4,6 @@ from core.managers import (
     db_manager,
     auth_manager,
     api_manager,
-    sse_manager,
-    remote_manager,
     tagcloud_manager,
     log_manager,
 )
@@ -31,6 +29,5 @@ def initialize_managers(app):
     auth_manager.initialize(app)
     api_manager.initialize(app)
 
-    remote_manager.initialize(app)
     tagcloud_manager.initialize(app)
     log_manager.logger.log_info("All Done")

@@ -29,7 +29,7 @@ class Presenter(BaseModel):
         self.parameters = parameters
 
     @classmethod
-    def get(cls, search):
+    def get_by_filter(cls, search):
         query = cls.query
 
         if search is not None:
@@ -44,7 +44,7 @@ class Presenter(BaseModel):
 
     @classmethod
     def get_all_json(cls, search):
-        presenters, count = cls.get(search)
+        presenters, count = cls.get_by_filter(search)
         items = [presenter.to_dict() for presenter in presenters]
         return {"total_count": count, "items": items}
 

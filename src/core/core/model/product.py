@@ -29,7 +29,7 @@ class Product(BaseModel):
         self.title = title
         self.description = description
         self.product_type_id = product_type_id
-        self.report_items = [ReportItem.find(report_item.id) for report_item in report_items]
+        self.report_items = [ReportItem.get(report_item.id) for report_item in report_items]
 
     @classmethod
     def count_all(cls):
@@ -131,7 +131,7 @@ class Product(BaseModel):
         report_items = data.pop("report_items", None)
         product = cls(**data)
         if report_items:
-            product.report_items = [ReportItem.get(r) for r in report_items]
+            product.report_items = [ReportItem.get_by_filter(r) for r in report_items]
         return product
 
 

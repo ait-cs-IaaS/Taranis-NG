@@ -29,10 +29,6 @@ class Organization(BaseModel):
         return data
 
     @classmethod
-    def find(cls, organization_id):
-        return cls.query.get(organization_id)
-
-    @classmethod
     def get_all(cls):
         return cls.query.order_by(db.asc(Organization.name)).all()
 

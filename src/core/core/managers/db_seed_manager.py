@@ -1102,7 +1102,7 @@ def pre_seed_default_user():
     if user_count > 0:
         return
 
-    admin_organization = Organization.find(1)
+    admin_organization = Organization.get(1)
     if not admin_organization:
         Organization.add_new(
             {
@@ -1113,7 +1113,7 @@ def pre_seed_default_user():
             }
         )
 
-    if not User.find(username="admin") and not User.find_by_role(1):
+    if not User.find_by_name(username="admin") and not User.find_by_role(1):
         User.add_new(
             {
                 "username": "admin",
@@ -1129,7 +1129,7 @@ def pre_seed_default_user():
             }
         )
 
-    if not Organization.find(2):
+    if not Organization.get(2):
         Organization.add_new(
             {
                 "id": 2,
@@ -1144,7 +1144,7 @@ def pre_seed_default_user():
             }
         )
 
-    if not User.find(username="user"):
+    if not User.find_by_name(username="user"):
         User.add_new(
             {
                 "username": "user",
@@ -1165,9 +1165,13 @@ def pre_seed_assets():
     from core.model.asset import AssetGroup
     from core.model.user import User
 
-    if AssetGroup.find("default"):
+    if AssetGroup.get("default"):
         return
     users = User.get_all()
     AssetGroup.create(
-        name="Default", description="Default group for uncategorized assets", organization_id=users[0].organization.id, id="default"
+        name="Default",
+        description="Default group for uncategorized assets",
+        organization_id=users[0].organization.id,
+        templates=[],
+        id="default",
     )

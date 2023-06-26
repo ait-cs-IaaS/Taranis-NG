@@ -176,9 +176,9 @@ class DownloadAttachment(Resource):
     @auth_required("ASSESS_ACCESS")
     def get(self, item_data_id, attribute_id):
         user = auth_manager.get_user_from_jwt()
-        attribute_mapping = news_item.NewsItemDataNewsItemAttribute.find(attribute_id)
+        attribute_mapping = news_item.NewsItemDataNewsItemAttribute.get(attribute_id)
         need_check = attribute_mapping is not None
-        attribute = news_item.NewsItemAttribute.find(attribute_id)
+        attribute = news_item.NewsItemAttribute.get(attribute_id)
         if (
             need_check
             and item_data_id == attribute_mapping.news_item_data_id

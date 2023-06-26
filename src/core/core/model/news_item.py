@@ -301,7 +301,7 @@ class NewsItem(BaseModel):
         return query.scalar() is not None
 
     def vote(self, vote_data, user_id):
-        vote = NewsItemVote.find(self.id, user_id)
+        vote = NewsItemVote.find_by_user(self.id, user_id)
         if vote is None:
             vote = self.create_new_vote(vote, user_id)
 
@@ -374,7 +374,7 @@ class NewsItem(BaseModel):
         if NewsItemAggregate.is_assigned_to_report([{"type": "AGGREGATE", "id": news_item.news_item_aggregate_id}]) is False:
             return "aggregate_in_use", 500
         aggregate_id = news_item.news_item_aggregate_id
-        aggregate = NewsItemAggregate.find(aggregate_id)
+        aggregate = NewsItemAggregate.get(aggregate_id)
         aggregate.news_items.remove(news_item)
         NewsItemVote.delete_all(news_item_id)
         db.session.delete(news_item)
@@ -412,7 +412,7 @@ class NewsItemVote(BaseModel):
         self.dislike = False
 
     @classmethod
-    def find(cls, news_item_id, user_id):
+    def find_by_user(cls, news_item_id, user_id):
         return cls.query.filter_by(news_item_id=news_item_id, user_id=user_id).first()
 
     @classmethod
@@ -708,7 +708,7 @@ class NewsItemAggregate(BaseModel):
         news_items_query = NewsItem.get_all_by_group_and_source_query(default_group_id, osint_source_id, time_limit)
         for news_item in news_items_query:
             news_item_data = news_item.news_item_data
-            aggregate = NewsItemAggregate.find(news_item.news_item_aggregate_id)
+            aggregate = NewsItemAggregate.get(news_item.news_item_aggregate_id)
             aggregate.news_items.remove(news_item)
             NewsItemVote.delete_all(news_item.id)
             db.session.delete(news_item)
@@ -816,10 +816,10 @@ class NewsItemAggregate(BaseModel):
     @classmethod
     def group_aggregate(cls, aggregate_ids: list, user: User | None = None):
         try:
-            first_aggregate = NewsItemAggregate.find(aggregate_ids.pop(0))
+            first_aggregate = NewsItemAggregate.get(aggregate_ids.pop(0))
             processed_aggregates = {first_aggregate}
             for item in aggregate_ids:
-                aggregate = NewsItemAggregate.find(item)
+                aggregate = NewsItemAggregate.get(item)
                 for news_item in aggregate.news_items[:]:
                     if user is None or NewsItem.allowed_with_acl(news_item.id, user, False, False, True):
                         first_aggregate.news_items.append(news_item)
@@ -839,10 +839,10 @@ class NewsItemAggregate(BaseModel):
         try:
             processed_aggregates = set()
             for item in newsitem_ids:
-                news_item = NewsItem.find(item)
+                news_item = NewsItem.get(item)
                 if not NewsItem.allowed_with_acl(news_item.id, user, False, False, True):
                     continue
-                aggregate = NewsItemAggregate.find(news_item.news_item_aggregate_id)
+                aggregate = NewsItemAggregate.get(news_item.news_item_aggregate_id)
                 group_id = aggregate.osint_source_group_id
                 aggregate.news_items.remove(news_item)
                 processed_aggregates.add(aggregate)

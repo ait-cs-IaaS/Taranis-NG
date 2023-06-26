@@ -154,7 +154,7 @@ def auth_required(permissions: list | str, acl=None):
                 logger.store_auth_error_activity(f"Missing identity in JWT: {get_jwt()}")
                 return error
 
-            user = User.find(identity)
+            user = User.find_by_name(identity)
 
             # does it include permissions?
             claims = get_jwt()
@@ -255,4 +255,4 @@ def get_user_from_jwt() -> User | None:
         return None
     identity = get_jwt_identity()
 
-    return User.find(identity) if identity else None
+    return User.find_by_name(identity) if identity else None

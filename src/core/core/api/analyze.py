@@ -152,7 +152,7 @@ class ReportItemAddAttachment(Resource):
         attribute_group_item_id = request.form["attribute_group_item_id"]
         description = request.form["description"]
         data = report_item.ReportItem.add_attachment(report_item_id, attribute_group_item_id, user, file, description)
-        updated_report_item = report_item.ReportItem.find(report_item_id)
+        updated_report_item = report_item.ReportItem.get(report_item_id)
         asset_manager.report_item_changed(updated_report_item)
         sse_manager.report_item_updated(data)
         sse_manager.remote_access_report_items_updated(updated_report_item.report_item_type_id)
@@ -165,7 +165,7 @@ class ReportItemRemoveAttachment(Resource):
     def delete(self, report_item_id, attribute_id):
         user = auth_manager.get_user_from_jwt()
         data = report_item.ReportItem.remove_attachment(report_item_id, attribute_id, user)
-        updated_report_item = report_item.ReportItem.find(report_item_id)
+        updated_report_item = report_item.ReportItem.get(report_item_id)
         asset_manager.report_item_changed(updated_report_item)
         sse_manager.report_item_updated(data)
         sse_manager.remote_access_report_items_updated(updated_report_item.report_item_type_id)
@@ -174,7 +174,7 @@ class ReportItemRemoveAttachment(Resource):
 class ReportItemDownloadAttachment(Resource):
     @auth_required("ANALYZE_ACCESS", ACLCheck.REPORT_ITEM_ACCESS)
     def get(self, report_item_id, attribute_id):
-        report_item_attribute = report_item.ReportItemAttribute.find(attribute_id)
+        report_item_attribute = report_item.ReportItemAttribute.get(attribute_id)
         return send_file(
             io.BytesIO(report_item_attribute.binary_data),
             download_name=report_item_attribute.value,

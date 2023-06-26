@@ -74,7 +74,7 @@ def news_item_aggregates(app, request, news_items_data):
 
         def teardown():
             nia = NewsItemAggregate()
-            user = User.find("admin")
+            user = User.find_by_name("admin")
             news_item_aggregates, _ = nia.get_by_filter({"group": "default"}, user)
             for aggregate in news_item_aggregates:
                 aggregate.delete(user)

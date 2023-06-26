@@ -1,11 +1,10 @@
 from core.model.bots_node import BotsNode
 from core.model.bot import Bot
 from core.remote.bots_api import BotsApi
-from shared.schema.bots_node import BotsNode as BotsNodeSchema
 from core.managers.log_manager import logger
 
 
-def get_bots_info(node: BotsNodeSchema):
+def get_bots_info(node: BotsNode):
     try:
         bots_info, status_code = BotsApi(node.api_url, node.api_key).get_bots_info()
     except ConnectionError:
@@ -29,7 +28,7 @@ def refresh_bots():
 
 
 def update_bots_node(node_id, data):
-    node = BotsNodeSchema.create(data)
+    node = BotsNode.get(node_id)
     bots, status_code = get_bots_info(node)
 
     if status_code != 200:

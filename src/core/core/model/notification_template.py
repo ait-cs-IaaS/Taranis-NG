@@ -38,11 +38,7 @@ class NotificationTemplate(BaseModel):
         self.recipients = recipients
 
     @classmethod
-    def find(cls, id):
-        return cls.query.get(id)
-
-    @classmethod
-    def get(cls, search, organization):
+    def get_by_filter(cls, search, organization):
         query = cls.query
 
         if organization:
@@ -61,7 +57,7 @@ class NotificationTemplate(BaseModel):
 
     @classmethod
     def get_all_json(cls, user, search):
-        templates, count = cls.get(search, user.organization)
+        templates, count = cls.get_by_filter(search, user.organization)
         items = [template.to_dict() for template in templates]
         return {"total_count": count, "items": items}
 

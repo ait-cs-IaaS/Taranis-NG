@@ -36,7 +36,7 @@ class BaseAuthenticator:
 
     @staticmethod
     def generate_jwt(username: str) -> tuple[dict[str, str], int]:
-        if user := User.find(username):
+        if user := User.find_by_name(username):
             logger.store_user_activity(user, "LOGIN", "Successful")
             access_token = create_access_token(
                 identity=user.username,

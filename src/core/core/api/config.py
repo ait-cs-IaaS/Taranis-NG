@@ -334,7 +334,7 @@ class CollectorsNodes(Resource):
 
     @auth_required("CONFIG_COLLECTORS_NODE_CREATE")
     def post(self):
-        return collectors_manager.add_collectors_node(request.json)
+        return collectors_node.CollectorsNode.add(request.json)
 
     @auth_required("CONFIG_COLLECTORS_NODE_UPDATE")
     def put(self, node_id):
@@ -390,7 +390,7 @@ class OSINTSourcesExport(Resource):
     def get(self):
         data = collectors_manager.export_osint_sources()
         if data is None:
-            return "", 400
+            return "Unable to export", 400
         return send_file(
             io.BytesIO(data),
             download_name="osint_sources_export.json",

@@ -48,7 +48,7 @@ class PublishProduct(Resource):
         product_data, status_code = presenters_manager.generate_product(product_id)
         if status_code == 200:
             return publishers_manager.publish(
-                publisher_preset.PublisherPreset.find(publisher_id),
+                publisher_preset.PublisherPreset.get(publisher_id),
                 product_data,
                 None,
                 None,

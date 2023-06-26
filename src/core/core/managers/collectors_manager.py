@@ -6,11 +6,10 @@ from core.model.collectors_node import CollectorsNode
 from core.model.osint_source import OSINTSource
 from core.remote.collectors_api import CollectorsApi
 from core.managers.log_manager import logger
-from shared.schema.collectors_node import CollectorsNode as CollectorNodeSchema
 from shared.schema.osint_source import OSINTSourceExportRootSchema, OSINTSourceExportRoot
 
 
-def get_collectors_info(node: CollectorNodeSchema):
+def get_collectors_info(node: CollectorsNode):
     try:
         collectors_info, status_code = CollectorsApi(node.api_url, node.api_key).get_collectors_info()
     except ConnectionError:
@@ -25,26 +24,8 @@ def get_collectors_info(node: CollectorNodeSchema):
     return Collector.load_multiple(collectors_info), status_code
 
 
-def add_collectors_node(data):
-    try:
-        logger.log_debug(f"ADD COLLECTOR: {data}")
-        node = CollectorNodeSchema.create(data)
-
-    except Exception as e:
-        logger.log_debug_trace()
-        return str(e), 500
-
-    try:
-        CollectorsNode.add_new(data)
-    except Exception:
-        logger.log_debug_trace(f"Couldn't add Collector Node: {node.name}")
-        return f"Couldn't add Collector node: {node.name}", 500
-
-    return node.id, 200
-
-
 def update_collectors_node(node_id, data):
-    node = CollectorNodeSchema.create(data)
+    node = CollectorsNode.get(node_id)
     collectors, status_code = get_collectors_info(node)
     if status_code != 200:
         return collectors, status_code

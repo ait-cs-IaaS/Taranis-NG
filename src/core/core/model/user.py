@@ -31,13 +31,13 @@ class User(BaseModel):
         self.username = username
         self.name = name
         self.password = generate_password_hash(password)
-        self.organization = Organization.find(organization["id"]) if isinstance(organization, dict) else Organization.find(organization)
+        self.organization = Organization.get(organization["id"]) if isinstance(organization, dict) else Organization.get(organization)
         self.roles = [Role.get(role["id"]) for role in roles]
         self.permissions = [Permission.get(permission["id"]) for permission in permissions]
         self.profile = UserProfile(True, False, [], "en")
 
     @classmethod
-    def find(cls, username):
+    def find_by_name(cls, username):
         return cls.query.filter_by(username=username).first()
 
     @classmethod

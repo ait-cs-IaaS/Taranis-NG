@@ -191,17 +191,17 @@ class RemoteAccess(BaseModel):
         return [cls.from_dict(data) for data in json_data]
 
 
-class RemoteAccessOSINTSource(db.Model):
+class RemoteAccessOSINTSource(BaseModel):
     remote_access_id = db.Column(db.Integer, db.ForeignKey("remote_access.id"), primary_key=True)
     osint_source_id = db.Column(db.String, db.ForeignKey("osint_source.id"), primary_key=True)
 
 
-class RemoteAccessReportItemType(db.Model):
+class RemoteAccessReportItemType(BaseModel):
     remote_access_id = db.Column(db.Integer, db.ForeignKey("remote_access.id"), primary_key=True)
     report_item_type_id = db.Column(db.Integer, db.ForeignKey("report_item_type.id"), primary_key=True)
 
 
-class RemoteNode(db.Model):
+class RemoteNode(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())
@@ -221,7 +221,6 @@ class RemoteNode(db.Model):
 
     def __init__(
         self,
-        id,
         name,
         description,
         enabled,
@@ -231,8 +230,9 @@ class RemoteNode(db.Model):
         sync_news_items,
         sync_report_items,
         osint_source_group_id,
+        id=None,
     ):
-        self.id = None
+        self.id = id
         self.name = name
         self.description = description
         self.remote_url = remote_url
@@ -244,11 +244,7 @@ class RemoteNode(db.Model):
         self.osint_source_group_id = osint_source_group_id
 
     @classmethod
-    def find(cls, node_id):
-        return cls.query.get(node_id)
-
-    @classmethod
-    def get(cls, search=None):
+    def get_by_filter(cls, search=None):
         query = cls.query
 
         if search is not None:
@@ -267,20 +263,6 @@ class RemoteNode(db.Model):
         remote_nodes, count = cls.get(search)
         items = [remote_node.to_dict() for remote_node in remote_nodes]
         return {"total_count": count, "items": items}
-
-    @classmethod
-    def add(cls, data) -> tuple[str, int]:
-        remote_node = cls.from_dict(data)
-        db.session.add(remote_node)
-        db.session.commit()
-        return f"Remote node {remote_node.name} added", 201
-
-    @classmethod
-    def delete(cls, remote_node_id) -> tuple[str, int]:
-        remote_node = cls.query.get(remote_node_id)
-        db.session.delete(remote_node)
-        db.session.commit()
-        return f"Remote node {remote_node.name} deleted", 200
 
     @classmethod
     def update(cls, remote_node_id, data) -> tuple[str, int]:
