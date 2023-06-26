@@ -74,10 +74,6 @@ class ACLEntry(BaseModel):
         return {"total_count": count, "items": items}
 
     @classmethod
-    def load_multiple(cls, json_data: list[dict[str, Any]]) -> list["ACLEntry"]:
-        return [cls.from_dict(data) for data in json_data]
-
-    @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "ACLEntry":
         return cls(**data)
 

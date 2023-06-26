@@ -55,7 +55,7 @@ class PublishersNode(BaseModel):
         return {"total_count": count, "items": items}
 
     @classmethod
-    def add_new(cls, node_data, publishers):
+    def add(cls, node_data, publishers):
         node = cls.from_dict(node_data)
         node.publishers = publishers
         db.session.add(node)

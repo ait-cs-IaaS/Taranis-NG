@@ -1104,7 +1104,7 @@ def pre_seed_default_user():
 
     admin_organization = Organization.get(1)
     if not admin_organization:
-        Organization.add_new(
+        Organization.add(
             {
                 "id": 1,
                 "name": "The Earth",
@@ -1114,7 +1114,7 @@ def pre_seed_default_user():
         )
 
     if not User.find_by_name(username="admin") and not User.find_by_role(1):
-        User.add_new(
+        User.add(
             {
                 "username": "admin",
                 "name": "Arthur Dent",
@@ -1130,7 +1130,7 @@ def pre_seed_default_user():
         )
 
     if not Organization.get(2):
-        Organization.add_new(
+        Organization.add(
             {
                 "id": 2,
                 "name": "The Clacks",
@@ -1145,7 +1145,7 @@ def pre_seed_default_user():
         )
 
     if not User.find_by_name(username="user"):
-        User.add_new(
+        User.add(
             {
                 "username": "user",
                 "name": "Terry Pratchett",

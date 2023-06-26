@@ -14,9 +14,7 @@ def app(request):
     from core.__init__ import create_app
 
     def teardown():
-        pass
-
-    #    os.remove("/var/tmp/taranis_test.db")
+        os.remove("/var/tmp/taranis_test.db")
 
     request.addfinalizer(teardown)
     yield create_app()

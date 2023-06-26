@@ -38,12 +38,12 @@ class NewsItemData(BaseModel):
         self.hash = hash
         self.title = title
         self.review = review
+        self.author = author
         self.source = source
         self.link = link
-        self.published = published
-        self.author = author
-        self.collected = collected
         self.content = content
+        self.collected = collected if type(collected) is datetime else datetime.fromisoformat(collected)
+        self.published = published if type(published) is datetime else datetime.fromisoformat(published)
         self.attributes = attributes
         self.osint_source_id = osint_source_id
 
@@ -177,10 +177,7 @@ class NewsItem(BaseModel):
     def get_by_filter(cls, filter, user):
         query = cls.query.distinct().group_by(NewsItem.id)
         query = query.join(NewsItemData, NewsItem.news_item_data_id == NewsItemData.id)
-        query = query.join(OSINTSourceGroupOSINTSource, OSINTSourceGroupOSINTSource.osint_source_id == OSINTSource.id)
         query = query.outerjoin(OSINTSource, NewsItemData.osint_source_id == OSINTSource.id)
-        if group := filter.get("group"):
-            query = query.filter(OSINTSourceGroupOSINTSource.osint_source_group_id == group)
 
         query = query.outerjoin(
             ACLEntry,
@@ -690,17 +687,17 @@ class NewsItemAggregate(BaseModel):
         return f"Added {len(news_items_data)} news items", 200
 
     @classmethod
-    def add_news_item(cls, news_item_data):
+    def add_news_item(cls, news_item_data) -> tuple[str, int]:
         news_item_data = NewsItemData.from_dict(news_item_data)
         if not news_item_data:
-            return
+            return "Invalid news item data", 400
         if not news_item_data.id:
             news_item_data.id = str(uuid.uuid4())
         db.session.add(news_item_data)
         cls.create_new_for_all_groups(news_item_data)
         db.session.commit()
 
-        return {news_item_data.osint_source_id}
+        return f"Added news item {news_item_data.id}", 201
 
     @classmethod
     def reassign_to_new_groups(cls, osint_source_id, default_group_id):

@@ -75,27 +75,12 @@ class User(BaseModel):
         items = [user.to_dict() for user in users]
         return {"total_count": count, "items": items}
 
-    @classmethod
-    def load_multiple(cls, json_data: list[dict[str, Any]]) -> list["User"]:
-        return [cls.from_dict(data) for data in json_data]
-
-    @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "User":
-        return cls(**data)
-
     def to_dict(self):
         data = {c.name: getattr(self, c.name) for c in self.__table__.columns if c.name != "password"}
         data["roles"] = [role.id for role in self.roles]
         data["permissions"] = [permission.id for permission in self.permissions]
         data["tag"] = "mdi-account"
         return data
-
-    @classmethod
-    def add_new(cls, data) -> tuple[str, int]:
-        user = cls.from_dict(data)
-        db.session.add(user)
-        db.session.commit()
-        return f"User {user.id} created", 201
 
     @classmethod
     def update(cls, user_id, data) -> tuple[str, int]:

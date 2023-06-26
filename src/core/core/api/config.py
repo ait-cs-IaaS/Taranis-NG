@@ -129,7 +129,7 @@ class ProductTypes(Resource):
 
     @auth_required("CONFIG_PRODUCT_TYPE_CREATE")
     def post(self):
-        product_type.ProductType.add_new(request.json)
+        product_type.ProductType.add(request.json)
 
 
 class ProductType(Resource):
@@ -184,7 +184,7 @@ class ACLEntries(Resource):
 
     @auth_required("CONFIG_ACL_CREATE")
     def post(self):
-        acl_entry.ACLEntry.add_new(request.json)
+        acl_entry.ACLEntry.add(request.json)
 
 
 class ACLEntry(Resource):
@@ -205,7 +205,7 @@ class Organizations(Resource):
 
     @auth_required("CONFIG_ORGANIZATION_CREATE")
     def post(self):
-        organization.Organization.add_new(request.json)
+        organization.Organization.add(request.json)
 
 
 class Organization(Resource):
@@ -227,9 +227,7 @@ class Users(Resource):
     @auth_required("CONFIG_USER_CREATE")
     def post(self):
         try:
-            if external_auth_manager.keycloak_user_management_enabled():
-                return external_auth_manager.create_user(request.json), 200
-            return user.User.add_new(request.json), 200
+            return user.User.add(request.json)
         except Exception:
             logger.exception()
             return "Could not create user", 400

@@ -36,8 +36,9 @@ class ManualOSINTSources(Resource):
 class AddNewsItem(Resource):
     @auth_required("ASSESS_CREATE")
     def post(self):
-        osint_source_ids = news_item.NewsItemAggregate.add_news_item(request.json)
+        ids, status = news_item.NewsItemAggregate.add_news_item(request.json)
         sse_manager.news_items_updated()
+        return ids, status
 
 
 class NewsItems(Resource):
@@ -49,15 +50,13 @@ class NewsItems(Resource):
             filter_keys = ["search" "read", "important", "relevant", "in_analyze", "range", "sort"]
             filter_args: dict[str, str | int] = {k: v for k, v in request.args.items() if k in filter_keys}
 
-            filter_args["group"] = request.args.get("group", osint_source.OSINTSourceGroup.get_default().id)
             filter_args["limit"] = min(int(request.args.get("limit", 20)), 200)
             page = int(request.args.get("page", 0))
             filter_args["offset"] = int(request.args.get("offset", page * filter_args["limit"]))
+            return news_item.NewsItem.get_by_filter_json(filter_args, user)
         except Exception as ex:
             logger.log_debug(ex)
-            return "", 400
-
-        return news_item.NewsItem.get_by_filter_json(filter_args, user)
+            return "Failed to get Newsitems", 400
 
 
 class NewsItemAggregates(Resource):

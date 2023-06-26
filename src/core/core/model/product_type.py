@@ -54,7 +54,7 @@ class ProductType(BaseModel):
         return query.scalar() is not None
 
     @classmethod
-    def get(cls, search, user, acl_check):
+    def get_by_filter(cls, search, user, acl_check):
         query = cls.query.distinct().group_by(ProductType.id)
 
         if acl_check:
@@ -79,7 +79,7 @@ class ProductType(BaseModel):
 
     @classmethod
     def get_all_json(cls, search, user, acl_check):
-        product_types, count = cls.get(search, user, acl_check)
+        product_types, count = cls.get_by_filter(search, user, acl_check)
         items = [product_type.to_dict() for product_type in product_types]
         return {"total_count": count, "items": items}
 

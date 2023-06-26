@@ -256,7 +256,7 @@ def collector_manager(
             abort()
 
         collectors = collector.Collector.load_multiple(collectors_info)
-        node = collectors_node.CollectorsNode.add_new(data, collectors)
+        node = collectors_node.CollectorsNode.add(data, collectors)
         collectors_info, status_code = CollectorsApi(api_url, api_key).get_collectors_info(node.id)
 
         print("Collector node '{}' with id {} created.".format(name, node.id))
@@ -287,12 +287,12 @@ def collector_manager(
                 app.logger.critical("Collector node does not exit!")
                 abort()
         elif name:
-            nodes, count = collectors_node.CollectorsNode.get(name)
+            nodes, count = collectors_node.CollectorsNode.get_by_filter(name)
             if not count:
                 app.logger.critical("Collector node does not exit!")
                 abort()
         else:
-            nodes, count = collectors_node.CollectorsNode.get(None)
+            nodes, count = collectors_node.CollectorsNode.get_by_filter(None)
             if not count:
                 app.logger.critical("No collector nodes exist!")
                 abort()
@@ -326,7 +326,7 @@ def collector_manager(
                 abort()
 
             collectors = collector.Collector.load_multiple(collectors_info)
-            node = collectors_node.CollectorsNode.add_new(data, collectors)
+            node = collectors_node.CollectorsNode.add(data, collectors)
             collectors_info, status_code = CollectorsApi(opt_api_url, opt_api_key).get_collectors_info(node.id)
 
             print("Collector node '{}' with id {} created.".format(opt_name, node.id))
@@ -357,7 +357,7 @@ def collector_manager(
                     app.logger.critical("Collector node does not exit!")
                     abort()
             elif opt_name:
-                nodes, count = collectors_node.CollectorsNode.get(opt_name)
+                nodes, count = collectors_node.CollectorsNode.get_by_filter(opt_name)
                 if not count:
                     app.logger.critical("Collector node does not exit!")
                     abort()

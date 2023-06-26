@@ -7,18 +7,20 @@ def fake_source(app):
         from core.model.osint_source import OSINTSource
 
         ossi = {
+            "id": "fake-source-id",
             "description": "",
             "name": "Some Bind",
             "parameter_values": [
                 {
                     "value": "https://www.some.bind.it/SiteGlobals/Functions/RSSFeed/RSSNewsfeed/RSSNewsfeed.xml",
-                    "parameter": {"key": "FEED_URL"},
+                    "parameter_key": "FEED_URL",
                 },
             ],
             "collector": {"type": "RSS_COLLECTOR"},
         }
 
-        yield OSINTSource.import_new(OSINTSource.from_dict(ossi))
+        OSINTSource.add(ossi)
+        yield ossi["id"]
 
 
 @pytest.fixture
@@ -47,7 +49,6 @@ def news_items_data(app, fake_source):
                 "source": "https: //www.content.xxxx.link/RSSNewsfeed.xml",
                 "title": "Bundesinnenministerin Nancy Faeser wird Claudia Plattner zur neuen BSI-Präsidentin berufen",
                 "author": "",
-                "likes": 0,
                 "collected": "2023-01-20T15:00:14.086285",
                 "hash": "e270c3a7d87051dea6c3dc14234451f884b427c32791862dacdd7a3e3d318da6",
                 "attributes": [],
@@ -64,7 +65,7 @@ def news_items_data(app, fake_source):
 @pytest.fixture
 def news_item_aggregates(app, request, news_items_data):
     with app.app_context():
-        from core.model.news_item import NewsItemAggregate, NewsItem
+        from core.model.news_item import NewsItemAggregate
         from core.model.user import User
         from core.managers.db_manager import db
 
@@ -91,6 +92,7 @@ class TestAssessApi(object):
         assert response.content_type == "application/json"
         assert response.data
         assert response.status_code == 200
+        return response
 
     def assert_get_failed(self, client, uri):
         response = client.get(uri)
@@ -98,13 +100,15 @@ class TestAssessApi(object):
         assert response.content_type == "application/json"
         assert response.get_json()["error"] == "not authorized"
         assert response.status_code == 401
+        return response
 
     def test_get_OSINTSourceGroupsAssess_auth(self, client, auth_header):
         """
         This test queries the OSINTSourceGroupsAssess authenticated.
         It expects a valid data and a valid status-code
         """
-        self.assert_get_ok(client, "/api/v1/assess/osint-source-groups", auth_header)
+        response = self.assert_get_ok(client, "/api/v1/assess/osint-source-groups", auth_header)
+        assert response.get_json()["items"][0]["id"] == "default"
 
     def test_get_OSINTSourceGroupsAssess_unauth(self, client):
         """
@@ -271,6 +275,7 @@ class TestAssessApi(object):
         assert response.data
         assert response.content_type == "application/json"
         assert response.status_code == 200
+        print(response.get_json())
         assert len(response.get_json()["items"]) == 2
 
     def test_get_NewsItemAggregatesTags_unauth(self, client):

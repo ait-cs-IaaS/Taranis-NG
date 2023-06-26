@@ -29,7 +29,7 @@ class OSINTSource(BaseModel):
     state = db.Column(db.SmallInteger, default=0)
     last_error_message = db.Column(db.String, default=None)
 
-    def __init__(self, name, description, collector_id, parameter_values, word_lists, osint_source_groups, id=None):
+    def __init__(self, name, description, collector_id, parameter_values, word_lists=None, osint_source_groups=None, id=None):
         self.id = id or str(uuid.uuid4())
         self.name = name
         self.description = description
@@ -37,7 +37,8 @@ class OSINTSource(BaseModel):
         self.parameter_values = parameter_values
 
         self.word_lists = []
-        self.word_lists.extend(WordList.get(word_list.id) for word_list in word_lists)
+        if word_lists:
+            self.word_lists.extend(WordList.get(word_list.id) for word_list in word_lists)
         self.osint_source_groups = (
             [OSINTSourceGroup.get_default()]
             if osint_source_groups is None
@@ -75,9 +76,7 @@ class OSINTSource(BaseModel):
         parameter_values = [ParameterValue.from_dict(parameter_value) for parameter_value in data.pop("parameter_values", [])]
         word_lists = [WordList.get(word_list_id) for word_list_id in data.pop("word_lists", [])]
         collector_type = data.pop("collector")["type"]
-        logger.debug(f"Loading OSINTSource with collector type {collector_type}")
         collector = Collector.find_by_type(collector_type)
-        logger.debug(f"Loaded collector {collector}")
         collector_id = collector.id
         return cls(parameter_values=parameter_values, word_lists=word_lists, collector_id=collector_id, **data)
 
@@ -119,39 +118,6 @@ class OSINTSource(BaseModel):
     def get_all_for_collector(cls, collector):
         sources = cls.query.filter_by(collector_type=collector).all()
         return [source.to_dict() for source in sources]
-
-    @classmethod
-    def add_new(cls, data):
-        osint_source = cls.from_dict(data)
-        db.session.add(osint_source)
-        db.session.commit()
-        return f"Successfully Added {osint_source.id}", 201
-
-    @classmethod
-    def import_new(cls, osint_source) -> str:
-        collector = Collector.find_by_type(osint_source.collector.type)
-        parameter_values = []
-        for parameter_value in osint_source.parameter_values:
-            for parameter in collector.parameters:
-                pv_key = parameter_value["parameter"] if type(parameter_value["parameter"]) == str else parameter_value["parameter"].key
-                if parameter.key == pv_key:
-                    new_parameter_value = ParameterValue(parameter_value["value"], parameter.key)
-                    parameter_values.append(new_parameter_value)
-                    break
-        source_id = str(uuid.uuid4())
-        news_osint_source = OSINTSource(
-            source_id,
-            osint_source.name,
-            osint_source.description,
-            collector.id,
-            parameter_values,
-            [],
-            [],
-        )
-
-        db.session.add(news_osint_source)
-        db.session.commit()
-        return source_id
 
     @classmethod
     def update(cls, osint_source_id, data):

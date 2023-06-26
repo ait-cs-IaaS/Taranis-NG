@@ -25,7 +25,7 @@ def get_collectors_info(node: CollectorsNode):
 
 
 def update_collectors_node(node_id, data):
-    node = CollectorsNode.get(node_id)
+    node = CollectorsNode.get_by_filter(node_id)
     collectors, status_code = get_collectors_info(node)
     if status_code != 200:
         return collectors, status_code
@@ -40,7 +40,7 @@ def update_collectors_node(node_id, data):
 
 
 def add_osint_source(data):
-    osint_source = OSINTSource.add_new(data)
+    osint_source = OSINTSource.add(data)
     refresh_collector(osint_source.collector)
 
 

@@ -34,7 +34,7 @@ def add_publishers_node(data):
 
     try:
         publishers = Publisher.load_multiple(publishers_info)
-        PublishersNode.add_new(data, publishers)
+        PublishersNode.add(data, publishers)
     except Exception:
         logger.log_debug_trace(f"Couldn't add Publisher Node: {node.name}")
         return f"Couldn't add Publisher Node: {node.name}", 500

@@ -59,14 +59,6 @@ class Organization(BaseModel):
         return cls(address=address, **data)
 
     @classmethod
-    def add_new(cls, data):
-        address = Address.from_dict(data.pop("address"))
-        organization = cls.from_dict(data)
-        organization.address = address
-        db.session.add(organization)
-        db.session.commit()
-
-    @classmethod
     def update(cls, organization_id, data) -> tuple[str, int]:
         organization = cls.query.get(organization_id)
         if organization is None:
