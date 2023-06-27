@@ -1,5 +1,6 @@
 from sqlalchemy import or_
 import uuid
+from typing import Any
 
 from core.managers.db_manager import db
 from core.model.parameter import Parameter
@@ -58,6 +59,15 @@ class Collector(BaseModel):
         collectors, count = cls.get_by_filter(search)
         items = [collector.to_dict() for collector in collectors]
         return {"total_count": count, "items": items}
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "id": self.id,
+            "name": self.name,
+            "description": self.description,
+            "type": self.type,
+            "parameters": [parameter.to_dict() for parameter in self.parameters],
+        }
 
 
 class CollectorParameter(BaseModel):

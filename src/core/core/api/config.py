@@ -55,7 +55,8 @@ class Attributes(Resource):
 
     @auth_required("CONFIG_ATTRIBUTE_CREATE")
     def post(self):
-        attribute.Attribute.add(request.json)
+        attribute = attribute.Attribute.add(request.json)
+        return {"message": "Attribute added", "id": attribute.id}, 201
 
 
 class Attribute(Resource):
@@ -82,7 +83,8 @@ class AttributeEnums(Resource):
 
     @auth_required("CONFIG_ATTRIBUTE_UPDATE")
     def post(self, attribute_id):
-        attribute.AttributeEnum.add(attribute_id, request.json)
+        attribute = attribute.AttributeEnum.add(attribute_id, request.json)
+        return {"message": "Attribute enum added", "id": attribute.id}, 201
 
 
 class AttributeEnum(Resource):
@@ -129,13 +131,14 @@ class ProductTypes(Resource):
 
     @auth_required("CONFIG_PRODUCT_TYPE_CREATE")
     def post(self):
-        product_type.ProductType.add(request.json)
+        product = product_type.ProductType.add(request.json)
+        return {"message": "Product type created", "id": product.id}, 201
 
 
 class ProductType(Resource):
     @auth_required("CONFIG_PRODUCT_TYPE_UPDATE")
     def put(self, type_id):
-        product_type.ProductType.update(type_id, request.json)
+        return product_type.ProductType.update(type_id, request.json)
 
     @auth_required("CONFIG_PRODUCT_TYPE_DELETE")
     def delete(self, type_id):
@@ -163,7 +166,8 @@ class Roles(Resource):
 
     @auth_required("CONFIG_ROLE_CREATE")
     def post(self):
-        role.Role.add(request.json)
+        role = role.Role.add(request.json)
+        return {"message": "Role created", "id": role.id}, 201
 
 
 class Role(Resource):
@@ -184,7 +188,8 @@ class ACLEntries(Resource):
 
     @auth_required("CONFIG_ACL_CREATE")
     def post(self):
-        acl_entry.ACLEntry.add(request.json)
+        acl = acl_entry.ACLEntry.add(request.json)
+        return {"message": "ACL created", "id": acl.id}, 201
 
 
 class ACLEntry(Resource):
@@ -205,7 +210,8 @@ class Organizations(Resource):
 
     @auth_required("CONFIG_ORGANIZATION_CREATE")
     def post(self):
-        organization.Organization.add(request.json)
+        org = organization.Organization.add(request.json)
+        return {"message": "Organization created", "id": org.id}, 201
 
 
 class Organization(Resource):
@@ -227,7 +233,8 @@ class Users(Resource):
     @auth_required("CONFIG_USER_CREATE")
     def post(self):
         try:
-            return user.User.add(request.json)
+            user = user.User.add(request.json)
+            return {"message": "User created", "id": user.id}, 201
         except Exception:
             logger.exception()
             return "Could not create user", 400
@@ -270,7 +277,7 @@ class ExternalUsers(Resource):
 
     @auth_required("MY_ASSETS_CONFIG")
     def post(self):
-        user.User.add_new_external(auth_manager.get_user_from_jwt(), request.json)
+        return user.User.add_new_external(auth_manager.get_user_from_jwt(), request.json)
 
 
 class ExternalUser(Resource):
@@ -291,7 +298,8 @@ class WordLists(Resource):
 
     @auth_required("CONFIG_WORD_LIST_CREATE")
     def post(self):
-        word_list.WordList.add(request.json)
+        wordlist = word_list.WordList.add(request.json)
+        return {"id": wordlist.id, "message": "Word list created successfully"}, 200
 
 
 class WordList(Resource):
@@ -332,7 +340,8 @@ class CollectorsNodes(Resource):
 
     @auth_required("CONFIG_COLLECTORS_NODE_CREATE")
     def post(self):
-        return collectors_node.CollectorsNode.add(request.json)
+        node = collectors_node.CollectorsNode.add(request.json)
+        return {"id": node.id, "message": "Node created successfully"}, 200
 
     @auth_required("CONFIG_COLLECTORS_NODE_UPDATE")
     def put(self, node_id):
@@ -358,13 +367,14 @@ class OSINTSources(Resource):
 
     @auth_required("CONFIG_OSINT_SOURCE_CREATE")
     def post(self):
-        collectors_manager.add_osint_source(request.json)
+        source = collectors_manager.add_osint_source(request.json)
+        return {"id": source.id, "message": "OSINT source created successfully"}, 200
 
 
 class OSINTSource(Resource):
     @auth_required("CONFIG_OSINT_SOURCE_ACCESS")
     def get(self, source_id):
-        return osint_source.OSINTSource.get(source_id)
+        return osint_source.OSINTSource.get(source_id).to_dict()
 
     @auth_required("CONFIG_OSINT_SOURCE_UPDATE")
     def put(self, source_id):
@@ -374,7 +384,7 @@ class OSINTSource(Resource):
 
     @auth_required("CONFIG_OSINT_SOURCE_DELETE")
     def delete(self, source_id):
-        collectors_manager.delete_osint_source(source_id)
+        return collectors_manager.delete_osint_source(source_id)
 
 
 class OSINTSourceRefresh(Resource):
@@ -401,7 +411,11 @@ class OSINTSourcesImport(Resource):
     @auth_required("CONFIG_OSINT_SOURCE_CREATE")
     def post(self):
         if file := request.files.get("file"):
-            collectors_manager.import_osint_sources(file)
+            sources = collectors_manager.import_osint_sources(file)
+            if sources is None:
+                return "Unable to import", 400
+            return {"sources": [source.id for source in sources], "count": len(sources), "message": "Successfully imported sources"}
+        return "No file provided", 400
 
 
 class OSINTSourceGroups(Resource):
@@ -412,7 +426,8 @@ class OSINTSourceGroups(Resource):
 
     @auth_required("CONFIG_OSINT_SOURCE_GROUP_CREATE")
     def post(self):
-        osint_source.OSINTSourceGroup.add(request.json)
+        source_group = osint_source.OSINTSourceGroup.add(request.json)
+        return {"id": source_group.id, "message": "OSINT source group created successfully"}, 200
 
 
 class OSINTSourceGroup(Resource):
@@ -433,7 +448,8 @@ class RemoteAccesses(Resource):
 
     @auth_required("CONFIG_REMOTE_ACCESS_CREATE")
     def post(self):
-        remote.RemoteAccess.add(request.json)
+        remote = remote.RemoteAccess.add(request.json)
+        return {"id": remote.id, "message": "Remote access created successfully"}, 200
 
 
 class RemoteAccess(Resource):
@@ -454,7 +470,8 @@ class RemoteNodes(Resource):
 
     @auth_required("CONFIG_REMOTE_ACCESS_CREATE")
     def post(self):
-        remote.RemoteNode.add(request.json)
+        remote = remote.RemoteNode.add(request.json)
+        return {"id": remote.id, "message": "Remote node created successfully"}, 200
 
 
 class RemoteNode(Resource):
@@ -495,7 +512,8 @@ class PresentersNodes(Resource):
 
     @auth_required("CONFIG_PRESENTERS_NODE_CREATE")
     def post(self):
-        return "", presenters_node.PresentersNode.add(request.json)
+        presenter = presenters_node.PresentersNode.add(request.json)
+        return {"id": presenter.id, "message": "Presenters node created successfully"}, 200
 
     @auth_required("CONFIG_PRESENTERS_NODE_UPDATE")
     def put(self, node_id):
@@ -514,7 +532,8 @@ class PublisherNodes(Resource):
 
     @auth_required("CONFIG_PUBLISHERS_NODE_CREATE")
     def post(self):
-        return "", publishers_manager.add_publishers_node(request.json)
+        publisher = publishers_manager.add_publishers_node(request.json)
+        return {"id": publisher.id, "message": "Publishers node created successfully"}, 200
 
     @auth_required("CONFIG_PUBLISHERS_NODE_UPDATE")
     def put(self, node_id):
@@ -533,7 +552,8 @@ class PublisherPresets(Resource):
 
     @auth_required("CONFIG_PUBLISHER_PRESET_CREATE")
     def post(self):
-        publishers_manager.add_publisher_preset(request.json)
+        publisher = publishers_manager.add_publisher_preset(request.json)
+        return {"id": publisher.id, "message": "Publisher preset created successfully"}, 200
 
 
 class PublisherPreset(Resource):
@@ -569,11 +589,12 @@ class BotNodes(Resource):
 
     @auth_required("CONFIG_BOTS_NODE_CREATE")
     def post(self):
-        return bots_node.BotsNode.add(request.json)
+        bot = bots_node.BotsNode.add(request.json)
+        return {"id": bot.id, "message": "Bots node created successfully"}, 200
 
     @auth_required("CONFIG_BOTS_NODE_UPDATE")
     def put(self, node_id):
-        bots_manager.update_bots_node(node_id, request.json)
+        return bots_manager.update_bots_node(node_id, request.json)
 
     @auth_required("CONFIG_BOTS_NODE_DELETE")
     def delete(self, node_id):

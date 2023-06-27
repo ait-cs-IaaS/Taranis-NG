@@ -21,19 +21,15 @@ class BaseModel(db.Model):
         return f"{cls.__name__} {id} not found", 404
 
     @classmethod
-    def add(cls, data) -> tuple[str, int]:
+    def add(cls, data) -> T:
         item = cls.from_dict(data)
         db.session.add(item)
         db.session.commit()
-        return f"{cls.__name__} {item.id} created", 201
+        return item
 
     @classmethod
-    def add_multiple(cls, data) -> tuple[str, int]:
-        items = cls.load_multiple(data)
-        for item in items:
-            db.session.add(item)
-        db.session.commit()
-        return f"{cls.__name__} {len(items)} items created", 201
+    def add_multiple(cls, json_data) -> tuple[list[T]]:
+        return [cls.add(data) for data in json_data]
 
     @classmethod
     def from_dict(cls: Type[T], data: dict[str, Any]) -> T:

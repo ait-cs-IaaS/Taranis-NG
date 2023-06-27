@@ -13,7 +13,7 @@ def fake_source(app):
             "parameter_values": [
                 {
                     "value": "https://www.some.bind.it/SiteGlobals/Functions/RSSFeed/RSSNewsfeed/RSSNewsfeed.xml",
-                    "parameter_key": "FEED_URL",
+                    "parameter": "FEED_URL",
                 },
             ],
             "collector": {"type": "RSS_COLLECTOR"},

@@ -28,7 +28,7 @@
             :required="item.required"
             :disabled="item['disabled']"
             :type="item.type"
-          ></v-text-field>
+          />
         </v-col>
         <v-textarea
           v-if="item.type === 'textarea'"
@@ -37,7 +37,7 @@
           :required="item.required"
           :disabled="item['disabled']"
           :type="item.type"
-        ></v-textarea>
+        />
         <v-select
           v-if="item.type === 'select' && item.options"
           v-model="formData[item.name]"
@@ -45,7 +45,7 @@
           :required="item.required"
           :disabled="item['disabled']"
           :items="item.options"
-        ></v-select>
+        />
         <v-switch
           v-if="item.type === 'switch'"
           v-model="formData[item.name]"
@@ -53,7 +53,7 @@
           :disabled="item['disabled']"
           true-value="true"
           false-value="false"
-        ></v-switch>
+        />
 
         <v-col
           v-if="item.type === 'table' && item.items !== undefined"

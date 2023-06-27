@@ -56,7 +56,7 @@ class RSSCollector(BaseCollector):
         feed_url = source["parameter_values"].get("FEED_URL", None)
         if not feed_url:
             logger.warning("No FEED_URL set")
-            return
+            return "No FEED_URL set"
 
         logger.log_collector_activity("rss", source["id"], f"Starting collector for url: {feed_url}")
 
@@ -68,8 +68,10 @@ class RSSCollector(BaseCollector):
         except Exception:
             logger.exception()
             logger.collector_exception(source, "Could not collect RSS Feed")
+            return "Could not collect RSS Feed"
 
         logger.log_debug(f"{self.type} collection finished.")
+        return None
 
     def content_from_feed(self, feed_entry, content_location: str) -> tuple[bool, str]:
         content_locations = [content_location, "content", "content:encoded"]

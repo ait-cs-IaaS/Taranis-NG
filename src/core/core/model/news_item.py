@@ -639,21 +639,20 @@ class NewsItemAggregate(BaseModel):
 
     @classmethod
     def create_new_for_all_groups(cls, news_item_data):
-        groups = OSINTSourceGroup.get_for_osint_source(news_item_data.osint_source_id)
-        for group in groups:
-            news_item = NewsItem()
-            news_item.news_item_data = news_item_data
-            db.session.add(news_item)
+        group = OSINTSourceGroup.get_for_osint_source(news_item_data.osint_source_id)[0]
+        news_item = NewsItem()
+        news_item.news_item_data = news_item_data
+        db.session.add(news_item)
 
-            aggregate = NewsItemAggregate()
-            aggregate.title = news_item_data.title
-            aggregate.description = news_item_data.review
-            aggregate.created = news_item_data.published
-            aggregate.osint_source_group_id = group.id
-            aggregate.news_items.append(news_item)
-            db.session.add(aggregate)
+        aggregate = NewsItemAggregate()
+        aggregate.title = news_item_data.title
+        aggregate.description = news_item_data.review
+        aggregate.created = news_item_data.published
+        aggregate.osint_source_group_id = group.id
+        aggregate.news_items.append(news_item)
+        db.session.add(aggregate)
 
-            NewsItemAggregateSearchIndex.prepare(aggregate)
+        NewsItemAggregateSearchIndex.prepare(aggregate)
 
     @classmethod
     def create_new_for_group(cls, news_item_data, osint_source_group_id):

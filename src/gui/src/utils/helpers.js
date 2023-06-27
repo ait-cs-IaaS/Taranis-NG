@@ -109,10 +109,14 @@ export function parseSubmittedParameterValues(unparsed_sources, data) {
 }
 
 export function createParameterValues(parameters, data) {
-  data.parameter_values = parameters.map((param) => ({
-    parameter: param,
-    value: data[param] || ''
-  }))
+  data.parameter_values = parameters.map((param) => {
+    const value = {
+      parameter: param,
+      value: data[param] || ''
+    }
+    delete data[param]
+    return value
+  })
   return data
 }
 

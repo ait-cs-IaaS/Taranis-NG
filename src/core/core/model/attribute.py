@@ -131,6 +131,9 @@ class AttributeEnum(BaseModel):
         data["attribute"] = self.attribute.to_dict()
         return data
 
+    def to_small_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 
 class Attribute(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
@@ -301,6 +304,6 @@ class Attribute(BaseModel):
             for c in self.__table__.columns
         }
         attribute_enums = AttributeEnum.get_all_for_attribute(self.id)
-        data["attribute_enums"] = [attribute_enum.to_dict() for attribute_enum in attribute_enums]
+        data["attribute_enums"] = [attribute_enum.to_small_dict() for attribute_enum in attribute_enums]
         data["tag"] = self.get_tag()
         return data

@@ -6,7 +6,6 @@ from core.model.collectors_node import CollectorsNode
 from core.model.osint_source import OSINTSource
 from core.remote.collectors_api import CollectorsApi
 from core.managers.log_manager import logger
-from shared.schema.osint_source import OSINTSourceExportRootSchema, OSINTSourceExportRoot
 
 
 def get_collectors_info(node: CollectorsNode):
@@ -25,7 +24,7 @@ def get_collectors_info(node: CollectorsNode):
 
 
 def update_collectors_node(node_id, data):
-    node = CollectorsNode.get_by_filter(node_id)
+    node = CollectorsNode.get(node_id)
     collectors, status_code = get_collectors_info(node)
     if status_code != 200:
         return collectors, status_code
@@ -41,29 +40,33 @@ def update_collectors_node(node_id, data):
 
 def add_osint_source(data):
     osint_source = OSINTSource.add(data)
-    refresh_collector(osint_source.collector)
+    refresh_collector(osint_source.collector_id)
+    return f"OSINT Source {osint_source.name} added", 201
 
 
 def update_osint_source(osint_source_id, data):
     osint_source, default_group = OSINTSource.update(osint_source_id, data)
-    refresh_collector(osint_source.collector)
+    refresh_collector(osint_source.collector_id)
     return osint_source, default_group
 
 
 def delete_osint_source(osint_source_id):
     osint_source = OSINTSource.get(osint_source_id)
-    collector = osint_source.collector
-    OSINTSource.delete(osint_source_id)
-    refresh_collector(collector)
+    if not osint_source:
+        return f"OSINT Source with ID: {osint_source_id} not found", 404
+    OSINTSource.delete(osint_source.id)
+    refresh_collector(osint_source.collector_id)
+    return f"OSINT Source {osint_source.name} deleted", 200
 
 
 def refresh_osint_source(osint_source_id):
     osint_source = OSINTSource.get(osint_source_id)
-    refresh_collector(osint_source.collector)
+    refresh_collector(osint_source.collector_id)
 
 
-def refresh_collector(collector):
+def refresh_collector(collector_id):
     try:
+        collector = Collector.get(collector_id)
         if node := CollectorsNode.get_first():
             CollectorsApi(node.api_url, node.api_key).refresh_collector(collector.type)
     except ConnectionError:
@@ -81,9 +84,7 @@ def refresh_collectors():
 def export_osint_sources():
     data = OSINTSource.get_all()
     data = cleanup_paramaters(data)
-    export_data = OSINTSourceExportRootSchema().dump(OSINTSourceExportRoot(1, data))
-    if "data" not in export_data:
-        return None
+    export_data = {"version": 2, "data": [osint_source.to_json() for osint_source in data]}
     return json.dumps(export_data).encode("utf-8")
 
 
@@ -95,7 +96,15 @@ def cleanup_paramaters(osint_sources: list) -> list:
     return osint_sources
 
 
+def parse_version_1(data: list) -> list:
+    for source in data:
+        for parameter in source["parameter_values"]:
+            parameter["parameter"] = parameter["parameter"]["key"]
+    return data
+
+
 def import_osint_sources(file):
     file_data = file.read()
     json_data = json.loads(file_data.decode("utf8"))
-    return OSINTSource.load_multiple(json_data)
+    data = parse_version_1(json_data["data"]) if json_data["version"] == 1 else json_data["data"]
+    return OSINTSource.add_multiple(data)

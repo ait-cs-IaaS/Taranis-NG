@@ -49,16 +49,13 @@ class CollectorsNode(BaseModel):
         return query.order_by(db.asc(CollectorsNode.name)).all(), query.count()
 
     @classmethod
-    def get_by_id(cls, id):
-        return cls.query.filter_by(id=id).first()
-
-    @classmethod
     def get_first(cls):
         return cls.query.first()
 
     @classmethod
     def get_json_by_id(cls, id):
-        return cls.get_by_id(id).to_dict()
+        node = cls.get(id)
+        return node.to_dict() if node else None
 
     @classmethod
     def get_all_json(cls, search):

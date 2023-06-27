@@ -13,10 +13,10 @@ class ParameterValue(BaseModel):
     parameter_key = db.Column(db.String(), db.ForeignKey("parameter.key"))
     parameter = db.relationship("Parameter")
 
-    def __init__(self, value, parameter_key):
+    def __init__(self, value, parameter):
         self.id = None
         self.value = value
-        self.parameter_key = parameter_key
+        self.parameter_key = parameter
 
     def to_dict(self) -> dict[str, Any]:
         data = super().to_dict()

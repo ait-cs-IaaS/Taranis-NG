@@ -21,8 +21,9 @@ class AddNewsItems(Resource):
     @api_key_required
     def post(self):
         json_data = request.json
-        osint_source_ids = news_item.NewsItemAggregate.add_news_items(json_data)
+        result, status = news_item.NewsItemAggregate.add_news_items(json_data)
         sse_manager.news_items_updated()
+        return result, status
 
 
 class CollectorsNode(Resource):
@@ -36,11 +37,28 @@ class CollectorsNode(Resource):
 
     @api_key_required
     def post(self):
-        return collectors_node.CollectorsNode.add(request.json)
+        node = collectors_node.CollectorsNode.add(request.json)
+        return {"id": node.id, "message": "Successful added"}, 201
 
     @api_key_required
     def delete(self, node_id):
-        collectors_node.CollectorsNode.delete(node_id)
+        return collectors_node.CollectorsNode.delete(node_id)
+
+
+class OSINTSourceStatusUpdate(Resource):
+    @api_key_required
+    def put(self, osint_source_id):
+        try:
+            source = osint_source.OSINTSource.get(osint_source_id)
+            if not source:
+                return {"error": f"OSINTSource with ID: {osint_source_id} not found"}, 404
+
+            error = request.json.get("error", None)
+            source.update_status(error)
+            return {"message": "Status updated"}
+        except Exception:
+            logger.log_debug_trace()
+            return {"error": "Could not update status"}, 500
 
 
 def initialize(api):
@@ -49,6 +67,11 @@ def initialize(api):
         OSINTSourcesForCollectors,
         "/osint-sources/<string:collector_type>",
     )
+    namespace.add_resource(
+        OSINTSourceStatusUpdate,
+        "/osint-source/<string:osint_source_id>",
+    )
+
     namespace.add_resource(AddNewsItems, "/news-items")
     namespace.add_resource(CollectorsNode, "/node/<string:node_id>", "/node")
     api.add_namespace(namespace)

@@ -96,6 +96,7 @@ class ProductType(BaseModel):
                     value.value = updated_value.value
 
         db.session.commit()
+        return product_type.id
 
     def to_dict(self) -> dict[str, Any]:
         data = super().to_dict()

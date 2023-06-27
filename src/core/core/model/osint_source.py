@@ -29,7 +29,7 @@ class OSINTSource(BaseModel):
     state = db.Column(db.SmallInteger, default=0)
     last_error_message = db.Column(db.String, default=None)
 
-    def __init__(self, name, description, collector_id, parameter_values, word_lists=None, osint_source_groups=None, id=None):
+    def __init__(self, name, description, collector_id, parameter_values, word_lists=None, id=None):
         self.id = id or str(uuid.uuid4())
         self.name = name
         self.description = description
@@ -39,11 +39,6 @@ class OSINTSource(BaseModel):
         self.word_lists = []
         if word_lists:
             self.word_lists.extend(WordList.get(word_list.id) for word_list in word_lists)
-        self.osint_source_groups = (
-            [OSINTSourceGroup.get_default()]
-            if osint_source_groups is None
-            else [OSINTSourceGroup.get(osint_source_group.id) for osint_source_group in osint_source_groups]
-        )
 
     @classmethod
     def get_all(cls):
@@ -75,9 +70,12 @@ class OSINTSource(BaseModel):
     def from_dict(cls, data: dict[str, Any]) -> "OSINTSource":
         parameter_values = [ParameterValue.from_dict(parameter_value) for parameter_value in data.pop("parameter_values", [])]
         word_lists = [WordList.get(word_list_id) for word_list_id in data.pop("word_lists", [])]
-        collector_type = data.pop("collector")["type"]
-        collector = Collector.find_by_type(collector_type)
-        collector_id = collector.id
+        if "collector" in data:
+            collector_type = data.pop("collector")["type"]
+            collector = Collector.find_by_type(collector_type)
+            collector_id = collector.id
+        else:
+            collector_id = data.pop("collector_id")
         return cls(parameter_values=parameter_values, word_lists=word_lists, collector_id=collector_id, **data)
 
     def to_dict(self):
@@ -120,6 +118,14 @@ class OSINTSource(BaseModel):
         return [source.to_dict() for source in sources]
 
     @classmethod
+    def add(cls, data):
+        osint_source = cls.from_dict(data)
+        db.session.add(osint_source)
+        OSINTSourceGroup.add_source_to_default(osint_source)
+        db.session.commit()
+        return osint_source
+
+    @classmethod
     def update(cls, osint_source_id, data):
         osint_source = cls.query.get(osint_source_id)
         updated_osint_source = cls.from_dict(data)
@@ -132,39 +138,20 @@ class OSINTSource(BaseModel):
                     value.value = updated_value.value
 
         osint_source.word_lists = updated_osint_source.word_lists
-
-        current_groups = OSINTSourceGroup.get_for_osint_source(osint_source_id)
-        default_group = None
-        for group in current_groups:
-            if group.default:
-                default_group = group
-
-            for source in group.osint_sources:
-                if source.id == osint_source_id:
-                    group.osint_sources.remove(source)
-                    break
-
-        if len(updated_osint_source.osint_source_groups) > 0:
-            for osint_source_group in updated_osint_source.osint_source_groups:
-                osint_source_group.osint_sources.append(osint_source)
-        else:
-            default_group = OSINTSourceGroup.get_default()
-            default_group.osint_sources.append(osint_source)
-
         db.session.commit()
 
-        return osint_source, default_group
+        return osint_source
 
-    def update_status(self, status_schema):
-        # if not collected, do not change last collected timestamp
-        if status_schema.last_collected:
-            self.last_collected = status_schema.last_collected
-
-        # if not attempted, do not change last collected timestamp
-        if status_schema.last_attempted:
-            self.last_attempted = status_schema.last_attempted
-
-        self.last_error_message = status_schema.last_error_message
+    def update_status(self, error_message=None):
+        logger.debug(f"Updating status for {self.id} with error message {error_message}")
+        self.last_attempted = datetime.now()
+        if error_message is None:
+            self.last_collected = datetime.now()
+            self.state = 0
+        else:
+            self.state = 1
+        self.last_error_message = error_message
+        db.session.commit()
 
 
 class OSINTSourceParameterValue(BaseModel):
@@ -211,6 +198,12 @@ class OSINTSourceGroup(BaseModel):
         return cls.query.filter(OSINTSourceGroup.default).first()
 
     @classmethod
+    def add_source_to_default(cls, osint_source: OSINTSource):
+        default_group = cls.get_default()
+        default_group.osint_sources.append(osint_source)
+        db.session.commit()
+
+    @classmethod
     def allowed_with_acl(cls, group_id, user, see: bool, access: bool, modify: bool) -> bool:
         query = db.session.query(OSINTSourceGroup.id).distinct().group_by(OSINTSourceGroup.id).filter(OSINTSourceGroup.id == group_id)
 
@@ -238,7 +231,6 @@ class OSINTSourceGroup(BaseModel):
             query = ACLEntry.apply_query(query, user, True, False, False)
 
         if search:
-            search_string = f"%{search}%"
             query = query.filter(
                 or_(
                     OSINTSourceGroup.name.ilike(f"%{search}%"),
@@ -261,13 +253,6 @@ class OSINTSourceGroup(BaseModel):
         data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
         data["osint_sources"] = [osint_source.id for osint_source in self.osint_sources]
         return data
-
-    @classmethod
-    def add(cls, data):
-        osint_source_group = cls.from_dict(data)
-        db.session.add(osint_source_group)
-        db.session.commit()
-        return f"Successfully Added {osint_source_group.id}", 201
 
     @classmethod
     def create(cls, group_id, name, description, default=False):

@@ -86,6 +86,7 @@ class BaseCollector:
                 item.hash = hashlib.sha256(for_hash.encode()).hexdigest()
 
     def publish(self, news_items, source):
+        logger.debug(f"Publishing {len(news_items)} news items to core api")
         self.sanitize_news_items(news_items, source)
         if "word_lists" in source:
             news_items = self.filter_by_word_list(news_items, source)
@@ -102,7 +103,8 @@ class BaseCollector:
                 return
 
             for source in self.osint_sources:
-                self.collect(source)
+                collect_status = self.collect(source)
+                self.core_api.update_osintsource_status(source['id'], collect_status)
 
         except Exception:
             logger.log_debug_trace()
