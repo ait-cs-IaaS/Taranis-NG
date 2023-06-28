@@ -59,10 +59,9 @@ export default {
 
     const addItem = () => {
       user.value = {
-        id: -1,
         username: '',
         name: '',
-        organization_id: undefined,
+        organization: undefined,
         roles: [],
         permissions: []
       }

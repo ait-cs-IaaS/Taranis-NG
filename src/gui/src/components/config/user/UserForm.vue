@@ -47,7 +47,7 @@
       <v-row no-gutters>
         <v-col cols="6" class="pr-1">
           <v-select
-            v-model="user.organization_id"
+            v-model="user.organization"
             item-title="name"
             item-value="id"
             :hint="$t('user.organization')"

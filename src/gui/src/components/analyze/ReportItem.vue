@@ -64,16 +64,10 @@
                 class="mb-1"
                 multiple
               >
-                <v-expansion-panel>
-                  <v-expansion-panel-title
-                    color="primary--text"
-                    class="body-1 text-uppercase pa-3"
-                  >
-                    {{ attribute_group.title }}
-                  </v-expansion-panel-title>
+                <v-expansion-panel :title="attribute_group.title">
                   <v-expansion-panel-text>
                     <attribute-item
-                      v-for="attribute_item in attributes[attribute_group.id]"
+                      v-for="attribute_item in attribute_group.attribute_group_items"
                       :key="attribute_item.id"
                       :read-only="!edit"
                       :attribute-item="attribute_item"
@@ -172,25 +166,27 @@ export default {
       this.selected_report_type = this.report_types.find(
         (report_type) => report_type.id === value
       )
-      console.debug('Selected report type', this.selected_report_type)
       this.report_item.report_item_type_id = value
+      console.debug('Selected report type', this.selected_report_type)
       if (!this.selected_report_type) {
+        notifyFailure("Couldn't find report type")
         return
       }
-      this.attributes = this.extractAttributes(
-        this.selected_report_type.attribute_groups
-      )
-
-      if (this.report_item.attributes.length > 0) {
-        return
-      }
-      this.report_item.attributes =
-        this.selected_report_type.attribute_groups.flatMap((group) =>
-          group.attribute_group_items.map((item) => ({
-            attribute_group_item_id: item.id,
-            value: ''
-          }))
-        )
+      return
+      // this.attributes = this.extractAttributes(
+      //   this.selected_report_type.attribute_groups
+      // )
+      // console.debug('Attributes', this.attributes)
+      // if (this.report_item.attributes.length > 0) {
+      //   return
+      // }
+      // this.report_item.attributes =
+      //   this.selected_report_type.attribute_groups.flatMap((group) =>
+      //     group.attribute_group_items.map((item) => ({
+      //       attribute_group_item_id: item.id,
+      //       value: ''
+      //     }))
+      //   )
     },
 
     extractAttributes(attribute_groups) {

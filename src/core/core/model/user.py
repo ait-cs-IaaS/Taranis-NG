@@ -77,6 +77,7 @@ class User(BaseModel):
 
     def to_dict(self):
         data = {c.name: getattr(self, c.name) for c in self.__table__.columns if c.name != "password"}
+        data["organization"] = self.organization_id
         data["roles"] = [role.id for role in self.roles]
         data["permissions"] = [permission.id for permission in self.permissions]
         data["tag"] = "mdi-account"

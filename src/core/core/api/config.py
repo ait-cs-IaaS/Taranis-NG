@@ -166,8 +166,8 @@ class Roles(Resource):
 
     @auth_required("CONFIG_ROLE_CREATE")
     def post(self):
-        role = role.Role.add(request.json)
-        return {"message": "Role created", "id": role.id}, 201
+        new_role = role.Role.add(request.json)
+        return {"message": "Role created", "id": new_role.id}, 201
 
 
 class Role(Resource):

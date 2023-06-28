@@ -202,7 +202,6 @@ class ReportItemType(BaseModel):
     def to_dict(self):
         data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
         data["attribute_groups"] = [attribute_group.to_dict() for attribute_group in self.attribute_groups]
-        data["tag"] = "mdi-file-table-outline"
         return data
 
     @classmethod
