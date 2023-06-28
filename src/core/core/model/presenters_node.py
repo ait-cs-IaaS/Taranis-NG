@@ -17,8 +17,8 @@ class PresentersNode(BaseModel):
 
     presenters = db.relationship("Presenter", back_populates="node", cascade="all")
 
-    def __init__(self, id, name, description, api_url, api_key):
-        self.id = str(uuid.uuid4())
+    def __init__(self, name, description, api_url, api_key, id=None):
+        self.id = id or str(uuid.uuid4())
         self.name = name
         self.description = description
         self.api_url = api_url

@@ -11,7 +11,7 @@ class Permission(BaseModel):
 
     roles = db.relationship("Role", secondary="role_permission")
 
-    def __init__(self, id, name, description):
+    def __init__(self, name, description, id=None):
         self.id = id
         self.name = name
         self.description = description

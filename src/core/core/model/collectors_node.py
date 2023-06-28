@@ -15,8 +15,8 @@ class CollectorsNode(BaseModel):
     api_url = db.Column(db.String(), nullable=False)
     api_key = db.Column(db.String(), nullable=False)
 
-    def __init__(self, id, name, description, api_url, api_key):
-        self.id = id if id != "" else str(uuid.uuid4())
+    def __init__(self, name, description, api_url, api_key, id=None):
+        self.id = id or str(uuid.uuid4())
         self.name = name
         self.description = description
         self.api_url = api_url

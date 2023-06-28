@@ -71,6 +71,11 @@ class AttributeGroup(BaseModel):
         ]
         return cls(attribute_group_items=attribute_group_items, **data)
 
+    def to_dict(self):
+        data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        data["attribute_group_items"] = [attribute_group_item.to_dict() for attribute_group_item in self.attribute_group_items]
+        return data
+
     @staticmethod
     def sort(attribute_group):
         return attribute_group.index

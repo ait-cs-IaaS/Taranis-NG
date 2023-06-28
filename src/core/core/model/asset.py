@@ -241,7 +241,7 @@ class AssetGroup(BaseModel):
     organization_id = db.Column(db.Integer, db.ForeignKey("organization.id"))
     organization = db.relationship("Organization")
 
-    def __init__(self, id, name: str, description: str, organization_id: int, templates: list | None = None):
+    def __init__(self, name: str, description: str, organization_id: int, templates: list | None = None, id=None):
         self.id = id or str(uuid.uuid4())
         self.name = name
         self.description = description

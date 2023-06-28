@@ -7,7 +7,6 @@ from core.managers.sse_manager import sse_manager
 from core.managers.log_manager import logger
 from core.managers.auth_manager import auth_required, ACLCheck
 from core.model import attribute, report_item, report_item_type
-from core.api.config import Attribute, Attributes
 
 
 class ReportTypes(Resource):

@@ -18,7 +18,7 @@
             :required="item.required"
             :disabled="item['disabled']"
             :type="item.type"
-          ></v-text-field>
+          />
         </v-col>
         <v-col v-else cols="12">
           <v-text-field
@@ -28,6 +28,7 @@
             :required="item.required"
             :disabled="item['disabled']"
             :type="item.type"
+            :bg-color="item.color"
           />
         </v-col>
         <v-textarea

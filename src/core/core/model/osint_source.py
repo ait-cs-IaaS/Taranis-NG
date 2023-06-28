@@ -172,7 +172,7 @@ class OSINTSourceGroup(BaseModel):
 
     osint_sources = db.relationship("OSINTSource", secondary="osint_source_group_osint_source")
 
-    def __init__(self, id, name, description, default, osint_sources):
+    def __init__(self, name, description, osint_sources, default=False, id=None):
         self.id = id or str(uuid.uuid4())
         self.name = name
         self.description = description

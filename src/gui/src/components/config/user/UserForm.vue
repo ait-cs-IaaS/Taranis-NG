@@ -53,6 +53,7 @@
             :hint="$t('user.organization')"
             :label="$t('user.organization')"
             :items="organizations"
+            :rules="[rules.required]"
           >
           </v-select>
         </v-col>
@@ -150,7 +151,13 @@ export default {
         : [rules.required, rules.matchPassword]
     })
 
-    const add = () => {
+    const add = async () => {
+      const isValid = await form.value.validate()
+      if (!isValid.valid) {
+        console.debug('Invalid')
+        return
+      }
+
       if (props.edit === false || pwd.value !== '') {
         user.value.password = pwd.value
       }

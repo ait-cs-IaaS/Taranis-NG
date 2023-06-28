@@ -233,8 +233,8 @@ class Users(Resource):
     @auth_required("CONFIG_USER_CREATE")
     def post(self):
         try:
-            user = user.User.add(request.json)
-            return {"message": "User created", "id": user.id}, 201
+            new_user = user.User.add(request.json)
+            return {"message": "User created", "id": new_user.id}, 201
         except Exception:
             logger.exception()
             return "Could not create user", 400

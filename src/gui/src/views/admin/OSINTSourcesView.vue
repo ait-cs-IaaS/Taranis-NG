@@ -107,7 +107,8 @@ export default {
             name: 'last_error_message',
             label: 'Error Message',
             type: 'text',
-            disabled: true
+            disabled: true,
+            color: 'red'
           }
         ].concat(base)
       }
