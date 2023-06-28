@@ -137,7 +137,7 @@ class BotInfo(Resource):
         return bot.Bot.get_by_filter(bot_id)
 
     def put(self, bot_id):
-        return bot.Bot.update_bot_parameters(bot_id, request.json)
+        return bot.Bot.update(bot_id, request.json)
 
 
 def initialize(api):

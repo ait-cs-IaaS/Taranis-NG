@@ -37,13 +37,13 @@ class Asset(BaseModel):
     vulnerabilities = db.relationship("AssetVulnerability", cascade="all, delete-orphan", back_populates="asset")
     vulnerabilities_count = db.Column(db.Integer, default=0)
 
-    def __init__(self, name, serial, description, asset_group_id, asset_cpes, id=None):
+    def __init__(self, name, serial, description, asset_group_id, asset_cpes=None, id=None):
         self.id = id
         self.name = name
         self.serial = serial
         self.description = description
         self.asset_group_id = asset_group_id
-        self.asset_cpes = asset_cpes
+        self.asset_cpes = [AssetCpe.get(cpe) for cpe in asset_cpes] if asset_cpes else []
 
     @classmethod
     def get_by_cpe(cls, cpes):
@@ -241,7 +241,7 @@ class AssetGroup(BaseModel):
     organization_id = db.Column(db.Integer, db.ForeignKey("organization.id"))
     organization = db.relationship("Organization")
 
-    def __init__(self, name: str, description: str, organization_id: int, templates: list | None = None, id=None):
+    def __init__(self, name: str, description: str, organization_id: int, templates: list = None, id=None):
         self.id = id or str(uuid.uuid4())
         self.name = name
         self.description = description
@@ -278,12 +278,6 @@ class AssetGroup(BaseModel):
         groups, count = cls.get_by_filter(search, user.organization)
         items = [group.to_dict() for group in groups]
         return {"total_count": count, "items": items}
-
-    @classmethod
-    def create(cls, name: str, description: str, organization_id: int, templates: list | None = None, id: str | None = None):
-        group = AssetGroup(id, name, description, organization_id, templates)
-        db.session.add(group)
-        db.session.commit()
 
     def to_dict(self) -> dict[str, Any]:
         data = super().to_dict()

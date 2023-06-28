@@ -39,7 +39,8 @@ def pre_seed(db):
 def pre_seed_source_groups():
     from core.model.osint_source import OSINTSourceGroup
 
-    OSINTSourceGroup.create(group_id="default", name="Default", description="Default group for uncategorized sources", default=True)
+    if not OSINTSourceGroup.get("default"):
+        OSINTSourceGroup.add({"id": "default", "name": "Default", "description": "Default group for uncategorized sources", "default": True})
 
 
 def pre_seed_workers():
@@ -1168,10 +1169,12 @@ def pre_seed_assets():
     if AssetGroup.get("default"):
         return
     users = User.get_all()
-    AssetGroup.create(
-        name="Default",
-        description="Default group for uncategorized assets",
-        organization_id=users[0].organization.id,
-        templates=[],
-        id="default",
+    AssetGroup.add(
+        {
+            "name": "Default",
+            "description": "Default group for uncategorized assets",
+            "organization_id": users[0].organization.id,
+            "templates": [],
+            "id": "default",
+        }
     )

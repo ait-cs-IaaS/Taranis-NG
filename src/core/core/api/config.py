@@ -324,7 +324,7 @@ class Bots(Resource):
         return bot.Bot.get_all_json(search)
 
     def put(self, bot_id):
-        return bot.Bot.update_bot_parameters(bot_id, request.json)
+        return bot.Bot.update(bot_id, request.json)
 
 
 class Parameters(Resource):

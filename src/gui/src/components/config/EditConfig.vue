@@ -15,7 +15,7 @@
             v-if="item.type === 'text' || item.type === 'number'"
             v-model="formData[item.parent][item.name]"
             :label="item.label"
-            :required="item.required"
+            :rules="item.rules"
             :disabled="item['disabled']"
             :type="item.type"
           />
@@ -25,7 +25,7 @@
             v-if="item.type === 'text' || item.type === 'number'"
             v-model="formData[item.name]"
             :label="item.label"
-            :required="item.required"
+            :rules="item.rules"
             :disabled="item['disabled']"
             :type="item.type"
             :bg-color="item.color"
@@ -35,7 +35,7 @@
           v-if="item.type === 'textarea'"
           v-model="formData[item.name]"
           :label="item.label"
-          :required="item.required"
+          :rules="item.rules"
           :disabled="item['disabled']"
           :type="item.type"
         />
@@ -43,7 +43,7 @@
           v-if="item.type === 'select' && item.options"
           v-model="formData[item.name]"
           :label="item.label"
-          :required="item.required"
+          :rules="item.rules"
           :disabled="item['disabled']"
           :items="item.options"
         />

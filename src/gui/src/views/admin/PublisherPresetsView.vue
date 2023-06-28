@@ -70,19 +70,19 @@ export default defineComponent({
           name: 'name',
           label: 'Name',
           type: 'text',
-          required: true
+          rules: [(v) => !!v || 'Required']
         },
         {
           name: 'description',
           label: 'Description',
           type: 'textarea',
-          required: true
+          rules: [(v) => !!v || 'Required']
         },
         {
           name: 'publisher_id',
           label: 'Type',
           type: 'select',
-          required: true,
+          rules: [(v) => !!v || 'Required'],
           options: publishersList.value,
           disabled: edit.value
         }

@@ -36,6 +36,16 @@ class AttributeGroupItem(BaseModel):
     def sort(attribute_group_item):
         return attribute_group_item.index
 
+    def to_dict(self):
+        data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        data["attribute"] = self.attribute.to_dict()
+        return data
+
+    def to_dict_with_group(self):
+        data = self.to_dict()
+        data["attribute_group"] = self.attribute_group.to_dict()
+        return data
+
 
 class AttributeGroup(BaseModel):
     id = db.Column(db.Integer, primary_key=True)

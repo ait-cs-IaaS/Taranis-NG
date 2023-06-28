@@ -49,13 +49,13 @@ export default {
         name: 'name',
         label: 'Name',
         type: 'text',
-        required: true
+        rules: [(v) => !!v || 'Required']
       },
       {
         name: 'description',
         label: 'Description',
         type: 'textarea',
-        required: true
+        rules: [(v) => !!v || 'Required']
       },
       {
         name: 'default_value',

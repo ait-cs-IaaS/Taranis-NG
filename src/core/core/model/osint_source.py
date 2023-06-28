@@ -172,7 +172,7 @@ class OSINTSourceGroup(BaseModel):
 
     osint_sources = db.relationship("OSINTSource", secondary="osint_source_group_osint_source")
 
-    def __init__(self, name, description, osint_sources, default=False, id=None):
+    def __init__(self, name, description, osint_sources=[], default=False, id=None):
         self.id = id or str(uuid.uuid4())
         self.name = name
         self.description = description
@@ -255,18 +255,9 @@ class OSINTSourceGroup(BaseModel):
         return data
 
     @classmethod
-    def create(cls, group_id, name, description, default=False):
-        if osint_source_group := cls.get(group_id):
-            return {"message": f"OSINT Source Group {osint_source_group.id} already exists"}, 400
-        osint_source_group = OSINTSourceGroup(group_id, name, description, default, [])
-        db.session.add(osint_source_group)
-        db.session.commit()
-        return {"message": f"Successfully created {osint_source_group.id}"}, 201
-
-    @classmethod
     def delete(cls, osint_source_group_id):
         osint_source_group = cls.query.get(osint_source_group_id)
-        if osint_source_group.default is not False:
+        if osint_source_group.default is True:
             return {"message": "could_not_delete_default_group"}, 400
         db.session.delete(osint_source_group)
         db.session.commit()

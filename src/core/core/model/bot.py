@@ -32,22 +32,37 @@ class Bot(BaseModel):
         }
 
     @classmethod
-    def update_bot_parameters(cls, bot_id, data):
-        try:
-            bot = cls.get(bot_id)
-            if not bot:
-                return None
-            for pv in bot.parameter_values:
-                for updated_value in data["parameter_values"]:
-                    if pv.parameter.key == updated_value["parameter"]:
-                        pv.value = updated_value["value"]
+    def update(cls, bot_id, data) -> "Bot":
+        bot = cls.get(bot_id)
+        if not bot:
+            return None
 
-            # bot_params = [{"id": pv.id, "key": pv.parameter.key, "value": pv.value} for pv in bot.parameter_values]
-            # print(f"bot_params = {bot_params}")
-            # bot.parameter_values = parameter_values
+        try:
+            bot.name = data.get("name", bot.name)
+            bot.description = data.get("description", bot.description)
+
+            cls.update_parameters(bot, data)
+
             db.session.commit()
+            return bot.to_dict()
         except Exception:
             logger.log_debug_trace("Update Bot Parameters Failed")
+            return None
+
+    @classmethod
+    def update_parameters(cls, bot, data):
+        def find_param_value(p_values, key):
+            # Helper function to find parameter value based on key
+            return next((pv for pv in p_values if pv.parameter.key == key), None)
+
+        if p_values := data.get("parameter_values"):
+            for updated_value in p_values:
+                if pv := find_param_value(bot.parameter_values, updated_value["parameter"]):
+                    pv.value = updated_value["value"]
+        elif bot_type_params := data.get(bot.type):
+            for key, value in bot_type_params.items():
+                if pv := find_param_value(bot.parameter_values, key):
+                    pv.value = value
 
     @classmethod
     def add(cls, data) -> tuple[str, int]:

@@ -180,7 +180,7 @@ class ReportItem(BaseModel):
         return data
 
     def to_detail_dict(self):
-        data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        data = self.to_dict()
         data["attributes"] = [attribute.to_dict() for attribute in self.attributes]
         data["aggregates"] = [aggregate.id for aggregate in self.aggregates]
         return data

@@ -71,19 +71,19 @@ export default {
           name: 'title',
           label: 'Title',
           type: 'text',
-          required: true
+          rules: [(v) => !!v || 'Required']
         },
         {
           name: 'description',
           label: 'Description',
           type: 'textarea',
-          required: true
+          rules: [(v) => !!v || 'Required']
         },
         {
           name: 'presenter_id',
           label: 'Presenter',
           type: 'select',
-          required: true,
+          rules: [(v) => !!v || 'Required'],
           options: this.presenters,
           disabled: this.edit
         }
