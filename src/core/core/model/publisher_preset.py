@@ -5,6 +5,7 @@ from core.managers.log_manager import logger
 from core.managers.db_manager import db
 from core.model.base_model import BaseModel
 from core.model.publishers_node import PublishersNode
+from core.model.parameter_value import ParameterValue
 
 
 class PublisherPreset(BaseModel):
@@ -72,23 +73,32 @@ class PublisherPreset(BaseModel):
 
     @classmethod
     def update(cls, preset_id, data):
-        preset = cls.query.get(preset_id)
+        preset = cls.get(preset_id)
         updated_preset = cls.from_dict(data)
         preset.name = updated_preset.name
         preset.description = updated_preset.description
 
-        for value in preset.parameter_values:
-            for updated_value in updated_preset.parameter_values:
-                if value.parameter_key == updated_value.parameter_key:
-                    value.value = updated_value.value
-
+        for update_pv in updated_preset.parameter_values:
+            if pv := ParameterValue.find_param_value(preset.parameter_values, update_pv.parameter_key):
+                pv.value = update_pv.value
+            else:
+                preset.parameter_values.append(update_pv)
         db.session.commit()
 
     def to_dict(self) -> dict[str, Any]:
         data = super().to_dict()
-        data["parameter_values"] = [value.to_dict() for value in self.parameter_values]
+        data["parameter_values"] = {value.parameter_key: value.value for value in self.parameter_values}
         data["tag"] = "mdi-file-star-outline"
         return data
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "PublisherPreset":
+        if parameter_values := data.pop("parameter_values", None):
+            data["parameter_values"] = [ParameterValue(parameter=param, value=val) for param, val in parameter_values.items()]
+        else:
+            data["parameter_values"] = []
+
+        return cls(**data)
 
 
 class PublisherPresetParameterValue(BaseModel):

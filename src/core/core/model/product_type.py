@@ -8,6 +8,7 @@ from core.managers.db_manager import db
 from core.model.product import Product
 from core.model.base_model import BaseModel
 from core.model.acl_entry import ACLEntry, ItemType
+from core.model.parameter_value import ParameterValue
 
 
 class ProductType(BaseModel):
@@ -103,6 +104,13 @@ class ProductType(BaseModel):
         data["parameter_values"] = [value.to_dict() for value in self.parameter_values]
         data["tag"] = "mdi-file-document-outline"
         return data
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "ProductType":
+        if parameter_values := data.pop("parameter_values", None):
+            data["parameter_values"] = [ParameterValue(**pv) for pv in parameter_values]
+
+        return cls(**data)
 
 
 class ProductTypeParameterValue(BaseModel):

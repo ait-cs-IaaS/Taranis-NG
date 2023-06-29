@@ -918,7 +918,7 @@ class NewsItemAggregate(BaseModel):
             if isinstance(value, datetime):
                 data[key] = value.isoformat()
         data["news_items"] = [news_item.to_dict() for news_item in self.news_items]
-        data["tags"] = [tag.name for tag in self.tags]
+        data["tags"] = [tag.to_dict() for tag in self.tags]
         if self.news_item_attributes:
             data["news_item_attributes"] = [news_item_attribute.to_dict() for news_item_attribute in self.news_item_attributes]
         return data
@@ -1020,7 +1020,7 @@ class NewsItemTag(BaseModel):
         self.tag_type = tag_type
 
     @classmethod
-    def find_largest_tag_clusters(cls, days: int = 7, limit: int = 12):
+    def find_largest_tag_clusters(cls, days: int = 7, limit: int = 12, min_count: int = 2):
         start_date = datetime.now() - timedelta(days=days)
         subquery = (
             db.session.query(cls.name, cls.tag_type, NewsItemAggregate.id, NewsItemAggregate.created)
@@ -1038,6 +1038,7 @@ class NewsItemTag(BaseModel):
             db.session.query(subquery.c.name, subquery.c.tag_type, group_concat_fn, func.count(subquery.c.name).label("count"))
             .select_from(subquery.join(NewsItemAggregate, subquery.c.id == NewsItemAggregate.id))
             .group_by(subquery.c.name, subquery.c.tag_type)
+            .having(func.count(subquery.c.name) >= min_count)
             .order_by(func.count(subquery.c.name).desc())
             .limit(limit)
             .all()
@@ -1071,7 +1072,7 @@ class NewsItemTag(BaseModel):
         if tag_type := filter_args.get("tag_type"):
             query = query.filter(cls.tag_type == tag_type)
 
-        if min_size := filter_args.get("min_size"):
+        if min_size := filter_args.get("min_size", 2):
             # returns only tags where the name appears at least min_size times in the database
             query = query.group_by(cls.name).having(func.count(cls.name) >= min_size)
 
@@ -1105,3 +1106,9 @@ class NewsItemTag(BaseModel):
         for tag in tags:
             db.session.delete(tag)
         db.session.commit()
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "name": self.name,
+            "tag_type": self.tag_type,
+        }

@@ -22,3 +22,11 @@ class ParameterValue(BaseModel):
         data = super().to_dict()
         data["parameter"] = Parameter.find_by_key(data.pop("parameter_key")).to_dict()
         return data
+
+    def to_simple_dict(self) -> dict[str, Any]:
+        return {self.parameter_key: self.value}
+
+    @classmethod
+    def find_param_value(cls, p_values: list["ParameterValue"], key: str) -> "ParameterValue":
+        # Helper function to find parameter value based on key
+        return next((pv for pv in p_values if pv.parameter.key == key), None)

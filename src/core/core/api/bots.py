@@ -68,11 +68,12 @@ class BotsNode(Resource):
 
     @api_key_required
     def post(self):
-        return bots_node.BotsNode.add(request.json)
+        bots_result = bots_node.BotsNode.add(request.json)
+        return {"id": bots_result.id, "name": bots_result.name}, 201
 
     @api_key_required
     def delete(self, node_id):
-        bots_node.BotsNode.delete(node_id)
+        return bots_node.BotsNode.delete(node_id)
 
 
 class UpdateNewsItemAttributes(Resource):

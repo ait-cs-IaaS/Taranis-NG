@@ -37,10 +37,9 @@ class ReportItems(Resource):
 
     @auth_required("ANALYZE_CREATE")
     def post(self):
-        new_report_item, status = report_item.ReportItem.add_report_item(request.json, auth_manager.get_user_from_jwt())
+        new_report_item, status = report_item.ReportItem.add(request.json, auth_manager.get_user_from_jwt())
         if status == 200 and new_report_item:
             asset_manager.report_item_changed(new_report_item)
-            sse_manager.remote_access_report_items_updated(new_report_item.report_item_type_id)
             sse_manager.report_items_updated()
 
         return new_report_item.id, status
@@ -75,7 +74,7 @@ class ReportItem(Resource):
 
     @auth_required("ANALYZE_DELETE", ACLCheck.REPORT_ITEM_MODIFY)
     def delete(self, report_item_id):
-        result, code = report_item.ReportItem.delete_report_item(report_item_id)
+        result, code = report_item.ReportItem.delete(report_item_id)
         if code == 200:
             sse_manager.report_items_updated()
         return result, code

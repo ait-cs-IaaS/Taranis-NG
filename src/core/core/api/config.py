@@ -55,8 +55,8 @@ class Attributes(Resource):
 
     @auth_required("CONFIG_ATTRIBUTE_CREATE")
     def post(self):
-        attribute = attribute.Attribute.add(request.json)
-        return {"message": "Attribute added", "id": attribute.id}, 201
+        attribute_result = attribute.Attribute.add(request.json)
+        return {"message": "Attribute added", "id": attribute_result.id}, 201
 
 
 class Attribute(Resource):
@@ -106,7 +106,7 @@ class ReportItemTypesConfig(Resource):
     @auth_required("CONFIG_REPORT_TYPE_CREATE")
     def post(self):
         try:
-            item_id = report_item_type.ReportItemType.add_report_item_type(request.json)
+            item_id = report_item_type.ReportItemType.add(request.json)
             return {"message": "Report item type added", "id": item_id}, 201
         except Exception:
             logger.exception("Failed to add report item type")
@@ -367,8 +367,7 @@ class OSINTSources(Resource):
 
     @auth_required("CONFIG_OSINT_SOURCE_CREATE")
     def post(self):
-        source = collectors_manager.add_osint_source(request.json)
-        return {"id": source.id, "message": "OSINT source created successfully"}, 200
+        return collectors_manager.add_osint_source(request.json)
 
 
 class OSINTSource(Resource):
@@ -552,8 +551,8 @@ class PublisherPresets(Resource):
 
     @auth_required("CONFIG_PUBLISHER_PRESET_CREATE")
     def post(self):
-        publisher = publishers_manager.add_publisher_preset(request.json)
-        return {"id": publisher.id, "message": "Publisher preset created successfully"}, 200
+        pub_result = publisher_preset.PublisherPreset.add(request.json)
+        return {"id": pub_result.id, "message": "Publisher preset created successfully"}, 200
 
 
 class PublisherPreset(Resource):

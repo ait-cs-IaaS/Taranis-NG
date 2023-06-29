@@ -117,10 +117,6 @@ class AttributeEnum(BaseModel):
         return f"Attribute Enum {attribute_enum_id} deleted", 200
 
     @classmethod
-    def load_multiple(cls, json_data: list[dict[str, Any]]) -> list["AttributeEnum"]:
-        return [cls.from_dict(data) for data in json_data]
-
-    @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "AttributeEnum":
         if attribute_data := data.pop("attribute", None):
             data["attribute"] = Attribute.from_dict(attribute_data)
@@ -145,14 +141,20 @@ class Attribute(BaseModel):
     validator = db.Column(db.Enum(AttributeValidator), default=AttributeValidator.NONE)
     validator_parameter = db.Column(db.String())
 
-    def __init__(self, name, description, type, validator_parameter, default_value="", validator=AttributeValidator.NONE, id=None):
+    def __init__(self, name, description, attribute_type, validator_parameter="", default_value="", validator=None, id=None):
         self.id = id
         self.name = name
         self.description = description
-        self.type = type
+        self.type = attribute_type
         self.default_value = default_value
         self.validator = validator
         self.validator_parameter = validator_parameter
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "Attribute":
+        if attribute_type := data.pop("type", None):
+            data["attribute_type"] = AttributeType[attribute_type]
+        return cls(**data)
 
     @classmethod
     def filter_by_type(cls, attribute_type):
@@ -245,7 +247,6 @@ class Attribute(BaseModel):
         desc = ""
         for event, element in iterparse(file_path, events=("start", "end")):
             if event == "end":
-                logger.log_debug(f"Element: {element}")
                 if element.tag == "{http://cpe.mitre.org/dictionary/2.0}title":
                     desc = element.text
                 elif element.tag == "{http://cpe.mitre.org/dictionary/2.0}cpe-item":
@@ -305,5 +306,6 @@ class Attribute(BaseModel):
         }
         attribute_enums = AttributeEnum.get_all_for_attribute(self.id)
         data["attribute_enums"] = [attribute_enum.to_small_dict() for attribute_enum in attribute_enums]
+        data["type"] = self.type.name
         data["tag"] = self.get_tag()
         return data

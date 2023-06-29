@@ -29,11 +29,13 @@ class PublisherPreset(Resource):
 
     @auth_required("CONFIG_PUBLISHER_PRESET_CREATE")
     def post(self):
-        publishers_manager.add_publisher_preset(request.json)
+        pub_result = publisher_preset.PublisherPreset.add(request.json)
+        return {"id": pub_result.id, "message": "Publisher preset created successfully"}, 200
 
     @auth_required("CONFIG_PUBLISHER_PRESET_UPDATE")
     def put(self, id):
-        publisher_preset.PublisherPreset.update(id, request.json)
+        pub_result = publisher_preset.PublisherPreset.update(id, request.json)
+        return {"id": pub_result.id, "message": "Publisher preset updated successfully"}, 200
 
     @auth_required("CONFIG_PUBLISHER_PRESET_DELETE")
     def delete(self, id):

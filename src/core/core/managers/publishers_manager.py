@@ -1,7 +1,6 @@
 from core.model.publishers_node import PublishersNode
 from core.model.publisher import Publisher
 from core.remote.publishers_api import PublishersApi
-from core.model.publisher_preset import PublisherPreset
 from core.managers.log_manager import logger
 
 from shared.schema.publishers_node import PublishersNode as PublishersNodeSchema
@@ -58,10 +57,6 @@ def update_publishers_node(node_id, data):
         return f"Couldn't add Publisher node: {node.name}", 500
 
     return node.id, status_code
-
-
-def add_publisher_preset(data):
-    PublisherPreset.add(data)
 
 
 def publish(preset, data, message_title, message_body, recipients):

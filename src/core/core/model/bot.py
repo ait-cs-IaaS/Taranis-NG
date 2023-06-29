@@ -51,17 +51,13 @@ class Bot(BaseModel):
 
     @classmethod
     def update_parameters(cls, bot, data):
-        def find_param_value(p_values, key):
-            # Helper function to find parameter value based on key
-            return next((pv for pv in p_values if pv.parameter.key == key), None)
-
         if p_values := data.get("parameter_values"):
             for updated_value in p_values:
-                if pv := find_param_value(bot.parameter_values, updated_value["parameter"]):
+                if pv := ParameterValue.find_param_value(bot.parameter_values, updated_value["parameter"]):
                     pv.value = updated_value["value"]
         elif bot_type_params := data.get(bot.type):
             for key, value in bot_type_params.items():
-                if pv := find_param_value(bot.parameter_values, key):
+                if pv := ParameterValue.find_param_value(bot.parameter_values, key):
                     pv.value = value
 
     @classmethod

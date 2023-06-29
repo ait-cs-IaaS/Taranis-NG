@@ -1857,25 +1857,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/resp.auth.error'
-  /collectors/{collector_id}/osint-sources:
+  /collectors/osint-sources/{collector_type}:
     parameters:
-      - name: collector_id
+      - name: collector_type
         in: path
         required: true
         schema:
           type: string
     get:
       tags: [collectors]
-      summary: get all OSINT sources of a specific collector
-      parameters:
-        - name: collector_type
-          in: query
-          schema:
-            type: string
-          required: true
+      summary: get all OSINT sources of a specific collector type
       responses:
         '200':
-          description: OSINT sources of a specific collector
+          description: OSINT sources of a specific collector type
           content:
             application/json:
               schema:
@@ -4899,8 +4893,6 @@ components:
           type: string
         binary_description:
           type: string
-        attribute_group_item_title:
-          type: string
         attribute_group_item_id:
           type: integer
     report_item_attribute:
@@ -4971,8 +4963,6 @@ components:
     report_item_attribute_remote:
       type: object
       properties:
-        attribute_group_item_title:
-          type: string
         value:
           type: string
     report_item_remote:

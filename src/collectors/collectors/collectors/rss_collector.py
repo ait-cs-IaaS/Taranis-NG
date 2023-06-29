@@ -25,14 +25,9 @@ class RSSCollector(BaseCollector):
         self.proxies = {"http": proxy_server, "https": proxy_server, "ftp": proxy_server}
 
     def make_request(self, url: str) -> None | requests.Response:
-        try:
-            response = requests.get(url, headers=self.headers, proxies=self.proxies)
-            if not response.ok:
-                return None
-        except Exception:
-            logger.exception(f"Could not get article content for: {url}")
-            return None
-
+        response = requests.get(url, headers=self.headers, proxies=self.proxies, timeout=60)
+        if not response.ok:
+            raise RuntimeError(f"Response not ok: {response.status_code}")
         return response
 
     def get_article_content(self, link_for_article: str) -> str:
@@ -65,10 +60,9 @@ class RSSCollector(BaseCollector):
 
         try:
             self.rss_collector(feed_url, source)
-        except Exception:
+        except Exception as e:
             logger.exception()
-            logger.collector_exception(source, "Could not collect RSS Feed")
-            return "Could not collect RSS Feed"
+            return str(e)
 
         logger.log_debug(f"{self.type} collection finished.")
         return None
@@ -135,7 +129,7 @@ class RSSCollector(BaseCollector):
         feed_content = self.make_request(feed_url)
         if not feed_content:
             logger.log_collector_activity("rss", source['id'], "RSS returned no content")
-            return
+            raise ValueError("RSS returned no content")
         feed = feedparser.parse(feed_content.content)
 
         logger.log_collector_activity("rss", source["id"], f'RSS returned feed with {len(feed["entries"])} entries')

@@ -54,7 +54,13 @@ class Publisher(BaseModel):
         return {"total_count": count, "items": items}
 
     def to_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        return {
+            "id": self.id,
+            "name": self.name,
+            "description": self.description,
+            "type": self.type,
+            "parameters": [parameter.to_dict() for parameter in self.parameters],
+        }
 
     @classmethod
     def load_multiple(cls, data: list[dict[str, Any]]) -> list["Publisher"]:

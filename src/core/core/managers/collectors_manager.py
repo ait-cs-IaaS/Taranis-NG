@@ -41,7 +41,7 @@ def update_collectors_node(node_id, data):
 def add_osint_source(data):
     osint_source = OSINTSource.add(data)
     refresh_collector(osint_source.collector_id)
-    return f"OSINT Source {osint_source.name} added", 201
+    return {"id": osint_source.id, "message": "OSINT source created successfully"}, 201
 
 
 def update_osint_source(osint_source_id, data):

@@ -24,15 +24,9 @@ class ReportItemAttribute(BaseModel):
     binary_mime_type = db.Column(db.String())
     binary_data = orm.deferred(db.Column(db.LargeBinary))
     binary_description = db.Column(db.String())
-    created = db.Column(db.DateTime, default=datetime.now)
-    last_updated = db.Column(db.DateTime, default=datetime.now)
-
-    version = db.Column(db.Integer, default=1)
-    current = db.Column(db.Boolean, default=True)
 
     attribute_group_item_id = db.Column(db.Integer, db.ForeignKey("attribute_group_item.id"))
     attribute_group_item = db.relationship("AttributeGroupItem")
-    attribute_group_item_title = db.Column(db.String)
 
     report_item_id = db.Column(db.Integer, db.ForeignKey("report_item.id"), nullable=True)
     report_item = db.relationship("ReportItem")
@@ -43,7 +37,6 @@ class ReportItemAttribute(BaseModel):
         attribute_group_item_id,
         binary_mime_type=None,
         binary_description=None,
-        attribute_group_item_title=None,
         id=None,
     ):
         self.id = id
@@ -51,7 +44,6 @@ class ReportItemAttribute(BaseModel):
         self.binary_mime_type = binary_mime_type
         self.binary_description = binary_description
         self.attribute_group_item_id = attribute_group_item_id
-        self.attribute_group_item_title = attribute_group_item_title
 
     @classmethod
     def find_by_attribute_group(cls, attribute_group_id, report_item_id=None):
@@ -157,7 +149,7 @@ class ReportItem(BaseModel):
 
     @classmethod
     def get_detail_json(cls, id):
-        return cls.query.get(id).to_dict()
+        return cls.get(id).to_detail_dict()
 
     @classmethod
     def get_groups(cls):
@@ -182,7 +174,7 @@ class ReportItem(BaseModel):
     def to_detail_dict(self):
         data = self.to_dict()
         data["attributes"] = [attribute.to_dict() for attribute in self.attributes]
-        data["aggregates"] = [aggregate.id for aggregate in self.aggregates]
+        data["news_item_aggregates"] = [aggregate.id for aggregate in self.news_item_aggregates]
         return data
 
     @classmethod
@@ -196,7 +188,7 @@ class ReportItem(BaseModel):
         return [cls.from_dict(report_item) for report_item in data]
 
     @classmethod
-    def add_report_item(cls, report_item_data, user):
+    def add(cls, report_item_data, user):
         report_item = cls.from_dict(report_item_data)
 
         if not ReportItemType.allowed_with_acl(report_item.report_item_type_id, user, False, False, True):
@@ -204,11 +196,19 @@ class ReportItem(BaseModel):
 
         report_item.user_id = user.id
         report_item.update_cpes()
+        report_item.add_attributes()
 
         db.session.add(report_item)
         db.session.commit()
 
         return report_item, 200
+
+    def add_attributes(self):
+        """Adds attributes based on the report item type to the report item."""
+        attribute_groups = ReportItemType.get(self.report_item_type_id).attribute_groups
+        for attribute_group in attribute_groups:
+            for attribute_group_item in attribute_group.attribute_group_items:
+                self.attributes.append(ReportItemAttribute(attribute_group_item_id=attribute_group_item.id, value=""))
 
     @classmethod
     def allowed_with_acl(cls, report_item_id, user, see, access, modify):
@@ -245,10 +245,6 @@ class ReportItem(BaseModel):
         )
 
         report_items = query.all()
-
-        for report_item in report_items:
-            for attribute in report_item.attributes:
-                attribute.attribute_group_item_title = attribute.attribute_group_item.title
 
         return [report_item.to_dict() for report_item in report_items], last_sync_time
 
@@ -429,7 +425,6 @@ class ReportItem(BaseModel):
             value=file.filename,
             binary_description=file.filename,
             binary_mime_type=file.mimetype,
-            attribute_group_item_title=description,
             attribute_group_item_id=attribute_group_item_id,
         )
 
@@ -471,15 +466,6 @@ class ReportItem(BaseModel):
         db.session.commit()
 
         return data
-
-    @classmethod
-    def delete_report_item(cls, id) -> tuple[str, int]:
-        report_item = cls.query.get(id)
-        if report_item is not None:
-            db.session.delete(report_item)
-            db.session.commit()
-            return "success", 200
-        return "not found", 404
 
     def update_cpes(self):
         self.report_item_cpes = []

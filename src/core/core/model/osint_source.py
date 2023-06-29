@@ -109,7 +109,7 @@ class OSINTSource(BaseModel):
     @classmethod
     def get_all_by_type(cls, collector_type: str):
         query = cls.query.join(Collector, OSINTSource.collector_id == Collector.id).filter(Collector.type == collector_type)
-        sources = query.order_by(db.asc(OSINTSource.name)).all()
+        sources = query.order_by(db.asc(OSINTSource.last_collected), db.asc(OSINTSource.last_attempted)).all()
         return [source.to_collector_dict() for source in sources]
 
     @classmethod
@@ -143,12 +143,12 @@ class OSINTSource(BaseModel):
         return osint_source
 
     def update_status(self, error_message=None):
-        logger.debug(f"Updating status for {self.id} with error message {error_message}")
         self.last_attempted = datetime.now()
         if error_message is None:
             self.last_collected = datetime.now()
             self.state = 0
         else:
+            logger.error(f"Updating status for {self.id} with error message {error_message}")
             self.state = 1
         self.last_error_message = error_message
         db.session.commit()

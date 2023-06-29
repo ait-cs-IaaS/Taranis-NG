@@ -1,11 +1,12 @@
 from sqlalchemy import or_, and_
 import sqlalchemy
-from typing import Any, Type
+from typing import Any
 from sqlalchemy.sql.expression import cast
 
 from core.managers.db_manager import db
 from core.model.base_model import BaseModel
 from core.model.acl_entry import ACLEntry, ItemType
+from core.managers.log_manager import logger
 
 
 class AttributeGroupItem(BaseModel):
@@ -197,19 +198,14 @@ class ReportItemType(BaseModel):
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "ReportItemType":
-        return cls(**data)
+        logger.debug(data)
+        attribute_groups = [AttributeGroup.from_dict(attribute_group) for attribute_group in data.pop("attribute_groups")]
+        return cls(attribute_groups=attribute_groups, **data)
 
     def to_dict(self):
         data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
         data["attribute_groups"] = [attribute_group.to_dict() for attribute_group in self.attribute_groups]
         return data
-
-    @classmethod
-    def add_report_item_type(cls, data):
-        report_item_type = cls.from_dict(data)
-        db.session.add(report_item_type)
-        db.session.commit()
-        return report_item_type.id
 
     @classmethod
     def update(cls, report_type_id, data) -> tuple[str, int]:

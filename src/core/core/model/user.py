@@ -111,10 +111,12 @@ class User(BaseModel):
         return user.profile.to_dict()
 
     @classmethod
-    def update_profile(cls, user, data) -> tuple[str, int]:
+    def update_profile(cls, user, data):
+        logger.debug(user.profile.from_dict(data))
         user.profile = user.profile.from_dict(data)
+
         db.session.commit()
-        return f"User {user.id} profile updated", 200
+        return user.profile.to_dict(), 200
 
     ##
     # External User Management - TODO: Check if this is still needed
@@ -196,6 +198,19 @@ class UserProfile(BaseModel):
         self.hotkeys = hotkeys
         self.language = language
 
+    @classmethod
+    def from_dict(cls, data: dict):
+        hotkeys = [Hotkey.from_dict(hotkey) for hotkey in data["hotkeys"]]
+        return cls(data["spellcheck"], data["dark_theme"], hotkeys, data["language"])
+
+    def to_dict(self):
+        return {
+            "spellcheck": self.spellcheck,
+            "dark_theme": self.dark_theme,
+            "hotkeys": [hotkey.to_dict() for hotkey in self.hotkeys],
+            "language": self.language,
+        }
+
 
 class Hotkey(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
@@ -205,8 +220,13 @@ class Hotkey(BaseModel):
 
     user_profile_id = db.Column(db.Integer, db.ForeignKey("user_profile.id"))
 
-    def __init__(self, key_code, key, alias):
-        self.id = None
+    def __init__(self, key_code, key, alias, id=None):
+        self.id = id
         self.key_code = key_code
         self.key = key
         self.alias = alias
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "Hotkey":
+        logger.debug(data)
+        return cls(data["key_code"], data["key"], data["alias"])
