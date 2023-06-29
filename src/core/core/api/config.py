@@ -1,6 +1,6 @@
 import io
 
-from flask import request, send_file
+from flask import request, send_file, jsonify
 from flask_restx import Resource, Namespace
 
 from core.managers import (
@@ -62,7 +62,8 @@ class Attributes(Resource):
 class Attribute(Resource):
     @auth_required(["CONFIG_ATTRIBUTE_ACCESS", "ANALYZE_ACCESS"])
     def get(self, attribute_id):
-        return attribute.Attribute.find_by_id(attribute_id)
+        result = attribute.Attribute.get(attribute_id)
+        return result.to_json() if result else ("Attribute not found", 404)
 
     @auth_required("CONFIG_ATTRIBUTE_UPDATE")
     def put(self, attribute_id):
@@ -83,8 +84,8 @@ class AttributeEnums(Resource):
 
     @auth_required("CONFIG_ATTRIBUTE_UPDATE")
     def post(self, attribute_id):
-        attribute = attribute.AttributeEnum.add(attribute_id, request.json)
-        return {"message": "Attribute enum added", "id": attribute.id}, 201
+        result = attribute.AttributeEnum.add(request.json)
+        return {"message": "Attribute enum added", "id": result.id}, 201
 
 
 class AttributeEnum(Resource):
@@ -106,8 +107,8 @@ class ReportItemTypesConfig(Resource):
     @auth_required("CONFIG_REPORT_TYPE_CREATE")
     def post(self):
         try:
-            item_id = report_item_type.ReportItemType.add(request.json)
-            return {"message": "Report item type added", "id": item_id}, 201
+            item = report_item_type.ReportItemType.add(request.json)
+            return {"message": "Report item type added", "id": item.id}, 201
         except Exception:
             logger.exception("Failed to add report item type")
             return {"message": "Failed to add report item type"}, 500
@@ -127,7 +128,7 @@ class ProductTypes(Resource):
     @auth_required("CONFIG_PRODUCT_TYPE_ACCESS")
     def get(self):
         search = request.args.get(key="search", default=None)
-        return product_type.ProductType.get_all_json(search, auth_manager.get_user_from_jwt(), False)
+        return jsonify(product_type.ProductType.get_all_json(search, auth_manager.get_user_from_jwt(), False))
 
     @auth_required("CONFIG_PRODUCT_TYPE_CREATE")
     def post(self):
@@ -373,7 +374,10 @@ class OSINTSources(Resource):
 class OSINTSource(Resource):
     @auth_required("CONFIG_OSINT_SOURCE_ACCESS")
     def get(self, source_id):
-        return osint_source.OSINTSource.get(source_id).to_dict()
+        if source := osint_source.OSINTSource.get(source_id):
+            return source.to_dict(), 200
+        else:
+            return "OSINT source not found", 404
 
     @auth_required("CONFIG_OSINT_SOURCE_UPDATE")
     def put(self, source_id):
@@ -447,8 +451,8 @@ class RemoteAccesses(Resource):
 
     @auth_required("CONFIG_REMOTE_ACCESS_CREATE")
     def post(self):
-        remote = remote.RemoteAccess.add(request.json)
-        return {"id": remote.id, "message": "Remote access created successfully"}, 200
+        result = remote.RemoteAccess.add(request.json)
+        return {"id": result.id, "message": "Remote access created successfully"}, 200
 
 
 class RemoteAccess(Resource):
@@ -469,8 +473,8 @@ class RemoteNodes(Resource):
 
     @auth_required("CONFIG_REMOTE_ACCESS_CREATE")
     def post(self):
-        remote = remote.RemoteNode.add(request.json)
-        return {"id": remote.id, "message": "Remote node created successfully"}, 200
+        result = remote.RemoteNode.add(request.json)
+        return {"id": result.id, "message": "Remote node created successfully"}, 200
 
 
 class RemoteNode(Resource):
@@ -531,8 +535,7 @@ class PublisherNodes(Resource):
 
     @auth_required("CONFIG_PUBLISHERS_NODE_CREATE")
     def post(self):
-        publisher = publishers_manager.add_publishers_node(request.json)
-        return {"id": publisher.id, "message": "Publishers node created successfully"}, 200
+        return publishers_manager.add_publishers_node(request.json)
 
     @auth_required("CONFIG_PUBLISHERS_NODE_UPDATE")
     def put(self, node_id):
@@ -601,7 +604,7 @@ class BotNodes(Resource):
 
 
 def initialize(api):
-    namespace = api.namespace("config", description="Configuration operations", path="/api/v1/config")
+    namespace = Namespace("config", description="Configuration operations", path="/api/v1/config")
     namespace.add_resource(
         DictionariesReload,
         "/reload-enum-dictionaries/<string:dictionary_type>",

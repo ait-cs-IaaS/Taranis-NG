@@ -112,22 +112,6 @@ class RemoteAccess(BaseModel):
         return {rows.id for rows in response}
 
     @classmethod
-    def add(cls, data) -> tuple[str, int]:
-        remote_access = cls.from_dict(data)
-        db.session.add(remote_access)
-        db.session.commit()
-        return f"Remote access {remote_access.name} added", 200
-
-    @classmethod
-    def delete(cls, remote_access_id) -> tuple[str, int]:
-        remote_access = cls.query.get(remote_access_id)
-        if not remote_access:
-            return "Remote access not found", 404
-        db.session.delete(remote_access)
-        db.session.commit()
-        return "Remote access deleted", 200
-
-    @classmethod
     def update(cls, remote_access_id, data) -> tuple[str, int]:
         remote_access = cls.query.get(remote_access_id)
         if not remote_access:
@@ -260,7 +244,7 @@ class RemoteNode(BaseModel):
 
     @classmethod
     def get_all_json(cls, search):
-        remote_nodes, count = cls.get(search)
+        remote_nodes, count = cls.get_by_filter(search)
         items = [remote_node.to_dict() for remote_node in remote_nodes]
         return {"total_count": count, "items": items}
 
@@ -290,10 +274,7 @@ class RemoteNode(BaseModel):
         return cls(**data)
 
     def to_dict(self):
-        data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
-        for key, value in data.items():
-            if isinstance(value, datetime):
-                data[key] = value.isoformat()
+        data = super().to_dict()
 
         data["tag"] = "mdi-share-variant"
         data["status"] = "red" if not self.enabled or not self.event_id else "green"

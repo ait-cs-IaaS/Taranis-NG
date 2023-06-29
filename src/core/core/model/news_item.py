@@ -108,8 +108,7 @@ class NewsItemData(BaseModel):
         )
 
     def has_attribute_value(self, value) -> bool:
-        attributes = self.attributes.all()
-        return any(attribute.value == value for attribute in attributes)
+        return any(attribute.value == value for attribute in self.attributes)
 
     @classmethod
     def update_news_item_lang(cls, news_item_id, lang):
@@ -153,9 +152,6 @@ class NewsItemData(BaseModel):
 
     def to_dict(self) -> dict[str, Any]:
         data = super().to_dict()
-        for key, value in data.items():
-            if isinstance(value, datetime):
-                data[key] = value.isoformat()
         data["tag"] = "mdi-file-table-outline"
         return data
 
@@ -375,10 +371,14 @@ class NewsItem(BaseModel):
     @classmethod
     def delete(cls, news_item_id):
         news_item = cls.get(news_item_id)
+        if not news_item:
+            return "not_found", 404
         if NewsItemAggregate.is_assigned_to_report([{"type": "AGGREGATE", "id": news_item.news_item_aggregate_id}]) is False:
             return "aggregate_in_use", 500
         aggregate_id = news_item.news_item_aggregate_id
         aggregate = NewsItemAggregate.get(aggregate_id)
+        if not aggregate:
+            return "not_found", 404
         aggregate.news_items.remove(news_item)
         NewsItemVote.delete_all(news_item_id)
         db.session.delete(news_item)
@@ -459,8 +459,9 @@ class NewsItemAggregate(BaseModel):
     news_item_attributes = db.relationship("NewsItemAttribute", secondary="news_item_aggregate_news_item_attribute")
 
     @classmethod
-    def get_by_id(cls, aggregate_id):
-        return cls.get(aggregate_id).to_dict()
+    def get_json(cls, aggregate_id):
+        item = cls.get(aggregate_id)
+        return item.to_dict() if item else ("not_found", 404)
 
     @classmethod
     def get_story_clusters(cls, days: int = 7, limit: int = 10):
@@ -647,19 +648,7 @@ class NewsItemAggregate(BaseModel):
     @classmethod
     def create_new_for_all_groups(cls, news_item_data):
         group = OSINTSourceGroup.get_for_osint_source(news_item_data.osint_source_id)[0]
-        news_item = NewsItem()
-        news_item.news_item_data = news_item_data
-        db.session.add(news_item)
-
-        aggregate = NewsItemAggregate()
-        aggregate.title = news_item_data.title
-        aggregate.description = news_item_data.review
-        aggregate.created = news_item_data.published
-        aggregate.osint_source_group_id = group.id
-        aggregate.news_items.append(news_item)
-        db.session.add(aggregate)
-
-        NewsItemAggregateSearchIndex.prepare(aggregate)
+        cls.create_new_for_group(news_item_data, group.id)
 
     @classmethod
     def create_new_for_group(cls, news_item_data, osint_source_group_id):
@@ -712,6 +701,8 @@ class NewsItemAggregate(BaseModel):
         for news_item in news_items_query:
             news_item_data = news_item.news_item_data
             aggregate = NewsItemAggregate.get(news_item.news_item_aggregate_id)
+            if not aggregate:
+                continue
             aggregate.news_items.remove(news_item)
             NewsItemVote.delete_all(news_item.id)
             db.session.delete(news_item)
@@ -777,6 +768,8 @@ class NewsItemAggregate(BaseModel):
             return "aggregate_in_use", 500
 
         aggregate = cls.get(id)
+        if not aggregate:
+            return "Not found", 404
         for news_item in aggregate.news_items:
             if NewsItem.allowed_with_acl(news_item.id, user, False, False, True):
                 aggregate.news_items.remove(news_item)
@@ -820,6 +813,8 @@ class NewsItemAggregate(BaseModel):
     def group_aggregate(cls, aggregate_ids: list, user: User | None = None):
         try:
             first_aggregate = NewsItemAggregate.get(aggregate_ids.pop(0))
+            if not first_aggregate:
+                return "not_found", 404
             processed_aggregates = {first_aggregate}
             for item in aggregate_ids:
                 aggregate = NewsItemAggregate.get(item)
@@ -901,7 +896,7 @@ class NewsItemAggregate(BaseModel):
         if aggregate is None:
             return
 
-        news_items = aggregate.news_items.all()
+        news_items = aggregate.news_items
         if len(news_items) == 0:
             NewsItemAggregateSearchIndex.remove(aggregate)
             db.session.delete(aggregate)
@@ -930,12 +925,9 @@ class NewsItemAggregate(BaseModel):
 
     def to_dict(self) -> dict[str, Any]:
         data = super().to_dict()
-        for key, value in data.items():
-            if isinstance(value, datetime):
-                data[key] = value.isoformat()
         data["news_items"] = [news_item.to_dict() for news_item in self.news_items]
         data["tags"] = [tag.to_dict() for tag in self.tags]
-        if news_item_attributes := self.news_item_attributes.all():
+        if news_item_attributes := self.news_item_attributes:
             data["news_item_attributes"] = [news_item_attribute.to_dict() for news_item_attribute in news_item_attributes]
         return data
 

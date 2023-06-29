@@ -1,5 +1,5 @@
 from typing import Any
-from sqlalchemy import or_, func
+from sqlalchemy import or_
 import uuid
 
 from core.managers.db_manager import db
@@ -32,7 +32,7 @@ class Bot(BaseModel):
         }
 
     @classmethod
-    def update(cls, bot_id, data) -> "Bot":
+    def update(cls, bot_id, data) -> "Bot | None":
         bot = cls.get(bot_id)
         if not bot:
             return None
@@ -44,7 +44,7 @@ class Bot(BaseModel):
             cls.update_parameters(bot, data)
 
             db.session.commit()
-            return bot.to_dict()
+            return bot
         except Exception:
             logger.log_debug_trace("Update Bot Parameters Failed")
             return None

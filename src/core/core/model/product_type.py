@@ -5,6 +5,7 @@ import sqlalchemy
 from sqlalchemy.sql.expression import cast
 
 from core.managers.db_manager import db
+from core.managers.log_manager import logger
 from core.model.product import Product
 from core.model.base_model import BaseModel
 from core.model.acl_entry import ACLEntry, ItemType
@@ -107,8 +108,11 @@ class ProductType(BaseModel):
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "ProductType":
+        logger.debug(data)
         if parameter_values := data.pop("parameter_values", None):
-            data["parameter_values"] = [ParameterValue(**pv) for pv in parameter_values]
+            data["parameter_values"] = [ParameterValue(parameter=param, value=val) for param, val in parameter_values.items()]
+        else:
+            data["parameter_values"] = []
 
         return cls(**data)
 

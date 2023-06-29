@@ -79,10 +79,7 @@ class OSINTSource(BaseModel):
         return cls(parameter_values=parameter_values, word_lists=word_lists, collector_id=collector_id, **data)
 
     def to_dict(self):
-        data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
-        for key, value in data.items():
-            if isinstance(value, datetime):
-                data[key] = value.isoformat()
+        data = super().to_dict()
         data["word_lists"] = [word_list.id for word_list in self.word_lists]
         data["parameter_values"] = [parameter_value.to_dict() for parameter_value in self.parameter_values]
         data["tag"] = "mdi-animation-outline"
@@ -98,10 +95,7 @@ class OSINTSource(BaseModel):
         return {"id": self.id, "name": self.name, "description": self.description, "collector_type": self.collector.type}
 
     def to_collector_dict(self):
-        data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
-        for key, value in data.items():
-            if isinstance(value, datetime):
-                data[key] = value.isoformat()
+        data = super().to_dict()
 
         data["parameter_values"] = {parameter_value.parameter.key: parameter_value.value for parameter_value in self.parameter_values}
         return data
@@ -251,7 +245,7 @@ class OSINTSourceGroup(BaseModel):
 
     def to_dict(self):
         data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
-        data["osint_sources"] = [osint_source.id for osint_source in self.osint_sources]
+        data["osint_sources"] = [(osint_source.id if osint_source else "") for osint_source in self.osint_sources]
         return data
 
     @classmethod

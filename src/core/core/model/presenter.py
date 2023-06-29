@@ -80,9 +80,9 @@ class Presenter(BaseModel):
     def find_by_type(cls, type):
         return cls.query.filter_by(type=type).first()
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self: "Presenter") -> dict[str, Any]:
         data = super().to_dict()
-        data["parameters"] = [parameter.key for parameter in self.parameters]
+        data["parameters"] = [parameter.to_dict() for parameter in self.parameters]
         data["product_types"] = [product_type.id for product_type in self.product_types]
         return data
 

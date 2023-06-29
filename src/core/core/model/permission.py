@@ -64,5 +64,5 @@ class Permission(BaseModel):
     @classmethod
     def get_external_permissions_json(cls):
         permissions = cls.get_external_permissions()
-        items = [permission.to_dict() for permission in permissions]
+        items = [permission.to_dict() if permission else None for permission in permissions]
         return {"total_count": len(items), "items": items}

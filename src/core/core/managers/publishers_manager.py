@@ -26,19 +26,18 @@ def add_publishers_node(data):
     try:
         logger.log_info(data)
         publishers_info = data.pop("publishers_info")
-        node = PublishersNodeSchema.create(data)
     except Exception as e:
         logger.log_debug_trace()
         return str(e), 500
 
     try:
         publishers = Publisher.load_multiple(publishers_info)
-        PublishersNode.add(data, publishers)
+        node = PublishersNode.add(data, publishers)
     except Exception:
-        logger.log_debug_trace(f"Couldn't add Publisher Node: {node.name}")
-        return f"Couldn't add Publisher Node: {node.name}", 500
+        logger.log_debug_trace("Couldn't add Publisher Node")
+        return "Couldn't add Publisher Node", 500
 
-    return node.id, 200
+    return {"id": node.id, "message": "Added node"}, 200
 
 
 def update_publishers_node(node_id, data):

@@ -149,7 +149,8 @@ class ReportItem(BaseModel):
 
     @classmethod
     def get_detail_json(cls, id):
-        return cls.get(id).to_detail_dict()
+        report_item = cls.get(id)
+        return report_item.to_detail_dict() if report_item else None
 
     @classmethod
     def get_groups(cls):
@@ -165,9 +166,6 @@ class ReportItem(BaseModel):
 
     def to_dict(self) -> dict[str, Any]:
         data = super().to_dict()
-        for key, value in data.items():
-            if isinstance(value, datetime):
-                data[key] = value.isoformat()
         data["tag"] = "mdi-file-table-outline"
         return data
 
@@ -403,8 +401,9 @@ class ReportItem(BaseModel):
                 if "remote_report_item_ids" in data:
                     data["remote_report_items"] = []
                     for remote_report_item_id in data["remote_report_item_ids"]:
-                        remote_report_item = ReportItem.get(remote_report_item_id).to_dict()
-                        data["remote_report_items"].append(schema.dump(remote_report_item))
+                        remote_report_item = ReportItem.get(remote_report_item_id)
+                        if remote_report_item is not None:
+                            data["remote_report_items"].append(remote_report_item.to_dict())
 
                 if "attribute_id" in data:
                     for attribute in report_item.attributes:

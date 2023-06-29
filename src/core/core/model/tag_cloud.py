@@ -117,7 +117,4 @@ class TagCloud(BaseModel):
 
     def to_dict(self) -> dict[str, Any]:
         data = super().to_dict()
-        for key, value in data.items():
-            if isinstance(value, datetime):
-                data[key] = value.isoformat()
         return data

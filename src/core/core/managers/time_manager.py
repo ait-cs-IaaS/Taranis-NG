@@ -1,9 +1,7 @@
-from celery import Celery, Task
-from celery import shared_task
+from celery import Celery, Task, shared_task
 from flask import Flask
 
 
-@shared_task(ignore_result=False)
 def schedule_job_every_day(time_of_day, job):
     pass
 

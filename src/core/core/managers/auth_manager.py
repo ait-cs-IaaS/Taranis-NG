@@ -176,17 +176,18 @@ def auth_required(permissions: list | str, acl=None):
                 return error
 
             # if the object does have an ACL, do we match it?
-            id_name = get_id_name_by_acl(acl)
-            if not id_name:
-                return fn(*args, **kwargs)
+            if acl:
+                id_name = get_id_name_by_acl(acl)
+                if not id_name:
+                    return fn(*args, **kwargs)
 
-            if acl and not check_acl(kwargs[id_name], acl, user):
-                logger.store_user_auth_error_activity(
-                    user,
-                    "",
-                    f"Access denied by ACL in JWT for identity: {identity}",
-                )
-                return error
+                if not check_acl(kwargs[id_name], acl, user):
+                    logger.store_user_auth_error_activity(
+                        user,
+                        "",
+                        f"Access denied by ACL in JWT for identity: {identity}",
+                    )
+                    return error
 
             return fn(*args, **kwargs)
 

@@ -55,11 +55,12 @@ class PublishersNode(BaseModel):
         return {"total_count": count, "items": items}
 
     @classmethod
-    def add(cls, node_data, publishers):
+    def add(cls, node_data, publishers) -> "PublishersNode":
         node = cls.from_dict(node_data)
         node.publishers = publishers
         db.session.add(node)
         db.session.commit()
+        return node
 
     @classmethod
     def update(cls, node_id, node_data, publishers):

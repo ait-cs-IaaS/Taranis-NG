@@ -132,7 +132,7 @@ class NewsItem(Resource):
 class NewsItemAggregate(Resource):
     @auth_required("ASSESS_ACCESS")
     def get(self, aggregate_id):
-        return news_item.NewsItemAggregate.get_by_id(aggregate_id)
+        return news_item.NewsItemAggregate.get_json(aggregate_id)
 
     @auth_required("ASSESS_UPDATE")
     def put(self, aggregate_id):

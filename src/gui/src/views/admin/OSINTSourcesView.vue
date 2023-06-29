@@ -69,7 +69,7 @@ export default {
     const edit = ref(false)
 
     const formFormat = computed(() => {
-      const base = [
+      let base = [
         {
           name: 'id',
           label: 'ID',
@@ -102,7 +102,7 @@ export default {
         }
       ]
       if (formData.value.last_error_message) {
-        return [
+        base = [
           {
             name: 'last_error_message',
             label: 'Error Message',

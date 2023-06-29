@@ -86,8 +86,10 @@ def news_item_aggregates(app, request, news_items_data):
 
 
 class TestAssessApi(object):
+    base_uri = "/api/v1/assess"
+
     def assert_get_ok(self, client, uri, auth_header):
-        response = client.get(uri, headers=auth_header)
+        response = client.get(f"{self.base_uri}/{uri}", headers=auth_header)
         assert response
         assert response.content_type == "application/json"
         assert response.data
@@ -95,7 +97,7 @@ class TestAssessApi(object):
         return response
 
     def assert_get_failed(self, client, uri):
-        response = client.get(uri)
+        response = client.get(f"{self.base_uri}/{uri}")
         assert response
         assert response.content_type == "application/json"
         assert response.get_json()["error"] == "not authorized"
@@ -107,7 +109,7 @@ class TestAssessApi(object):
         This test queries the OSINTSourceGroupsAssess authenticated.
         It expects a valid data and a valid status-code
         """
-        response = self.assert_get_ok(client, "/api/v1/assess/osint-source-groups", auth_header)
+        response = self.assert_get_ok(client, "osint-source-groups", auth_header)
         assert response.get_json()["items"][0]["id"] == "default"
 
     def test_get_OSINTSourceGroupsAssess_unauth(self, client):
@@ -115,49 +117,49 @@ class TestAssessApi(object):
         This test queries the OSINTSourceGroupsAssess UNauthenticated.
         It expects "not authorized"
         """
-        self.assert_get_failed(client, "/api/v1/assess/osint-source-groups")
+        self.assert_get_failed(client, "osint-source-groups")
 
     def test_get_OSINTSourceGroupsList_auth(self, client, auth_header):
         """
         This test queries the OSINTSourceGroupsList authenticated.
         It expects a valid data and a valid status-code
         """
-        self.assert_get_ok(client, "/api/v1/assess/osint-source-group-list", auth_header)
+        self.assert_get_ok(client, "osint-source-group-list", auth_header)
 
     def test_get_OSINTSourceGroupsList_unauth(self, client):
         """
         This test queries the OSINTSourceGroupsList UNauthenticated.
         It expects "not authorized"
         """
-        self.assert_get_failed(client, "/api/v1/assess/osint-source-group-list")
+        self.assert_get_failed(client, "osint-source-group-list")
 
     def test_get_OSINTSourcesList_auth(self, client, auth_header):
         """
         This test queries the OSINTSourcesList authenticated.
         It expects a valid data and a valid status-code
         """
-        self.assert_get_ok(client, "/api/v1/assess/osint-sources-list", auth_header)
+        self.assert_get_ok(client, "osint-sources-list", auth_header)
 
     def test_get_OSINTSourcesList_unauth(self, client):
         """
         This test queries the OSINTSourcesList UNauthenticated.
         It expects "not authorized"
         """
-        self.assert_get_failed(client, "/api/v1/assess/osint-sources-list")
+        self.assert_get_failed(client, "osint-sources-list")
 
     def test_get_ManualOSINTSources_auth(self, client, auth_header):
         """
         This test queries the ManualOSINTSources authenticated.
         It expects a valid data and a valid status-code
         """
-        self.assert_get_ok(client, "/api/v1/assess/manual-osint-sources", auth_header)
+        self.assert_get_ok(client, "manual-osint-sources", auth_header)
 
     def test_get_ManualOSINTSources_unauth(self, client):
         """
         This test queries the ManualOSINTSources UNauthenticated.
         It expects "not authorized"
         """
-        self.assert_get_failed(client, "/api/v1/assess/manual-osint-sources")
+        self.assert_get_failed(client, "manual-osint-sources")
 
     # def test_post_AddNewsItem_auth(self, client, news_item_aggregates, auth_header):
     #     """
@@ -303,7 +305,7 @@ class TestAssessApi(object):
         response = client.get("/api/v1/assess/tags", headers=auth_header)
         assert response
         assert response.data
-        assert len(response.get_json()) == 3
+        assert len(response.get_json()) == 2
         assert response.content_type == "application/json"
         assert response.status_code == 200
         response = client.get("/api/v1/assess/tags?search=fo", headers=auth_header)
@@ -311,4 +313,4 @@ class TestAssessApi(object):
         response = client.get("/api/v1/assess/tags?limit=1", headers=auth_header)
         assert len(response.get_json()) == 1
         response = client.get("/api/v1/assess/tags?offset=1", headers=auth_header)
-        assert len(response.get_json()) == 2
+        assert len(response.get_json()) == 1
