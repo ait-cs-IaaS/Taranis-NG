@@ -110,7 +110,8 @@ class NewsItemAggregateTagList(Resource):
 class NewsItem(Resource):
     @auth_required("ASSESS_ACCESS", ACLCheck.NEWS_ITEM_ACCESS)
     def get(self, item_id):
-        return news_item.NewsItem.get(item_id).to_dict()
+        item = news_item.NewsItem.get(item_id)
+        return item.to_json() if item else ("NewsItem not found", 404)
 
     @auth_required("ASSESS_UPDATE", ACLCheck.NEWS_ITEM_MODIFY)
     def put(self, item_id):
@@ -180,7 +181,8 @@ class DownloadAttachment(Resource):
         need_check = attribute_mapping is not None
         attribute = news_item.NewsItemAttribute.get(attribute_id)
         if (
-            need_check
+            attribute
+            and need_check
             and item_data_id == attribute_mapping.news_item_data_id
             and news_item.NewsItemData.allowed_with_acl(
                 attribute_mapping.news_item_data_id,

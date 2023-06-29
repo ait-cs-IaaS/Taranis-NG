@@ -56,7 +56,7 @@ def initialize(app):
     with app.app_context():
         current_authenticator.initialize(app)
 
-    time_manager.schedule_job_every_day("00:00", cleanup_token_blacklist, app)
+    time_manager.schedule_job_every_day("00:00", cleanup_token_blacklist)
 
 
 def get_required_credentials():
@@ -123,7 +123,7 @@ def no_auth(fn):
     return wrapper
 
 
-def get_id_name_by_acl(acl):
+def get_id_name_by_acl(acl) -> str | None:
     if "NEWS_ITEM" in acl.name:
         return "item_id"
     elif "REPORT_ITEM" in acl.name:
@@ -132,6 +132,7 @@ def get_id_name_by_acl(acl):
         return "group_id"
     elif "PRODUCT" in acl.name:
         return "product_id"
+    return None
 
 
 def auth_required(permissions: list | str, acl=None):
@@ -175,7 +176,11 @@ def auth_required(permissions: list | str, acl=None):
                 return error
 
             # if the object does have an ACL, do we match it?
-            if acl and not check_acl(kwargs[get_id_name_by_acl(acl)], acl, user):
+            id_name = get_id_name_by_acl(acl)
+            if not id_name:
+                return fn(*args, **kwargs)
+
+            if acl and not check_acl(kwargs[id_name], acl, user):
                 logger.store_user_auth_error_activity(
                     user,
                     "",

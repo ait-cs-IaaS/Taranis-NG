@@ -9,7 +9,7 @@ from core.model.base_model import BaseModel
 from core.managers.log_manager import logger
 from core.model.user import User
 from core.model.acl_entry import ACLEntry, ItemType
-from core.model.osint_source import OSINTSourceGroup, OSINTSource, OSINTSourceGroupOSINTSource
+from core.model.osint_source import OSINTSourceGroup, OSINTSource
 
 
 class NewsItemData(BaseModel):
@@ -108,17 +108,23 @@ class NewsItemData(BaseModel):
         )
 
     def has_attribute_value(self, value) -> bool:
-        return any(attribute.value == value for attribute in self.attributes)
+        attributes = self.attributes.all()
+        return any(attribute.value == value for attribute in attributes)
 
     @classmethod
     def update_news_item_lang(cls, news_item_id, lang):
         news_item = cls.get(news_item_id)
+        if news_item is None:
+            return "Invalid news item id", 400
         news_item.language = lang
         db.session.commit()
+        return "Language updated", 200
 
     @classmethod
     def update_news_item_attributes(cls, news_item_id, attributes) -> tuple[str, int]:
         news_item = cls.get(news_item_id)
+        if news_item is None:
+            return "Invalid news item id", 400
 
         attributes = NewsItemAttribute.load_multiple(attributes)
         if attributes is None:
@@ -347,7 +353,8 @@ class NewsItem(BaseModel):
     @classmethod
     def update(cls, id, data, user_id):
         news_item = cls.get(id)
-
+        if not news_item:
+            return "not_found", 404
         news_item.update_status(data, user_id)
 
         NewsItemAggregate.update_status(news_item.news_item_aggregate_id)
@@ -816,6 +823,8 @@ class NewsItemAggregate(BaseModel):
             processed_aggregates = {first_aggregate}
             for item in aggregate_ids:
                 aggregate = NewsItemAggregate.get(item)
+                if not aggregate:
+                    continue
                 for news_item in aggregate.news_items[:]:
                     if user is None or NewsItem.allowed_with_acl(news_item.id, user, False, False, True):
                         first_aggregate.news_items.append(news_item)
@@ -836,9 +845,13 @@ class NewsItemAggregate(BaseModel):
             processed_aggregates = set()
             for item in newsitem_ids:
                 news_item = NewsItem.get(item)
+                if not news_item:
+                    continue
                 if not NewsItem.allowed_with_acl(news_item.id, user, False, False, True):
                     continue
                 aggregate = NewsItemAggregate.get(news_item.news_item_aggregate_id)
+                if not aggregate:
+                    continue
                 group_id = aggregate.osint_source_group_id
                 aggregate.news_items.remove(news_item)
                 processed_aggregates.add(aggregate)
@@ -885,8 +898,11 @@ class NewsItemAggregate(BaseModel):
     @classmethod
     def update_status(cls, aggregate_id):
         aggregate = cls.get(aggregate_id)
+        if aggregate is None:
+            return
 
-        if len(aggregate.news_items) == 0:
+        news_items = aggregate.news_items.all()
+        if len(news_items) == 0:
             NewsItemAggregateSearchIndex.remove(aggregate)
             db.session.delete(aggregate)
             return
@@ -896,7 +912,7 @@ class NewsItemAggregate(BaseModel):
         aggregate.important = False
         aggregate.likes = 0
         aggregate.dislikes = 0
-        for news_item in aggregate.news_items:
+        for news_item in news_items:
             aggregate.relevance += news_item.relevance
             aggregate.likes += news_item.likes
             aggregate.dislikes += news_item.dislikes
@@ -905,12 +921,12 @@ class NewsItemAggregate(BaseModel):
 
     @classmethod
     def update_news_items_aggregate_summary(cls, aggregate_id, summary):
-        try:
-            aggregate = cls.get(aggregate_id)
-            aggregate.summary = summary
-            db.session.commit()
-        except Exception:
-            logger.log_debug_trace(f"Update News Aggregate Summary Failed for {aggregate_id}")
+        aggregate = cls.get(aggregate_id)
+        if not aggregate:
+            return "not_found", 404
+        aggregate.summary = summary
+        db.session.commit()
+        return "success", 200
 
     def to_dict(self) -> dict[str, Any]:
         data = super().to_dict()
@@ -919,8 +935,8 @@ class NewsItemAggregate(BaseModel):
                 data[key] = value.isoformat()
         data["news_items"] = [news_item.to_dict() for news_item in self.news_items]
         data["tags"] = [tag.to_dict() for tag in self.tags]
-        if self.news_item_attributes:
-            data["news_item_attributes"] = [news_item_attribute.to_dict() for news_item_attribute in self.news_item_attributes]
+        if news_item_attributes := self.news_item_attributes.all():
+            data["news_item_attributes"] = [news_item_attribute.to_dict() for news_item_attribute in news_item_attributes]
         return data
 
 
