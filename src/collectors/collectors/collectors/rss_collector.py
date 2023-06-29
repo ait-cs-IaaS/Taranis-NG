@@ -134,6 +134,6 @@ class RSSCollector(BaseCollector):
 
         logger.log_collector_activity("rss", source["id"], f'RSS returned feed with {len(feed["entries"])} entries')
 
-        news_items = [self.parse_feed(feed_entry, feed_url, source) for feed_entry in feed["entries"]]
+        news_items = [self.parse_feed(feed_entry, feed_url, source) for feed_entry in feed["entries"][:100]]
 
         self.publish(news_items, source)
