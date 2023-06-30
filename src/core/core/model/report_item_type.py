@@ -80,7 +80,7 @@ class AttributeGroup(BaseModel):
         attribute_group_items = [
             AttributeGroupItem.from_dict(attribute_group_item) for attribute_group_item in data.pop("attribute_group_items")
         ]
-        data.pop("report_item_type_id")
+        data.pop("report_item_type_id", None)
         return cls(attribute_group_items=attribute_group_items, **data)
 
     def to_dict(self):
