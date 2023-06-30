@@ -1091,10 +1091,7 @@ class NewsItemTag(BaseModel):
         offset = filter_args.get("offset", 0)
         limit = filter_args.get("limit", 20)
 
-        if db.session.get_bind().dialect.name == "sqlite":
-            query = query.group_by(cls.name)
-        else:
-            query = query.distinct(cls.name)
+        query = query.group_by(cls.name)
 
         return query.offset(offset).limit(limit).all()
 
