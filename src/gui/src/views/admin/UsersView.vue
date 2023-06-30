@@ -3,7 +3,7 @@
     <DataTable
       v-model:items="users.items"
       :add-button="true"
-      :header-filter="['tag', 'id', 'name', 'username']"
+      :header-filter="['tag', 'id', 'username', 'name']"
       sort-by-item="id"
       :action-column="true"
       @delete-item="deleteItem"

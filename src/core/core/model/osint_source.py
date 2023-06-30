@@ -73,6 +73,9 @@ class OSINTSource(BaseModel):
         if "collector" in data:
             collector_type = data.pop("collector")["type"]
             collector = Collector.find_by_type(collector_type)
+            if not collector:
+                logger.error(f"Collector {collector_type} not found")
+                raise ValueError(f"Collector {collector_type} not found")
             collector_id = collector.id
         else:
             collector_id = data.pop("collector_id")

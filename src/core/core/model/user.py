@@ -85,6 +85,15 @@ class User(BaseModel):
         return data
 
     @classmethod
+    def add(cls: "User", data) -> "User":
+        item = cls.from_dict(data)
+        if not item.password:
+            raise ValueError("Password is required")
+        db.session.add(item)
+        db.session.commit()
+        return item
+
+    @classmethod
     def update(cls, user_id, data) -> tuple[str, int]:
         user = cls.get(user_id)
         if not user:
@@ -97,6 +106,8 @@ class User(BaseModel):
         logger.debug(f"Organization: {organization}")
         user.username = data["username"]
         user.name = data["name"]
+        if password := data.get("password"):
+            user.password = generate_password_hash(password)
         user.organization = organization
         user.profile = profile
         user.roles = roles
