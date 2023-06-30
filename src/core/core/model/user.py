@@ -26,11 +26,12 @@ class User(BaseModel):
     profile_id = db.Column(db.Integer, db.ForeignKey("user_profile.id"))
     profile = db.relationship("UserProfile", cascade="all")
 
-    def __init__(self, username, name, password, organization, roles, permissions, id=None):
+    def __init__(self, username, name, organization, roles, permissions, password=None, id=None):
         self.id = id
         self.username = username
         self.name = name
-        self.password = generate_password_hash(password)
+        if password:
+            self.password = generate_password_hash(password)
         self.organization = Organization.get(organization["id"]) if isinstance(organization, dict) else Organization.get(organization)
         self.roles = [Role.get(role["id"]) for role in roles]
         self.permissions = [Permission.get(permission["id"]) for permission in permissions]
@@ -53,7 +54,7 @@ class User(BaseModel):
         return cls.query.order_by(db.asc(User.name)).all()
 
     @classmethod
-    def get(cls, search, organization):
+    def get_by_filter(cls, search, organization):
         query = cls.query
 
         if organization:
@@ -71,13 +72,13 @@ class User(BaseModel):
 
     @classmethod
     def get_all_json(cls, search=None):
-        users, count = cls.get(search, None)
+        users, count = cls.get_by_filter(search, None)
         items = [user.to_dict() for user in users]
         return {"total_count": count, "items": items}
 
     def to_dict(self):
         data = {c.name: getattr(self, c.name) for c in self.__table__.columns if c.name != "password"}
-        data["organization"] = self.organization_id
+        data["organization"] = data.pop("organization_id")
         data["roles"] = [role.id for role in self.roles]
         data["permissions"] = [permission.id for permission in self.permissions]
         data["tag"] = "mdi-account"
@@ -85,14 +86,20 @@ class User(BaseModel):
 
     @classmethod
     def update(cls, user_id, data) -> tuple[str, int]:
-        user = cls.query.get(user_id)
-        if user is None:
+        user = cls.get(user_id)
+        if not user:
             return f"User {user_id} not found", 404
-        updated_user = cls.from_dict(data)
-        for key, value in vars(updated_user).items():
-            if hasattr(user, key) and key != "id":
-                setattr(user, key, value)
-
+        data.pop("id")
+        data.pop("tag")
+        organization = Organization.get(data.pop("organization"))
+        profile = UserProfile.get(data.pop("profile_id"))
+        roles = [Role.get(role_id) for role_id in data.pop("roles")]
+        logger.debug(f"Organization: {organization}")
+        user.username = data["username"]
+        user.name = data["name"]
+        user.organization = organization
+        user.profile = profile
+        user.roles = roles
         db.session.commit()
         return f"User {user_id} updated", 200
 

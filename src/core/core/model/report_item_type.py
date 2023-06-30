@@ -80,6 +80,7 @@ class AttributeGroup(BaseModel):
         attribute_group_items = [
             AttributeGroupItem.from_dict(attribute_group_item) for attribute_group_item in data.pop("attribute_group_items")
         ]
+        data.pop("report_item_type_id")
         return cls(attribute_group_items=attribute_group_items, **data)
 
     def to_dict(self):
@@ -209,11 +210,13 @@ class ReportItemType(BaseModel):
 
     @classmethod
     def update(cls, report_type_id, data) -> tuple[str, int]:
-        report_type = cls.query.get(report_type_id)
+        report_type = cls.get(report_type_id)
         if not report_type:
             return "Report Type not found", 404
-        for key, value in data.items():
-            if hasattr(report_type, key) and key != "id":
-                setattr(report_type, key, value)
+        report_type.title = data["title"]
+        report_type.description = data["description"]
+        report_type.attribute_groups = [AttributeGroup.from_dict(attribute_group) for attribute_group in data["attribute_groups"]]
+        for attribute_group in report_type.attribute_groups:
+            attribute_group.report_item_type = report_type
         db.session.commit()
         return f"Report Type {report_type.title} updated", 200

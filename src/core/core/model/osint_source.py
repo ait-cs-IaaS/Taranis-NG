@@ -171,7 +171,7 @@ class OSINTSourceGroup(BaseModel):
         self.name = name
         self.description = description
         self.default = default
-        self.osint_sources = [OSINTSource.get(osint_source.id) for osint_source in osint_sources]
+        self.osint_sources = [OSINTSource.get(osint_source) for osint_source in osint_sources]
 
     @classmethod
     def get_all(cls):
@@ -250,7 +250,9 @@ class OSINTSourceGroup(BaseModel):
 
     @classmethod
     def delete(cls, osint_source_group_id):
-        osint_source_group = cls.query.get(osint_source_group_id)
+        osint_source_group = cls.get(osint_source_group_id)
+        if not osint_source_group:
+            return {"message": "No Sourcegroup found"}, 404
         if osint_source_group.default is True:
             return {"message": "could_not_delete_default_group"}, 400
         db.session.delete(osint_source_group)
