@@ -1072,7 +1072,7 @@ class NewsItemTag(BaseModel):
 
     @classmethod
     def get_filtered_tags(cls, filter_args: dict):
-        query = cls.query
+        query = cls.query.with_entities(cls.name, cls.tag_type)
 
         if search := filter_args.get("search"):
             query = query.filter(cls.name.ilike(f"%{search}%"))
@@ -1082,7 +1082,7 @@ class NewsItemTag(BaseModel):
 
         if min_size := filter_args.get("min_size", 2):
             # returns only tags where the name appears at least min_size times in the database
-            query = query.group_by(cls.name).having(func.count(cls.name) >= min_size)
+            query = query.group_by(cls.name, cls.tag_type).having(func.count(cls.name) >= min_size)
 
         return cls.get_rows(query, filter_args)
 
@@ -1090,8 +1090,6 @@ class NewsItemTag(BaseModel):
     def get_rows(cls, query, filter_args: dict):
         offset = filter_args.get("offset", 0)
         limit = filter_args.get("limit", 20)
-
-        query = query.group_by(cls.name)
 
         return query.offset(offset).limit(limit).all()
 
