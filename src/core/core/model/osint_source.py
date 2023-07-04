@@ -88,6 +88,14 @@ class OSINTSource(BaseModel):
         data["tag"] = "mdi-animation-outline"
         return data
 
+    def to_export_dict(self):
+        return {
+            "name": self.name,
+            "description": self.description,
+            "collector_id": self.collector_id,
+            "parameter_values": [parameter_value.to_export_dict() for parameter_value in self.parameter_values],
+        }
+
     @classmethod
     def get_all_with_type(cls):
         sources, count = cls.get_by_filter(None)
@@ -99,7 +107,6 @@ class OSINTSource(BaseModel):
 
     def to_collector_dict(self):
         data = super().to_dict()
-
         data["parameter_values"] = {parameter_value.parameter.key: parameter_value.value for parameter_value in self.parameter_values}
         return data
 
