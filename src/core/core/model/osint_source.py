@@ -1,7 +1,6 @@
 import uuid
 from datetime import datetime
 from typing import Any
-
 from sqlalchemy import or_, and_, nulls_first
 
 from core.managers.db_manager import db
