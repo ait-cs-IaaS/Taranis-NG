@@ -424,14 +424,6 @@ class NewsItemVote(BaseModel):
         for vote in votes:
             db.session.delete(vote)
 
-    @classmethod
-    def delete_for_remote_node(cls, news_item_id, remote_node_id):
-        vote = cls.query.filter_by(news_item_id=news_item_id, remote_node_id=remote_node_id).first()
-        if vote is None:
-            return 0
-        db.session.delete(vote)
-        return 1 if vote.like else -1
-
 
 class NewsItemAggregate(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
