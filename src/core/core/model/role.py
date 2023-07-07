@@ -19,7 +19,7 @@ class Role(BaseModel):
         self.permissions = permissions
 
     @classmethod
-    def find_by_name(cls, role_name):
+    def filter_by_name(cls, role_name):
         return cls.query.filter_by(name=role_name).first()
 
     @classmethod
