@@ -1,5 +1,6 @@
 from pydantic import validator
 from pydantic_settings import BaseSettings
+from typing import Any
 
 
 class Settings(BaseSettings):
@@ -53,7 +54,17 @@ class Settings(BaseSettings):
     PRE_SEED_PASSWORD_ADMIN: str = "admin"
     PRE_SEED_PASSWORD_USER: str = "user"
 
-    CELERY: dict | None = {"broker_url": "amqp://localhost", "result_persistent": False}
+    QUEUE_BROKER_URL: str = "amqp://localhost"
+    CELERY: dict[str, Any] | None = None
+
+    @validator("CELERY", pre=True, always=True)
+    def set_celery(cls, value, values):
+        if value and len(value) > 1:
+            return value
+        return {
+            "broker_url": values["QUEUE_BROKER_URL"],
+            # "result_backend": values["SQLALCHEMY_DATABASE_URI"],
+        }
 
 
 Config = Settings()

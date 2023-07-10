@@ -11,6 +11,8 @@ from core.managers.log_manager import logger
 def get_collectors_info(node: CollectorsNode):
     try:
         collectors_info, status_code = CollectorsApi(node.api_url, node.api_key).get_collectors_info()
+        if not collectors_info:
+            return None, status_code
     except ConnectionError:
         return f"Connection error: Could not reach {node.api_url}", 500
     except Exception:
@@ -25,6 +27,8 @@ def get_collectors_info(node: CollectorsNode):
 
 def update_collectors_node(node_id, data):
     node = CollectorsNode.get(node_id)
+    if not node:
+        return f"Collector Node with ID: {node_id} not found", 404
     collectors, status_code = get_collectors_info(node)
     if status_code != 200:
         return collectors, status_code
@@ -60,13 +64,17 @@ def delete_osint_source(osint_source_id):
 
 
 def refresh_osint_source(osint_source_id):
-    osint_source = OSINTSource.get(osint_source_id)
-    refresh_collector(osint_source.collector_id)
+    if osint_source := OSINTSource.get(osint_source_id):
+        refresh_collector(osint_source.collector_id)
+    else:
+        return f"OSINT Source with ID: {osint_source_id} not found", 404
 
 
 def refresh_collector(collector_id):
     try:
         collector = Collector.get(collector_id)
+        if not collector:
+            return f"Collector with ID: {collector_id} not found", 404
         if node := CollectorsNode.get_first():
             CollectorsApi(node.api_url, node.api_key).refresh_collector(collector.type)
     except ConnectionError:
