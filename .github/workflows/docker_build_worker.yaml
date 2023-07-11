@@ -1,14 +1,10 @@
-name: Presenters Docker image
+name: Worker Docker image
 
 on:
   push:
     paths:
-    - 'src/presenters/**'
-    - 'docker/Dockerfile.presenters'
-    - 'docker/start.sh'
-    - 'docker/prestart.sh'
-    - 'docker/entrypoint.sh'
-    - 'docker/gunicorn_conf.py'
+    - 'src/worker/**'
+    - 'docker/Dockerfile.worker'
     branches:
     - master
     - awake
@@ -30,11 +26,11 @@ jobs:
       - name: get ghcr owner repository
         run: |
           echo "GHCR_OWNER=${GITHUB_REPOSITORY_OWNER,,}" >>${GITHUB_ENV}
-      - name: Build and push presenters
+      - name: Build and push worker image
         uses: docker/build-push-action@v3
         with:
-          file: docker/Dockerfile.presenters
+          file: docker/Dockerfile.worker
           push: true
           tags: |
-            ghcr.io/${{ env.GHCR_OWNER }}/taranis-ng-presenters:latest
-            ghcr.io/${{ env.GHCR_OWNER }}/taranis-ng-presenters:${{ github.ref_name }}
+            ghcr.io/${{ env.GHCR_OWNER }}/taranis-ng-worker:latest
+            ghcr.io/${{ env.GHCR_OWNER }}/taranis-ng-worker:${{ github.ref_name }}

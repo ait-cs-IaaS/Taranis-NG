@@ -1,9 +1,9 @@
+from worker.config import Config
 from celery import Celery
 from celery.schedules import crontab
+import sys
 
-from collector import task1, task2
-from core.config import Config
-from core.managers.log_manager import logger
+from worker.log import logger
 
 
 class CeleryWorker:
@@ -17,8 +17,8 @@ class CeleryWorker:
     def setup_periodic_tasks(self):
         jobs = [
             # run task 1 every minute and task 2 every 2 minutes
-            {"task": task1.s("testX"), "schedule": 10.0},
-            {"task": task2.s(), "schedule": crontab(minute="*/2")},
+            # {"task": task1.s("testX"), "schedule": 10.0},
+            # {"task": task2.s(), "schedule": crontab(minute="*/2")},
         ]
 
         for job in jobs:
@@ -39,6 +39,9 @@ class CeleryWorker:
         )
 
 
-cw = CeleryWorker()
-cw.setup_periodic_tasks()
-celery = cw.app
+if __name__ == "worker":
+    cw = CeleryWorker()
+    if "beat" in sys.argv:
+        logger.log_info("Starting celery beat")
+        cw.setup_periodic_tasks()
+    celery = cw.app
