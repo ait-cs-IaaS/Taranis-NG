@@ -12,8 +12,14 @@
       @selection-change="selectionChange"
     >
       <template #titlebar>
-        <v-btn color="blue-grey" dark class="ml-4" @click="triggerWorkers">
-          <v-icon>mdi-run</v-icon>Trigger Workers
+        <v-btn
+          color="blue-grey"
+          dark
+          class="ml-4"
+          prepend-icon="mdi-run"
+          @click="triggerWorkers"
+        >
+          Trigger Workers
         </v-btn>
       </template>
     </DataTable>

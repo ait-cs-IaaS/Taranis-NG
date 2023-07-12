@@ -340,6 +340,14 @@ export function createOSINTSource(source) {
   return ApiService.post('/config/osint-sources', source)
 }
 
+export function collectOSINTSSource(source_id) {
+  return ApiService.post(`/config/osint-sources/?${source_id}/collect`)
+}
+
+export function collectAllOSINTSSources() {
+  return ApiService.post('/config/collect-osint-sources')
+}
+
 export function updateOSINTSource(source) {
   return ApiService.put(`/config/osint-sources/${source.id}`, source)
 }

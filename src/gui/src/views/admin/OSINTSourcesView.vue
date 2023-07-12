@@ -14,6 +14,28 @@
     >
       <template #titlebar>
         <ImportExport @import="importData" @export="exportData"></ImportExport>
+        <v-btn
+          color="blue-grey"
+          dark
+          class="ml-4"
+          prepend-icon="mdi-run"
+          @click="collectAllSources"
+        >
+          Collect Sources
+        </v-btn>
+      </template>
+      <template #actionColumn="source">
+        <v-tooltip left>
+          <template #activator="{ props }">
+            <v-icon
+              v-bind="props"
+              color="secondary"
+              icon="mdi-run"
+              @click.stop="collectSource(source.item)"
+            />
+          </template>
+          <span>Collect Source</span>
+        </v-tooltip>
       </template>
     </DataTable>
     <EditConfig
@@ -34,7 +56,9 @@ import {
   createOSINTSource,
   updateOSINTSource,
   exportOSINTSources,
-  importOSINTSources
+  importOSINTSources,
+  collectOSINTSSource,
+  collectAllOSINTSSources
 } from '@/api/config'
 import {
   notifySuccess,
@@ -46,7 +70,7 @@ import {
 import { storeToRefs } from 'pinia'
 import { useConfigStore } from '@/stores/ConfigStore'
 import { useMainStore } from '@/stores/MainStore'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, toRaw } from 'vue'
 
 export default {
   name: 'OSINTSourcesView',
@@ -223,10 +247,36 @@ export default {
         queryString = 'ids=' + selected.value.join('&ids=')
       }
       exportOSINTSources(queryString)
+        .then(() => {
+          notifySuccess('Successfully exported')
+        })
+        .catch(() => {
+          notifyFailure('Failed to export')
+        })
     }
 
     const selectionChange = (selected) => {
       selected.value = selected.map((item) => item.id)
+    }
+
+    const collectAllSources = () => {
+      collectAllOSINTSSources()
+        .then(() => {
+          notifySuccess('Successfully collected all sources')
+        })
+        .catch(() => {
+          notifyFailure('Failed to collect all sources')
+        })
+    }
+
+    const collectSource = (source) => {
+      collectOSINTSSource(source.id)
+        .then(() => {
+          notifySuccess(`Successfully collected ${source.name}`)
+        })
+        .catch(() => {
+          notifyFailure(`Failed to collect ${source.name}`)
+        })
     }
 
     return {
@@ -247,6 +297,8 @@ export default {
       updateItem,
       importData,
       exportData,
+      collectSource,
+      collectAllSources,
       selectionChange
     }
   }

@@ -77,7 +77,7 @@
 
       <template #item.actions="{ item }">
         <div class="d-inline-flex">
-          <slot name="actionColumn"></slot>
+          <slot name="actionColumn" :item="item.raw"></slot>
           <v-tooltip left>
             <template #activator="{ props }">
               <v-icon
