@@ -9,12 +9,11 @@ from worker.log import logger
 from worker.core_api import CoreApi
 
 class BaseCollector:
-    type = "BASE_COLLECTOR"
-    name = "Base Collector"
-    description = "Base abstract type for all collectors"
-
     def __init__(self):
-        self.osint_sources = []
+        self.type = "BASE_COLLECTOR"
+        self.name = "Base Collector"
+        self.description = "Base abstract type for all collectors"
+
         self.core_api = CoreApi()
 
     def filter_by_word_list(self, news_items, source):
@@ -36,7 +35,11 @@ class BaseCollector:
                     break
         return filtered_news_items
 
-    def sanitize_html(self, html):
+
+    def collect(self, source: dict):
+        pass
+
+    def sanitize_html(self, html: str):
         html = re.sub(r"(?i)(&nbsp;|\xa0)", " ", html, re.DOTALL)
         return BeautifulSoup(html, "lxml").text
 

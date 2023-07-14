@@ -1,9 +1,11 @@
-from worker.config import Config
+import sys
 from celery import Celery
 from celery.schedules import crontab
-import sys
 
+from worker.config import Config
 from worker.log import logger
+from worker.core_api import CoreApi
+from worker.tasks import collect
 
 
 class CeleryWorker:
@@ -13,17 +15,20 @@ class CeleryWorker:
         self.app = Celery(__name__)
         self.app.config_from_object(celery_config)
         self.app.set_default()
+        self.core_api = CoreApi()
+
 
     def setup_periodic_tasks(self):
-        jobs = [
-            # run task 1 every minute and task 2 every 2 minutes
-            # {"task": task1.s("testX"), "schedule": 10.0},
-            # {"task": task2.s(), "schedule": crontab(minute="*/2")},
-        ]
+        jobs = self.core_api.get_periodic_tasks()
+
+        if jobs is None:
+            logger.log_info("No periodic tasks to schedule")
+            return
 
         for job in jobs:
-            self.app.add_periodic_task(schedule=job["schedule"], sig=job["task"])
-
+            if "schedule" not in job:
+                job["schedule"] = "hourly"
+            self.schedule_collector(job["id"], job["schedule"])
         logger.log_info("Periodic tasks scheduled")
 
     def schedule_job_every_day(self, job):
@@ -36,6 +41,12 @@ class CeleryWorker:
         self.app.add_periodic_task(
             schedule=crontab(minute="0"),
             sig=job,
+        )
+
+    def schedule_collector(self, id, schedule):
+        self.app.add_periodic_task(
+            schedule=schedule,
+            sig=collect.s(id),
         )
 
 

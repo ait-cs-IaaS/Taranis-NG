@@ -23,25 +23,52 @@ class CoreApi:
             )
             return response.json()
         except Exception:
-            return None, 400
+            return None
 
-    def get_osint_sources(self, collector_type: str) -> dict | None:
+
+    def get_periodic_tasks(self):
         try:
             response = requests.get(
-                f"{self.api_url}/api/v1/collectors/osint-sources/{quote(collector_type)}",
+                f"{self.api_url}/api/v1/beat/periodic-tasks",
+                headers=self.headers,
+            )
+            return response.json()
+        except Exception:
+            return None
+
+
+    def get_osint_source(self, source_id: str) -> dict | None:
+        try:
+            response = requests.get(
+                f"{self.api_url}/api/v1/worker/osint-sources/{source_id}",
                 headers=self.headers,
                 verify=self.verify,
             )
 
-            if response.ok:
-                return response.json()
-
-            logger.critical(f"Can't get OSINT Sources: {response.text}")
-            return None
+            return self.parse_osint_source(response)
         except Exception:
             logger.log_debug_trace("Can't get OSINT Sources")
             return None
 
+
+    def get_osint_sources(self, collector_type: str) -> dict | None:
+        try:
+            response = requests.get(
+                f"{self.api_url}/api/v1/collectors/osint-sources/{quote(string=collector_type)}",
+                headers=self.headers,
+                verify=self.verify,
+            )
+
+            return self.parse_osint_source(response)
+        except Exception:
+            logger.log_debug_trace("Can't get OSINT Sources")
+            return None
+
+    def parse_osint_source(self, response):
+        if response.ok:
+            return response.json()
+        logger.critical(f"Can't get OSINT Sources: {response.text}")
+        return None
 
     def update_news_item_attributes(self, id, attributes):
         try:
@@ -52,7 +79,7 @@ class CoreApi:
             )
             return response.status_code
         except Exception:
-            return None, 400
+            return None
 
     def update_news_item_tags(self, id, tags):
         try:
@@ -64,7 +91,7 @@ class CoreApi:
             return response.status_code
         except Exception:
             logger.log_debug_trace("update_news_item_tags failed")
-            return None, 400
+            return None
 
     def delete_word_list_category_entries(self, id, name):
         try:
@@ -74,7 +101,7 @@ class CoreApi:
             )
             return response.status_code
         except Exception:
-            return None, 400
+            return None
 
     def update_word_list_category_entries(self, id, name, entries):
         try:
@@ -85,7 +112,7 @@ class CoreApi:
             )
             return response.status_code
         except Exception:
-            return None, 400
+            return None
 
     def get_categories(self, id):
         try:
@@ -95,7 +122,7 @@ class CoreApi:
             )
             return response.json()
         except Exception:
-            return None, 400
+            return None
 
     def add_word_list_category(self, id, category):
         try:
@@ -106,7 +133,7 @@ class CoreApi:
             )
             return response.status_code
         except Exception:
-            return None, 400
+            return None
 
     def get_news_items_aggregate(self, source_group, limit):
         try:
@@ -117,7 +144,7 @@ class CoreApi:
             return response.json(), response.status_code
         except Exception:
             logger.log_debug_trace("get_news_items_aggregate failed")
-            return None, 400
+            return None
 
     def news_items_grouping(self, data):
         try:
@@ -128,7 +155,7 @@ class CoreApi:
             )
             return response.status_code
         except Exception:
-            return None, 400
+            return None
 
     def add_news_items(self, news_items) -> bool:
         try:

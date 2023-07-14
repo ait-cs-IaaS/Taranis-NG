@@ -11,6 +11,7 @@ from core.managers import (
     bots_manager,
     external_auth_manager,
     collectors_manager,
+    queue_manager,
 )
 from core.managers.log_manager import logger
 from core.managers.auth_manager import auth_required, get_user_from_jwt
@@ -36,7 +37,6 @@ from core.model import (
     user,
     word_list,
 )
-from core.model.news_item import NewsItemAggregate
 from core.model.permission import Permission
 
 
@@ -391,10 +391,10 @@ class OSINTSource(Resource):
         return collectors_manager.delete_osint_source(source_id)
 
 
-class OSINTSourceRefresh(Resource):
+class OSINTSourceCollect(Resource):
     @auth_required("CONFIG_OSINT_SOURCE_ACCESS")
-    def put(self, source_id):
-        return collectors_manager.refresh_osint_source(source_id)
+    def post(self, source_id):
+        return queue_manager.collect_osint_source(source_id)
 
 
 class OSINTSourcesExport(Resource):
@@ -651,7 +651,7 @@ def initialize(api):
 
     namespace.add_resource(OSINTSources, "/osint-sources")
     namespace.add_resource(OSINTSource, "/osint-sources/<string:source_id>")
-    namespace.add_resource(OSINTSourceRefresh, "/osint-sources/<string:source_id>/refresh")
+    namespace.add_resource(OSINTSourceCollect, "/osint-sources/<string:source_id>/collect")
     namespace.add_resource(OSINTSourcesExport, "/export-osint-sources")
     namespace.add_resource(OSINTSourcesImport, "/import-osint-sources")
     namespace.add_resource(OSINTSourceGroups, "/osint-source-groups")

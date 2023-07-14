@@ -12,13 +12,38 @@ from worker.log import logger
 
 
 class RSSCollector(BaseCollector):
-    type = "RSS_COLLECTOR"
-    name = "RSS Collector"
-    description = "Collector for gathering data from RSS feeds"
 
-    news_items = []
-    proxies = None
-    headers = {}
+    def __init__(self):
+        super().__init__()
+        self.type = "RSS_COLLECTOR"
+        self.name = "RSS Collector"
+        self.description = "Collector for gathering data from RSS feeds"
+
+        self.news_items = []
+        self.proxies = None
+        self.headers = {}
+
+
+    def collect(self, source):
+        feed_url = source["parameter_values"].get("FEED_URL", None)
+        if not feed_url:
+            logger.warning("No FEED_URL set")
+            return "No FEED_URL set"
+
+        logger.info(f"RSS-Feed {source['id']} Starting collector for url: {feed_url}")
+
+        if user_agent := source["parameter_values"].get("USER_AGENT", None):
+            self.headers = {"User-Agent": user_agent}
+
+        try:
+            self.rss_collector(feed_url, source)
+        except Exception as e:
+            logger.exception()
+            logger.error(f"RSS collector for {feed_url} failed with error: {str(e)}")
+            return str(e)
+
+        logger.log_debug(f"{self.type} collection finished.")
+        return None
 
     def set_proxies(self, proxy_server: str):
         self.proxies = {"http": proxy_server, "https": proxy_server, "ftp": proxy_server}
@@ -45,27 +70,6 @@ class RSSCollector(BaseCollector):
         soup = BeautifulSoup(html_content, features="html.parser")
         content_text = [p.text.strip() for p in soup.findAll(content_location)]
         return " ".join([w.replace("\xa0", " ") for w in content_text])
-
-    def collect(self, source):
-        feed_url = source["parameter_values"].get("FEED_URL", None)
-        if not feed_url:
-            logger.warning("No FEED_URL set")
-            return "No FEED_URL set"
-
-        logger.info(f"RSS-Feed {source['id']} Starting collector for url: {feed_url}")
-
-        if user_agent := source["parameter_values"].get("USER_AGENT", None):
-            self.headers = {"User-Agent": user_agent}
-
-        try:
-            self.rss_collector(feed_url, source)
-        except Exception as e:
-            logger.exception()
-            logger.error(f"RSS collector for {feed_url} failed with error: {str(e)}")
-            return str(e)
-
-        logger.log_debug(f"{self.type} collection finished.")
-        return None
 
     def content_from_feed(self, feed_entry, content_location: str) -> tuple[bool, str]:
         content_locations = [content_location, "content", "content:encoded"]

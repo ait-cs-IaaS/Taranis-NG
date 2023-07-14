@@ -3,7 +3,7 @@
     <DataTable
       :items="sources"
       :add-button="true"
-      :header-filter="['tag', 'state', 'name', 'description', 'FEED_URL']"
+      :header-filter="['tag', 'state', 'name', 'FEED_URL']"
       sort-by-item="id"
       :action-column="true"
       @delete-item="deleteItem"
@@ -70,7 +70,7 @@ import {
 import { storeToRefs } from 'pinia'
 import { useConfigStore } from '@/stores/ConfigStore'
 import { useMainStore } from '@/stores/MainStore'
-import { ref, computed, onMounted, toRaw } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 export default {
   name: 'OSINTSourcesView',

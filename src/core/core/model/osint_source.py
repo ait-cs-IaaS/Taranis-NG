@@ -114,7 +114,20 @@ class OSINTSource(BaseModel):
     def to_collector_dict(self):
         data = super().to_dict()
         data["parameter_values"] = {parameter_value.parameter.key: parameter_value.value for parameter_value in self.parameter_values}
+        data["type"] = Collector.get_type(self.collector_id)
         return data
+
+    def to_scheduler_dict(self):
+        schedule = {
+            "schedule": parameter_value.value
+            for parameter_value in self.parameter_values
+            if parameter_value.parameter.key == "REFRESH_INTERVAL"
+        }
+        return {
+            "id": self.id,
+            "name": self.name,
+            **schedule,
+        }
 
     @classmethod
     def get_all_by_type(cls, collector_type: str):
@@ -123,9 +136,11 @@ class OSINTSource(BaseModel):
         return [source.to_collector_dict() for source in sources]
 
     @classmethod
-    def get_all_for_collector(cls, collector):
-        sources = cls.query.filter_by(collector_type=collector).all()
-        return [source.to_dict() for source in sources]
+    def get_schedule_by_type(cls):
+        sources = cls.query.order_by(
+            db.nulls_first(db.asc(OSINTSource.last_collected)), db.nulls_first(db.asc(OSINTSource.last_attempted))
+        ).all()
+        return [source.to_scheduler_dict() for source in sources]
 
     @classmethod
     def add(cls, data):

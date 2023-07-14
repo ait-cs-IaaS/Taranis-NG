@@ -4,6 +4,7 @@ import socket
 import logging
 import traceback
 from typing import Optional
+from celery.signals import after_setup_logger, after_setup_task_logger
 
 from worker.config import Config
 
@@ -112,3 +113,11 @@ class Logger(TaranisLogger):
 
 
 logger = Logger(module=Config.MODULE_ID, colored=Config.COLORED_LOGS, debug=Config.DEBUG, gunicorn=False, syslog_address=None)
+
+
+@after_setup_logger.connect
+def setup_loggers(logger, *args, **kwargs):
+    logger.setLevel(logging.INFO)
+
+    # if Config.DEBUG:
+    #    logger.setLevel(logging.DEBUG)

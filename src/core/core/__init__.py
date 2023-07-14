@@ -28,6 +28,6 @@ def initialize_managers(app):
 
     auth_manager.initialize(app)
     api_manager.initialize(app)
-    queue_manager.QueueManager(app)
+    queue_manager.initialize(app)
 
     log_manager.logger.log_info("All Done")

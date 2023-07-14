@@ -1,6 +1,9 @@
 from celery import Celery
 from flask import Flask
-from celery.bin import worker
+
+from core.managers.log_manager import logger
+
+celery: Celery = Celery()
 
 
 class QueueManager:
@@ -13,3 +16,25 @@ class QueueManager:
         celery_app.set_default()
         app.extensions["celery"] = celery_app
         return celery_app
+
+
+def initialize(app: Flask):
+    global celery
+    celery = QueueManager(app).celery
+
+
+periodic_tasks = [
+    {"task": "cleanup_token_blacklist", "schedule": "daily"},
+]
+
+
+def periodic_collection_tasks():
+    from core.model.osint_source import OSINTSource
+
+    return OSINTSource.get_schedule_by_type()
+
+
+def collect_osint_source(source_id: str):
+    celery.send_task("worker.tasks.collect", args=[source_id])
+    logger.info(f"Collect for source {source_id} scheduled")
+    return {"message": f"Refresh for source {source_id} scheduled"}, 200
