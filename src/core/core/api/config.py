@@ -384,7 +384,7 @@ class OSINTSource(Resource):
         source = osint_source.OSINTSource.update(source_id, request.json)
         if not source:
             return f"OSINT Source with ID: {source_id} not found", 404
-        queue_manager.update_osint_source(source)
+        queue_manager.schedule_osint_source(source)
         return f"OSINT Source {source.name} updated", 200
 
     @auth_required("CONFIG_OSINT_SOURCE_DELETE")

@@ -1,5 +1,6 @@
 from celery.beat import Scheduler, ScheduleEntry
 from datetime import datetime, timezone
+from celery.schedules import crontab
 
 from worker.core_api import CoreApi
 from worker.log import logger
@@ -24,8 +25,23 @@ class RESTScheduler(Scheduler):
     def get_schedule_from_core(self):
         if schedule := self.core_api.get_schedule():
             logger.info(f"Got schedule: {schedule}")
-            return {entry['name']: self.Entry(**entry) for entry in schedule}
+            schedule_dict = {}
+            for entry in schedule:
+                entry['schedule'] = self.parse_schedule(entry)
+                entry['app'] = self.app
+                schedule_dict[entry['name']] = self.Entry(**entry)
+            return schedule_dict
         return {}
+
+    def parse_schedule(self, entry):
+        if schedule_content := entry.get("schedule"):
+            if schedule_content == 'hourly':
+                return crontab(minute="0")
+            if schedule_content == 'daily':
+                return crontab(minute="0", hour="0")
+            if schedule_content == 'weekly':
+                return crontab(minute="0", hour="0", day_of_week="0")
+        return crontab(minute="0")
 
     def set_to_backend(self):
         self.core_api.update_schedule(self.schedule)

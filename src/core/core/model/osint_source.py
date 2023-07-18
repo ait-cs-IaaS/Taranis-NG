@@ -102,7 +102,7 @@ class OSINTSource(BaseModel):
         return ParameterValue.find_param_value(self.parameter_values, "REFRESH_INTERVAL") or "0 0 * * *"
 
     def to_task_dict(self):
-        return {"id": self.to_task_id(), "name": "worker.tasks.collect", "schedule": self.get_schedule(), "args": [self.id]}
+        return {"id": self.to_task_id(), "task": "worker.tasks.collect", "schedule": self.get_schedule(), "args": [self.id]}
 
     def to_export_dict(self):
         return {

@@ -4,15 +4,15 @@ from flask_restx import Resource, Namespace
 from core.managers.auth_manager import api_key_required
 from core.managers.log_manager import logger
 from core.model.osint_source import OSINTSource
-from core.model.queue import ScheduleEntry, Schedule
+from core.model.queue import ScheduleEntry
 
 
 class QueueSchedule(Resource):
     @api_key_required
     def get(self):
         try:
-            if schedules := Schedule.get_all():
-                return [sched.to_dict() for sched in schedules], 200
+            if schedules := ScheduleEntry.get_all():
+                return [sched.to_worker_dict() for sched in schedules], 200
             return {"message": "No schedules found"}, 404
         except Exception:
             logger.log_debug_trace()
@@ -26,7 +26,7 @@ class QueueSchedule(Resource):
             entries = [ScheduleEntry.from_dict(entry) for entry in data]
             if not entries:
                 return {"message": "No entries provided"}, 400
-            return Schedule.sync(entries), 200
+            return ScheduleEntry.sync(entries), 200
         except Exception:
             logger.log_debug_trace()
 
