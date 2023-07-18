@@ -36,6 +36,7 @@ from core.model import (
     role,
     user,
     word_list,
+    queue,
 )
 from core.model.permission import Permission
 
@@ -151,12 +152,6 @@ class Permissions(Resource):
     def get(self):
         search = request.args.get(key="search", default=None)
         return Permission.get_all_json(search)
-
-
-class ExternalPermissions(Resource):
-    @auth_required("MY_ASSETS_CONFIG")
-    def get(self):
-        return Permission.get_external_permissions_json()
 
 
 class Roles(Resource):
@@ -337,9 +332,28 @@ class Parameters(Resource):
 
 
 class RefreshWorkers(Resource):
-    @auth_required("CONFIG_COLLECTORS_NODE_UPDATE")
     def post(self):
         bots_manager.refresh_bots()
+
+
+class QueueSchedule(Resource):
+    @auth_required("CONFIG_WORKER_ACCESS")
+    def get(self):
+        try:
+            if schedules := queue.ScheduleEntry.get_all():
+                return [sched.to_dict() for sched in schedules], 200
+            return {"message": "No schedules found"}, 404
+        except Exception:
+            logger.log_debug_trace()
+
+
+class Workers(Resource):
+    @auth_required("CONFIG_WORKER_ACCESS")
+    def get(self):
+        try:
+            return queue_manager.queue_manager.ping_workers()
+        except Exception:
+            logger.log_debug_trace()
 
 
 class OSINTSources(Resource):
@@ -378,8 +392,8 @@ class OSINTSource(Resource):
         source = osint_source.OSINTSource.get(source_id)
         if not source:
             return f"OSINT Source with ID: {source_id} not found", 404
-        osint_source.OSINTSource.delete(source_id)
         queue_manager.unschedule_osint_source(source)
+        osint_source.OSINTSource.delete(source_id)
         return f"OSINT Source {source.name} deleted", 200
 
 
@@ -617,7 +631,6 @@ def initialize(api):
     namespace.add_resource(ProductType, "/product-types/<int:type_id>")
 
     namespace.add_resource(Permissions, "/permissions")
-    namespace.add_resource(ExternalPermissions, "/external-permissions")
     namespace.add_resource(Roles, "/roles")
     namespace.add_resource(Role, "/roles/<int:role_id>")
     namespace.add_resource(ACLEntries, "/acls")
@@ -636,6 +649,8 @@ def initialize(api):
     namespace.add_resource(WordList, "/word-lists/<int:word_list_id>")
 
     namespace.add_resource(RefreshWorkers, "/workers/refresh")
+    namespace.add_resource(QueueSchedule, "/workers/schedule")
+    namespace.add_resource(Workers, "/workers")
     namespace.add_resource(Collectors, "/collectors", "/collectors/<string:collector_type>")
     namespace.add_resource(Bots, "/bots", "/bots/<string:bot_id>")
     namespace.add_resource(Parameters, "/parameters")

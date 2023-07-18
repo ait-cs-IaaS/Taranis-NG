@@ -6,6 +6,9 @@ from core.model.queue import Schedule
 from core.model.osint_source import OSINTSource
 
 queue_manager: "QueueManager"
+periodic_tasks = [
+    {"id": "cleanup_token_blacklist", "name": "worker.tasks.cleanup_token_blacklist", "schedule": "daily", "args": []},
+]
 
 
 class QueueManager:
@@ -13,6 +16,8 @@ class QueueManager:
         self.celery = self.init_app(app)
         Schedule.ensure_single_instance()
         self.queue = Schedule.get_instance()
+        self.add_periodic_tasks()
+        self.update_task_queue_from_osint_sources()
 
     def init_app(self, app: Flask):
         celery_app = Celery(app.name)
@@ -21,12 +26,22 @@ class QueueManager:
         app.extensions["celery"] = celery_app
         return celery_app
 
+    def add_periodic_tasks(self):
+        for task in periodic_tasks:
+            self.queue.add_or_update(task)
+
     def update_task_queue_from_osint_sources(self):
         from core.model.osint_source import OSINTSource
 
         sources = OSINTSource.get_all()
         for source in sources:
-            self.queue.add_entry(source.to_task_dict())
+            self.queue.add_or_update(source.to_task_dict())
+
+    def ping_workers(self):
+        result = self.celery.control.ping()
+        workers = [{"name": list(worker.keys())[0], "status": list(list(worker.values())[0].keys())[0]} for worker in result]
+        logger.info(f"Workers: {workers}")
+        return workers
 
 
 def initialize(app: Flask):
@@ -34,14 +49,9 @@ def initialize(app: Flask):
     queue_manager = QueueManager(app)
 
 
-periodic_tasks = [
-    {"task": "cleanup_token_blacklist", "schedule": "daily"},
-]
-
-
 def schedule_osint_source(source: OSINTSource):
     entry = source.to_task_dict()
-    queue_manager.queue.add_entry(entry)
+    queue_manager.queue.add_or_update(entry)
     logger.info(f"Schedule for source {source.id} updated")
     return {"message": f"Schedule for source {source.id} updated"}, 200
 

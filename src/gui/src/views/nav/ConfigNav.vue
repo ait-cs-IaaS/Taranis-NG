@@ -42,6 +42,12 @@ export default {
         permission: 'CONFIG_ACL_ACCESS'
       },
       {
+        icon: 'mdi-account-hard-hat',
+        title: 'nav_menu.workers',
+        route: '/config/workers',
+        permission: 'CONFIG_WORKER_ACCESS'
+      },
+      {
         icon: 'mdi-server-network',
         title: 'nav_menu.nodes',
         route: '/config/nodes',

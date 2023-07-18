@@ -40,12 +40,6 @@ class Schedule(BaseModel):
             db.session.commit()
         return len(instances)
 
-    def add_entry(self, entry_data):
-        entry = ScheduleEntry.from_dict(entry_data)
-        self.entries.append(entry)
-        db.session.commit()
-        return entry, 200
-
     def delete_entry(self, entry_id):
         entry = ScheduleEntry.get(entry_id)
         if not entry:
@@ -61,6 +55,16 @@ class Schedule(BaseModel):
             return entry, 200
         return f"Schedule Entry {entry_data['id']} not found", 404
 
+    def add_or_update(self, entry_data):
+        if entry := ScheduleEntry.get(entry_data["id"]):
+            entry.update(entry_data)
+            db.session.commit()
+            return entry, 200
+        entry = ScheduleEntry.from_dict(entry_data)
+        self.entries.append(entry)
+        db.session.commit()
+        return entry, 200
+
 
 class ScheduleEntry(BaseModel):
     id = db.Column(db.String, primary_key=True)
@@ -70,7 +74,7 @@ class ScheduleEntry(BaseModel):
 
     schedule = db.Column(db.String)
     args = db.Column(db.String)
-    last_run_at = db.Column(db.DateTime, default=datetime.now)
+    last_run_at = db.Column(db.DateTime)
     total_run_count = db.Column(db.Integer)
 
     def __init__(self, id, name, schedule, args):

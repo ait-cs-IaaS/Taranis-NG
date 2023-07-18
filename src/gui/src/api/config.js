@@ -89,11 +89,6 @@ export function getAllPermissions(filter_data) {
   return ApiService.get(`/config/permissions?${filter}`)
 }
 
-export function getAllExternalPermissions(filter_data) {
-  const filter = ApiService.getQueryStringFromNestedObject(filter_data)
-  return ApiService.get(`/config/external-permissions?${filter}`)
-}
-
 export function getAllRoles(filter_data) {
   const filter = ApiService.getQueryStringFromNestedObject(filter_data)
   return ApiService.get(`/config/roles?${filter}`)
@@ -284,6 +279,14 @@ export function getAllNodes(filter_data) {
 
 export function triggerNode() {
   return ApiService.post('/config/workers/refresh')
+}
+
+export function getAllSchedule() {
+  return ApiService.get('/config/workers/schedule')
+}
+
+export function getAllWorkers() {
+  return ApiService.get('/config/workers')
 }
 
 export function updateNode(node) {
