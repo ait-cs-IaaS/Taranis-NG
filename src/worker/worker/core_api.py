@@ -199,3 +199,11 @@ class CoreApi:
         except Exception:
             logger.log_debug_trace("Cannot update OSINT Source status")
             return False
+
+    def cleanup_token_blacklist(self):
+        try:
+            response = requests.post(f"{self.api_url}/api/v1/worker/token-blacklist", headers=self.headers, verify=self.verify)
+            return response.ok
+        except Exception:
+            logger.log_debug_trace("Cannot cleanup token blacklist")
+            return False
