@@ -32,8 +32,8 @@ class Settings(BaseSettings):
             "ignore_result": True,
             "broker_connection_retry_on_startup": True,
             "broker_connection_retry": False, # To suppress deprecation warning
+            "beat_scheduler": "worker.scheduler:RESTScheduler",
         }
-
 
 
 Config = Settings()

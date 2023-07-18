@@ -42,53 +42,6 @@ def update_collectors_node(node_id, data):
     return node.id, status_code
 
 
-def add_osint_source(data):
-    osint_source = OSINTSource.add(data)
-    refresh_collector(osint_source.collector_id)
-    return {"id": osint_source.id, "message": "OSINT source created successfully"}, 201
-
-
-def update_osint_source(osint_source_id, data):
-    osint_source = OSINTSource.update(osint_source_id, data)
-    refresh_collector(osint_source.collector_id)
-    return f"OSINT Source {osint_source.name} updated", 200
-
-
-def delete_osint_source(osint_source_id):
-    osint_source = OSINTSource.get(osint_source_id)
-    if not osint_source:
-        return f"OSINT Source with ID: {osint_source_id} not found", 404
-    OSINTSource.delete(osint_source.id)
-    refresh_collector(osint_source.collector_id)
-    return f"OSINT Source {osint_source.name} deleted", 200
-
-
-def refresh_osint_source(osint_source_id):
-    if osint_source := OSINTSource.get(osint_source_id):
-        refresh_collector(osint_source.collector_id)
-    else:
-        return f"OSINT Source with ID: {osint_source_id} not found", 404
-
-
-def refresh_collector(collector_id):
-    try:
-        collector = Collector.get(collector_id)
-        if not collector:
-            return f"Collector with ID: {collector_id} not found", 404
-        if node := CollectorsNode.get_first():
-            CollectorsApi(node.api_url, node.api_key).refresh_collector(collector.type)
-    except ConnectionError:
-        logger.critical("Connection error: Could not reach Collector")
-
-
-def refresh_collectors():
-    try:
-        if node := CollectorsNode.get_first():
-            CollectorsApi(node.api_url, node.api_key).refresh_collectors()
-    except ConnectionError:
-        logger.critical("Connection error: Could not reach Collector")
-
-
 def export_osint_sources():
     data = OSINTSource.get_all()
     data = cleanup_paramaters(data)

@@ -2,13 +2,17 @@ from celery import Celery
 from flask import Flask
 
 from core.managers.log_manager import logger
+from core.model.queue import Schedule
+from core.model.osint_source import OSINTSource
 
-celery: Celery = Celery()
+queue_manager: "QueueManager"
 
 
 class QueueManager:
     def __init__(self, app: Flask):
         self.celery = self.init_app(app)
+        Schedule.ensure_single_instance()
+        self.queue = Schedule.get_instance()
 
     def init_app(self, app: Flask):
         celery_app = Celery(app.name)
@@ -17,10 +21,17 @@ class QueueManager:
         app.extensions["celery"] = celery_app
         return celery_app
 
+    def update_task_queue_from_osint_sources(self):
+        from core.model.osint_source import OSINTSource
+
+        sources = OSINTSource.get_all()
+        for source in sources:
+            self.queue.add_entry(source.to_task_dict())
+
 
 def initialize(app: Flask):
-    global celery
-    celery = QueueManager(app).celery
+    global queue_manager
+    queue_manager = QueueManager(app)
 
 
 periodic_tasks = [
@@ -28,13 +39,28 @@ periodic_tasks = [
 ]
 
 
-def periodic_collection_tasks():
-    from core.model.osint_source import OSINTSource
+def schedule_osint_source(source: OSINTSource):
+    entry = source.to_task_dict()
+    queue_manager.queue.add_entry(entry)
+    logger.info(f"Schedule for source {source.id} updated")
+    return {"message": f"Schedule for source {source.id} updated"}, 200
 
-    return OSINTSource.get_schedule_by_type()
+
+def unschedule_osint_source(source: OSINTSource):
+    entry_id = source.to_task_dict()["id"]
+    queue_manager.queue.delete_entry(entry_id)
+    logger.info(f"Schedule for source {source.id} removed")
+    return {"message": f"Schedule for source {source.id} removed"}, 200
+
+
+def update_osint_source(source: OSINTSource):
+    entry = source.to_task_dict()
+    queue_manager.queue.update_entry(entry)
+    logger.info(f"Schedule for source {source.id} updated")
+    return {"message": f"Schedule for source {source.id} updated"}, 200
 
 
 def collect_osint_source(source_id: str):
-    celery.send_task("worker.tasks.collect", args=[source_id])
+    queue_manager.celery.send_task("worker.tasks.collect", args=[source_id])
     logger.info(f"Collect for source {source_id} scheduled")
     return {"message": f"Refresh for source {source_id} scheduled"}, 200

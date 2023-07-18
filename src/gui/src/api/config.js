@@ -287,9 +287,6 @@ export function triggerNode() {
 }
 
 export function updateNode(node) {
-  if (node.type === 'collector') {
-    return ApiService.put(`/config/collectors-nodes/${node.id}`, node)
-  }
   if (node.type === 'bot') {
     return ApiService.put(`/config/bots-nodes/${node.id}`, node)
   }
@@ -302,9 +299,6 @@ export function updateNode(node) {
 }
 
 export function createNode(node) {
-  if (node.type === 'collector') {
-    return ApiService.post('/config/collectors-nodes', node)
-  }
   if (node.type === 'bot') {
     return ApiService.post('/config/bots-nodes', node)
   }
@@ -317,9 +311,6 @@ export function createNode(node) {
 }
 
 export function deleteNode(node) {
-  if (node.type === 'collector') {
-    return ApiService.delete(`/config/collectors-nodes/${node.id}`, node)
-  }
   if (node.type === 'bot') {
     return ApiService.delete(`/config/bots-nodes/${node.id}`, node)
   }

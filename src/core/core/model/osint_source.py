@@ -40,8 +40,10 @@ class OSINTSource(BaseModel):
             self.word_lists.extend(WordList.get(word_list.id) for word_list in word_lists)
 
     @classmethod
-    def get_all(cls):
-        return cls.query.order_by(OSINTSource.name).all()
+    def get_all(cls) -> list["OSINTSource"]:
+        return cls.query.order_by(
+            db.nulls_first(db.asc(OSINTSource.last_collected)), db.nulls_first(db.asc(OSINTSource.last_attempted))
+        ).all()
 
     @classmethod
     def get_by_filter(cls, search=None):
@@ -71,7 +73,6 @@ class OSINTSource(BaseModel):
         [data.pop(key, None) for key in drop_keys if key in data]
 
         parameter_values = [ParameterValue.from_dict(parameter_value) for parameter_value in data.pop("parameter_values", [])]
-        word_lists = [WordList.get(word_list_id) for word_list_id in data.pop("word_lists", [])]
         collector_type = None
         if "collector" in data:
             collector_type = data.pop("collector")["type"]
@@ -85,7 +86,7 @@ class OSINTSource(BaseModel):
             collector_id = collector.id
         else:
             collector_id = data.pop("collector_id")
-        return cls(parameter_values=parameter_values, word_lists=word_lists, collector_id=collector_id, **data)
+        return cls(parameter_values=parameter_values, collector_id=collector_id, **data)
 
     def to_dict(self):
         data = super().to_dict()
@@ -94,11 +95,20 @@ class OSINTSource(BaseModel):
         data["tag"] = "mdi-animation-outline"
         return data
 
+    def to_task_id(self):
+        return f"osint_source_{self.id}_{self.collector.type}"
+
+    def get_schedule(self):
+        return ParameterValue.find_param_value(self.parameter_values, "REFRESH_INTERVAL") or "0 0 * * *"
+
+    def to_task_dict(self):
+        return {"id": self.to_task_id(), "name": "worker.tasks.collect", "schedule": self.get_schedule(), "args": [self.id]}
+
     def to_export_dict(self):
         return {
             "name": self.name,
             "description": self.description,
-            "collector_type": Collector.get_type(self.collector_id),
+            "collector_type": self.collector.type,
             "parameter_values": [parameter_value.to_export_dict() for parameter_value in self.parameter_values],
         }
 
@@ -117,30 +127,11 @@ class OSINTSource(BaseModel):
         data["type"] = Collector.get_type(self.collector_id)
         return data
 
-    def to_scheduler_dict(self):
-        schedule = {
-            "schedule": parameter_value.value
-            for parameter_value in self.parameter_values
-            if parameter_value.parameter.key == "REFRESH_INTERVAL"
-        }
-        return {
-            "id": self.id,
-            "name": self.name,
-            **schedule,
-        }
-
     @classmethod
     def get_all_by_type(cls, collector_type: str):
         query = cls.query.join(Collector, OSINTSource.collector_id == Collector.id).filter(Collector.type == collector_type)
         sources = query.order_by(db.nulls_first(db.asc(OSINTSource.last_collected)), db.nulls_first(db.asc(OSINTSource.last_attempted))).all()
         return [source.to_collector_dict() for source in sources]
-
-    @classmethod
-    def get_schedule_by_type(cls):
-        sources = cls.query.order_by(
-            db.nulls_first(db.asc(OSINTSource.last_collected)), db.nulls_first(db.asc(OSINTSource.last_attempted))
-        ).all()
-        return [source.to_scheduler_dict() for source in sources]
 
     @classmethod
     def add(cls, data):
@@ -196,13 +187,15 @@ class OSINTSourceGroup(BaseModel):
     default = db.Column(db.Boolean(), default=False)
 
     osint_sources = db.relationship("OSINTSource", secondary="osint_source_group_osint_source")
+    word_lists = db.relationship("WordList", secondary="osint_source_group_word_list")
 
-    def __init__(self, name, description, osint_sources=[], default=False, id=None):
+    def __init__(self, name, description, osint_sources=None, default=False, word_lists=None, id=None):
         self.id = id or str(uuid.uuid4())
         self.name = name
         self.description = description
         self.default = default
-        self.osint_sources = [OSINTSource.get(osint_source) for osint_source in osint_sources]
+        self.osint_sources = [OSINTSource.get(osint_source) for osint_source in osint_sources] if osint_sources else []
+        self.word_lists = [WordList.get(word_list.id) for word_list in word_lists] if word_lists else []
 
     @classmethod
     def get_all(cls):
@@ -275,8 +268,9 @@ class OSINTSourceGroup(BaseModel):
         return {"total_count": count, "items": items}
 
     def to_dict(self):
-        data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
-        data["osint_sources"] = [(osint_source.id if osint_source else "") for osint_source in self.osint_sources]
+        data = super().to_dict()
+        data["osint_sources"] = [osint_source.id for osint_source in self.osint_sources if osint_source]
+        data["word_lists"] = [word_list.id for word_list in self.word_lists if word_list]
         return data
 
     @classmethod
@@ -298,6 +292,7 @@ class OSINTSourceGroup(BaseModel):
         osint_source_group.name = data["name"]
         osint_source_group.description = data["description"]
         osint_source_group.osint_sources = [OSINTSource.get(osint_source) for osint_source in data.pop("osint_sources", [])]
+        osint_source_group.word_lists = [WordList.get(word_list) for word_list in data.pop("word_lists", [])]
         db.session.commit()
         return f"Succussfully updated {osint_source_group.id}", 201
 
@@ -311,3 +306,8 @@ class OSINTSourceGroup(BaseModel):
 class OSINTSourceGroupOSINTSource(BaseModel):
     osint_source_group_id = db.Column(db.String, db.ForeignKey("osint_source_group.id", ondelete="CASCADE"), primary_key=True)
     osint_source_id = db.Column(db.String, db.ForeignKey("osint_source.id", ondelete="CASCADE"), primary_key=True)
+
+
+class OSINTSourceGroupWordList(BaseModel):
+    osint_source_group_id = db.Column(db.String, db.ForeignKey("osint_source_group.id", ondelete="CASCADE"), primary_key=True)
+    word_list_id = db.Column(db.Integer, db.ForeignKey("word_list.id", ondelete="CASCADE"), primary_key=True)

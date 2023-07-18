@@ -15,6 +15,14 @@ class CoreApi:
     def get_headers(self) -> dict:
         return {"Authorization": f"Bearer {self.api_key}", "Content-type": "application/json"}
 
+
+    def parse_osint_source(self, response):
+        if response.ok:
+            return response.json()
+        logger.critical(f"Can't get OSINT Sources: {response.text}")
+        return None
+
+
     def get_news_items_data(self, limit):
         try:
             response = requests.get(
@@ -64,11 +72,27 @@ class CoreApi:
             logger.log_debug_trace("Can't get OSINT Sources")
             return None
 
-    def parse_osint_source(self, response):
-        if response.ok:
-            return response.json()
-        logger.critical(f"Can't get OSINT Sources: {response.text}")
-        return None
+    def get_schedule(self):
+        try:
+            response = requests.get(
+                f"{self.api_url}/api/v1/beat/schedule",
+                headers=self.headers,
+            )
+            return response.json() if response.ok else None
+        except Exception:
+            return None
+
+
+    def update_schedule(self, schedule):
+        try:
+            response = requests.put(
+                f"{self.api_url}/api/v1/beat/schedule",
+                json=schedule,
+                headers=self.headers,
+            )
+            return response.status_code
+        except Exception:
+            return None
 
     def update_news_item_attributes(self, id, attributes):
         try:

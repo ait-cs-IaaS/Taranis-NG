@@ -336,30 +336,9 @@ class Parameters(Resource):
         return parameter.Parameter.get_all_json()
 
 
-class CollectorsNodes(Resource):
-    @auth_required("CONFIG_COLLECTORS_NODE_ACCESS")
-    def get(self):
-        search = request.args.get(key="search", default=None)
-        return collectors_node.CollectorsNode.get_all_json(search)
-
-    @auth_required("CONFIG_COLLECTORS_NODE_CREATE")
-    def post(self):
-        node = collectors_node.CollectorsNode.add(request.json)
-        return {"id": node.id, "message": "Node created successfully"}, 200
-
-    @auth_required("CONFIG_COLLECTORS_NODE_UPDATE")
-    def put(self, node_id):
-        collectors_manager.update_collectors_node(node_id, request.json)
-
-    @auth_required("CONFIG_COLLECTORS_NODE_DELETE")
-    def delete(self, node_id):
-        collectors_node.CollectorsNode.delete(node_id)
-
-
 class RefreshWorkers(Resource):
     @auth_required("CONFIG_COLLECTORS_NODE_UPDATE")
     def post(self):
-        collectors_manager.refresh_collectors()
         bots_manager.refresh_bots()
 
 
@@ -371,7 +350,11 @@ class OSINTSources(Resource):
 
     @auth_required("CONFIG_OSINT_SOURCE_CREATE")
     def post(self):
-        return collectors_manager.add_osint_source(request.json)
+        source = osint_source.OSINTSource.add(request.json)
+        if not source:
+            return "OSINT source could not be created", 400
+        queue_manager.schedule_osint_source(source)
+        return {"id": source.id, "message": "OSINT source created successfully"}, 201
 
 
 class OSINTSource(Resource):
@@ -384,11 +367,20 @@ class OSINTSource(Resource):
 
     @auth_required("CONFIG_OSINT_SOURCE_UPDATE")
     def put(self, source_id):
-        return collectors_manager.update_osint_source(source_id, request.json)
+        source = osint_source.OSINTSource.update(source_id, request.json)
+        if not source:
+            return f"OSINT Source with ID: {source_id} not found", 404
+        queue_manager.update_osint_source(source)
+        return f"OSINT Source {source.name} updated", 200
 
     @auth_required("CONFIG_OSINT_SOURCE_DELETE")
     def delete(self, source_id):
-        return collectors_manager.delete_osint_source(source_id)
+        source = osint_source.OSINTSource.get(source_id)
+        if not source:
+            return f"OSINT Source with ID: {source_id} not found", 404
+        osint_source.OSINTSource.delete(source_id)
+        queue_manager.unschedule_osint_source(source)
+        return f"OSINT Source {source.name} deleted", 200
 
 
 class OSINTSourceCollect(Resource):
@@ -643,7 +635,6 @@ def initialize(api):
     namespace.add_resource(WordLists, "/word-lists")
     namespace.add_resource(WordList, "/word-lists/<int:word_list_id>")
 
-    namespace.add_resource(CollectorsNodes, "/collectors-nodes", "/collectors-nodes/<string:node_id>")
     namespace.add_resource(RefreshWorkers, "/workers/refresh")
     namespace.add_resource(Collectors, "/collectors", "/collectors/<string:collector_type>")
     namespace.add_resource(Bots, "/bots", "/bots/<string:bot_id>")
