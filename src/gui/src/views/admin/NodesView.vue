@@ -1,5 +1,6 @@
 <template>
   <div>
+    <DeprecationWarning />
     <DataTable
       v-model:items="nodes.items"
       :add-button="false"
@@ -34,6 +35,7 @@
 
 <script>
 import DataTable from '@/components/common/DataTable.vue'
+import DeprecationWarning from '@/components/common/DeprecationWarning.vue'
 import EditConfig from '@/components/config/EditConfig.vue'
 import { deleteNode, createNode, updateNode, triggerNode } from '@/api/config'
 import { useConfigStore } from '@/stores/ConfigStore'
@@ -45,6 +47,7 @@ import { storeToRefs } from 'pinia'
 export default {
   name: 'NodesView',
   components: {
+    DeprecationWarning,
     DataTable,
     EditConfig
   },
