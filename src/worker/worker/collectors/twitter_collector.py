@@ -4,8 +4,7 @@ import uuid
 import tweepy
 
 from .base_collector import BaseCollector
-from shared.schema.news_item import NewsItemData
-from collectors.managers.log_manager import logger
+from worker.log import logger
 
 
 class TwitterCollector(BaseCollector):
@@ -71,24 +70,24 @@ class TwitterCollector(BaseCollector):
 
                     for_hash = author + tweet_id + str(preview)
 
-                    news_item = NewsItemData(
-                        uuid.uuid4(),
-                        hashlib.sha256(for_hash.encode()).hexdigest(),
-                        title,
-                        preview,
-                        url,
-                        link,
-                        published,
-                        author,
-                        datetime.datetime.now(),
-                        content,
-                        source["id"],
-                        attributes,
-                    )
+                    news_item = {
+                        "id": str(uuid.uuid4()),
+                        "hash": hashlib.sha256(for_hash.encode()).hexdigest(),
+                        "title": title,
+                        "review": preview,
+                        "source": url,
+                        "link": link,
+                        "published": published,
+                        "author": author,
+                        "collected": datetime.datetime.now(),
+                        "content": content,
+                        "osint_source_id": source["id"],
+                        "attributes": [],
+                    }
 
                     news_items.append(news_item)
 
             self.publish(news_items, source)
         except Exception:
             logger.exception()
-            logger.collector_exception(source, "Could not collect Tweeets")
+            logger.error(f"Could not collect Tweeets {source['id']}")

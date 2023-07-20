@@ -19,8 +19,7 @@ import dateparser
 import re
 
 from .base_collector import BaseCollector
-from collectors.managers.log_manager import logger
-from shared.schema.news_item import NewsItemData, NewsItemAttribute
+from worker.log import logger
 
 import traceback
 
@@ -647,21 +646,25 @@ class WebCollector(BaseCollector):
 
         author = self.__find_element_text_by(browser, self.selectors["author"])
 
-        for_hash = author + title + article_description
-        news_item = NewsItemData(
-            uuid.uuid4(),
-            hashlib.sha256(for_hash.encode()).hexdigest(),
-            title,
-            article_description,
-            self.web_url,
-            link,
-            published,
-            author,
-            datetime.datetime.now(),
-            article_full_text,
-            self.source["id"],
-            [],
-        )
+        author = author or ""
+        title = title or ""
+        article_description = article_description or ""
+        for_hash: str = author + title + link
+
+        news_item = {
+            "id": str(uuid.uuid4()),
+            "hash": hashlib.sha256(for_hash.encode()).hexdigest(),
+            "title": title,
+            "review": article_description,
+            "source": self.web_url,
+            "link": link,
+            "published": published,
+            "author": author,
+            "collected": datetime.datetime.now(),
+            "content": article_full_text,
+            "osint_source_id": self.source["id"],
+            "attributes": [],
+        }
 
         if self.selectors["additional_id"]:
             value = self.__find_element_text_by(browser, self.selectors["additional_id"])
@@ -669,6 +672,6 @@ class WebCollector(BaseCollector):
                 key = "Additional_ID"
                 binary_mime_type = ""
                 binary_value = ""
-                attribute = NewsItemAttribute(uuid.uuid4(), key, value, binary_mime_type, binary_value)
-                news_item.attributes.append(attribute)
+                attribute = { "id": uuid.uuid4(), "key": key, "value": value, "binary_mime_type": binary_mime_type, "binary_value": binary_value }
+                news_item["attributes"].append(attribute)
         return news_item

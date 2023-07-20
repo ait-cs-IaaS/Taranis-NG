@@ -4,6 +4,7 @@ WORKDIR /app/
 
 RUN python -m pip install --upgrade pip
 RUN apt-get update && apt-get upgrade -y
+RUN groupadd user && useradd --home-dir /app -g user user
 
 COPY ./src/worker/setup.cfg ./src/worker/setup.py /app/
 
@@ -15,11 +16,10 @@ RUN apt-get install --no-install-recommends -y \
     apt-get autoremove -y --purge &&\
     apt-get clean
 
+USER user
 COPY ./src/worker/. /app/
 ENV PYTHONPATH=/app
 
-VOLUME ["/app/storage"]
-
 ENTRYPOINT [ "celery" ]
 
-CMD ["--app worker worker"]
+CMD ["--app", "worker", "worker"]

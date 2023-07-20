@@ -8,9 +8,8 @@ import email.header
 import email.utils
 import socket
 
-from collectors.managers.log_manager import logger
+from worker.log import logger
 from .base_collector import BaseCollector
-from shared.schema.news_item import NewsItemData, NewsItemAttribute
 
 
 class EmailCollector(BaseCollector):
@@ -29,7 +28,7 @@ class EmailCollector(BaseCollector):
         proxy_server = source["parameter_values"]["PROXY_SERVER"]
 
         def proxy_tunnel():
-            server = email_server_type.lower() + "." + email_server_hostname.lower()
+            server = f"{email_server_type.lower()}.{email_server_hostname.lower()}"
             port = email_server_port
 
             server_proxy = proxy_server.rsplit(":", 1)[0]
@@ -67,20 +66,20 @@ class EmailCollector(BaseCollector):
 
                 for_hash = author + title + message_id
 
-                news_item = NewsItemData(
-                    uuid.uuid4(),
-                    hashlib.sha256(for_hash.encode()).hexdigest(),
-                    title,
-                    review,
-                    url,
-                    link,
-                    published,
-                    author,
-                    datetime.datetime.now(),
-                    content,
-                    source["id"],
-                    attributes,
-                )
+                news_item = {
+                    "id": str(uuid.uuid4()),
+                    "hash": hashlib.sha256(for_hash.encode()).hexdigest(),
+                    "title": title,
+                    "review": review,
+                    "source": url,
+                    "link": link,
+                    "published": published,
+                    "author": author,
+                    "collected": datetime.datetime.now(),
+                    "content": content,
+                    "osint_source_id": source["id"],
+                    "attributes": [],
+                }
 
                 if part.get_content_maintype() == "multipart":
                     pass
@@ -89,12 +88,12 @@ class EmailCollector(BaseCollector):
 
                 file_name = part.get_filename()
 
-                if file_name:
-                    binary_mime_type = part.get_content_type()
-                    binary_value = part.get_payload()
+                # if file_name:
+                #     binary_mime_type = part.get_content_type()
+                #     binary_value = part.get_payload()
 
-                    news_attribute = NewsItemAttribute(uuid.uuid4(), key, value, binary_mime_type, binary_value)
-                    news_item.attributes.append(news_attribute)
+                #     news_attribute = NewsItemAttribute(uuid.uuid4(), key, value, binary_mime_type, binary_value)
+                #     news_item.attributes.append(news_attribute)
 
                 news_items.append(news_item)
 
@@ -104,13 +103,13 @@ class EmailCollector(BaseCollector):
                     proxy_tunnel()
 
                 connection = imaplib.IMAP4_SSL(
-                    email_server_type.lower() + "." + email_server_hostname.lower(),
+                    f"{email_server_type.lower()}.{email_server_hostname.lower()}",
                     email_server_port,
                 )
                 connection.login(email_username, email_password)
                 connection.select("inbox")
 
-                result, data = connection.uid("search", None, "UNSEEN")
+                _, data = connection.uid("search", "", "UNSEEN")
                 i = len(data[0].split())
 
                 for x in range(i):
@@ -134,7 +133,7 @@ class EmailCollector(BaseCollector):
                     proxy_tunnel()
 
                 connection = poplib.POP3_SSL(
-                    email_server_type.lower() + "." + email_server_hostname.lower(),
+                    f"{email_server_type.lower()}.{email_server_hostname.lower()}",
                     email_server_port,
                 )
                 connection.user(email_username)

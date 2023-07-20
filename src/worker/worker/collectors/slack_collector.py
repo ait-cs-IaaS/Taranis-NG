@@ -6,7 +6,7 @@ from slackclient import SlackClient
 import socket
 
 from .base_collector import BaseCollector
-from shared.schema.news_item import NewsItemData
+from worker.log import logger
 
 
 class SlackCollector(BaseCollector):
@@ -35,9 +35,7 @@ class SlackCollector(BaseCollector):
                 s.send(str.encode(connection))
                 s.recv(4096)
             except Exception:
-                print("OSINTSource ID: " + source["id"])
-                print("OSINTSource name: " + source.name)
-                print("Proxy connection failed")
+                logger.debug(f"OSINTSource ID: {source['id']} OSINTSource name: {source['name']} Proxy connection failed")
 
         slack_client = SlackClient(source["parameter_values"]["SLACK_API_TOKEN"])
 
@@ -74,20 +72,20 @@ class SlackCollector(BaseCollector):
 
                                 for_hash = author + channel + content
 
-                                news_item = NewsItemData(
-                                    uuid.uuid4(),
-                                    hashlib.sha256(for_hash.encode()).hexdigest(),
-                                    title,
-                                    preview,
-                                    url,
-                                    link,
-                                    published,
-                                    author,
-                                    datetime.datetime.now(),
-                                    content,
-                                    source["id"],
-                                    [],
-                                )
+                                news_item = {
+                                    "id": str(uuid.uuid4()),
+                                    "hash": hashlib.sha256(for_hash.encode()).hexdigest(),
+                                    "title": title,
+                                    "review": preview,
+                                    "source": url,
+                                    "link": link,
+                                    "published": published,
+                                    "author": author,
+                                    "collected": datetime.datetime.now(),
+                                    "content": content,
+                                    "osint_source_id": source["id"],
+                                    "attributes": [],
+                                }
 
                                 news_items.append(news_item)
 
@@ -98,6 +96,4 @@ class SlackCollector(BaseCollector):
                     print("Deleted message")
                     pass
         else:
-            print("OSINTSource ID: " + source["id"])
-            print("OSINTSource name: " + source.name)
-            print("ERROR")
+            logger.debug(f"OSINTSource ID: {source['id']} OSINTSource name: {source['name']} Proxy connection failed")

@@ -69,28 +69,6 @@ services:
         max-size: "200k"
         max-file: "10"
 
-  bots:
-    depends_on:
-      core:
-        condition: service_healthy
-    deploy:
-      restart_policy:
-        condition: on-failure
-        max_attempts: 3
-    image: "${DOCKER_IMAGE_NAMESPACE}/taranis-ng-bots:${TARANIS_NG_TAG:-latest}"
-    environment:
-      API_KEY: "${API_KEY}"
-      TARANIS_NG_CORE_URL: "http://core"
-      TARANIS_NG_CORE_SSE: "http://core/sse"
-      WORKERS_PER_CORE: "1"
-      WEB_CONCURRENCY: "1"
-      DEBUG: "${DEBUG:-False}"
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "200k"
-        max-file: "10"
-
   beat:
     depends_on:
       - rabbitmq

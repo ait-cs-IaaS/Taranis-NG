@@ -228,12 +228,6 @@ parameters = [
         "type": "STRING",
     },
     {
-        "description": "Full url for Atom feed",
-        "name": "Atom feed URL",
-        "key": "ATOM_FEED_URL",
-        "type": "STRING",
-    },
-    {
         "name": "Source Group",
         "key": "SOURCE_GROUP",
         "description": "OSINT Source group to inspect",
@@ -465,17 +459,6 @@ collectors = [
             "ADDITIONAL_ID_SELECTOR",
         ],
         "type": "WEB_COLLECTOR",
-    },
-    {
-        "description": "Collector for gathering data from Atom feeds",
-        "name": "Atom Collector",
-        "parameters": [
-            "ATOM_FEED_URL",
-            "USER_AGENT",
-            "PROXY_SERVER",
-            "REFRESH_INTERVAL",
-        ],
-        "type": "ATOM_COLLECTOR",
     },
     {
         "description": "Collector for manual input of news items",
