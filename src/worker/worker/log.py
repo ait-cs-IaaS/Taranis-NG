@@ -118,6 +118,6 @@ logger = Logger(module=Config.MODULE_ID, colored=Config.COLORED_LOGS, debug=Conf
 @after_setup_logger.connect
 def setup_loggers(logger, *args, **kwargs):
     logger.setLevel(logging.INFO)
+    if Config.DEBUG:
+        logger.setLevel(logging.DEBUG)
 
-    # if Config.DEBUG:
-    #    logger.setLevel(logging.DEBUG)

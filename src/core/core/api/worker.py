@@ -5,6 +5,38 @@ from core.managers.auth_manager import api_key_required
 from core.managers.log_manager import logger
 from core.model.osint_source import OSINTSource
 from core.model.queue import ScheduleEntry
+import core.managers.queue_manager
+
+
+class QueueScheduleEntry(Resource):
+    @api_key_required
+    def get(self, schedule_id: str):
+        try:
+            if schedule := ScheduleEntry.get(schedule_id):
+                return schedule.to_worker_dict(), 200
+            return {"message": f"Schedule with id {schedule_id} not found"}, 404
+        except Exception:
+            logger.log_debug_trace()
+
+
+class NextRunTime(Resource):
+    @api_key_required
+    def get(self):
+        try:
+            return core.managers.queue_manager.queue_manager.next_run_time, 200
+        except Exception:
+            logger.log_debug_trace()
+
+    @api_key_required
+    def put(self):
+        try:
+            data = request.json
+            if not data:
+                return {"message": "No data provided"}, 400
+            core.managers.queue_manager.queue_manager.next_run_time.update(data)
+            return {"message": "Next run time updated"}, 200
+        except Exception:
+            logger.log_debug_trace()
 
 
 class QueueSchedule(Resource):
@@ -48,6 +80,14 @@ def initialize(api):
     beat_namespace.add_resource(
         QueueSchedule,
         "/schedule",
+    )
+    beat_namespace.add_resource(
+        QueueScheduleEntry,
+        "/schedule/<string:schedule_id>",
+    )
+    beat_namespace.add_resource(
+        NextRunTime,
+        "/next-run-time",
     )
     worker_namespace.add_resource(
         Sources,

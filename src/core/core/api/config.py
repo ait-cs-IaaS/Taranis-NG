@@ -360,14 +360,16 @@ class OSINTSources(Resource):
     @auth_required("CONFIG_OSINT_SOURCE_ACCESS")
     def get(self):
         search = request.args.get(key="search", default=None)
-        return osint_source.OSINTSource.get_all_json(search)
+        result_dict = osint_source.OSINTSource.get_all_json(search)
+        if result_dict["total_count"] == 0:
+            return result_dict, 404
+        return result_dict, 200
 
     @auth_required("CONFIG_OSINT_SOURCE_CREATE")
     def post(self):
         source = osint_source.OSINTSource.add(request.json)
         if not source:
             return "OSINT source could not be created", 400
-        queue_manager.schedule_osint_source(source)
         return {"id": source.id, "message": "OSINT source created successfully"}, 201
 
 
@@ -376,15 +378,13 @@ class OSINTSource(Resource):
     def get(self, source_id):
         if source := osint_source.OSINTSource.get(source_id):
             return source.to_dict(), 200
-        else:
-            return "OSINT source not found", 404
+        return "OSINT source not found", 404
 
     @auth_required("CONFIG_OSINT_SOURCE_UPDATE")
     def put(self, source_id):
         source = osint_source.OSINTSource.update(source_id, request.json)
         if not source:
             return f"OSINT Source with ID: {source_id} not found", 404
-        queue_manager.schedule_osint_source(source)
         return f"OSINT Source {source.name} updated", 200
 
     @auth_required("CONFIG_OSINT_SOURCE_DELETE")
@@ -392,7 +392,6 @@ class OSINTSource(Resource):
         source = osint_source.OSINTSource.get(source_id)
         if not source:
             return f"OSINT Source with ID: {source_id} not found", 404
-        queue_manager.unschedule_osint_source(source)
         osint_source.OSINTSource.delete(source_id)
         return f"OSINT Source {source.name} deleted", 200
 

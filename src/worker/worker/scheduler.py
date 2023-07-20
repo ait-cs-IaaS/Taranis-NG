@@ -1,16 +1,34 @@
+import time
 from celery.beat import Scheduler, ScheduleEntry
 from datetime import datetime, timezone
 from celery.schedules import crontab
+from datetime import timedelta
 
 from worker.core_api import CoreApi
 from worker.log import logger
 
+# class RESTScheduleEntry(ScheduleEntry):
+#     def is_due(self):
+#         return super(RESTScheduleEntry, self).is_due()
+
+#     def next(self):
+#         return super(RESTScheduleEntry, self).next()
+
+
 class RESTScheduleEntry(ScheduleEntry):
     def is_due(self):
         return super(RESTScheduleEntry, self).is_due()
+        # self.due_check_count += 1
+        # if self.due_check_count >= 100:
+        #     self.due_check_count = 0
+        #     next_run_time = datetime.now(timezone.utc) + timedelta(seconds=int(next_time_to_run)) # type: ignore
+        #     logger.debug(f'Task {self.name}: next_run_time={next_run_time}')
+        #     self.core_api.update_next_run_time(next_run_time)
+        # return is_due, next_time_to_run
 
     def next(self):
         return super(RESTScheduleEntry, self).next()
+
 
 class RESTScheduler(Scheduler):
     Entry = RESTScheduleEntry
@@ -19,29 +37,24 @@ class RESTScheduler(Scheduler):
         super(RESTScheduler, self).__init__(*args, **kwargs)
         self.core_api = CoreApi()
         self.schedule = self.get_schedule_from_core()
+        self.last_checked = datetime.now(timezone.utc)
         self.max_interval = 60
 
 
     def get_schedule_from_core(self):
         if schedule := self.core_api.get_schedule():
-            logger.info(f"Got schedule: {schedule}")
+            logger.debug(f"Got schedule: {schedule}")
             schedule_dict = {}
             for entry in schedule:
-                entry['schedule'] = self.parse_schedule(entry)
                 entry['app'] = self.app
                 schedule_dict[entry['name']] = self.Entry(**entry)
+                logger.debug(f'Added task {entry} to schedule')
+                _, next_time_to_run = schedule_dict[entry["name"]].is_due()
+                next_run_time = datetime.now(timezone.utc) + timedelta(seconds=int(next_time_to_run))
+                logger.debug(f'Task {entry["name"]}: next_run_time={next_run_time}')
+                self.core_api.update_next_run_time(entry["name"], next_run_time)
             return schedule_dict
         return {}
-
-    def parse_schedule(self, entry):
-        if schedule_content := entry.get("schedule"):
-            if schedule_content == 'hourly':
-                return crontab(minute="0")
-            if schedule_content == 'daily':
-                return crontab(minute="0", hour="0")
-            if schedule_content == 'weekly':
-                return crontab(minute="0", hour="0", day_of_week="0")
-        return crontab(minute="0")
 
     def set_to_backend(self):
         self.core_api.update_schedule(self.schedule)
@@ -61,3 +74,12 @@ class RESTScheduler(Scheduler):
     def get_schedule(self):
         self.schedule = self.get_schedule_from_core()
         return self.schedule
+
+    def tick(self):
+        now = datetime.now(timezone.utc)
+        if (now - self.last_checked).total_seconds() >= self.max_interval:
+            self.last_checked = now
+            if self.schedule_changed():
+                self.schedule = self.get_schedule()
+        time.sleep(0.1)
+        super(RESTScheduler, self).tick()

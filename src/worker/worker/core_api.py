@@ -1,5 +1,7 @@
 import requests
 from urllib.parse import quote
+from datetime import datetime
+
 from worker.log import logger
 from worker.config import Config
 
@@ -27,17 +29,6 @@ class CoreApi:
         try:
             response = requests.get(
                 f"{self.api_url}/api/v1/bots/news-item-data?limit={limit}",
-                headers=self.headers,
-            )
-            return response.json()
-        except Exception:
-            return None
-
-
-    def get_periodic_tasks(self):
-        try:
-            response = requests.get(
-                f"{self.api_url}/api/v1/beat/periodic-tasks",
                 headers=self.headers,
             )
             return response.json()
@@ -198,6 +189,14 @@ class CoreApi:
             return response.ok
         except Exception:
             logger.log_debug_trace("Cannot update OSINT Source status")
+            return False
+
+    def update_next_run_time(self, name: str, next_run_time: datetime):
+        try:
+            response = requests.put(f"{self.api_url}/api/v1/beat/next-run-time", headers=self.headers, verify=self.verify, json={name: next_run_time.isoformat()})
+            return response.ok
+        except Exception:
+            logger.log_debug_trace("Cannot update schedule entry")
             return False
 
     def cleanup_token_blacklist(self):

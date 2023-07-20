@@ -51,6 +51,11 @@ class ScheduleEntry(BaseModel):
             db.session.commit()
         return "Schedule updated", 200
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "ScheduleEntry":
+        data["args"] = ",".join(data.get("args", []))
+        return ScheduleEntry(**data)
+
     def to_dict(self) -> dict[str, Any]:
         data = super().to_dict()
         data["last_run_at"] = self.last_run_at.isoformat() if self.last_run_at else None
@@ -59,5 +64,19 @@ class ScheduleEntry(BaseModel):
     def to_worker_dict(self) -> dict[str, Any]:
         data = super().to_dict()
         data["name"] = data.pop("id")
+        data["args"] = data.get("args", "").split(",")
+        if schedule := data.get("schedule"):
+            if schedule == "hourly":
+                data["schedule"] = 3600 * 60
+            elif schedule == "daily":
+                data["schedule"] = 86400 * 60
+            elif schedule == "weekly":
+                data["schedule"] = 604800 * 60
+            elif type(schedule) == int:
+                data["schedule"] = schedule * 60
+            elif type(schedule) == str and schedule.isdigit():
+                data["schedule"] = int(schedule) * 60
+            else:
+                data["schedule"] = 600 * 60
         data["last_run_at"] = self.last_run_at.isoformat() if self.last_run_at else None
         return data

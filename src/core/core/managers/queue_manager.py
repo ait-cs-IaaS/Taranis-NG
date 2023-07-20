@@ -3,7 +3,6 @@ from flask import Flask
 
 from core.managers.log_manager import logger
 from core.model.queue import ScheduleEntry
-from core.model.osint_source import OSINTSource
 
 queue_manager: "QueueManager"
 periodic_tasks = [
@@ -14,6 +13,7 @@ periodic_tasks = [
 class QueueManager:
     def __init__(self, app: Flask):
         self.celery = self.init_app(app)
+        self.next_run_time = {}
         self.add_periodic_tasks()
         self.update_task_queue_from_osint_sources()
 
@@ -45,20 +45,6 @@ class QueueManager:
 def initialize(app: Flask):
     global queue_manager
     queue_manager = QueueManager(app)
-
-
-def schedule_osint_source(source: OSINTSource):
-    entry = source.to_task_dict()
-    ScheduleEntry.add_or_update(entry)
-    logger.info(f"Schedule for source {source.id} updated")
-    return {"message": f"Schedule for source {source.id} updated"}, 200
-
-
-def unschedule_osint_source(source: OSINTSource):
-    entry_id = source.to_task_dict()["id"]
-    ScheduleEntry.delete(entry_id)
-    logger.info(f"Schedule for source {source.id} removed")
-    return {"message": f"Schedule for source {source.id} removed"}, 200
 
 
 def collect_osint_source(source_id: str):

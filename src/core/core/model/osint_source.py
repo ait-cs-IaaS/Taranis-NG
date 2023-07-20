@@ -10,6 +10,7 @@ from core.model.collector import Collector
 from core.model.parameter_value import ParameterValue
 from core.model.word_list import WordList
 from core.model.base_model import BaseModel
+from core.model.queue import ScheduleEntry
 
 
 class OSINTSource(BaseModel):
@@ -99,7 +100,7 @@ class OSINTSource(BaseModel):
         return f"osint_source_{self.id}_{self.collector.type}"
 
     def get_schedule(self):
-        return ParameterValue.find_param_value(self.parameter_values, "REFRESH_INTERVAL") or "0 0 * * *"
+        return ParameterValue.find_param_value(self.parameter_values, "REFRESH_INTERVAL") or "1"
 
     def to_task_dict(self):
         return {"id": self.to_task_id(), "task": "worker.tasks.collect", "schedule": self.get_schedule(), "args": [self.id]}
@@ -139,6 +140,7 @@ class OSINTSource(BaseModel):
         db.session.add(osint_source)
         OSINTSourceGroup.add_source_to_default(osint_source)
         db.session.commit()
+        osint_source.schedule_osint_source()
         return osint_source
 
     @classmethod
@@ -155,8 +157,18 @@ class OSINTSource(BaseModel):
 
         osint_source.word_lists = updated_osint_source.word_lists
         db.session.commit()
-
+        osint_source.schedule_osint_source()
         return osint_source
+
+    @classmethod
+    def delete(cls, id) -> tuple[str, int]:
+        if source := cls.get(id):
+            source.unschedule_osint_source()
+            db.session.delete(source)
+            db.session.commit()
+            return f"{cls.__name__} {id} deleted", 200
+
+        return f"{cls.__name__} {id} not found", 404
 
     def update_status(self, error_message=None):
         self.last_attempted = datetime.now()
@@ -168,6 +180,18 @@ class OSINTSource(BaseModel):
             self.state = 1
         self.last_error_message = error_message
         db.session.commit()
+
+    def schedule_osint_source(self):
+        entry = self.to_task_dict()
+        ScheduleEntry.add_or_update(entry)
+        logger.info(f"Schedule for source {self.id} updated")
+        return {"message": f"Schedule for source {self.id} updated"}, 200
+
+    def unschedule_osint_source(self):
+        entry_id = self.to_task_dict()["id"]
+        ScheduleEntry.delete(entry_id)
+        logger.info(f"Schedule for source {self.id} removed")
+        return {"message": f"Schedule for source {self.id} removed"}, 200
 
 
 class OSINTSourceParameterValue(BaseModel):
