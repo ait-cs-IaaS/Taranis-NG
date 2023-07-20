@@ -5,7 +5,6 @@ from core.managers.auth_manager import api_key_required
 from core.managers.log_manager import logger
 from core.model.osint_source import OSINTSource
 from core.model.queue import ScheduleEntry
-import core.managers.queue_manager
 
 
 class QueueScheduleEntry(Resource):
@@ -21,19 +20,12 @@ class QueueScheduleEntry(Resource):
 
 class NextRunTime(Resource):
     @api_key_required
-    def get(self):
-        try:
-            return core.managers.queue_manager.queue_manager.next_run_time, 200
-        except Exception:
-            logger.log_debug_trace()
-
-    @api_key_required
     def put(self):
         try:
             data = request.json
             if not data:
                 return {"message": "No data provided"}, 400
-            core.managers.queue_manager.queue_manager.next_run_time.update(data)
+            ScheduleEntry.update_next_run_time(data)
             return {"message": "Next run time updated"}, 200
         except Exception:
             logger.log_debug_trace()

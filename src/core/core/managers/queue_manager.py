@@ -13,7 +13,6 @@ periodic_tasks = [
 class QueueManager:
     def __init__(self, app: Flask):
         self.celery = self.init_app(app)
-        self.next_run_time = {}
         self.add_periodic_tasks()
         self.update_task_queue_from_osint_sources()
 

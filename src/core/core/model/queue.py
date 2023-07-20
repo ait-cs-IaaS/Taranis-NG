@@ -12,6 +12,7 @@ class ScheduleEntry(BaseModel):
     schedule = db.Column(db.String)
     args = db.Column(db.String)
     last_run_at = db.Column(db.DateTime)
+    next_run_time = db.Column(db.DateTime)
     total_run_count = db.Column(db.Integer)
 
     def __init__(self, id, task, schedule, args):
@@ -58,11 +59,24 @@ class ScheduleEntry(BaseModel):
 
     def to_dict(self) -> dict[str, Any]:
         data = super().to_dict()
+        data["next_run_time"] = self.next_run_time.isoformat() if self.next_run_time else None
         data["last_run_at"] = self.last_run_at.isoformat() if self.last_run_at else None
         return data
 
+    @classmethod
+    def update_next_run_time(cls, next_run_times: dict):
+        for entry_id, runtime in next_run_times.items():
+            if entry := cls.get(entry_id):
+                logger.debug(f"Updating next run time for {entry_id} to {runtime}")
+                entry.next_run_time = runtime
+                db.session.commit()
+            else:
+                logger.error(f"Schedule entry {entry_id} not found")
+        return "Next run times updated", 200
+
     def to_worker_dict(self) -> dict[str, Any]:
         data = super().to_dict()
+        data.pop("next_run_time")
         data["name"] = data.pop("id")
         data["args"] = data.get("args", "").split(",")
         if schedule := data.get("schedule"):
