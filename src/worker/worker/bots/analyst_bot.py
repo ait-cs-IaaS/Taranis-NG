@@ -1,4 +1,5 @@
 import re
+import datetime
 
 from .base_bot import BaseBot
 from worker.log import logger
@@ -48,14 +49,13 @@ class AnalystBot(BaseBot):
                                 binary_mime_type = ""
                                 binary_value = ""
 
-                                news_attribute = news_item.NewsItemAttribute(key, value, binary_mime_type, binary_value)
+                                news_attribute = {"key": key, "value": value, "binary_mime_type": binary_mime_type, "binary_value": binary_value}
 
                                 attributes.append(news_attribute)
 
-                                news_item_attributes_schema = news_item.NewsItemAttributeSchema(many=True)
                                 self.core_api.update_news_item_attributes(
                                     news_item_id,
-                                    news_item_attributes_schema.dump(attributes),
+                                    attributes,
                                 )
 
         except Exception:

@@ -9,7 +9,7 @@ class BaseBot:
     name = "Base Bot"
     description = "Base abstract type for all bots"
 
-    def __init__(self, parameters: dict, refresh: bool = True):
+    def __init__(self):
         self.core_api = CoreApi()
 
     def execute(self):

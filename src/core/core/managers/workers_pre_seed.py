@@ -60,12 +60,6 @@ parameters = [
         "type": "STRING",
     },
     {
-        "name": "Slack API token",
-        "description": "API token for Slack authentication.",
-        "key": "SLACK_API_TOKEN",
-        "type": "STRING",
-    },
-    {
         "name": "Collected workspaces channels ID",
         "description": "Channels which will be collected.",
         "key": "WORKSPACE_CHANNELS_ID",
@@ -406,17 +400,6 @@ collectors = [
             "REFRESH_INTERVAL",
         ],
         "type": "EMAIL_COLLECTOR",
-    },
-    {
-        "description": "Collector for gathering data from Slack",
-        "name": "Slack Collector",
-        "parameters": [
-            "SLACK_API_TOKEN",
-            "WORKSPACE_CHANNELS_ID",
-            "PROXY_SERVER",
-            "REFRESH_INTERVAL",
-        ],
-        "type": "SLACK_COLLECTOR",
     },
     {
         "description": "Collector for gathering data from Twitter",
