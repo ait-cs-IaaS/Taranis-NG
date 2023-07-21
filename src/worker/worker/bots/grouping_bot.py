@@ -10,15 +10,17 @@ class GroupingBot(BaseBot):
     description = "Bot for grouping news items into aggregates"
     default_regex = r"CVE-\d{4}-\d{4,7}"
 
-    def execute(self):
+    def execute(self, parameters=None):
+        if not parameters:
+            return
         try:
-            source_group = self.parameters.get("SOURCE_GROUP", None) or "default"
-            regexp = self.parameters.get("REGULAR_EXPRESSION", None)
+            source_group = parameters.get("SOURCE_GROUP", None) or "default"
+            regexp = parameters.get("REGULAR_EXPRESSION", None)
 
             if not source_group or not regexp:
                 return
 
-            limit = self.history()
+            limit = (datetime.datetime.now() - datetime.timedelta(days=7)).isoformat()
             import datetime
 
             limit = (datetime.datetime.now() - datetime.timedelta(days=30)).isoformat()
@@ -48,13 +50,4 @@ class GroupingBot(BaseBot):
                     self.core_api.news_items_grouping(ids)
 
         except Exception:
-            logger.log_debug_trace(f"Error running Bot: {self.type}")
-
-    def execute_on_event(self, event_type, data):
-        try:
-            source_group = self.parameters["SOURCE_GROUP"]
-            regexp = self.parameters["REGULAR_EXPRESSION"]
-            logger.log_debug(source_group + regexp)
-
-        except Exception as error:
             logger.log_debug_trace(f"Error running Bot: {self.type}")

@@ -1,5 +1,4 @@
-from shared.schema.presenter import PresenterSchema
-from presenters.managers.log_manager import logger
+from worker.log import logger
 import json
 import datetime
 
@@ -9,9 +8,6 @@ class BasePresenter:
     name = "Base Presenter"
     description = "Base abstract type for all presenters"
 
-    def get_info(self):
-        info_schema = PresenterSchema()
-        return info_schema.dump(self)
 
     def print_exception(self, error):
         logger.log_debug_trace("[{0}] {1}".format(self.name, error))

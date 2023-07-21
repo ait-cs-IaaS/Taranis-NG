@@ -1,7 +1,6 @@
 import requests
 
 from .base_bot import BaseBot
-from shared.schema import word_list
 from worker.log import logger
 
 
@@ -10,30 +9,37 @@ class WordlistUpdaterBot(BaseBot):
     name = "Wordlist Updater Bot"
     description = "Bot for updating word lists"
 
-    def execute(self):
+    def execute(self, parameters=None):
         def load_file(source, word_list_format):
             if "http" in source and word_list_format == "txt":
                 response = requests.get(source)
                 content = response.text.strip().split("\r\n")
-                content = [word for word in content]
+                content = list(content)
             else:
                 with open(source) as file:
                     content = [line.rstrip() for line in file]
 
             return content
 
+
+        if not parameters:
+            return
+
         try:
-            data_url = self.parameters["DATA_URL"]
-            data_format = self.parameters["FORMAT"]
-            word_list_id = self.parameters["WORD_LIST_ID"]
-            word_list_category_name = self.parameters["WORD_LIST_CATEGORY"]
-            delete_word_entries = self.parameters["DELETE"].lower()
+            data_url = parameters["DATA_URL"]
+            data_format = parameters["FORMAT"]
+            word_list_id = parameters["WORD_LIST_ID"]
+            word_list_category_name = parameters["WORD_LIST_CATEGORY"]
+            delete_word_entries = parameters["DELETE"].lower()
 
             source_word_list = load_file(data_url, data_format)
 
             categories = self.core_api.get_categories(word_list_id)
 
-            if not any(category["name"] == word_list_category_name for category in categories):
+            if all(
+                category["name"] != word_list_category_name
+                for category in categories
+            ):
                 name = word_list_category_name
                 description = "Stop word list category created by Updater Bot."
                 entries = []
@@ -61,15 +67,6 @@ class WordlistUpdaterBot(BaseBot):
                 word_list_category_name,
                 word_list_entries_schema.dump(entries),
             )
-
-        except Exception as error:
-            logger.log_debug_trace(f"Error running Bot: {self.type}")
-
-    def execute_on_event(self, event_type, data):
-        try:
-            data_url_preset = self.parameters["DATA_URL"]
-            format_preset = self.parameters["FORMAT"]
-            logger.log_debug(data_url_preset + format_preset)
 
         except Exception as error:
             logger.log_debug_trace(f"Error running Bot: {self.type}")

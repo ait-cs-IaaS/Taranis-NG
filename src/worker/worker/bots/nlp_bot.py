@@ -21,14 +21,6 @@ class NLPBot(BaseBot):
     """
     summary_threshold = 750
 
-    r"""
-    Parameters
-    ------------
-    model_name: str
-        the pre-trained transformers model to be used;
-        currently supported: facebook/bart-large-cnn (default), T-Systems-onsite/mt5-small-sum-de-en-v2, deutsche-telekom/mt5-small-sum-de-en-v1
-    """
-
     def set_summarization_model(self) -> None:
         self.sum_model_name_en = "facebook/bart-large-cnn"
         self.sum_model_en = BartForConditionalGeneration.from_pretrained(self.sum_model_name_en)
@@ -47,11 +39,13 @@ class NLPBot(BaseBot):
         # self.kw_model_en = KeyBERT("all-MiniLM-L6-v2")
         # self.kw_model_de = KeyBERT("paraphrase-mpnet-base-v2")
 
-    def execute(self):
+    def execute(self, parameters=None):
+        if not parameters:
+            return
         try:
-            source_group = self.parameters.get("SOURCE_GROUP", None)
+            source_group = parameters.get("SOURCE_GROUP", None)
 
-            limit = self.history()
+            limit = (datetime.datetime.now() - datetime.timedelta(days=7)).isoformat()
 
             data = self.core_api.get_news_items_aggregate(source_group, limit)
             if not data:
@@ -97,14 +91,6 @@ class NLPBot(BaseBot):
                 if keywords:
                     self.core_api.update_news_item_tags(aggregate["id"], keywords)
 
-        except Exception:
-            logger.log_debug_trace(f"Error running Bot: {self.type}")
-
-    def execute_on_event(self, event_type, data):
-        try:
-            # source_group = preset.parameter_values["SOURCE_GROUP"]
-            # keywords = preset.parameter_values["KEYWORDS"]
-            pass
         except Exception:
             logger.log_debug_trace(f"Error running Bot: {self.type}")
 

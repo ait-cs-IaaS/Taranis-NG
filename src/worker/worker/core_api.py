@@ -129,13 +129,13 @@ class CoreApi:
         except Exception:
             return None
 
-    def get_categories(self, id):
+    def get_categories(self, id) -> dict | None:
         try:
             response = requests.get(
                 f"{self.api_url}/api/v1/bots/word-list-categories/{id}",
                 headers=self.headers,
             )
-            return response.json()
+            return response.json() if response.ok else None
         except Exception:
             return None
 
@@ -150,13 +150,13 @@ class CoreApi:
         except Exception:
             return None
 
-    def get_news_items_aggregate(self, source_group, limit):
+    def get_news_items_aggregate(self, source_group, limit) -> dict | None:
         try:
             response = requests.get(
                 f"{self.api_url}/api/v1/bots/news-item-aggregates?group={source_group}",
                 headers=self.headers,
             )
-            return response.json(), response.status_code
+            return response.json() if response.ok else None
         except Exception:
             logger.log_debug_trace("get_news_items_aggregate failed")
             return None

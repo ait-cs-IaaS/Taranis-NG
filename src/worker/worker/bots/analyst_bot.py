@@ -1,7 +1,6 @@
 import re
 
 from .base_bot import BaseBot
-from shared.schema import news_item
 from worker.log import logger
 
 
@@ -15,10 +14,12 @@ class AnalystBot(BaseBot):
     news_items = []
     news_items_data = []
 
-    def execute(self):
+    def execute(self, parameters=None):
+        if not parameters:
+            return
         try:
-            regex = self.parameters.get("REGULAR_EXPRESSION", "")
-            attr = self.parameters.get("ATTRIBUTE_NAME", "")
+            regex = parameters.get("REGULAR_EXPRESSION", "")
+            attr = parameters.get("ATTRIBUTE_NAME", "")
             if not regex or not attr:
                 return
 
@@ -26,7 +27,7 @@ class AnalystBot(BaseBot):
             self.attr_name = attr.replace(" ", "").split(",")
 
             bots_params = dict(zip(self.regexp, self.attr_name))
-            limit = self.history()
+            limit = (datetime.datetime.now() - datetime.timedelta(days=7)).isoformat()
 
             if news_items_data := self.core_api.get_news_items_data(limit):
                 for item in news_items_data:
@@ -58,14 +59,4 @@ class AnalystBot(BaseBot):
                                 )
 
         except Exception:
-            logger.log_debug_trace(f"Error running Bot: {self.type}")
-
-    def execute_on_event(self, event_type, data):
-        try:
-            source_group = self.parameters["SOURCE_GROUP"]
-            regexp = self.parameters["REGULAR_EXPRESSION"]
-            attr_name = self.parameters["ATTRIBUTE_NAME"]
-            logger.log_debug(source_group + regexp + attr_name)
-
-        except Exception as error:
             logger.log_debug_trace(f"Error running Bot: {self.type}")

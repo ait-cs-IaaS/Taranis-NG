@@ -8,15 +8,17 @@ class TaggingBot(BaseBot):
     name = "Tagging Bot"
     description = "Bot for tagging news items"
 
-    def execute(self):
+    def execute(self, parameters=None):
+        if not parameters:
+            return
         try:
-            source_group = self.parameters.get("SOURCE_GROUP", None)
-            regexp = self.parameters.get("REGULAR_EXPRESSION", None)
+            source_group = parameters.get("SOURCE_GROUP", None)
+            regexp = parameters.get("REGULAR_EXPRESSION", None)
 
             if not regexp or not source_group:
                 return
 
-            limit = self.history()
+            limit = (datetime.datetime.now() - datetime.timedelta(days=7)).isoformat()
 
             data = self.core_api.get_news_items_aggregate(source_group, limit)
             if not data:
@@ -38,13 +40,5 @@ class TaggingBot(BaseBot):
                                 findings.add(finding[1])
                 self.core_api.update_news_item_tags(aggregate["id"], list(findings))
 
-        except Exception as error:
-            logger.log_debug_trace(f"Error running Bot: {self.type}")
-
-    def execute_on_event(self, event_type, data):
-        try:
-            # source_group = preset.parameter_values["SOURCE_GROUP"]
-            # keywords = preset.parameter_values["KEYWORDS"]
-            pass
         except Exception as error:
             logger.log_debug_trace(f"Error running Bot: {self.type}")

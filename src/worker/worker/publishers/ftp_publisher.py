@@ -14,12 +14,12 @@ class FTPPublisher(BasePublisher):
     description = "Publisher for publishing to FTP server"
 
     def publish(self, publisher_input):
+        filename = ""
         try:
             ftp_url = publisher_input.parameter_values_map["FTP_URL"]
 
             mime_type = publisher_input.mime_type[:]
 
-            filename = ""
             if mime_type[:] == "application/pdf":
                 filename = "file_" + datetime.datetime.now().strftime("%d-%m-%Y_%H:%M") + ".pdf"
             elif mime_type[:] == "text/plain":

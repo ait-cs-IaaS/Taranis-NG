@@ -85,8 +85,6 @@ services:
       QUEUE_BROKER_USER: "${RABBITMQ_USER:-taranis}"
       QUEUE_BROKER_PASSWORD: "${RABBITMQ_PASSWORD}"
       DEBUG: "${DEBUG:-False}"
-    volumes:
-      - "beat_storage:/app/storage"
     logging:
       driver: "json-file"
       options:
@@ -151,6 +149,4 @@ services:
 volumes:
   database_data:
   core_data:
-  collector_storage:
   rabbitmq_data:
-  beat_storage:
