@@ -2268,7 +2268,7 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: '#/components/schemas/attribute.presentation'
+                      $ref: '#/components/schemas/attribute'
         '401':
           description: authorization error
           content:
@@ -2702,7 +2702,7 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: '#/components/schemas/role.presentation'
+                      $ref: '#/components/schemas/role'
         '401':
           description: authorization error
           content:
@@ -2718,7 +2718,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/role.new'
+              $ref: '#/components/schemas/role'
       responses:
         '200':
           description: success
@@ -2744,7 +2744,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/role.new'
+              $ref: '#/components/schemas/role'
       responses:
         '200':
           description: success
@@ -3456,6 +3456,26 @@ paths:
                   format: json
                 collectors_node_id:
                   type: integer
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/osint_source'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+        '404':
+          $ref: "#/components/schemas/notFound"
+        '405':
+          description: method not allowed
+          content:
+            'application/json': { }
+            'application/xml': { }
   /config/osint-source-groups:
     get:
       tags: [config]
@@ -4976,28 +4996,18 @@ components:
       properties:
         id:
           type: string
-    role.base:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        description:
-          type: string
     role:
       allOf:
-        - $ref: '#/components/schemas/role.base'
         - type: object
           properties:
+            id:
+              type: string
+            name:
+              type: string
+            description:
+              type: string
             permissions:
               type: array
-              items:
-                $ref: '#/components/schemas/permission'
-    role.presentation:
-      allOf:
-        - $ref: '#/components/schemas/role'
-        - $ref: '#/components/schemas/presentation'
     role.id:
       type: object
       properties:
