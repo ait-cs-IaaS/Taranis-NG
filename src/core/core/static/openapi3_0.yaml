@@ -105,8 +105,19 @@ paths:
           schema:
             type: string
       responses:
+        '200':
+          description: successful authentication
         '302':
           description: redirection to the URL requested before authentication
+        '404':
+          $ref: "#/components/schemas/notFound"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+
   /auth/refresh:
     get:
       tags:
@@ -125,6 +136,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/resp.auth.error'
+        '404':
+          $ref: "#/components/schemas/notFound"
         '500':
           description: Internal server error
           content:
@@ -179,7 +192,8 @@ paths:
                   isalive:
                     type: boolean
                     example: True
-
+        '404':
+          $ref: "#/components/schemas/notFound"
   /users/profile:
     get:
       tags: [users]
@@ -4053,7 +4067,7 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: '#/components/schemas/bots_node.presentation'
+                      $ref: '#/components/schemas/bots_node'
         '401':
           description: authorization error
           content:
@@ -4145,8 +4159,8 @@ paths:
                     items:
                       anyOf:
                         - $ref: '#/components/schemas/publishers_node.presentation'
-                        - $ref: '#/components/schemas/bots_node.presentation'
-                        - $ref: '#/components/schemas/collectors_node.presentation'
+                        - $ref: '#/components/schemas/bots_node'
+                        - $ref: '#/components/schemas/collectors_node'
                         - $ref: '#/components/schemas/presenters_node.presentation'
         '401':
           description: authorization error
@@ -4768,6 +4782,28 @@ paths:
               properties:
                 last_sync_time:
                   $ref: '#/components/schemas/date_time_full'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  last_sync_time:
+                    type: string
+                  news_items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/news_item_remote'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+        '404':
+          $ref: "#/components/schemas/notFound"
   /remote/sync-report-items:
     get:
       tags: [remote]
@@ -4805,6 +4841,28 @@ paths:
               properties:
                 last_sync_time:
                   $ref: '#/components/schemas/date_time_full'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  last_sync_time:
+                    type: string
+                  report_items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/report_item_remote'
+        '401':
+          description: authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp.auth.error'
+        '404':
+          $ref: "#/components/schemas/notFound"
 
 
 components:
@@ -6370,7 +6428,7 @@ components:
         bots:
           type: array
           items:
-            $ref: '#/components/schemas/bot'
+            $ref: '#/components/schemas/bots_node'
 
     publisher.new:
       allOf:
