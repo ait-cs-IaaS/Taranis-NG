@@ -1,13 +1,12 @@
 import schemathesis
 import pytest
 
-
 @pytest.fixture
 def schema_wsgi(app):
     return schemathesis.from_wsgi("/api/v1/doc/swagger.json", app)
 
 
-schema = schemathesis.from_pytest_fixture("schema_wsgi")
+schema = schemathesis.from_pytest_fixture("schema_wsgi",  validate_schema=True)
 
 
 @schema.parametrize()
