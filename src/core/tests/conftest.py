@@ -90,6 +90,11 @@ def auth_header(access_token):
     return {"Authorization": f"Bearer {access_token}", "Content-type": "application/json"}
 
 
+@pytest.fixture
+def api_header():
+    return {"Authorization": "Bearer test_api", "Content-type": "application/json"}
+
+
 @pytest.fixture(scope="session")
 def permissions():
     yield [
