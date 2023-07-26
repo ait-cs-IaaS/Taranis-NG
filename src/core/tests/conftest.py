@@ -13,10 +13,10 @@ load_dotenv(dotenv_path="tests/.env", override=True)
 def app(request):
     from core.__init__ import create_app
 
-    def teardown():
-        os.remove("/var/tmp/taranis_test.db")
+    # def teardown():
+    #     os.remove("/var/tmp/taranis_test.db")
 
-    request.addfinalizer(teardown)
+    # request.addfinalizer(teardown)
     yield create_app()
 
 
@@ -92,9 +92,7 @@ def auth_header(access_token):
 
 @pytest.fixture
 def api_header():
-    return {"Authorization": "Bearer test_api", "Content-type": "application/json"}
-
-
+    return {"Authorization": "Bearer test_key", "Content-type": "application/json"}
 
 
 @pytest.fixture(scope="session")
@@ -118,8 +116,6 @@ def access_token_no_permissions(app):
 @pytest.fixture
 def auth_header_no_permissions(access_token_no_permissions):
     return {"Authorization": f"Bearer {access_token_no_permissions}", "Content-type": "application/json"}
-
-
 
 
 @pytest.fixture(scope="session")
