@@ -102,10 +102,6 @@ def test_worker(case, api_header, client):
 #     case.validate_response(response)
 
 
-@pytest.fixture
-def fake_auth_header():
-    return {"Authorization": f"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0IiwibmFtZSI6IlRlc3QifQ.KGms9PM91aSMJJWWSUnzaUalxurP-egFn0tqRutUoUE", "Content-type": "application/json"}
-
 
 def check_401(response, case):
     if response.status_code != 401:
