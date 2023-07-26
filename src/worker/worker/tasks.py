@@ -2,9 +2,16 @@ from celery import shared_task
 
 from worker.log import logger
 from worker.core_api import CoreApi
+import worker.bots
 
+bots = {
+    "ANALYST_BOT": worker.bots.AnalystBot(),
+    "GROUPING_BOT": worker.bots.GroupingBot(),
+    "NLP_BOT": worker.bots.NLPBot(),
+    "TAGGING_BOT": worker.bots.TaggingBot()
+}
 
-@shared_task
+@shared_task(time_limit=60)
 def collect(source_id: str):
     import worker.collectors as collectors
 
@@ -18,9 +25,8 @@ def collect(source_id: str):
         return collectors.RSSCollector().collect(source)
     return "Not implemented"
 
-@shared_task
+@shared_task(time_limit=60)
 def execute_bot(bot_id: str, filter: dict | None = None):
-    import worker.bots as bots
 
     core_api = CoreApi()
     bot_config = core_api.get_bot_config(bot_id)
@@ -28,19 +34,25 @@ def execute_bot(bot_id: str, filter: dict | None = None):
         logger.error(f"Bot with id {bot_id} not found")
         return
 
-    if bot_config["type"] == "ANALYST_BOT":
-        return bots.AnalystBot().execute(bot_config)
-    if bot_config["type"] == "GROUPING_BOT":
-        return bots.GroupingBot().execute(bot_config)
-    if bot_config["type"] == "NLP_BOT":
-        return bots.NLPBot().execute(bot_config)
-    if bot_config["type"] == "TAGGING_BOT":
-        return bots.TaggingBot().execute(bot_config)
+    bot_type = bot_config.get("type")
+    if not bot_type:
+        logger.error(f"Bot with id {bot_id} has no type")
+        return
 
-    return "Not implemented"
+    bot = bots.get(bot_type)
+    if not bot:
+        return "Not implemented"
+
+    bot_params = bot_config.get(bot_type)
+    if not bot_params:
+        logger.error(f"Bot with id {bot_id} has no params")
+        return
+
+    bot_params |= filter
+    return bot.execute(bot_params)
 
 
-@shared_task
+@shared_task(time_limit=10)
 def cleanup_token_blacklist():
     core_api = CoreApi()
     core_api.cleanup_token_blacklist()
