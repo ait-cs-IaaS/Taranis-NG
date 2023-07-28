@@ -1,3 +1,5 @@
+import csv
+import json
 import requests
 
 from .base_bot import BaseBot
@@ -9,12 +11,10 @@ class WordlistUpdaterBot(BaseBot):
     name = "Wordlist Updater Bot"
     description = "Bot for updating word lists"
 
-    def parse_csv(self, content):
-
-        pass
-
-    def parse_json(self, content):
-        pass
+    def parse_csv(self, content) -> list:
+        cr = csv.reader(content.splitlines(), delimiter=';', lineterminator='\n')
+        headers = next(cr)
+        return [dict(zip(headers, row)) for row in cr]
 
     def execute(self, word_list):
         url = word_list["link"]
@@ -24,11 +24,11 @@ class WordlistUpdaterBot(BaseBot):
             logger.error(f"Failed to update word list {word_list['name']}")
             return
         content_type = response.headers['content-type']
-        entries = {}
-        if content_type == "text/csv":
-            entries = self.parse_csv(response.content)
-        elif content_type == "application/json":
-            entries = self.parse_json(response.content)
+        entries = []
+        if content_type == "text/csv" or url.endswith(".csv"):
+            entries = self.parse_csv(response.content.decode('utf-8'))
+        elif content_type == "application/json" or url.endswith(".json"):
+            entries = response.json()
         else:
             logger.error(f"Unsupported content type {content_type}")
             return
