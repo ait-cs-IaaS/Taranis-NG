@@ -719,7 +719,7 @@ class NewsItemAggregate(BaseModel):
                 if type(tag) is dict:
                     tag_name = tag["name"]
                     tag_type = tag["type"]
-                    sub_forms = tag["sub_forms"]
+                    sub_forms = tag.get("sub_forms", None)
                 else:
                     tag_name = tag
                     tag_type = "misc"
@@ -980,7 +980,14 @@ class NewsItemTag(BaseModel):
         self.id = None
         self.name = name
         self.tag_type = tag_type
-        self.sub_forms = sub_forms
+        if sub_forms:
+            if type(sub_forms) == list:
+                self.sub_forms = ",".join(sub_forms)
+            elif type(sub_forms) == str:
+                self.sub_forms = sub_forms
+            else:
+                self.sub_forms = ""
+                logger.debug(f"wrong type for sub_forms {type(sub_forms)}")
 
     @classmethod
     def find_largest_tag_clusters(cls, days: int = 7, limit: int = 12, min_count: int = 2):
