@@ -239,7 +239,10 @@ class NewsItem(BaseModel):
             NewsItemData.collected >= time_limit,
         )
         query = query.join(NewsItemAggregate, NewsItemAggregate.id == NewsItem.news_item_aggregate_id)
-        query = query.filter(NewsItemAggregate.osint_source_group_id == group_id)
+        groups = OSINTSourceGroup.get_for_osint_source(NewsItemData.osint_source_id)
+        if groups:
+            group = groups[0]
+            query = query.filter(group.id == group_id)
         return query
 
     def allowed_with_acl(self, user: User, see, access, modify):
@@ -414,8 +417,6 @@ class NewsItemAggregate(BaseModel):
     comments = db.Column(db.String(), default="")
 
     summary = db.Column(db.Text, default="")
-
-    osint_source_group_id = db.Column(db.String, db.ForeignKey("osint_source_group.id"))
 
     news_items = db.relationship("NewsItem")
 
@@ -597,11 +598,10 @@ class NewsItemAggregate(BaseModel):
 
     @classmethod
     def create_new_for_all_groups(cls, news_item_data):
-        group = OSINTSourceGroup.get_for_osint_source(news_item_data.osint_source_id)[0]
-        cls.create_new_for_group(news_item_data, group.id)
+        cls.create_new_for_group(news_item_data)
 
     @classmethod
-    def create_new_for_group(cls, news_item_data, osint_source_group_id):
+    def create_new_for_group(cls, news_item_data):
         news_item = NewsItem()
         news_item.news_item_data = news_item_data
         db.session.add(news_item)
@@ -610,7 +610,6 @@ class NewsItemAggregate(BaseModel):
         aggregate.title = news_item_data.title
         aggregate.description = news_item_data.review
         aggregate.created = news_item_data.published
-        aggregate.osint_source_group_id = osint_source_group_id
         aggregate.news_items.append(news_item)
         db.session.add(aggregate)
 
@@ -649,7 +648,7 @@ class NewsItemAggregate(BaseModel):
             return {"error": "add failed"}, 500
 
     @classmethod
-    def add_remote_news_items(cls, news_items_data_list, remote_node, osint_source_group_id):
+    def add_remote_news_items(cls, news_items_data_list, remote_node):
         news_items_data = cls.load_multiple(news_items_data_list)
         news_item_data_ids = set()
         if not news_items_data:
@@ -661,7 +660,7 @@ class NewsItemAggregate(BaseModel):
                 attribute.remote_user = remote_node.name
 
             db.session.add(news_item_data)
-            cls.create_new_for_group(news_item_data, osint_source_group_id)
+            cls.create_new_for_group(news_item_data)
             news_item_data_ids.add(str(news_item_data.id))
         db.session.commit()
 
@@ -788,10 +787,9 @@ class NewsItemAggregate(BaseModel):
                 aggregate = NewsItemAggregate.get(news_item.news_item_aggregate_id)
                 if not aggregate:
                     continue
-                group_id = aggregate.osint_source_group_id
                 aggregate.news_items.remove(news_item)
                 processed_aggregates.add(aggregate)
-                cls.create_single_aggregate(news_item, group_id)
+                cls.create_single_aggregate(news_item)
             db.session.commit()
             cls.update_aggregates(processed_aggregates)
             return {"message": "success"}, 200
@@ -818,13 +816,12 @@ class NewsItemAggregate(BaseModel):
             logger.log_debug_trace("Update Aggregates Failed")
 
     @classmethod
-    def create_single_aggregate(cls, news_item, group_id):
+    def create_single_aggregate(cls, news_item):
         new_aggregate = NewsItemAggregate()
         new_aggregate.title = news_item.news_item_data.title
         new_aggregate.description = news_item.news_item_data.review
         new_aggregate.created = news_item.news_item_data.collected
         new_aggregate.news_items.append(news_item)
-        new_aggregate.osint_source_group_id = group_id
         db.session.add(new_aggregate)
         db.session.commit()
 
