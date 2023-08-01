@@ -72,8 +72,8 @@ class NLPBot(BaseBot):
                 current_keywords.update(self.generateKeywords(aggregate_content[:self.extraction_text_limit]))
                 current_keywords.update(self.lemmatize(current_keywords))
 
-                polyfuzz_matches = self.polyfuzz(all_keywords.keys(), current_keywords.keys())
-                current_keywords.update(self.update_keywords_from_polyfuzz(polyfuzz_matches, all_keywords, current_keywords))
+                self.polyfuzz(all_keywords.keys(), current_keywords.keys())
+                # current_keywords.update(self.update_keywords_from_polyfuzz(from_list, to_list, all_keywords, current_keywords))
                 logger.debug(current_keywords)
                 self.core_api.update_news_item_tags(aggregate["id"], current_keywords)
 
@@ -93,12 +93,13 @@ class NLPBot(BaseBot):
 
 
     def lemmatize(self, keywords: dict) -> dict:
+        result = {}
         for keyword in keywords:
             baseform = self.wordnet_lemmatizer.lemmatize(keyword)
+            result[baseform] = keywords[keyword]
             if baseform != keyword:
-                keywords[keyword]["sub_forms"].append(keyword)
-                keyword[baseform] = keywords.pop(keyword)
-        return keywords
+                result[baseform]["sub_forms"].append(keyword)
+        return result
 
     def convert_list_to_dict(self, keywords: list) -> dict:
         return {keyword["name"]: keyword["sub_forms"] for keyword in keywords}
@@ -115,20 +116,21 @@ class NLPBot(BaseBot):
 
 
 
-    def polyfuzz(self, from_list: list, to_list: list) -> DataFrame:
+    def polyfuzz(self, from_list: list, to_list: list) -> tuple[list, list]:
         if len(to_list) < 2:
             to_list += to_list
         if not from_list or not to_list:
             return []
         self.polyfuzz_model.match(from_list, to_list)
         df = self.polyfuzz_model.get_matches()
+        logger.info(f"Polyfuzz matches: {df} - {len(df)}")
         values = df[df['Similarity'] >=0.65]
-        return values.replace(numpy.nan, None)
+        logger.info(f"Polyfuzz matches: {values} - {len(values)}")
+        values = values.replace(numpy.nan, None)
+        return values['From'], values['To']
 
 
-    def update_keywords_from_polyfuzz(self, polyfuzz_matches: DataFrame, all_keywords: dict, current_keywords: dict) -> dict:
-        values_from = polyfuzz_matches['From'] # ["Cyber", "Security"]
-        values_to = polyfuzz_matches['To'] # ["Cyber", "Securities"]
+    def update_keywords_from_polyfuzz(self, values_from, values_to, all_keywords: dict, current_keywords: dict) -> dict:
         for i, matching_value in enumerate(values_from): # "Cyber", "Security"
             matching_entry = all_keywords[matching_value] # Cyber": { "cybering", "cyberoo", "CYBÄR"}   ## "Security"
             if matching_value in current_keywords: # "Securities"
