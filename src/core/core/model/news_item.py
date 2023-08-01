@@ -718,7 +718,7 @@ class NewsItemAggregate(BaseModel):
             if type(tags) is dict:
                 for name, tag in tags.items():
                     tag_name = name
-                    tag_type = tag["type"]
+                    tag_type = tag["tag_type"]
                     sub_forms = tag.get("sub_forms", None)
                     n_i_a.tags.append(NewsItemTag(name=tag_name, tag_type=tag_type, sub_forms=sub_forms))
             else:

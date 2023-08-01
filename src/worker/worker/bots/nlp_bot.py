@@ -10,7 +10,6 @@ from polyfuzz.models import TFIDF
 from sentence_transformers import SentenceTransformer
 from keybert import KeyBERT
 import numpy
-from pandas import DataFrame
 import nltk
 import torch
 
@@ -28,6 +27,7 @@ class NLPBot(BaseBot):
         self.keybert_model = KeyBERT(model=SentenceTransformer("basel/ATTACK-BERT"))
         self.wordnet_lemmatizer = WordNetLemmatizer()
         nltk.download('wordnet')
+        nltk.download('stopwords')
         self.language = ""
         self.extraction_text_limit = 5000
 
@@ -85,7 +85,7 @@ class NLPBot(BaseBot):
         ner_model = self.ner_model
         doc = ner_model(text)
         return {
-            ent.text: {"type": ent.label_, "sub_forms": []}
+            ent.text: {"tag_type": ent.label_, "sub_forms": []}
             for ent in doc.ents
             if 16 > len(ent.text) > 2
             and self.not_in_stopwords(ent.text)
@@ -101,12 +101,9 @@ class NLPBot(BaseBot):
                 result[baseform]["sub_forms"].append(keyword)
         return result
 
-    def convert_list_to_dict(self, keywords: list) -> dict:
-        return {keyword["name"]: keyword["sub_forms"] for keyword in keywords}
-
     def generateKeywords(self, text: str) -> dict:
         keywords = self.keybert_model.extract_keywords(docs=text, keyphrase_ngram_range=(1, 1), use_mmr=True, top_n=10, diversity=0.5, stop_words="english")
-        return {keyword: {"type": "CySec", "sub_forms": []} for keyword, distance in keywords if 16 > len(keyword) > 2 and distance > 0.1 and self.not_in_stopwords(keyword)}
+        return {keyword: {"tag_type": "CySec", "sub_forms": []} for keyword, distance in keywords if 16 > len(keyword) > 2 and distance > 0.1 and self.not_in_stopwords(keyword)}
 
     def detect_language(self, text) -> str:
         return py3langid.classify(text)[0]
