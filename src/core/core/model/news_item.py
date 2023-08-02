@@ -1,4 +1,5 @@
 import uuid
+import base64
 from datetime import datetime, timedelta
 from typing import Any
 from sqlalchemy import orm, and_, or_, func
@@ -271,17 +272,17 @@ class NewsItem(BaseModel):
 
         return query.scalar() is not None
 
-    def vote(self, vote_data, user_id):
-        vote = NewsItemVote.find_by_user(self.id, user_id)
-        if vote is None:
+    def vote(self, vote_data, user_id) -> "NewsItemVote":
+        if vote := NewsItemVote.find_by_user(self.id, user_id):
+            if vote_data > 0:
+                self.update_like_vote(vote)
+            else:
+                self.update_dislike_vote(vote)
+        else:
             vote = self.create_new_vote(vote, user_id)
 
-        if vote_data > 0:
-            self.update_like_vote(vote)
-        else:
-            self.update_dislike_vote(vote)
-
         self.news_item_data.updated = datetime.now()
+        return vote
 
     def create_new_vote(self, vote, user_id):
         vote = NewsItemVote(self.id, user_id)
@@ -289,34 +290,14 @@ class NewsItem(BaseModel):
         return vote
 
     def update_like_vote(self, vote):
-        self.increment_likes()
-        self.increment_relevance()
-        vote.like = True
-        vote.dislike = False
+        self.likes -= 1
+        self.relevance -= 1
+        vote.like = ~vote.like
 
     def update_dislike_vote(self, vote):
-        self.increment_dislikes()
-        self.decrement_relevance()
-        vote.dislike = True
-        vote.like = False
-
-    def increment_likes(self):
-        self.likes += 1
-
-    def decrement_likes(self):
-        self.likes -= 1
-
-    def increment_dislikes(self):
-        self.dislikes += 1
-
-    def decrement_dislikes(self):
         self.dislikes -= 1
-
-    def increment_relevance(self):
         self.relevance += 1
-
-    def decrement_relevance(self):
-        self.relevance -= 1
+        vote.dislike = ~vote.dislike
 
     @classmethod
     def update(cls, news_item_id, data, user_id):
@@ -594,7 +575,7 @@ class NewsItemAggregate(BaseModel):
     @classmethod
     def get_for_worker(cls, filter_args: dict):
         news_item_aggregates, _ = cls.get_by_filter(filter_args=filter_args)
-        return [news_item_aggregate.to_dict() for news_item_aggregate in news_item_aggregates]
+        return [news_item_aggregate.to_worker_dict() for news_item_aggregate in news_item_aggregates]
 
     @classmethod
     def create_new_for_all_groups(cls, news_item_data):
@@ -732,15 +713,16 @@ class NewsItemAggregate(BaseModel):
             if not n_i_a:
                 logger.error(f"News Item Aggregate {news_item_aggregate_id} not found")
                 return {"error": "not_found"}, 404
-            for tag in tags:
-                if type(tag) is dict:
-                    tag_name = tag["name"]
-                    tag_type = tag["type"]
-                else:
-                    tag_name = tag
-                    tag_type = "misc"
-                if tag_name not in [tag.name for tag in n_i_a.tags]:
-                    n_i_a.tags.append(NewsItemTag(name=tag_name, tag_type=tag_type))
+
+            if type(tags) is dict:
+                for name, tag in tags.items():
+                    tag_name = name
+                    tag_type = tag["tag_type"]
+                    sub_forms = tag.get("sub_forms", None)
+                    n_i_a.tags.append(NewsItemTag(name=tag_name, tag_type=tag_type, sub_forms=sub_forms))
+            else:
+                for tag in tags:
+                    n_i_a.tags.append(NewsItemTag(name=tag, tag_type="misc", sub_forms=None))
             db.session.commit()
             return {"message": "success"}, 200
         except Exception:
@@ -861,10 +843,45 @@ class NewsItemAggregate(BaseModel):
         db.session.commit()
         return {"message": "success"}, 200
 
+    def vote(self, vote_data, user_id) -> "NewsItemVote":
+        if vote := NewsItemVote.find_by_user(self.id, user_id):
+            if vote_data > 0:
+                self.update_like_vote(vote)
+            else:
+                self.update_dislike_vote(vote)
+        else:
+            vote = self.create_new_vote(vote, user_id)
+
+        self.news_item_data.updated = datetime.now()
+        return vote
+
+    def create_new_vote(self, vote, user_id):
+        vote = NewsItemVote(self.id, user_id)
+        db.session.add(vote)
+        return vote
+
+    def update_like_vote(self, vote):
+        self.likes -= 1
+        self.relevance -= 1
+        vote.like = ~vote.like
+
+    def update_dislike_vote(self, vote):
+        self.dislikes -= 1
+        self.relevance += 1
+        vote.dislike = ~vote.dislike
+
     def to_dict(self) -> dict[str, Any]:
         data = super().to_dict()
         data["news_items"] = [news_item.to_dict() for news_item in self.news_items]
         data["tags"] = [tag.to_dict() for tag in self.tags]
+        if news_item_attributes := self.news_item_attributes:
+            data["news_item_attributes"] = [news_item_attribute.to_dict() for news_item_attribute in news_item_attributes]
+        return data
+
+    def to_worker_dict(self) -> dict[str, Any]:
+        data = super().to_dict()
+        data["news_items"] = [news_item.to_dict() for news_item in self.news_items]
+        data["tags"] = {tag.name: tag.to_dict() for tag in self.tags}
         if news_item_attributes := self.news_item_attributes:
             data["news_item_attributes"] = [news_item_attribute.to_dict() for news_item_attribute in news_item_attributes]
         return data
@@ -957,13 +974,22 @@ class NewsItemTag(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255))
     tag_type = db.Column(db.String(255))
+    sub_forms = db.Column(db.Text)
     n_i_a_id = db.Column(db.ForeignKey(NewsItemAggregate.id))
     n_i_a = db.relationship(NewsItemAggregate, backref=orm.backref("tags", cascade="all, delete-orphan"))
 
-    def __init__(self, name, tag_type):
+    def __init__(self, name, tag_type, sub_forms=None):
         self.id = None
         self.name = name
         self.tag_type = tag_type
+        if sub_forms:
+            if type(sub_forms) == list:
+                self.sub_forms = ",".join(sub_forms)
+            elif type(sub_forms) == str:
+                self.sub_forms = sub_forms
+            else:
+                self.sub_forms = ""
+                logger.debug(f"wrong type for sub_forms {type(sub_forms)}")
 
     @classmethod
     def find_largest_tag_clusters(cls, days: int = 7, limit: int = 12, min_count: int = 2):
@@ -1018,9 +1044,11 @@ class NewsItemTag(BaseModel):
         if tag_type := filter_args.get("tag_type"):
             query = query.filter(cls.tag_type == tag_type)
 
-        if min_size := filter_args.get("min_size", 2):
+        if min_size := filter_args.get("min_size", 4):
             # returns only tags where the name appears at least min_size times in the database
             query = query.group_by(cls.name, cls.tag_type).having(func.count(cls.name) >= min_size)
+            # order by size
+            query = query.order_by(func.count(cls.name).desc())
 
         rows = cls.get_rows(query, filter_args)
         return [cls(name=row[0], tag_type=row[1]) for row in rows]
@@ -1049,8 +1077,15 @@ class NewsItemTag(BaseModel):
             db.session.delete(tag)
         db.session.commit()
 
+    def get_forms(self) -> list[str]:
+        tags = [self.name]
+        if self.sub_forms:
+            tags.append(self.sub_forms.split(","))
+        return tags
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "tag_type": self.tag_type,
+            "sub_forms": self.sub_forms.split(",") if self.sub_forms else "",
         }
