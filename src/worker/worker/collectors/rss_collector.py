@@ -85,6 +85,8 @@ class RSSCollector(BaseCollector):
             or str(feed_entry.get("pubDate"))
             or str(feed_entry.get("created"))
             or str(feed_entry.get("updated"))
+            or str(feed_entry.get("modified"))
+            or str(feed_entry.get("dc:date"))
             or ""
         )
         if not published:
