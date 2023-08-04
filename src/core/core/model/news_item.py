@@ -123,11 +123,6 @@ class NewsItemData(BaseModel):
         items = [news_item.to_dict() for news_item in news_items]
         return items, last_sync_time
 
-    def to_dict(self) -> dict[str, Any]:
-        data = super().to_dict()
-        data["tag"] = "mdi-file-table-outline"
-        return data
-
 
 class NewsItem(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
@@ -481,7 +476,7 @@ class NewsItemAggregate(BaseModel):
         if tags := filter_args.get("tags"):
             for tag in tags:
                 alias = orm.aliased(NewsItemTag)
-                query = query.join(alias, NewsItemAggregate.id == alias.n_i_a_id).filter(alias.name == tag)
+                query = query.join(alias, NewsItemAggregate.id == alias.n_i_a_id).filter(alias.name == tag or tag in alias.sub_forms)
 
         filter_range = filter_args.get("range", "").lower()
         if filter_range and filter_range in ["day", "week", "month"]:
@@ -703,22 +698,27 @@ class NewsItemAggregate(BaseModel):
         return any(ReportItemNewsItemAggregate.assigned(aggregate_id) for aggregate_id in aggregate_ids)
 
     @classmethod
-    def update_tags(cls, news_item_aggregate_id: int, tags: list) -> tuple[dict, int]:
+    def update_tags(cls, news_item_aggregate_id: int, tags: list | dict) -> tuple[dict, int]:
         try:
             n_i_a = cls.get(news_item_aggregate_id)
             if not n_i_a:
                 logger.error(f"News Item Aggregate {news_item_aggregate_id} not found")
                 return {"error": "not_found"}, 404
 
+            new_tags = {}
             if type(tags) is dict:
                 for name, tag in tags.items():
                     tag_name = name
-                    tag_type = tag["tag_type"]
+                    tag_type = tag.get("tag_type", "misc")
                     sub_forms = tag.get("sub_forms", None)
-                    n_i_a.tags.append(NewsItemTag(name=tag_name, tag_type=tag_type, sub_forms=sub_forms))
+                    new_tags[tag_name] = NewsItemTag(name=tag_name, tag_type=tag_type, sub_forms=sub_forms)
             else:
-                for tag in tags:
-                    n_i_a.tags.append(NewsItemTag(name=tag, tag_type="misc", sub_forms=None))
+                for tag_name in tags:
+                    new_tags[tag_name] = NewsItemTag(name=tag_name, tag_type="misc", sub_forms=None)
+            for tag_name, new_tag in new_tags.items():
+                if tag_name.lower() in [tag.name.lower() for tag in n_i_a.tags]:
+                    continue
+                n_i_a.tags.append(new_tag)
             db.session.commit()
             return {"message": "success"}, 200
         except Exception:
@@ -869,7 +869,7 @@ class NewsItemAggregate(BaseModel):
     def to_dict(self) -> dict[str, Any]:
         data = super().to_dict()
         data["news_items"] = [news_item.to_dict() for news_item in self.news_items]
-        data["tags"] = [tag.to_dict() for tag in self.tags]
+        data["tags"] = [tag.to_small_dict() for tag in self.tags]
         if news_item_attributes := self.news_item_attributes:
             data["news_item_attributes"] = [news_item_attribute.to_dict() for news_item_attribute in news_item_attributes]
         return data
@@ -980,7 +980,7 @@ class NewsItemTag(BaseModel):
         self.tag_type = tag_type
         if sub_forms:
             if type(sub_forms) == list:
-                self.sub_forms = ",".join(sub_forms)
+                self.sub_forms = ",".join([s.replace(",", "") for s in sub_forms])
             elif type(sub_forms) == str:
                 self.sub_forms = sub_forms
             else:
@@ -1059,7 +1059,7 @@ class NewsItemTag(BaseModel):
     @classmethod
     def get_json(cls, filter_args: dict) -> list[dict[str, Any]]:
         tags = cls.get_filtered_tags(filter_args)
-        return [tag.to_dict() for tag in tags]
+        return [tag.to_small_dict() for tag in tags]
 
     @classmethod
     def get_list(cls, filter_args: dict) -> list[str]:
@@ -1083,5 +1083,11 @@ class NewsItemTag(BaseModel):
         return {
             "name": self.name,
             "tag_type": self.tag_type,
-            "sub_forms": self.sub_forms.split(",") if self.sub_forms else "",
+            "sub_forms": self.sub_forms.split(",") if self.sub_forms else [],
+        }
+
+    def to_small_dict(self) -> dict[str, Any]:
+        return {
+            "name": self.name,
+            "tag_type": self.tag_type,
         }

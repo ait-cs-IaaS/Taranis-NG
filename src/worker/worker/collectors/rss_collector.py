@@ -13,7 +13,6 @@ from worker.log import logger
 
 
 class RSSCollector(BaseCollector):
-
     def __init__(self):
         super().__init__()
         self.type = "RSS_COLLECTOR"
@@ -23,9 +22,8 @@ class RSSCollector(BaseCollector):
         self.news_items = []
         self.proxies = None
         self.headers = {}
-        logger_trafilatura = logging.getLogger('trafilatura')
+        logger_trafilatura = logging.getLogger("trafilatura")
         logger_trafilatura.setLevel(logging.WARNING)
-
 
     def collect(self, source):
         feed_url = source["parameter_values"].get("FEED_URL", None)
@@ -82,7 +80,14 @@ class RSSCollector(BaseCollector):
         return False, content_location
 
     def get_published_date(self, feed_entry: feedparser.FeedParserDict) -> datetime.datetime:
-        published: str | datetime.datetime = str(feed_entry.get("published")) or str(feed_entry.get("pubDate")) or ""
+        published: str | datetime.datetime = str(
+            feed_entry.get(
+                "published",
+                feed_entry.get(
+                    "pubDate", feed_entry.get("created", feed_entry.get("updated", feed_entry.get("modified", feed_entry.get("dc:date", ""))))
+                ),
+            )
+        )
         if not published:
             link: str = str(feed_entry.get("link", ""))
             if not link:
@@ -95,6 +100,7 @@ class RSSCollector(BaseCollector):
         try:
             return dateparser.parse(published, ignoretz=True) if published else datetime.datetime.now()
         except Exception:
+            logger.info("Could not parse date - falling back to current date")
             return datetime.datetime.now()
 
     def parse_feed(self, feed_entry: feedparser.FeedParserDict, feed_url, source) -> dict[str, str | datetime.datetime | list]:
@@ -116,6 +122,8 @@ class RSSCollector(BaseCollector):
                 content = self.parse_article_content(html_content, content_location)
             else:
                 content = "The article is older than 90 days - skipping"
+        elif description:
+            content = description
         else:
             content = "No content found in feed or article - please check your CONTENT_LOCATION parameter"
 

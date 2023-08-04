@@ -104,8 +104,8 @@ export default {
         {
           name: 'last_collected',
           label: 'Last Collected',
-          type: 'text',
-          disabled: true
+          disabled: true,
+          type: 'date'
         },
         {
           name: 'name',
@@ -260,6 +260,8 @@ export default {
       if (selected.value.length > 0) {
         queryString = 'ids=' + selected.value.join('&ids=')
       }
+      console.debug(queryString)
+      console.debug(selected.value)
       exportOSINTSources(queryString)
         .then(() => {
           notifySuccess('Successfully exported')
@@ -269,8 +271,8 @@ export default {
         })
     }
 
-    const selectionChange = (selected) => {
-      selected.value = selected.map((item) => item.id)
+    const selectionChange = (new_selection) => {
+      selected.value = new_selection
     }
 
     const collectAllSources = () => {

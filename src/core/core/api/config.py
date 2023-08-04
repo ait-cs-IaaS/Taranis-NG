@@ -299,6 +299,18 @@ class WordList(Resource):
         word_list.WordList.update(word_list_id, request.json)
 
 
+class WordListImport(Resource):
+    @auth_required("CONFIG_WORD_LIST_UPDATE")
+    def put(self, word_list_id):
+        word_list.WordList.update(word_list_id, request.json)
+
+
+class WordListExport(Resource):
+    @auth_required("CONFIG_WORD_LIST_UPDATE")
+    def put(self, word_list_id):
+        word_list.WordList.update(word_list_id, request.json)
+
+
 class WordListGather(Resource):
     @auth_required("CONFIG_WORD_LIST_UPDATE")
     def put(self, word_list_id):
@@ -379,10 +391,9 @@ class OSINTSource(Resource):
 
     @auth_required("CONFIG_OSINT_SOURCE_UPDATE")
     def put(self, source_id):
-        source = osint_source.OSINTSource.update(source_id, request.json)
-        if not source:
-            return f"OSINT Source with ID: {source_id} not found", 404
-        return f"OSINT Source {source.name} updated", 200
+        if source := osint_source.OSINTSource.update(source_id, request.json):
+            return f"OSINT Source {source.name} updated", 200
+        return f"OSINT Source with ID: {source_id} not found", 404
 
     @auth_required("CONFIG_OSINT_SOURCE_DELETE")
     def delete(self, source_id):
@@ -399,10 +410,17 @@ class OSINTSourceCollect(Resource):
         return queue_manager.collect_osint_source(source_id)
 
 
+class OSINTSourceCollectAll(Resource):
+    @auth_required("CONFIG_OSINT_SOURCE_ACCESS")
+    def post(self):
+        return queue_manager.collect_all_osint_sources()
+
+
 class OSINTSourcesExport(Resource):
     @auth_required("CONFIG_OSINT_SOURCE_ACCESS")
     def get(self):
-        data = osint_source.OSINTSource.export_osint_sources()
+        source_ids = request.args.getlist("ids")
+        data = osint_source.OSINTSource.export_osint_sources(source_ids)
         if data is None:
             return "Unable to export", 400
         return send_file(
@@ -643,6 +661,8 @@ def initialize(api: Api):
 
     namespace.add_resource(WordLists, "/word-lists")
     namespace.add_resource(WordList, "/word-lists/<int:word_list_id>")
+    namespace.add_resource(WordListImport, "/import-word-list")
+    namespace.add_resource(WordListExport, "/export-word-list")
     namespace.add_resource(WordListGather, "/gather-word-list-entries/<int:word_list_id>")
 
     namespace.add_resource(RefreshWorkers, "/workers/refresh")
@@ -654,6 +674,7 @@ def initialize(api: Api):
 
     namespace.add_resource(OSINTSources, "/osint-sources")
     namespace.add_resource(OSINTSource, "/osint-sources/<string:source_id>")
+    namespace.add_resource(OSINTSourceCollectAll, "/osint-sources/collect")
     namespace.add_resource(OSINTSourceCollect, "/osint-sources/<string:source_id>/collect")
     namespace.add_resource(OSINTSourcesExport, "/export-osint-sources")
     namespace.add_resource(OSINTSourcesImport, "/import-osint-sources")
