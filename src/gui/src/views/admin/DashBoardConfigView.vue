@@ -39,21 +39,6 @@
           </span>
         </template>
       </dash-board-card>
-      <dash-board-card link-to="/config/nodes" link-text="Nodes">
-        <template #content>
-          <v-icon class="mr-2" color="green">
-            mdi-lightbulb-off-outline
-          </v-icon>
-          <span class="caption">Collectors are pending</span>
-          <v-divider inset></v-divider>
-
-          <v-icon class="mr-2"> mdi-clock-check-outline </v-icon>
-          <span class="caption"
-            >Last successful run ended at
-            <b>{{ dashboard_data.latest_collected }}</b></span
-          >
-        </template>
-      </dash-board-card>
       <dash-board-card link-to="#" link-text="Database">
         <template #content>
           <v-icon class="mr-2" color="blue"> mdi-database </v-icon>
