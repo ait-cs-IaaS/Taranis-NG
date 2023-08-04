@@ -578,11 +578,7 @@ class NewsItemAggregate(BaseModel):
         return [news_item_aggregate.to_worker_dict() for news_item_aggregate in news_item_aggregates]
 
     @classmethod
-    def create_new_for_all_groups(cls, news_item_data):
-        cls.create_new_for_group(news_item_data)
-
-    @classmethod
-    def create_new_for_group(cls, news_item_data):
+    def create_new(cls, news_item_data):
         news_item = NewsItem()
         news_item.news_item_data = news_item_data
         db.session.add(news_item)
@@ -606,7 +602,7 @@ class NewsItemAggregate(BaseModel):
         for news_item_data in news_items_data:
             if not NewsItemData.identical(news_item_data.hash):
                 db.session.add(news_item_data)
-                cls.create_new_for_all_groups(news_item_data)
+                cls.create_new(news_item_data)
         db.session.commit()
 
         return f"Added {len(news_items_data)} news items", 200
@@ -620,7 +616,7 @@ class NewsItemAggregate(BaseModel):
                 return {"error": "News item already exists"}, 409
             if news_item_data := NewsItemData.from_dict(news_item_data_json):
                 db.session.add(news_item_data)
-                cls.create_new_for_all_groups(news_item_data)
+                cls.create_new(news_item_data)
                 db.session.commit()
                 return {"message": "news_item_data created", "id": news_item_data.id}, 201
             return {"error": "Invalid news item data"}, 422
@@ -641,7 +637,7 @@ class NewsItemAggregate(BaseModel):
                 attribute.remote_user = remote_node.name
 
             db.session.add(news_item_data)
-            cls.create_new_for_group(news_item_data)
+            cls.create_new(news_item_data)
             news_item_data_ids.add(str(news_item_data.id))
         db.session.commit()
 
