@@ -48,8 +48,7 @@ class EventThread(threading.Thread):
                                     with EventThread.app.app_context():
                                         NewsItemAggregate.add_remote_news_items(
                                             data["news_items"],
-                                            self.remote_node,
-                                            self.remote_node.osint_source_group_id,
+                                            self.remote_node
                                         )
 
                                     RemoteApi(
