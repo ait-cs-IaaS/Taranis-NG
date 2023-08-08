@@ -1,16 +1,14 @@
 import io
 
 from flask import request, send_file, jsonify
-from flask_restx import Resource, Namespace
+from flask_restx import Resource, Namespace, Api
 
 from core.managers import (
     auth_manager,
-    remote_manager,
     presenters_manager,
     publishers_manager,
     bots_manager,
-    external_auth_manager,
-    collectors_manager,
+    queue_manager,
 )
 from core.managers.log_manager import logger
 from core.managers.auth_manager import auth_required, get_user_from_jwt
@@ -35,8 +33,8 @@ from core.model import (
     role,
     user,
     word_list,
+    queue,
 )
-from core.model.news_item import NewsItemAggregate
 from core.model.permission import Permission
 
 
@@ -153,12 +151,6 @@ class Permissions(Resource):
         return Permission.get_all_json(search)
 
 
-class ExternalPermissions(Resource):
-    @auth_required("MY_ASSETS_CONFIG")
-    def get(self):
-        return Permission.get_external_permissions_json()
-
-
 class Roles(Resource):
     @auth_required("CONFIG_ROLE_ACCESS")
     def get(self):
@@ -245,9 +237,6 @@ class User(Resource):
     @auth_required("CONFIG_USER_UPDATE")
     def put(self, user_id):
         try:
-            if external_auth_manager.keycloak_user_management_enabled():
-                original_username = user.User.find_by_id(user_id).username
-                return external_auth_manager.update_user(request.json, original_username), 200
             return user.User.update(user_id, request.json), 200
         except Exception:
             logger.exception()
@@ -258,10 +247,6 @@ class User(Resource):
     def delete(self, user_id):
         try:
             original_user = user.User.find_by_id(user_id)
-            original_username = original_user.username
-            if external_auth_manager.keycloak_user_management_enabled():
-                return external_auth_manager.delete_user(original_username), 200
-
             return user.User.delete(user_id), 200
 
         except Exception as ex:
@@ -313,6 +298,24 @@ class WordList(Resource):
         word_list.WordList.update(word_list_id, request.json)
 
 
+class WordListImport(Resource):
+    @auth_required("CONFIG_WORD_LIST_UPDATE")
+    def put(self, word_list_id):
+        word_list.WordList.update(word_list_id, request.json)
+
+
+class WordListExport(Resource):
+    @auth_required("CONFIG_WORD_LIST_UPDATE")
+    def put(self, word_list_id):
+        word_list.WordList.update(word_list_id, request.json)
+
+
+class WordListGather(Resource):
+    @auth_required("CONFIG_WORD_LIST_UPDATE")
+    def put(self, word_list_id):
+        return queue_manager.gather_word_list(word_list_id)
+
+
 class Collectors(Resource):
     def get(self):
         search = request.args.get(key="search", default=None)
@@ -336,42 +339,46 @@ class Parameters(Resource):
         return parameter.Parameter.get_all_json()
 
 
-class CollectorsNodes(Resource):
-    @auth_required("CONFIG_COLLECTORS_NODE_ACCESS")
-    def get(self):
-        search = request.args.get(key="search", default=None)
-        return collectors_node.CollectorsNode.get_all_json(search)
-
-    @auth_required("CONFIG_COLLECTORS_NODE_CREATE")
-    def post(self):
-        node = collectors_node.CollectorsNode.add(request.json)
-        return {"id": node.id, "message": "Node created successfully"}, 200
-
-    @auth_required("CONFIG_COLLECTORS_NODE_UPDATE")
-    def put(self, node_id):
-        collectors_manager.update_collectors_node(node_id, request.json)
-
-    @auth_required("CONFIG_COLLECTORS_NODE_DELETE")
-    def delete(self, node_id):
-        collectors_node.CollectorsNode.delete(node_id)
-
-
 class RefreshWorkers(Resource):
-    @auth_required("CONFIG_COLLECTORS_NODE_UPDATE")
     def post(self):
-        collectors_manager.refresh_collectors()
         bots_manager.refresh_bots()
+
+
+class QueueSchedule(Resource):
+    @auth_required("CONFIG_WORKER_ACCESS")
+    def get(self):
+        try:
+            if schedules := queue.ScheduleEntry.get_all():
+                return [sched.to_dict() for sched in schedules], 200
+            return {"message": "No schedules found"}, 404
+        except Exception:
+            logger.log_debug_trace()
+
+
+class Workers(Resource):
+    @auth_required("CONFIG_WORKER_ACCESS")
+    def get(self):
+        try:
+            return queue_manager.queue_manager.ping_workers()
+        except Exception:
+            logger.log_debug_trace()
 
 
 class OSINTSources(Resource):
     @auth_required("CONFIG_OSINT_SOURCE_ACCESS")
     def get(self):
         search = request.args.get(key="search", default=None)
-        return osint_source.OSINTSource.get_all_json(search)
+        result_dict = osint_source.OSINTSource.get_all_json(search)
+        if result_dict["total_count"] == 0:
+            return result_dict, 404
+        return result_dict, 200
 
     @auth_required("CONFIG_OSINT_SOURCE_CREATE")
     def post(self):
-        return collectors_manager.add_osint_source(request.json)
+        source = osint_source.OSINTSource.add(request.json)
+        if not source:
+            return "OSINT source could not be created", 400
+        return {"id": source.id, "message": "OSINT source created successfully"}, 201
 
 
 class OSINTSource(Resource):
@@ -379,28 +386,40 @@ class OSINTSource(Resource):
     def get(self, source_id):
         if source := osint_source.OSINTSource.get(source_id):
             return source.to_dict(), 200
-        else:
-            return "OSINT source not found", 404
+        return "OSINT source not found", 404
 
     @auth_required("CONFIG_OSINT_SOURCE_UPDATE")
     def put(self, source_id):
-        return collectors_manager.update_osint_source(source_id, request.json)
+        if source := osint_source.OSINTSource.update(source_id, request.json):
+            return f"OSINT Source {source.name} updated", 200
+        return f"OSINT Source with ID: {source_id} not found", 404
 
     @auth_required("CONFIG_OSINT_SOURCE_DELETE")
     def delete(self, source_id):
-        return collectors_manager.delete_osint_source(source_id)
+        source = osint_source.OSINTSource.get(source_id)
+        if not source:
+            return f"OSINT Source with ID: {source_id} not found", 404
+        osint_source.OSINTSource.delete(source_id)
+        return f"OSINT Source {source.name} deleted", 200
 
 
-class OSINTSourceRefresh(Resource):
+class OSINTSourceCollect(Resource):
     @auth_required("CONFIG_OSINT_SOURCE_ACCESS")
-    def put(self, source_id):
-        return collectors_manager.refresh_osint_source(source_id)
+    def post(self, source_id):
+        return queue_manager.collect_osint_source(source_id)
+
+
+class OSINTSourceCollectAll(Resource):
+    @auth_required("CONFIG_OSINT_SOURCE_ACCESS")
+    def post(self):
+        return queue_manager.collect_all_osint_sources()
 
 
 class OSINTSourcesExport(Resource):
     @auth_required("CONFIG_OSINT_SOURCE_ACCESS")
     def get(self):
-        data = collectors_manager.export_osint_sources()
+        source_ids = request.args.getlist("ids")
+        data = osint_source.OSINTSource.export_osint_sources(source_ids)
         if data is None:
             return "Unable to export", 400
         return send_file(
@@ -415,7 +434,7 @@ class OSINTSourcesImport(Resource):
     @auth_required("CONFIG_OSINT_SOURCE_CREATE")
     def post(self):
         if file := request.files.get("file"):
-            sources = collectors_manager.import_osint_sources(file)
+            sources = osint_source.OSINTSource.import_osint_sources(file)
             if sources is None:
                 return "Unable to import", 400
             return {"sources": [source.id for source in sources], "count": len(sources), "message": "Successfully imported sources"}
@@ -442,58 +461,6 @@ class OSINTSourceGroup(Resource):
     @auth_required("CONFIG_OSINT_SOURCE_GROUP_DELETE")
     def delete(self, group_id):
         return osint_source.OSINTSourceGroup.delete(group_id)
-
-
-class RemoteAccesses(Resource):
-    @auth_required("CONFIG_REMOTE_ACCESS_ACCESS")
-    def get(self):
-        search = request.args.get(key="search", default=None)
-        return remote.RemoteAccess.get_all_json(search)
-
-    @auth_required("CONFIG_REMOTE_ACCESS_CREATE")
-    def post(self):
-        result = remote.RemoteAccess.add(request.json)
-        return {"id": result.id, "message": "Remote access created successfully"}, 200
-
-
-class RemoteAccess(Resource):
-    @auth_required("CONFIG_REMOTE_ACCESS_UPDATE")
-    def put(self, remote_access_id):
-        return remote.RemoteAccess.update(remote_access_id, request.json)
-
-    @auth_required("CONFIG_REMOTE_ACCESS_DELETE")
-    def delete(self, remote_access_id):
-        return remote.RemoteAccess.delete(remote_access_id)
-
-
-class RemoteNodes(Resource):
-    @auth_required("CONFIG_REMOTE_ACCESS_ACCESS")
-    def get(self):
-        search = request.args.get(key="search", default=None)
-        return remote.RemoteNode.get_all_json(search)
-
-    @auth_required("CONFIG_REMOTE_ACCESS_CREATE")
-    def post(self):
-        result = remote.RemoteNode.add(request.json)
-        return {"id": result.id, "message": "Remote node created successfully"}, 200
-
-
-class RemoteNode(Resource):
-    @auth_required("CONFIG_REMOTE_ACCESS_UPDATE")
-    def put(self, remote_node_id):
-        if remote.RemoteNode.update(id, request.json) is False:
-            remote_manager.disconnect_from_node(remote_node_id)
-
-    @auth_required("CONFIG_REMOTE_ACCESS_DELETE")
-    def delete(self, remote_node_id):
-        remote_manager.disconnect_from_node(remote_node_id)
-        return remote.RemoteNode.delete(id)
-
-
-class RemoteNodeConnect(Resource):
-    @auth_required("CONFIG_REMOTE_ACCESS_ACCESS")
-    def get(self, remote_node_id):
-        return remote_manager.connect_to_node(remote_node_id)
 
 
 class Presenters(Resource):
@@ -604,7 +571,7 @@ class BotNodes(Resource):
         return bots_node.BotsNode.delete(node_id)
 
 
-def initialize(api):
+def initialize(api: Api):
     namespace = Namespace("config", description="Configuration operations", path="/api/v1/config")
     namespace.add_resource(
         DictionariesReload,
@@ -625,7 +592,6 @@ def initialize(api):
     namespace.add_resource(ProductType, "/product-types/<int:type_id>")
 
     namespace.add_resource(Permissions, "/permissions")
-    namespace.add_resource(ExternalPermissions, "/external-permissions")
     namespace.add_resource(Roles, "/roles")
     namespace.add_resource(Role, "/roles/<int:role_id>")
     namespace.add_resource(ACLEntries, "/acls")
@@ -642,27 +608,25 @@ def initialize(api):
 
     namespace.add_resource(WordLists, "/word-lists")
     namespace.add_resource(WordList, "/word-lists/<int:word_list_id>")
+    namespace.add_resource(WordListImport, "/import-word-list")
+    namespace.add_resource(WordListExport, "/export-word-list")
+    namespace.add_resource(WordListGather, "/gather-word-list-entries/<int:word_list_id>")
 
-    namespace.add_resource(CollectorsNodes, "/collectors-nodes", "/collectors-nodes/<string:node_id>")
     namespace.add_resource(RefreshWorkers, "/workers/refresh")
+    namespace.add_resource(QueueSchedule, "/workers/schedule")
+    namespace.add_resource(Workers, "/workers")
     namespace.add_resource(Collectors, "/collectors", "/collectors/<string:collector_type>")
     namespace.add_resource(Bots, "/bots", "/bots/<string:bot_id>")
     namespace.add_resource(Parameters, "/parameters")
 
     namespace.add_resource(OSINTSources, "/osint-sources")
     namespace.add_resource(OSINTSource, "/osint-sources/<string:source_id>")
-    namespace.add_resource(OSINTSourceRefresh, "/osint-sources/<string:source_id>/refresh")
+    namespace.add_resource(OSINTSourceCollectAll, "/osint-sources/collect")
+    namespace.add_resource(OSINTSourceCollect, "/osint-sources/<string:source_id>/collect")
     namespace.add_resource(OSINTSourcesExport, "/export-osint-sources")
     namespace.add_resource(OSINTSourcesImport, "/import-osint-sources")
     namespace.add_resource(OSINTSourceGroups, "/osint-source-groups")
     namespace.add_resource(OSINTSourceGroup, "/osint-source-groups/<string:group_id>")
-
-    namespace.add_resource(RemoteAccesses, "/remote-accesses")
-    namespace.add_resource(RemoteAccess, "/remote-accesses/<int:remote_access_id>")
-
-    namespace.add_resource(RemoteNodes, "/remote-nodes")
-    namespace.add_resource(RemoteNode, "/remote-nodes/<int:remote_node_id>")
-    namespace.add_resource(RemoteNodeConnect, "/remote-nodes/<int:remote_node_id>/connect")
 
     namespace.add_resource(Presenters, "/presenters")
     namespace.add_resource(Publishers, "/publishers")

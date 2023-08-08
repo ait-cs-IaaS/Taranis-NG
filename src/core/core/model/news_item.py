@@ -1,4 +1,5 @@
 import uuid
+import base64
 from datetime import datetime, timedelta
 from typing import Any
 from sqlalchemy import orm, and_, or_, func
@@ -49,33 +50,6 @@ class NewsItemData(BaseModel):
     @classmethod
     def count_all(cls):
         return cls.query.count()
-
-    @classmethod
-    def allowed_with_acl(cls, news_item_data_id, user, see, access, modify):
-        news_item_data = cls.query.get(news_item_data_id)
-        if news_item_data.remote_source:
-            return True
-        query = db.session.query(NewsItemData.id).distinct().group_by(NewsItemData.id).filter(NewsItemData.id == news_item_data_id)
-
-        query = query.join(OSINTSource, NewsItemData.osint_source_id == OSINTSource.id)
-
-        query = query.outerjoin(
-            ACLEntry,
-            or_(
-                and_(
-                    NewsItemData.osint_source_id == ACLEntry.item_id,
-                    ACLEntry.item_type == ItemType.OSINT_SOURCE,
-                ),
-                and_(
-                    OSINTSource.collector_id == ACLEntry.item_id,
-                    ACLEntry.item_type == ItemType.COLLECTOR,
-                ),
-            ),
-        )
-
-        query = ACLEntry.apply_query(query, user, see, access, modify)
-
-        return query.scalar() is not None
 
     @classmethod
     def identical(cls, hash) -> bool:
@@ -148,11 +122,6 @@ class NewsItemData(BaseModel):
         news_items = query.all()
         items = [news_item.to_dict() for news_item in news_items]
         return items, last_sync_time
-
-    def to_dict(self) -> dict[str, Any]:
-        data = super().to_dict()
-        data["tag"] = "mdi-file-table-outline"
-        return data
 
 
 class NewsItem(BaseModel):
@@ -256,8 +225,7 @@ class NewsItem(BaseModel):
     def get_by_filter_json(cls, filter, user):
         news_items, count = cls.get_by_filter(filter, user)
         items = [news_item.to_dict() for news_item in news_items]
-
-        return {"total_count": count, "items": items}
+        return {"total_count": count, "items": items}, 200
 
     @classmethod
     def get_all_by_group_and_source_query(cls, group_id, source_id, time_limit):
@@ -267,15 +235,16 @@ class NewsItem(BaseModel):
             NewsItemData.collected >= time_limit,
         )
         query = query.join(NewsItemAggregate, NewsItemAggregate.id == NewsItem.news_item_aggregate_id)
-        query = query.filter(NewsItemAggregate.osint_source_group_id == group_id)
+        groups = OSINTSourceGroup.get_for_osint_source(NewsItemData.osint_source_id)
+        if groups:
+            group = groups[0]
+            query = query.filter(group.id == group_id)
         return query
 
-    @classmethod
-    def allowed_with_acl(cls, news_item_id, user: User, see, access, modify):
-        news_item = cls.query.get(news_item_id)
-        if news_item.news_item_data.remote_source is not None:
+    def allowed_with_acl(self, user: User, see, access, modify):
+        if self.news_item_data.remote_source is not None:
             return True
-        query = db.session.query(NewsItem.id).distinct().group_by(NewsItem.id).filter(NewsItem.id == news_item_id)
+        query = db.session.query(NewsItem.id).distinct().group_by(NewsItem.id).filter(NewsItem.id == self.id)
 
         query = query.join(NewsItemData, NewsItem.news_item_data_id == NewsItemData.id)
         query = query.join(OSINTSource, NewsItemData.osint_source_id == OSINTSource.id)
@@ -298,17 +267,17 @@ class NewsItem(BaseModel):
 
         return query.scalar() is not None
 
-    def vote(self, vote_data, user_id):
-        vote = NewsItemVote.find_by_user(self.id, user_id)
-        if vote is None:
+    def vote(self, vote_data, user_id) -> "NewsItemVote":
+        if vote := NewsItemVote.find_by_user(self.id, user_id):
+            if vote_data > 0:
+                self.update_like_vote(vote)
+            else:
+                self.update_dislike_vote(vote)
+        else:
             vote = self.create_new_vote(vote, user_id)
 
-        if vote_data > 0:
-            self.update_like_vote(vote)
-        else:
-            self.update_dislike_vote(vote)
-
         self.news_item_data.updated = datetime.now()
+        return vote
 
     def create_new_vote(self, vote, user_id):
         vote = NewsItemVote(self.id, user_id)
@@ -316,46 +285,26 @@ class NewsItem(BaseModel):
         return vote
 
     def update_like_vote(self, vote):
-        self.increment_likes()
-        self.increment_relevance()
-        vote.like = True
-        vote.dislike = False
+        self.likes -= 1
+        self.relevance -= 1
+        vote.like = ~vote.like
 
     def update_dislike_vote(self, vote):
-        self.increment_dislikes()
-        self.decrement_relevance()
-        vote.dislike = True
-        vote.like = False
-
-    def increment_likes(self):
-        self.likes += 1
-
-    def decrement_likes(self):
-        self.likes -= 1
-
-    def increment_dislikes(self):
-        self.dislikes += 1
-
-    def decrement_dislikes(self):
         self.dislikes -= 1
-
-    def increment_relevance(self):
         self.relevance += 1
-
-    def decrement_relevance(self):
-        self.relevance -= 1
+        vote.dislike = ~vote.dislike
 
     @classmethod
-    def update(cls, id, data, user_id):
-        news_item = cls.get(id)
+    def update(cls, news_item_id, data, user_id):
+        news_item = cls.get(news_item_id)
         if not news_item:
-            return "not_found", 404
+            return {"error": f"NewsItem with id: {news_item_id} not found"}, 404
         news_item.update_status(data, user_id)
 
         NewsItemAggregate.update_status(news_item.news_item_aggregate_id)
         db.session.commit()
 
-        return "success", 200
+        return {"message": "success"}, 200
 
     def update_status(self, data, user_id):
         if "vote" in data:
@@ -371,20 +320,22 @@ class NewsItem(BaseModel):
     def delete(cls, news_item_id):
         news_item = cls.get(news_item_id)
         if not news_item:
-            return "not_found", 404
-        if NewsItemAggregate.is_assigned_to_report([{"type": "AGGREGATE", "id": news_item.news_item_aggregate_id}]) is False:
-            return "aggregate_in_use", 500
+            return {"error": f"NewsItem with id: {news_item_id} not found"}, 404
         aggregate_id = news_item.news_item_aggregate_id
         aggregate = NewsItemAggregate.get(aggregate_id)
         if not aggregate:
-            return "not_found", 404
+            return {"error": f"Aggregate with id: {id} not found"}, 404
+
+        if NewsItemAggregate.is_assigned_to_report([{"type": "AGGREGATE", "id": aggregate_id}]) is False:
+            return {"error": f"aggregate with: {aggregate_id} assigned to a report"}, 500
+
         aggregate.news_items.remove(news_item)
         NewsItemVote.delete_all(news_item_id)
         db.session.delete(news_item)
         NewsItemAggregate.update_status(aggregate_id)
         db.session.commit()
 
-        return "success", 200
+        return {"message": "success"}, 200
 
     @classmethod
     def delete_only(cls, news_item):
@@ -442,8 +393,6 @@ class NewsItemAggregate(BaseModel):
     comments = db.Column(db.String(), default="")
 
     summary = db.Column(db.Text, default="")
-
-    osint_source_group_id = db.Column(db.String, db.ForeignKey("osint_source_group.id"))
 
     news_items = db.relationship("NewsItem")
 
@@ -527,7 +476,9 @@ class NewsItemAggregate(BaseModel):
         if tags := filter_args.get("tags"):
             for tag in tags:
                 alias = orm.aliased(NewsItemTag)
-                query = query.join(alias, NewsItemAggregate.id == alias.n_i_a_id).filter(alias.name == tag)
+                query = query.join(alias, NewsItemAggregate.id == alias.n_i_a_id).filter(
+                    or_(alias.name == tag, alias.sub_forms.contains(tag))
+                )
 
         filter_range = filter_args.get("range", "").lower()
         if filter_range and filter_range in ["day", "week", "month"]:
@@ -543,6 +494,9 @@ class NewsItemAggregate(BaseModel):
                 date_limit = date_limit.replace(day=1)
 
             query = query.filter(NewsItemAggregate.created >= date_limit)
+
+        if timestamp := filter_args.get("timestamp"):
+            query = query.filter(NewsItemAggregate.created >= datetime.fromisoformat(timestamp))
 
         return query
 
@@ -596,7 +550,6 @@ class NewsItemAggregate(BaseModel):
     @classmethod
     def get_by_filter(cls, filter_args: dict, user: User | None = None):
         query = cls.query.distinct().group_by(NewsItemAggregate.id)
-
         query = cls._add_filters_to_query(filter_args, query)
 
         if user:
@@ -608,19 +561,6 @@ class NewsItemAggregate(BaseModel):
         return paged_query.all(), query.count()
 
     @classmethod
-    def get_by_timestamp(cls, filter_args: dict):
-        logger.debug(f"Getting NewsItems Filtered: {filter_args}")
-        query = cls.query.distinct().group_by(NewsItemAggregate.id)
-
-        if group := filter_args.get("group"):
-            query = query.filter(NewsItemAggregate.osint_source_group_id == group)
-
-        if timestamp := filter_args.get("timestamp"):
-            query = query.filter(NewsItemAggregate.created >= timestamp)
-
-        return query.all()
-
-    @classmethod
     def get_by_filter_json(cls, filter_args, user):
         news_item_aggregates, count = cls.get_by_filter(filter_args=filter_args, user=user)
         for news_item_aggregate in news_item_aggregates:
@@ -630,22 +570,12 @@ class NewsItemAggregate(BaseModel):
         return {"total_count": count, "items": items}
 
     @classmethod
-    def get_by_timestamp_json(cls, filter_args):
-        news_item_aggregates = cls.get_by_timestamp(filter_args=filter_args)
-        return [news_item_aggregate.to_dict() for news_item_aggregate in news_item_aggregates]
+    def get_for_worker(cls, filter_args: dict):
+        news_item_aggregates, _ = cls.get_by_filter(filter_args=filter_args)
+        return [news_item_aggregate.to_worker_dict() for news_item_aggregate in news_item_aggregates]
 
     @classmethod
-    def get_for_worker(cls, limit: str):
-        news_item_aggregates, _ = cls.get_by_filter(filter_args={"limit": limit})
-        return [news_item_aggregate.to_dict() for news_item_aggregate in news_item_aggregates]
-
-    @classmethod
-    def create_new_for_all_groups(cls, news_item_data):
-        group = OSINTSourceGroup.get_for_osint_source(news_item_data.osint_source_id)[0]
-        cls.create_new_for_group(news_item_data, group.id)
-
-    @classmethod
-    def create_new_for_group(cls, news_item_data, osint_source_group_id):
+    def create_new(cls, news_item_data):
         news_item = NewsItem()
         news_item.news_item_data = news_item_data
         db.session.add(news_item)
@@ -654,7 +584,6 @@ class NewsItemAggregate(BaseModel):
         aggregate.title = news_item_data.title
         aggregate.description = news_item_data.review
         aggregate.created = news_item_data.published
-        aggregate.osint_source_group_id = osint_source_group_id
         aggregate.news_items.append(news_item)
         db.session.add(aggregate)
 
@@ -670,26 +599,30 @@ class NewsItemAggregate(BaseModel):
         for news_item_data in news_items_data:
             if not NewsItemData.identical(news_item_data.hash):
                 db.session.add(news_item_data)
-                cls.create_new_for_all_groups(news_item_data)
+                cls.create_new(news_item_data)
         db.session.commit()
 
         return f"Added {len(news_items_data)} news items", 200
 
     @classmethod
-    def add_news_item(cls, news_item_data) -> tuple[str, int]:
-        news_item_data = NewsItemData.from_dict(news_item_data)
-        if not news_item_data:
-            return "Invalid news item data", 400
-        if not news_item_data.id:
-            news_item_data.id = str(uuid.uuid4())
-        db.session.add(news_item_data)
-        cls.create_new_for_all_groups(news_item_data)
-        db.session.commit()
-
-        return f"Added news item {news_item_data.id}", 201
+    def add_news_item(cls, news_item_data_json: dict) -> tuple[dict, int]:
+        try:
+            if news_item_data_json.keys() != NewsItemData.__table__.columns.keys():
+                return {"error": "Invalid news item data"}, 422
+            if NewsItemData.identical(news_item_data_json["hash"]):
+                return {"error": "News item already exists"}, 409
+            if news_item_data := NewsItemData.from_dict(news_item_data_json):
+                db.session.add(news_item_data)
+                cls.create_new(news_item_data)
+                db.session.commit()
+                return {"message": "news_item_data created", "id": news_item_data.id}, 201
+            return {"error": "Invalid news item data"}, 422
+        except Exception:
+            logger.exception(f"Add News Item Failed {news_item_data_json}")
+            return {"error": "add failed"}, 500
 
     @classmethod
-    def add_remote_news_items(cls, news_items_data_list, remote_node, osint_source_group_id):
+    def add_remote_news_items(cls, news_items_data_list, remote_node):
         news_items_data = cls.load_multiple(news_items_data_list)
         news_item_data_ids = set()
         if not news_items_data:
@@ -701,7 +634,7 @@ class NewsItemAggregate(BaseModel):
                 attribute.remote_user = remote_node.name
 
             db.session.add(news_item_data)
-            cls.create_new_for_group(news_item_data, osint_source_group_id)
+            cls.create_new(news_item_data)
             news_item_data_ids.add(str(news_item_data.id))
         db.session.commit()
 
@@ -709,11 +642,11 @@ class NewsItemAggregate(BaseModel):
     def update(cls, id, data, user):
         aggregate = cls.get(id)
         if not aggregate:
-            return "Not found", 404
+            return {"error": f"Aggregate with id: {id} not found"}, 404
 
         logger.debug(f"Updating aggregate {id} with {data}")
         for news_item in aggregate.news_items:
-            if NewsItem.allowed_with_acl(news_item.id, user, False, False, True):
+            if news_item.allowed_with_acl(user, False, False, True):
                 if "vote" in data:
                     news_item.vote(data["vote"], user.id)
 
@@ -738,18 +671,18 @@ class NewsItemAggregate(BaseModel):
 
         db.session.commit()
 
-        return "success", 200
+        return {"message": "success"}, 200
 
     @classmethod
-    def delete_by_id(cls, id, user):
-        if cls.is_assigned_to_report([id]):
-            return "aggregate_in_use", 500
+    def delete_by_id(cls, aggregate_id, user):
+        if cls.is_assigned_to_report([aggregate_id]):
+            return {"error": f"aggregate with: {aggregate_id} assigned to a report"}, 500
 
-        aggregate = cls.get(id)
+        aggregate = cls.get(aggregate_id)
         if not aggregate:
-            return "Not found", 404
+            return {"error": f"Aggregate with id: {aggregate_id} not found"}, 404
         for news_item in aggregate.news_items:
-            if NewsItem.allowed_with_acl(news_item.id, user, False, False, True):
+            if news_item.allowed_with_acl(user, False, False, True):
                 aggregate.news_items.remove(news_item)
                 NewsItem.delete_only(news_item)
 
@@ -757,7 +690,7 @@ class NewsItemAggregate(BaseModel):
 
         db.session.commit()
 
-        return "success", 200
+        return {"message": "success"}, 200
 
     def delete(self, user):
         return self.delete_by_id(self.id, user)
@@ -767,39 +700,48 @@ class NewsItemAggregate(BaseModel):
         return any(ReportItemNewsItemAggregate.assigned(aggregate_id) for aggregate_id in aggregate_ids)
 
     @classmethod
-    def update_tags(cls, news_item_aggregate_id: int, tags: list) -> tuple[str, int]:
+    def update_tags(cls, news_item_aggregate_id: int, tags: list | dict) -> tuple[dict, int]:
         try:
             n_i_a = cls.get(news_item_aggregate_id)
             if not n_i_a:
-                return "not_found", 404
-            for tag in tags:
-                if type(tag) is dict:
-                    tag_name = tag["name"]
-                    tag_type = tag["type"]
-                else:
-                    tag_name = tag
-                    tag_type = "misc"
-                if tag_name not in [tag.name for tag in n_i_a.tags]:
-                    n_i_a.tags.append(NewsItemTag(name=tag_name, tag_type=tag_type))
+                logger.error(f"News Item Aggregate {news_item_aggregate_id} not found")
+                return {"error": "not_found"}, 404
+
+            new_tags = {}
+            if type(tags) is dict:
+                for name, tag in tags.items():
+                    tag_name = name
+                    tag_type = tag.get("tag_type", "misc")
+                    sub_forms = tag.get("sub_forms", None)
+                    new_tags[tag_name] = NewsItemTag(name=tag_name, tag_type=tag_type, sub_forms=sub_forms)
+            else:
+                for tag_name in tags:
+                    new_tags[tag_name] = NewsItemTag(name=tag_name, tag_type="misc", sub_forms=None)
+            for tag_name, new_tag in new_tags.items():
+                if tag_name.lower() in [tag.name.lower() for tag in n_i_a.tags]:
+                    continue
+                n_i_a.tags.append(new_tag)
             db.session.commit()
-            return "success", 200
+            return {"message": "success"}, 200
         except Exception:
             logger.log_debug_trace("Update News Item Tags Failed")
-            return "error", 500
+            return {"error": "update failed"}, 500
 
     @classmethod
     def group_aggregate(cls, aggregate_ids: list, user: User | None = None):
         try:
+            if len(aggregate_ids) < 2 or any(type(a_id) is not int for a_id in aggregate_ids):
+                return {"error": "at least two aggregate ids needed"}, 404
             first_aggregate = NewsItemAggregate.get(aggregate_ids.pop(0))
             if not first_aggregate:
-                return "not_found", 404
+                return {"error": "not_found"}, 404
             processed_aggregates = {first_aggregate}
             for item in aggregate_ids:
                 aggregate = NewsItemAggregate.get(item)
                 if not aggregate:
                     continue
                 for news_item in aggregate.news_items[:]:
-                    if user is None or NewsItem.allowed_with_acl(news_item.id, user, False, False, True):
+                    if user is None or news_item.allowed_with_acl(user, False, False, True):
                         first_aggregate.news_items.append(news_item)
                         first_aggregate.relevance += news_item.relevance + 1
                         aggregate.news_items.remove(news_item)
@@ -807,10 +749,10 @@ class NewsItemAggregate(BaseModel):
 
             db.session.commit()
             cls.update_aggregates(processed_aggregates)
-            return "success", 200
+            return {"message": "success"}, 200
         except Exception:
             logger.log_debug_trace("Grouping News Item Aggregates Failed")
-            return "error", 500
+            return {"error": "grouping failed"}, 500
 
     @classmethod
     def ungroup_aggregate(cls, newsitem_ids: list, user: User | None = None):
@@ -820,21 +762,20 @@ class NewsItemAggregate(BaseModel):
                 news_item = NewsItem.get(item)
                 if not news_item:
                     continue
-                if not NewsItem.allowed_with_acl(news_item.id, user, False, False, True):
+                if not news_item.allowed_with_acl(user, False, False, True):
                     continue
                 aggregate = NewsItemAggregate.get(news_item.news_item_aggregate_id)
                 if not aggregate:
                     continue
-                group_id = aggregate.osint_source_group_id
                 aggregate.news_items.remove(news_item)
                 processed_aggregates.add(aggregate)
-                cls.create_single_aggregate(news_item, group_id)
+                cls.create_single_aggregate(news_item)
             db.session.commit()
             cls.update_aggregates(processed_aggregates)
-            return "success", 200
+            return {"message": "success"}, 200
         except Exception:
             logger.log_debug_trace("Grouping News Item Aggregates Failed")
-            return "error", 500
+            return {"error": "ungroup failed"}, 500
 
     @classmethod
     def update_aggregates(cls, aggregates: set):
@@ -855,13 +796,12 @@ class NewsItemAggregate(BaseModel):
             logger.log_debug_trace("Update Aggregates Failed")
 
     @classmethod
-    def create_single_aggregate(cls, news_item, group_id):
+    def create_single_aggregate(cls, news_item):
         new_aggregate = NewsItemAggregate()
         new_aggregate.title = news_item.news_item_data.title
         new_aggregate.description = news_item.news_item_data.review
         new_aggregate.created = news_item.news_item_data.collected
         new_aggregate.news_items.append(news_item)
-        new_aggregate.osint_source_group_id = group_id
         db.session.add(new_aggregate)
         db.session.commit()
 
@@ -899,12 +839,47 @@ class NewsItemAggregate(BaseModel):
             return "not_found", 404
         aggregate.summary = summary
         db.session.commit()
-        return "success", 200
+        return {"message": "success"}, 200
+
+    def vote(self, vote_data, user_id) -> "NewsItemVote":
+        if vote := NewsItemVote.find_by_user(self.id, user_id):
+            if vote_data > 0:
+                self.update_like_vote(vote)
+            else:
+                self.update_dislike_vote(vote)
+        else:
+            vote = self.create_new_vote(vote, user_id)
+
+        self.news_item_data.updated = datetime.now()
+        return vote
+
+    def create_new_vote(self, vote, user_id):
+        vote = NewsItemVote(self.id, user_id)
+        db.session.add(vote)
+        return vote
+
+    def update_like_vote(self, vote):
+        self.likes -= 1
+        self.relevance -= 1
+        vote.like = ~vote.like
+
+    def update_dislike_vote(self, vote):
+        self.dislikes -= 1
+        self.relevance += 1
+        vote.dislike = ~vote.dislike
 
     def to_dict(self) -> dict[str, Any]:
         data = super().to_dict()
         data["news_items"] = [news_item.to_dict() for news_item in self.news_items]
-        data["tags"] = [tag.to_dict() for tag in self.tags]
+        data["tags"] = [tag.to_small_dict() for tag in self.tags]
+        if news_item_attributes := self.news_item_attributes:
+            data["news_item_attributes"] = [news_item_attribute.to_dict() for news_item_attribute in news_item_attributes]
+        return data
+
+    def to_worker_dict(self) -> dict[str, Any]:
+        data = super().to_dict()
+        data["news_items"] = [news_item.to_dict() for news_item in self.news_items]
+        data["tags"] = {tag.name: tag.to_dict() for tag in self.tags}
         if news_item_attributes := self.news_item_attributes:
             data["news_item_attributes"] = [news_item_attribute.to_dict() for news_item_attribute in news_item_attributes]
         return data
@@ -997,13 +972,22 @@ class NewsItemTag(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255))
     tag_type = db.Column(db.String(255))
+    sub_forms = db.Column(db.Text)
     n_i_a_id = db.Column(db.ForeignKey(NewsItemAggregate.id))
     n_i_a = db.relationship(NewsItemAggregate, backref=orm.backref("tags", cascade="all, delete-orphan"))
 
-    def __init__(self, name, tag_type):
+    def __init__(self, name, tag_type, sub_forms=None):
         self.id = None
         self.name = name
         self.tag_type = tag_type
+        if sub_forms:
+            if type(sub_forms) == list:
+                self.sub_forms = ",".join([s.replace(",", "") for s in sub_forms])
+            elif type(sub_forms) == str:
+                self.sub_forms = sub_forms
+            else:
+                self.sub_forms = ""
+                logger.debug(f"wrong type for sub_forms {type(sub_forms)}")
 
     @classmethod
     def find_largest_tag_clusters(cls, days: int = 7, limit: int = 12, min_count: int = 2):
@@ -1058,9 +1042,11 @@ class NewsItemTag(BaseModel):
         if tag_type := filter_args.get("tag_type"):
             query = query.filter(cls.tag_type == tag_type)
 
-        if min_size := filter_args.get("min_size", 2):
+        if min_size := filter_args.get("min_size", 4):
             # returns only tags where the name appears at least min_size times in the database
             query = query.group_by(cls.name, cls.tag_type).having(func.count(cls.name) >= min_size)
+            # order by size
+            query = query.order_by(func.count(cls.name).desc())
 
         rows = cls.get_rows(query, filter_args)
         return [cls(name=row[0], tag_type=row[1]) for row in rows]
@@ -1075,7 +1061,7 @@ class NewsItemTag(BaseModel):
     @classmethod
     def get_json(cls, filter_args: dict) -> list[dict[str, Any]]:
         tags = cls.get_filtered_tags(filter_args)
-        return [tag.to_dict() for tag in tags]
+        return [tag.to_small_dict() for tag in tags]
 
     @classmethod
     def get_list(cls, filter_args: dict) -> list[str]:
@@ -1089,7 +1075,20 @@ class NewsItemTag(BaseModel):
             db.session.delete(tag)
         db.session.commit()
 
+    def get_forms(self) -> list[str]:
+        tags = [self.name]
+        if self.sub_forms:
+            tags.append(self.sub_forms.split(","))
+        return tags
+
     def to_dict(self) -> dict[str, Any]:
+        return {
+            "name": self.name,
+            "tag_type": self.tag_type,
+            "sub_forms": self.sub_forms.split(",") if self.sub_forms else [],
+        }
+
+    def to_small_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "tag_type": self.tag_type,

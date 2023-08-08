@@ -13,6 +13,9 @@ class BaseModel(db.Model):
     def __str__(self) -> str:
         return f"{self.__class__.__name__} {self.to_json()}"
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__} {self.to_json()}"
+
     @classmethod
     def delete(cls: Type[T], id) -> tuple[str, int]:
         if cls.query.filter_by(id=id).delete():
@@ -52,6 +55,8 @@ class BaseModel(db.Model):
 
     @classmethod
     def get(cls: Type[T], id) -> T | None:
+        if isinstance(id, int) and (id < 0 or id > 2**63 - 1):
+            return None
         return cls.query.get(id)
 
     @classmethod

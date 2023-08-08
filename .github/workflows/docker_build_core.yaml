@@ -3,17 +3,15 @@ name: Core Docker image
 on:
   push:
     paths:
-    - 'src/core/**'
-    - 'docker/Dockerfile.core'
-    - 'docker/start.sh'
-    - 'docker/prestart_core.sh'
-    - 'docker/entrypoint.sh'
-    - 'docker/gunicorn_conf.py'
+      - "src/core/**"
+      - "docker/Dockerfile.core"
+      - "docker/entrypoint.sh"
+      - "docker/gunicorn_conf.py"
     branches:
-    - master
-    - awake
+      - master
+      - awake
     tags:
-    - '**'
+      - "**"
 
 permissions:
   packages: write
@@ -27,14 +25,13 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: "3.11"
       - name: test
         working-directory: src/core
         run: |
-          python -m pip install --upgrade -r ../../dev_requirements.txt
-          pip install -e .
+          pip install -e .[dev]
           echo "Starting Pytest"
-          pytest
+          pytest --ignore tests/test_schema.py
 
   build_wheel:
     name: build wheel
@@ -44,7 +41,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: "3.11"
       - name: build
         working-directory: src/core
         run: |

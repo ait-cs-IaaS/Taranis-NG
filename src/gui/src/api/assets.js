@@ -14,31 +14,11 @@ export function createAssetGroup(group) {
 }
 
 export function updateAssetGroup(group) {
-  return ApiService.put(`/asset-groups/${group.id}`, group)
+  return ApiService.put(`/asset-groups/${group}`, group)
 }
 
 export function deleteAssetGroup(group) {
-  return ApiService.delete(`/asset-groups/${group.id}`)
-}
-
-export function getAllNotificationTemplates(filter_data) {
-  const filter = ApiService.getQueryStringFromNestedObject(filter_data)
-  return ApiService.get(`/asset-notification-templates?${filter}`)
-}
-
-export function createNotificationTemplate(template) {
-  return ApiService.post('/asset-notification-templates', template)
-}
-
-export function updateNotificationTemplate(template) {
-  return ApiService.put(
-    `/asset-notification-templates/${template.id}`,
-    template
-  )
-}
-
-export function deleteNotificationTemplate(template) {
-  return ApiService.delete(`/asset-notification-templates/${template.id}`)
+  return ApiService.delete(`/asset-groups/${group}`)
 }
 
 export function getAllAssets(filter_data) {
@@ -62,11 +42,11 @@ export function solveVulnerability(data) {
 }
 
 export function updateAsset(asset) {
-  return ApiService.put(`/assets/${asset.id}`, asset)
+  return ApiService.put(`/assets/${asset}`, asset)
 }
 
 export function deleteAsset(asset) {
-  return ApiService.delete(`/assets/${asset.id}`)
+  return ApiService.delete(`/assets/${asset}`)
 }
 
 export function findAttributeCPE() {

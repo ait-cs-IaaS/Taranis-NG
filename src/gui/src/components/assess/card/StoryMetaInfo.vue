@@ -48,7 +48,7 @@
         :class="detailView ? 'detailView' : ''"
       >
         <week-chart
-          v-if="!published_date_outdated && lgAndUp"
+          v-if="!published_date_outdated && lgAndUp && !reportView"
           :chart-height="detailView ? 300 : 250"
           :chart-width="detailView ? 800 : 600"
           :story="story"
@@ -79,7 +79,8 @@ export default {
     detailView: {
       type: Boolean,
       default: false
-    }
+    },
+    reportView: { type: Boolean, default: false }
   },
   emits: ['selectItem', 'deleteItem'],
   setup(props) {
@@ -90,6 +91,11 @@ export default {
       const pub_dates = props.story.news_items
         .map((item) => item.news_item_data.published)
         .sort()
+
+      if (pub_dates.length === 0) {
+        console.warn('No published dates found for story', props.story.title)
+        return [null, null]
+      }
 
       return [pub_dates[pub_dates.length - 1], pub_dates[0]]
     })

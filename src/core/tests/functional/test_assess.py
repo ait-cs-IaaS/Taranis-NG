@@ -76,8 +76,8 @@ def news_item_aggregates(app, request, news_items_data):
         from core.model.user import User
 
         nia = NewsItemAggregate()
-        nia1 = nia.create_new_for_group(news_items_data[0], "default")
-        nia2 = nia.create_new_for_group(news_items_data[1], "default")
+        nia1 = nia.create_new(news_items_data[0])
+        nia2 = nia.create_new(news_items_data[1])
 
         def teardown():
             nia = NewsItemAggregate()
@@ -305,19 +305,21 @@ class TestAssessApi(object):
         nia1, nia2 = news_item_aggregates
         response = nia1.update_tags(nia1.id, ["foo", "bar", "baz"])
         assert response[1] == 200
-        response = nia2.update_tags(nia2.id, [{"name": "foo", "type": "misc"}, {"name": "bar", "type": "misc"}])
+        response = nia2.update_tags(nia2.id, {"foo": {"tag_type": "misc"}, "bar": {"tag_type": "misc"}})
         assert response[1] == 200
 
         response = client.get("/api/v1/assess/tags", headers=auth_header)
         assert response
         assert response.data
         print(response.get_json())
-        assert len(response.get_json()) == 2
+        assert len(response.get_json()) == 0
         assert response.content_type == "application/json"
         assert response.status_code == 200
-        response = client.get("/api/v1/assess/tags?search=fo", headers=auth_header)
+        response = client.get("/api/v1/assess/tags?min_size=1", headers=auth_header)
+        assert len(response.get_json()) == 3
+        response = client.get("/api/v1/assess/tags?search=fo&min_size=1", headers=auth_header)
         assert len(response.get_json()) == 1
-        response = client.get("/api/v1/assess/tags?limit=1", headers=auth_header)
+        response = client.get("/api/v1/assess/tags?limit=1&min_size=1", headers=auth_header)
         assert len(response.get_json()) == 1
-        response = client.get("/api/v1/assess/tags?offset=1", headers=auth_header)
-        assert len(response.get_json()) == 1
+        response = client.get("/api/v1/assess/tags?offset=1&min_size=1", headers=auth_header)
+        assert len(response.get_json()) == 2

@@ -13,10 +13,10 @@ load_dotenv(dotenv_path="tests/.env", override=True)
 def app(request):
     from core.__init__ import create_app
 
-    def teardown():
-        os.remove("/var/tmp/taranis_test.db")
+    # def teardown():
+    #     os.remove("/var/tmp/taranis_test.db")
 
-    request.addfinalizer(teardown)
+    # request.addfinalizer(teardown)
     yield create_app()
 
 
@@ -90,6 +90,34 @@ def auth_header(access_token):
     return {"Authorization": f"Bearer {access_token}", "Content-type": "application/json"}
 
 
+@pytest.fixture
+def api_header():
+    return {"Authorization": "Bearer test_key", "Content-type": "application/json"}
+
+
+@pytest.fixture(scope="session")
+def access_token_no_permissions(app):
+    from flask_jwt_extended import create_access_token
+
+    with app.app_context():
+        return create_access_token(
+            identity="admin",
+            additional_claims={
+                "user_claims": {
+                    "id": "admin",
+                    "name": "admin",
+                    "organization_name": "TestOrg",
+                    "permissions": [],
+                }
+            },
+        )
+
+
+@pytest.fixture
+def auth_header_no_permissions(access_token_no_permissions):
+    return {"Authorization": f"Bearer {access_token_no_permissions}", "Content-type": "application/json"}
+
+
 @pytest.fixture(scope="session")
 def permissions():
     yield [
@@ -146,10 +174,6 @@ def permissions():
         "CONFIG_BOT_PRESET_CREATE",
         "CONFIG_BOT_PRESET_UPDATE",
         "CONFIG_BOT_PRESET_DELETE",
-        "CONFIG_COLLECTORS_NODE_ACCESS",
-        "CONFIG_COLLECTORS_NODE_CREATE",
-        "CONFIG_COLLECTORS_NODE_UPDATE",
-        "CONFIG_COLLECTORS_NODE_DELETE",
         "CONFIG_OSINT_SOURCE_ACCESS",
         "CONFIG_OSINT_SOURCE_CREATE",
         "CONFIG_OSINT_SOURCE_UPDATE",
@@ -183,5 +207,6 @@ def permissions():
         "CONFIG_REMOTE_NODE_UPDATE",
         "CONFIG_REMOTE_NODE_DELETE",
         "CONFIG_NODE_ACCESS",
+        "CONFIG_WORKER_ACCESS",
         "CONFIG_API_ACCESS",
     ]

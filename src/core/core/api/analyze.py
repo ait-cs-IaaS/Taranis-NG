@@ -1,11 +1,11 @@
 import io
 from flask import request, jsonify, send_file
-from flask_restx import Resource, Namespace
+from flask_restx import Resource, Namespace, Api
 
 from core.managers import asset_manager, auth_manager
 from core.managers.sse_manager import sse_manager
 from core.managers.log_manager import logger
-from core.managers.auth_manager import auth_required, ACLCheck
+from core.managers.auth_manager import auth_required
 from core.model import attribute, report_item, report_item_type
 
 
@@ -28,7 +28,7 @@ class ReportItems(Resource):
             filter_keys = ["search", "completed", "incompleted", "range", "sort", "group"]
             filter_args: dict[str, str | int] = {k: v for k, v in request.args.items() if k in filter_keys}
 
-            filter_args["offset"] = int(request.args.get("offset", 0))
+            filter_args["offset"] = min(int(request.args.get("offset", 0)), (2**31) - 1)
             filter_args["limit"] = min(int(request.args.get("limit", 20)), 200)
             return report_item.ReportItem.get_json(filter_args, auth_manager.get_user_from_jwt())
         except Exception as ex:
@@ -42,29 +42,38 @@ class ReportItems(Resource):
             asset_manager.report_item_changed(new_report_item)
             sse_manager.report_items_updated()
 
-        return new_report_item.id, status
+        return new_report_item.to_detail_dict(), status
 
 
 class ReportItemAggregates(Resource):
-    @auth_required("ANALYZE_ACCESS", ACLCheck.REPORT_ITEM_ACCESS)
+    @auth_required("ANALYZE_ACCESS")
     def get(self, report_item_id):
         return report_item.ReportItem.get_aggregate_ids(report_item_id)
 
-    @auth_required("ANALYZE_UPDATE", ACLCheck.REPORT_ITEM_MODIFY)
+    @auth_required("ANALYZE_UPDATE")
     def put(self, report_item_id):
         request_data = request.json
-        if not request_data:
+        if type(request_data) != list:
+            logger.debug("No data in request")
+            return "No data in request", 400
+        return report_item.ReportItem.set_aggregates(report_item_id, request_data, auth_manager.get_user_from_jwt())
+
+    @auth_required("ANALYZE_UPDATE")
+    def post(self, report_item_id):
+        request_data = request.json
+        if type(request_data) != list:
             logger.debug("No data in request")
             return "No data in request", 400
         return report_item.ReportItem.add_aggregates(report_item_id, request_data, auth_manager.get_user_from_jwt())
 
 
 class ReportItem(Resource):
-    @auth_required("ANALYZE_ACCESS", ACLCheck.REPORT_ITEM_ACCESS)
+    @auth_required("ANALYZE_ACCESS")
     def get(self, report_item_id):
-        return report_item.ReportItem.get_detail_json(report_item_id)
+        result_json = report_item.ReportItem.get_detail_json(report_item_id)
+        return (result_json, 200) if result_json else ("Could not get report item", 404)
 
-    @auth_required("ANALYZE_UPDATE", ACLCheck.REPORT_ITEM_MODIFY)
+    @auth_required("ANALYZE_UPDATE")
     def put(self, report_item_id):
         request_data = request.json
         if not request_data:
@@ -72,7 +81,7 @@ class ReportItem(Resource):
             return "No data in request", 400
         return report_item.ReportItem.update_report_item(report_item_id, request_data, auth_manager.get_user_from_jwt())
 
-    @auth_required("ANALYZE_DELETE", ACLCheck.REPORT_ITEM_MODIFY)
+    @auth_required("ANALYZE_DELETE")
     def delete(self, report_item_id):
         result, code = report_item.ReportItem.delete(report_item_id)
         if code == 200:
@@ -81,7 +90,7 @@ class ReportItem(Resource):
 
 
 class ReportItemData(Resource):
-    @auth_required("ANALYZE_ACCESS", ACLCheck.REPORT_ITEM_ACCESS)
+    @auth_required("ANALYZE_ACCESS")
     def get(self, report_item_id):
         try:
             data = {}
@@ -109,7 +118,7 @@ class ReportItemData(Resource):
 
 
 class ReportItemLocks(Resource):
-    @auth_required("ANALYZE_UPDATE", ACLCheck.REPORT_ITEM_MODIFY)
+    @auth_required("ANALYZE_UPDATE")
     def get(self, report_item_id):
         if id in sse_manager.report_item_locks:
             return jsonify(sse_manager.report_item_locks[report_item_id])
@@ -117,14 +126,14 @@ class ReportItemLocks(Resource):
 
 
 class ReportItemLock(Resource):
-    @auth_required("ANALYZE_UPDATE", ACLCheck.REPORT_ITEM_MODIFY)
+    @auth_required("ANALYZE_UPDATE")
     def put(self, report_item_id):
         if user := auth_manager.get_user_from_jwt():
             sse_manager.report_item_lock(report_item_id, user.id)
 
 
 class ReportItemUnlock(Resource):
-    @auth_required("ANALYZE_UPDATE", ACLCheck.REPORT_ITEM_MODIFY)
+    @auth_required("ANALYZE_UPDATE")
     def put(self, report_item_id):
         if user := auth_manager.get_user_from_jwt():
             sse_manager.report_item_unlock(report_item_id, user.id)
@@ -140,7 +149,7 @@ class ReportItemAttributeEnums(Resource):
 
 
 class ReportItemAddAttachment(Resource):
-    @auth_required(["ANALYZE_CREATE", "ANALYZE_UPDATE"], ACLCheck.REPORT_ITEM_MODIFY)
+    @auth_required(["ANALYZE_CREATE", "ANALYZE_UPDATE"])
     def post(self, report_item_id):
         file = request.files.get("file")
         if not file:
@@ -153,35 +162,35 @@ class ReportItemAddAttachment(Resource):
         updated_report_item = report_item.ReportItem.get(report_item_id)
         asset_manager.report_item_changed(updated_report_item)
         sse_manager.report_item_updated(data)
-        sse_manager.remote_access_report_items_updated(updated_report_item.report_item_type_id)
 
         return data
 
 
 class ReportItemRemoveAttachment(Resource):
-    @auth_required("ANALYZE_UPDATE", ACLCheck.REPORT_ITEM_MODIFY)
+    @auth_required("ANALYZE_UPDATE")
     def delete(self, report_item_id, attribute_id):
         user = auth_manager.get_user_from_jwt()
         data = report_item.ReportItem.remove_attachment(report_item_id, attribute_id, user)
         updated_report_item = report_item.ReportItem.get(report_item_id)
         asset_manager.report_item_changed(updated_report_item)
         sse_manager.report_item_updated(data)
-        sse_manager.remote_access_report_items_updated(updated_report_item.report_item_type_id)
 
 
 class ReportItemDownloadAttachment(Resource):
-    @auth_required("ANALYZE_ACCESS", ACLCheck.REPORT_ITEM_ACCESS)
+    @auth_required("ANALYZE_ACCESS")
     def get(self, report_item_id, attribute_id):
-        report_item_attribute = report_item.ReportItemAttribute.get(attribute_id)
-        return send_file(
-            io.BytesIO(report_item_attribute.binary_data),
-            download_name=report_item_attribute.value,
-            mimetype=report_item_attribute.binary_mime_type,
-            as_attachment=True,
-        )
+        if report_item_attribute := report_item.ReportItemAttribute.get(attribute_id):
+            return send_file(
+                io.BytesIO(report_item_attribute.binary_data),
+                download_name=report_item_attribute.value,
+                mimetype=report_item_attribute.binary_mime_type,
+                as_attachment=True,
+            )
+
+        return {"Error": "Report Item Attribute Not Found"}, 404
 
 
-def initialize(api):
+def initialize(api: Api):
     namespace = Namespace("analyze", description="Analyze API", path="/api/v1/analyze")
     namespace.add_resource(ReportTypes, "/report-types")
     namespace.add_resource(ReportItemGroups, "/report-item-groups")

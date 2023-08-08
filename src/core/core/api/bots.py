@@ -1,13 +1,12 @@
-import json
 from flask import request
-from flask_restx import Resource, Namespace
+from flask_restx import Resource, Namespace, Api
 from datetime import datetime, timedelta
 
 from core.managers import bots_manager
 from core.managers.sse_manager import sse_manager
 from core.managers.log_manager import logger
-from core.managers.auth_manager import api_key_required, get_user_from_jwt
-from core.model import news_item, word_list, bots_node, bot, osint_source
+from core.managers.auth_manager import api_key_required
+from core.model import news_item, word_list, bots_node, bot
 
 
 class BotGroupAction(Resource):
@@ -87,6 +86,7 @@ class UpdateNewsItemTags(Resource):
     def put(self, aggregate_id):
         if data := request.json:
             return news_item.NewsItemAggregate.update_tags(aggregate_id, data)
+        return {"No data provided"}, 400
 
 
 class UpdateNewsItemsAggregateSummary(Resource):
@@ -95,36 +95,10 @@ class UpdateNewsItemsAggregateSummary(Resource):
         news_item.NewsItemAggregate.update_news_items_aggregate_summary(aggregate_id, request.json)
 
 
-class BotNewsItemAggregates(Resource):
-    @api_key_required
-    def get(self):
-        try:
-            filter_args = {
-                "group": request.args.get("group", default=osint_source.OSINTSourceGroup.get_default().id),
-                "timestamp": datetime.fromisoformat(request.args.get("timestamp", datetime.now().isoformat())),
-            }
-
-            return news_item.NewsItemAggregate.get_by_timestamp_json(filter_args)
-        except Exception:
-            logger.exception("Failed to get Stories")
-            return "Failed to get Stories", 400
-
-
-class GetDefaultNewsItemsAggregate(Resource):
-    @api_key_required
-    def get(self):
-        limit = request.args.get("limit", "")
-        return news_item.NewsItemAggregate.get_for_worker(limit), 200
-
-
 class WordListEntries(Resource):
     @api_key_required
-    def delete(self, word_list_id, entry_name):
-        return word_list.WordListEntry.delete_entries(word_list_id, entry_name)
-
-    @api_key_required
-    def put(self, word_list_id, entry_name):
-        return word_list.WordListEntry.update_word_list_entries(word_list_id, request.json)
+    def put(self, word_list_id):
+        return word_list.WordList.update(word_list_id, request.json)
 
 
 class BotsInfo(Resource):
@@ -141,14 +115,14 @@ class BotInfo(Resource):
         return bot.Bot.update(bot_id, request.json)
 
 
-def initialize(api):
+def initialize(api: Api):
     namespace = Namespace("bots", description="Bots related operations", path="/api/v1/bots")
     namespace.add_resource(BotsInfo, "/")
     namespace.add_resource(BotInfo, "/<string:bot_id>")
     namespace.add_resource(NewsItemData, "/news-item-data")
     namespace.add_resource(
         UpdateNewsItemTags,
-        "/news-items-aggregate/<string:aggregate_id>/tags",
+        "/aggregate/<string:aggregate_id>/tags",
     )
     namespace.add_resource(
         UpdateNewsItemData,
@@ -162,17 +136,12 @@ def initialize(api):
     namespace.add_resource(BotUnGroupAction, "/news-item-aggregates/ungroup")
 
     namespace.add_resource(
-        BotNewsItemAggregates,
-        "/news-item-aggregates",
-    )
-    namespace.add_resource(
         UpdateNewsItemsAggregateSummary,
-        "/news-items-aggregate/<string:aggregate_id>/summary",
+        "/aggregate/<string:aggregate_id>/summary",
     )
-    namespace.add_resource(GetDefaultNewsItemsAggregate, "/news-item-aggregates")
     namespace.add_resource(
         WordListEntries,
-        "/word-list/<int:word_list_id>/entries/<string:entry_name>",
+        "/word-list/<int:word_list_id>",
     )
     namespace.add_resource(BotsNode, "/node/<string:node_id>", "/node")
     api.add_namespace(namespace)

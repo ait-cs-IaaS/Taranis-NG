@@ -89,11 +89,6 @@ export function getAllPermissions(filter_data) {
   return ApiService.get(`/config/permissions?${filter}`)
 }
 
-export function getAllExternalPermissions(filter_data) {
-  const filter = ApiService.getQueryStringFromNestedObject(filter_data)
-  return ApiService.get(`/config/external-permissions?${filter}`)
-}
-
 export function getAllRoles(filter_data) {
   const filter = ApiService.getQueryStringFromNestedObject(filter_data)
   return ApiService.get(`/config/roles?${filter}`)
@@ -228,53 +223,19 @@ export function importWordList(form_data) {
   return ApiService.upload('/config/import-word-lists', form_data)
 }
 
+export function gatherWordListEntries(word_list) {
+  return ApiService.put(
+    `/config/gather-word-list-entries/${word_list.id}`,
+    word_list
+  )
+}
+
 export function exportWordList(filter_data) {
   const filter = ApiService.getQueryStringFromNestedObject(filter_data)
   return ApiService.download(
     `/config/export-word-lists?${filter}`,
     'word_lists_export.json'
   )
-}
-
-export function getAllRemoteAccesses(filter_data) {
-  const filter = ApiService.getQueryStringFromNestedObject(filter_data)
-  return ApiService.get(`/config/remote-accesses?${filter}`)
-}
-
-export function createRemoteAccess(remote_access) {
-  return ApiService.post('/config/remote-accesses', remote_access)
-}
-
-export function updateRemoteAccess(remote_access) {
-  return ApiService.put(
-    `/config/remote-accesses/${remote_access.id}`,
-    remote_access
-  )
-}
-
-export function deleteRemoteAccess(remote_access) {
-  return ApiService.delete(`/config/remote-accesses/${remote_access.id}`)
-}
-
-export function getAllRemoteNodes(filter_data) {
-  const filter = ApiService.getQueryStringFromNestedObject(filter_data)
-  return ApiService.get(`/config/remote-nodes?${filter}`)
-}
-
-export function createRemoteNode(remote_node) {
-  return ApiService.post('/config/remote-nodes', remote_node)
-}
-
-export function updateRemoteNode(remote_node) {
-  return ApiService.put(`/config/remote-nodes/${remote_node.id}`, remote_node)
-}
-
-export function deleteRemoteNode(remote_node) {
-  return ApiService.delete(`/config/remote-nodes/${remote_node.id}`)
-}
-
-export function connectRemoteNode(remote_node) {
-  return ApiService.get(`/config/remote-nodes/${remote_node.id}/connect`)
 }
 
 export function getAllNodes(filter_data) {
@@ -286,10 +247,15 @@ export function triggerNode() {
   return ApiService.post('/config/workers/refresh')
 }
 
+export function getAllSchedule() {
+  return ApiService.get('/config/workers/schedule')
+}
+
+export function getAllWorkers() {
+  return ApiService.get('/config/workers')
+}
+
 export function updateNode(node) {
-  if (node.type === 'collector') {
-    return ApiService.put(`/config/collectors-nodes/${node.id}`, node)
-  }
   if (node.type === 'bot') {
     return ApiService.put(`/config/bots-nodes/${node.id}`, node)
   }
@@ -302,9 +268,6 @@ export function updateNode(node) {
 }
 
 export function createNode(node) {
-  if (node.type === 'collector') {
-    return ApiService.post('/config/collectors-nodes', node)
-  }
   if (node.type === 'bot') {
     return ApiService.post('/config/bots-nodes', node)
   }
@@ -317,9 +280,6 @@ export function createNode(node) {
 }
 
 export function deleteNode(node) {
-  if (node.type === 'collector') {
-    return ApiService.delete(`/config/collectors-nodes/${node.id}`, node)
-  }
   if (node.type === 'bot') {
     return ApiService.delete(`/config/bots-nodes/${node.id}`, node)
   }
@@ -338,6 +298,14 @@ export function getAllOSINTSources(filter_data) {
 
 export function createOSINTSource(source) {
   return ApiService.post('/config/osint-sources', source)
+}
+
+export function collectOSINTSSource(source_id) {
+  return ApiService.post(`/config/osint-sources/${source_id}/collect`)
+}
+
+export function collectAllOSINTSSources() {
+  return ApiService.post('/config/osint-sources/collect')
 }
 
 export function updateOSINTSource(source) {

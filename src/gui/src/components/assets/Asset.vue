@@ -1,57 +1,60 @@
 <template>
-  <v-container fluid>
-    <v-app-bar :elevation="2" app class="mt-12">
+  <v-card>
+    <v-toolbar density="compact">
       <v-toolbar-title>{{ container_title }}</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-btn color="success" class="mr-2" @click="saveAsset">
-        <v-icon left>mdi-content-save</v-icon>
-        <span>{{ $t('button.save') }}</span>
+      <v-btn
+        prepend-icon="mdi-content-save"
+        color="success"
+        variant="flat"
+        @click="saveAsset"
+      >
+        {{ $t('button.save') }}
       </v-btn>
-    </v-app-bar>
-
-    <v-row no-gutters>
-      <v-col cols="6">
-        <v-text-field
-          v-model="asset.name"
-          :label="$t('form.name')"
-          :rules="required"
-        />
-      </v-col>
-      <v-col cols="6">
-        <v-text-field v-model="asset.serial" :label="$t('asset.serial')" />
-      </v-col>
-      <v-col cols="12">
-        <v-textarea
-          v-model="asset.description"
-          :label="$t('asset.description')"
-          :spellcheck="spellcheck"
-        />
-      </v-col>
-      <v-col cols="12">
-        <v-select
-          v-model="asset.group"
-          :label="$t('asset.group')"
-          :items="['foo', 'bar', 'fizz', 'buzz']"
-        />
-      </v-col>
-    </v-row>
-    <v-row no-gutters>
-      <v-col cols="12">
-        {{ asset.asset_cpes }}
-      </v-col>
-      <v-col cols="12">
-        {{ vulnerabilities }}
-      </v-col>
-    </v-row>
-  </v-container>
+    </v-toolbar>
+    <v-card-text>
+      <v-row no-gutters>
+        <v-col cols="6">
+          <v-text-field
+            v-model="asset.name"
+            :label="$t('form.name')"
+            :rules="required"
+          />
+        </v-col>
+        <v-col cols="5" offset="1">
+          <v-text-field v-model="asset.serial" :label="$t('asset.serial')" />
+        </v-col>
+        <v-col cols="12">
+          <v-textarea
+            v-model="asset.description"
+            :label="$t('asset.description')"
+          />
+        </v-col>
+        <v-col cols="12">
+          <v-select
+            v-model="asset.group"
+            :label="$t('asset.group')"
+            :items="asset_groups"
+          />
+        </v-col>
+      </v-row>
+      <v-row no-gutters>
+        <v-col cols="12">
+          {{ asset.asset_cpes }}
+        </v-col>
+        <v-col cols="12">
+          {{ vulnerabilities }}
+        </v-col>
+      </v-row>
+    </v-card-text>
+  </v-card>
 </template>
 
 <script>
+import { ref, computed, onMounted } from 'vue'
 import { createAsset, updateAsset } from '@/api/assets'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
-
-import { mapState } from 'pinia'
-import { useSettingsStore } from '@/stores/SettingsStore'
+import { useAssetsStore } from '@/stores/AssetsStore'
+import { useI18n } from 'vue-i18n'
 
 export default {
   name: 'AssetView',
@@ -59,25 +62,32 @@ export default {
     assetProp: { type: Object, required: true },
     edit: { type: Boolean, default: false }
   },
-  data: function () {
-    return {
-      required: [(v) => !!v || 'Required'],
-      vulnerabilities: [],
-      asset: this.assetProp
-    }
-  },
-  computed: {
-    container_title() {
-      return this.edit
-        ? `${this.$t('button.edit')} asset`
-        : `${this.$t('button.add_new')} asset`
-    },
-    ...mapState(useSettingsStore, ['spellcheck'])
-  },
-  methods: {
-    saveAsset() {
-      if (this.edit) {
-        updateAsset(this.asset)
+  setup(props) {
+    const { t } = useI18n()
+    const assetsStore = useAssetsStore()
+
+    const required = ref([(v) => !!v || 'Required'])
+    const vulnerabilities = ref([])
+    const asset = ref(props.assetProp)
+
+    const container_title = computed(() => {
+      return props.edit
+        ? `${t('button.edit')} asset`
+        : `${t('button.add_new')} asset`
+    })
+
+    const asset_groups = computed(() => {
+      return assetsStore.asset_groups.map((item) => {
+        return {
+          title: item.name,
+          value: item.id
+        }
+      })
+    })
+
+    const saveAsset = () => {
+      if (props.edit) {
+        updateAsset(asset.value)
           .then(() => {
             notifySuccess('asset.successful_edit')
           })
@@ -85,7 +95,7 @@ export default {
             notifyFailure('asset.failed')
           })
       } else {
-        createAsset(this.asset)
+        createAsset(asset.value)
           .then(() => {
             notifySuccess('asset.successful')
           })
@@ -93,10 +103,24 @@ export default {
             notifyFailure('asset.failed')
           })
       }
-    },
+    }
 
-    update(cpes) {
-      this.asset.asset_cpes = cpes
+    onMounted(() => {
+      assetsStore.loadAssetGroups()
+    })
+
+    const update = (cpes) => {
+      asset.value.asset_cpes = cpes
+    }
+
+    return {
+      required,
+      vulnerabilities,
+      asset,
+      container_title,
+      asset_groups,
+      saveAsset,
+      update
     }
   }
 }

@@ -1,11 +1,10 @@
 import base64
-from flask import Response
-from flask import request
-from flask_restx import Resource, Namespace
+from flask import Response, request
+from flask_restx import Resource, Namespace, Api
 
 from core.managers import auth_manager, presenters_manager, publishers_manager
 from core.managers.log_manager import logger
-from core.managers.auth_manager import auth_required, ACLCheck
+from core.managers.auth_manager import auth_required
 from core.model import product, publisher_preset
 
 
@@ -29,15 +28,15 @@ class Products(Resource):
 
 
 class Product(Resource):
-    @auth_required("PUBLISH_UPDATE", ACLCheck.PRODUCT_TYPE_ACCESS)
+    @auth_required("PUBLISH_UPDATE")
     def get(self, product_id):
         return product.Product.get_detail_json(product_id)
 
-    @auth_required("PUBLISH_UPDATE", ACLCheck.PRODUCT_TYPE_MODIFY)
+    @auth_required("PUBLISH_UPDATE")
     def put(self, product_id):
         product.Product.update(product_id, request.json)
 
-    @auth_required("PUBLISH_DELETE", ACLCheck.PRODUCT_TYPE_MODIFY)
+    @auth_required("PUBLISH_DELETE")
     def delete(self, product_id):
         return product.Product.delete(product_id)
 
@@ -70,7 +69,7 @@ class ProductsOverview(Resource):
         return "Failed to generate product", status_code
 
 
-def initialize(api):
+def initialize(api: Api):
     namespace = Namespace("publish", description="Publish API", path="/api/v1/publish")
     namespace.add_resource(Products, "/products")
     namespace.add_resource(Product, "/products/<int:product_id>")

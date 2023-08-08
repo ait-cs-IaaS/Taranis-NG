@@ -1,2 +1,5 @@
 node_modules
 venv
+dist
+**/venv
+**/node_modules

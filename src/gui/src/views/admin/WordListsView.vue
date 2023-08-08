@@ -15,9 +15,22 @@
       <template #titlebar>
         <ImportExport @import="importData" @export="exportData"></ImportExport>
       </template>
+      <template #actionColumn="source">
+        <v-tooltip left>
+          <template #activator="{ props }">
+            <v-icon
+              v-bind="props"
+              color="secondary"
+              icon="mdi-update"
+              @click.stop="updateWordListEntries(source.item)"
+            />
+          </template>
+          <span>Update Wordlist</span>
+        </v-tooltip>
+      </template>
     </DataTable>
     <EditConfig
-      v-if="formData && Object.keys(formData).length > 0"
+      v-if="showForm"
       :config-data="formData"
       :form-format="formFormat"
       @submit="handleSubmit"
@@ -35,7 +48,8 @@ import {
   createWordList,
   updateWordList,
   exportWordList,
-  importWordList
+  importWordList,
+  gatherWordListEntries
 } from '@/api/config'
 import { notifySuccess, objectFromFormat, notifyFailure } from '@/utils/helpers'
 import { useConfigStore } from '@/stores/ConfigStore'
@@ -50,13 +64,14 @@ export default {
     ImportExport
   },
   setup() {
-    const store = useConfigStore()
+    const showForm = ref(false)
+    const configStore = useConfigStore()
     const mainStore = useMainStore()
 
     const selected = ref([])
     const formData = ref({})
     const edit = ref(false)
-    const { word_lists } = storeToRefs(store)
+    const { word_lists } = storeToRefs(configStore)
 
     const formFormat = computed(() => [
       {
@@ -87,11 +102,16 @@ export default {
         name: 'use_for_stop_words',
         label: 'Use for stop words',
         type: 'switch'
+      },
+      {
+        name: 'entries',
+        label: 'Words',
+        type: 'list'
       }
     ])
 
     const updateData = () => {
-      store.loadWordLists().then(() => {
+      configStore.loadWordLists().then(() => {
         mainStore.itemCountTotal = word_lists.value.total_count
         mainStore.itemCountFiltered = word_lists.value.items.length
       })
@@ -100,11 +120,13 @@ export default {
     const addItem = () => {
       formData.value = objectFromFormat(formFormat.value)
       edit.value = false
+      showForm.value = true
     }
 
     const editItem = (item) => {
       formData.value = item
       edit.value = true
+      showForm.value = true
     }
 
     const handleSubmit = (submittedData) => {
@@ -157,8 +179,18 @@ export default {
       exportWordList(selected.value)
     }
 
-    const selectionChange = (selected) => {
-      selected.value = selected.map((item) => item.id)
+    const selectionChange = (new_selection) => {
+      selected.value = new_selection.map((item) => item.id)
+    }
+
+    const updateWordListEntries = (item) => {
+      gatherWordListEntries(item)
+        .then(() => {
+          notifySuccess(`Triggered update for ${item.name}`)
+        })
+        .catch(() => {
+          notifyFailure(`Failed to trigger update for ${item.name}`)
+        })
     }
 
     onMounted(() => {
@@ -171,6 +203,7 @@ export default {
       formFormat,
       edit,
       word_lists,
+      showForm,
       updateData,
       addItem,
       editItem,
@@ -180,7 +213,8 @@ export default {
       updateItem,
       importData,
       exportData,
-      selectionChange
+      selectionChange,
+      updateWordListEntries
     }
   }
 }

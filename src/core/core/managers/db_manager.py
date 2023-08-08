@@ -2,7 +2,7 @@ import sys
 import subprocess
 
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate, upgrade, stamp
+from flask_migrate import Migrate
 from core.managers.db_seed_manager import pre_seed
 from sqlalchemy.engine import reflection
 from core.managers.log_manager import logger
@@ -31,8 +31,10 @@ def initialize(app):
         return
 
     if is_db_empty():
+        logger.debug("Create new Database")
         db.create_all()
         flask_migrate_subprocess("stamp")  # stamp(migrate.directory, "head")
         pre_seed(db)
     else:
+        logger.debug("Migrate existing Database")
         flask_migrate_subprocess("upgrade")  # upgrade(migrate.directory, "head")

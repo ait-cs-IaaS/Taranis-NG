@@ -20,11 +20,11 @@ class User(BaseModel):
     organization_id = db.Column(db.Integer, db.ForeignKey("organization.id"))
     organization = db.relationship("Organization")
 
-    roles = db.relationship(Role, secondary="user_role")
-    permissions = db.relationship(Permission, secondary="user_permission")
+    roles = db.relationship(Role, secondary="user_role", cascade="all, delete")
+    permissions = db.relationship(Permission, secondary="user_permission", cascade="all, delete")
 
-    profile_id = db.Column(db.Integer, db.ForeignKey("user_profile.id"))
-    profile = db.relationship("UserProfile", cascade="all")
+    profile_id = db.Column(db.Integer, db.ForeignKey("user_profile.id", ondelete="CASCADE"))
+    profile = db.relationship("UserProfile", cascade="all, delete")
 
     def __init__(self, username, name, organization, roles, permissions, password=None, id=None):
         self.id = id
@@ -38,7 +38,7 @@ class User(BaseModel):
         self.profile = UserProfile(True, False, [], "en")
 
     @classmethod
-    def find_by_name(cls, username):
+    def find_by_name(cls, username: str):
         return cls.query.filter_by(username=username).first()
 
     @classmethod
@@ -83,13 +83,13 @@ class User(BaseModel):
     def to_dict(self):
         data = {c.name: getattr(self, c.name) for c in self.__table__.columns if c.name != "password"}
         data["organization"] = data.pop("organization_id")
-        data["roles"] = [role.id for role in self.roles]
-        data["permissions"] = [permission.id for permission in self.permissions]
+        data["roles"] = [role.id for role in self.roles if role]
+        data["permissions"] = [permission.id for permission in self.permissions if permission]
         data["tag"] = "mdi-account"
         return data
 
     @classmethod
-    def add(cls: "User", data) -> "User":
+    def add(cls, data) -> "User":
         item = cls.from_dict(data)
         if not item.password:
             raise ValueError("Password is required")
@@ -121,18 +121,18 @@ class User(BaseModel):
         return f"User {user_id} updated", 200
 
     def get_permissions(self):
-        all_permissions = {permission.id for permission in self.permissions}
+        all_permissions = {permission.id for permission in self.permissions if permission}
 
         for role in self.roles:
-            all_permissions.update(role.get_permissions())
+            if role:
+                all_permissions.update(role.get_permissions())
         return list(all_permissions)
 
     def get_current_organization_name(self):
         return self.organization.name if self.organization else ""
 
-    @classmethod
-    def get_profile_json(cls, user):
-        return user.profile.to_dict()
+    def get_profile_json(self) -> tuple[dict, int]:
+        return self.profile.to_dict(), 200
 
     @classmethod
     def update_profile(cls, user, data):
@@ -148,7 +148,7 @@ class User(BaseModel):
 
     @classmethod
     def get_all_external_json(cls, user, search):
-        users, count = cls.get(search, user.organization)
+        users, count = cls.get_by_filter(search, user.organization)
         items = [user.to_dict() for user in users]
         return {"total_count": count, "items": items}
 
@@ -178,7 +178,7 @@ class User(BaseModel):
         user.name = updated_user.name
 
         for permission in updated_user.permissions:
-            if permission.id not in permissions:
+            if permission and permission.id not in permissions:
                 updated_user.permissions.remove(permission)
 
         user.permissions = updated_user.permissions
@@ -198,12 +198,12 @@ class User(BaseModel):
 
 class UserRole(BaseModel):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), primary_key=True)
-    role_id = db.Column(db.Integer, db.ForeignKey("role.id"), primary_key=True)
+    role_id = db.Column(db.Integer, db.ForeignKey("role.id", ondelete="CASCADE"), primary_key=True)
 
 
 class UserPermission(BaseModel):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), primary_key=True)
-    permission_id = db.Column(db.String, db.ForeignKey("permission.id"), primary_key=True)
+    permission_id = db.Column(db.String, db.ForeignKey("permission.id", ondelete="CASCADE"), primary_key=True)
 
 
 class UserProfile(BaseModel):

@@ -1,20 +1,35 @@
 <template>
   <v-container fluid>
-    <v-card v-for="asset in assets" :key="asset.id" class="mt-3">
-      <v-card-title>
-        {{ asset.name }}
-      </v-card-title>
-    </v-card>
-    <v-card
-      v-for="asset_group in asset_groups"
-      :key="asset_group.id"
-      class="mt-3"
-    >
-      <v-card-title>
-        {{ asset_group.name }} - {{ asset_group.id }} -
-        {{ asset_group.description }}
-      </v-card-title>
-    </v-card>
+    <v-expansion-panels multiple>
+      <v-expansion-panel v-for="(group, i) in asset_groups" :key="i">
+        <v-expansion-panel-title
+          >{{ group.name }}
+          <v-btn
+            v-if="filterAssets(group.id).length === 0"
+            class="ml-5"
+            prepend-icon="mdi-delete"
+            size="x-small"
+            @click.stop="deleteItemGroup(group.id)"
+          >
+            Delete Empty Group
+          </v-btn>
+
+          <template #actions>
+            <v-icon icon="mdi-menu-down" />
+          </template>
+        </v-expansion-panel-title>
+        <v-expansion-panel-text>
+          <v-list dense>
+            <v-list-item v-for="(asset, j) in filterAssets(group.id)" :key="j">
+              <v-list-item-title>{{ asset.name }}</v-list-item-title>
+              <v-list-item-subtitle>
+                {{ asset.description }}
+              </v-list-item-subtitle>
+            </v-list-item>
+          </v-list>
+        </v-expansion-panel-text>
+      </v-expansion-panel>
+    </v-expansion-panels>
   </v-container>
 </template>
 
@@ -24,84 +39,91 @@ import {
   // solveVulnerability,
   deleteAsset
 } from '@/api/assets'
-import { mapActions, mapState, mapWritableState } from 'pinia'
+import { defineComponent, ref, onMounted } from 'vue'
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
 import { useAssetsStore } from '@/stores/AssetsStore'
 import { useMainStore } from '@/stores/MainStore'
+import { storeToRefs } from 'pinia'
 
-export default {
+export default defineComponent({
   name: 'AssetsView',
-  components: {},
-  data: function () {
-    return {
-      selected: [],
-      assets: [],
-      asset_groups: [],
-      headers: [
-        { title: 'tag', key: 'tag', sortable: false, width: '15px' },
-        { title: 'name', key: 'name' },
-        { title: 'description', key: 'description' }
-      ]
+  setup() {
+    const selected = ref([])
+    const assetsStore = useAssetsStore()
+    const mainStore = useMainStore()
+    const { asset_groups, assets } = storeToRefs(assetsStore)
+
+    const updateData = () => {
+      assetsStore.loadAssets().then(() => {
+        mainStore.itemCountTotal = assets.value.total_count
+        mainStore.itemCountFiltered = assets.value.length
+      })
+      assetsStore.loadAssetGroups()
     }
-  },
-  computed: {
-    ...mapWritableState(useMainStore, ['itemCountTotal', 'itemCountFiltered']),
-    ...mapState(useAssetsStore, {
-      store_asset_groups: 'asset_groups',
-      store_assets: 'assets'
-    })
-  },
-  mounted() {
-    this.updateData()
-  },
-  methods: {
-    ...mapActions(useAssetsStore, ['loadAssetGroups', 'loadAssets']),
-    updateData() {
-      this.loadAssets().then(() => {
-        const sources = this.store_assets
-        this.assets = sources.items
-        this.itemCountTotal = sources.total_count
-        this.itemCountFiltered = sources.length
-      })
-      this.loadAssetGroups().then(() => {
-        this.asset_groups = this.store_asset_groups.items
-      })
-    },
-    addAsset() {
-      this.$router.push('/asset/0')
-    },
-    editAsset(item) {
-      this.$router.push('/asset/' + item.id)
-    },
-    addAssetGroup() {
-      this.$router.push('/asset-group/0')
-    },
-    editAssetGroup(item) {
-      this.$router.push('/asset-group/' + item.id)
-    },
-    deleteAsset(item) {
+
+    const filterAssets = (groupId) => {
+      return assets.value.filter((asset) => asset.asset_group_id === groupId)
+    }
+
+    const addAsset = () => {
+      router.push('/asset/0')
+    }
+
+    const editAsset = (item) => {
+      router.push('/asset/' + item.id)
+    }
+
+    const addAssetGroup = () => {
+      router.push('/asset-group/0')
+    }
+
+    const editAssetGroup = (item) => {
+      router.push('/asset-group/' + item.id)
+    }
+
+    const deleteItem = (item) => {
       deleteAsset(item)
         .then(() => {
           notifySuccess(`Successfully deleted ${item.name}`)
-          this.updateData()
+          updateData()
         })
         .catch(() => {
           notifyFailure(`Failed to delete ${item.name}`)
         })
-    },
-    deleteAssetGroup(item) {
+    }
+
+    const deleteItemGroup = (item) => {
       deleteAssetGroup(item)
         .then(() => {
           notifySuccess(`Successfully deleted ${item.name}`)
-          this.updateData()
+          updateData()
         })
         .catch(() => {
           notifyFailure(`Failed to delete ${item.name}`)
         })
-    },
-    selectionChange(selected) {
-      this.selected = selected.map((item) => item.id)
+    }
+
+    const selectionChange = (new_selection) => {
+      selected.value = new_selection
+    }
+
+    onMounted(() => {
+      updateData()
+    })
+
+    return {
+      selected,
+      assets,
+      asset_groups,
+      addAsset,
+      editAsset,
+      addAssetGroup,
+      editAssetGroup,
+      deleteItem,
+      filterAssets,
+      deleteItemGroup,
+      selectionChange
     }
   }
-}
+})
 </script>

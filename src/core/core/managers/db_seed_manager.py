@@ -209,27 +209,6 @@ def pre_seed_permissions():
     )
 
     Permission.add(
-        "CONFIG_COLLECTORS_NODE_ACCESS",
-        "Config collectors nodes access",
-        "Access to collectors nodes configuration",
-    )
-    Permission.add(
-        "CONFIG_COLLECTORS_NODE_CREATE",
-        "Config collectors node create",
-        "Create collectors node configuration",
-    )
-    Permission.add(
-        "CONFIG_COLLECTORS_NODE_UPDATE",
-        "Config collectors node update",
-        "Update collectors node configuration",
-    )
-    Permission.add(
-        "CONFIG_COLLECTORS_NODE_DELETE",
-        "Config collectors node delete",
-        "Delete collectors node configuration",
-    )
-
-    Permission.add(
         "CONFIG_OSINT_SOURCE_ACCESS",
         "Config OSINT source access",
         "Access to OSINT sources configuration",
@@ -475,6 +454,11 @@ def pre_seed_permissions():
         "CONFIG_NODE_ACCESS",
         "Config nodes access",
         "Access to all nodes from configuration",
+    )
+    Permission.add(
+        "CONFIG_WORKER_ACCESS",
+        "Access to workers",
+        "Access to workers configuration",
     )
     Permission.add(
         "CONFIG_API_ACCESS",
@@ -1048,7 +1032,12 @@ def pre_seed_report_items(db):
         ]
 
         group5 = AttributeGroup.from_dict(
-            {"title": "Attribute", "description": "Attribute", "index": 1, "attribute_group_items": attribute_group_items}
+            {
+                "title": "Attribute",
+                "description": "Attribute",
+                "index": 1,
+                "attribute_group_items": attribute_group_items,
+            }
         )
         db.session.add(group4)
         db.session.add(group5)
@@ -1172,8 +1161,7 @@ def pre_seed_assets():
         {
             "name": "Default",
             "description": "Default group for uncategorized assets",
-            "organization_id": users[0].organization.id,
-            "templates": [],
+            "organization": users[0].organization,
             "id": "default",
         }
     )

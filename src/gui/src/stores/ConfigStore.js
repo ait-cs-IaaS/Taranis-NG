@@ -1,11 +1,10 @@
 import { defineStore } from 'pinia'
-import { notifyFailure } from '@/utils/helpers'
+import { notifyFailure, parseWordListEntries } from '@/utils/helpers'
 import {
   getAllACLEntries,
   getAllAttributes,
   getAllBots,
   getAllCollectors,
-  getAllExternalPermissions,
   getAllExternalUsers,
   getAllOrganizations,
   getAllOSINTSourceGroups,
@@ -15,17 +14,16 @@ import {
   getAllPublisherPresets,
   getAllPresenters,
   getAllPublishers,
-  getAllRemoteAccesses,
-  getAllRemoteNodes,
   getAllReportTypes,
   getAllRoles,
   getAllUsers,
   getAllNodes,
   getAllWordLists,
-  getAllParameters
+  getAllParameters,
+  getAllSchedule,
+  getAllWorkers
 } from '@/api/config'
 import { getAllUserProductTypes } from '@/api/user'
-import { Logger } from 'sass'
 
 export const useConfigStore = defineStore('config', {
   state: () => ({
@@ -48,39 +46,13 @@ export const useConfigStore = defineStore('config', {
     report_item_types_config: { total_count: 0, items: [] },
     roles: { total_count: 0, items: [] },
     users: { total_count: 0, items: [] },
-    word_lists: { total_count: 0, items: [] }
+    word_lists: { total_count: 0, items: [] },
+    schedule: [],
+    workers: []
   }),
   getters: {
     getUserByID: (state) => (user_id) => {
       return state.users.items.find((user) => user.id === user_id) || null
-    },
-    getCollectorsNodes() {
-      return this.nodes.items.map(function (item) {
-        if (item.type === 'Collector') {
-          return item
-        }
-      })
-    },
-    getPresentersNodes() {
-      return this.nodes.items.map(function (item) {
-        if (item.type === 'Presenter') {
-          return item
-        }
-      })
-    },
-    getPublishersNodes() {
-      return this.nodes.items.map(function (item) {
-        if (item.type === 'Publisher') {
-          return item
-        }
-      })
-    },
-    getBotsNodes() {
-      return this.nodes.items.map(function (item) {
-        if (item.type === 'Bot') {
-          return item
-        }
-      })
     }
   },
   actions: {
@@ -122,15 +94,6 @@ export const useConfigStore = defineStore('config', {
     },
     loadPermissions(data) {
       return getAllPermissions(data)
-        .then((response) => {
-          this.permissions = response.data
-        })
-        .catch((error) => {
-          notifyFailure(error.message)
-        })
-    },
-    loadExternalPermissions(data) {
-      return getAllExternalPermissions(data)
         .then((response) => {
           this.permissions = response.data
         })
@@ -187,24 +150,9 @@ export const useConfigStore = defineStore('config', {
       return getAllWordLists(data)
         .then((response) => {
           this.word_lists = response.data
-        })
-        .catch((error) => {
-          notifyFailure(error.message)
-        })
-    },
-    loadRemoteAccesses(data) {
-      return getAllRemoteAccesses(data)
-        .then((response) => {
-          this.remote_access = response.data
-        })
-        .catch((error) => {
-          notifyFailure(error.message)
-        })
-    },
-    loadRemoteNodes(data) {
-      return getAllRemoteNodes(data)
-        .then((response) => {
-          this.remote_nodes = response.data
+          this.word_lists.items.forEach((word_list) => {
+            word_list.entries = parseWordListEntries(word_list.entries)
+          })
         })
         .catch((error) => {
           notifyFailure(error.message)
@@ -286,6 +234,24 @@ export const useConfigStore = defineStore('config', {
       return getAllParameters(data)
         .then((response) => {
           this.parameters = response.data
+        })
+        .catch((error) => {
+          notifyFailure(error.message)
+        })
+    },
+    loadSchedule(data) {
+      return getAllSchedule(data)
+        .then((response) => {
+          this.schedule = response.data
+        })
+        .catch((error) => {
+          notifyFailure(error.message)
+        })
+    },
+    loadWorkers(data) {
+      return getAllWorkers(data)
+        .then((response) => {
+          this.workers = response.data
         })
         .catch((error) => {
           notifyFailure(error.message)

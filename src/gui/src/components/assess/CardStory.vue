@@ -3,7 +3,7 @@
     :ripple="false"
     elevation="3"
     :rounded="false"
-    class="no-gutters align-self-stretch mb-3 mt-2"
+    class="no-gutters align-self-stretch mb-3 mt-2 ml-2 mr-2"
     :class="[
       {
         selected: selected
@@ -32,29 +32,39 @@
         class="d-flex flex-row flex-grow-1 order-lg-2 order-sm-3 justify-space-evenly"
       >
         <v-btn
-          v-if="!detailView"
           v-ripple="false"
           size="small"
           class="item-action-btn"
           variant="tonal"
           append-icon="mdi-text-box-search-outline"
           :to="'/story/' + story.id"
-          title="View Story"
           @click.stop
         >
-          <span>Details</span>
+          <span>Open</span>
         </v-btn>
 
         <v-btn
+          v-if="!reportView"
           v-ripple="false"
           size="small"
           class="item-action-btn"
           variant="tonal"
           append-icon="mdi-google-circles-communities"
-          title="Add to Report"
           @click.stop="sharingDialog = true"
         >
           <span>Add to Report</span>
+        </v-btn>
+
+        <v-btn
+          v-if="reportView"
+          v-ripple="false"
+          size="small"
+          class="item-action-btn"
+          variant="tonal"
+          append-icon="mdi-trash-can"
+          @click.stop="removeFromReport()"
+        >
+          <span>Remove from Report</span>
         </v-btn>
 
         <v-btn
@@ -74,12 +84,12 @@
         </v-btn>
 
         <v-btn
+          v-if="!detailView && !reportView"
           v-ripple="false"
           size="small"
           class="item-action-btn"
           variant="tonal"
           :append-icon="!story.read ? 'mdi-eye-outline' : 'mdi-eye-off-outline'"
-          :title="!story.read ? 'mark as read' : 'unmark as read'"
           @click.stop="markAsRead()"
         >
           <span>{{ !story.read ? 'read' : 'unread' }}</span>
@@ -127,7 +137,9 @@
               :prepend-icon="
                 !story.important ? 'mdi-star-check-outline' : 'mdi-star-check'
               "
-              title="mark as important"
+              :title="
+                !story.important ? 'mark as important' : 'unmark as important'
+              "
               @click.stop="markAsImportant()"
             />
             <v-list-item
@@ -154,7 +166,11 @@
       </v-col>
       <!-- META INFO -->
       <v-col class="px-5 pt-2 pb-3 order-4" cols="12" sm="12" lg="6">
-        <story-meta-info :story="story" :detail-view="openSummary" />
+        <story-meta-info
+          :story="story"
+          :detail-view="openSummary"
+          :report-view="reportView"
+        />
       </v-col>
     </v-row>
   </v-card>
@@ -178,12 +194,9 @@ import StoryMetaInfo from '@/components/assess/card/StoryMetaInfo.vue'
 import votes from '@/components/assess/card/votes.vue'
 import SummarizedContent from '@/components/assess/card/SummarizedContent.vue'
 import CardNewsItem from '@/components/assess/CardNewsItem.vue'
-import {
-  deleteNewsItemAggregate,
-  importantNewsItemAggregate,
-  readNewsItemAggregate
-} from '@/api/assess'
+import { deleteNewsItemAggregate } from '@/api/assess'
 import { ref, computed } from 'vue'
+import { useAssessStore } from '@/stores/AssessStore'
 
 export default {
   name: 'CardStory',
@@ -201,14 +214,16 @@ export default {
       required: true
     },
     selected: { type: Boolean, default: false },
-    detailView: { type: Boolean, default: false }
+    detailView: { type: Boolean, default: false },
+    reportView: { type: Boolean, default: false }
   },
-  emits: ['selectItem', 'deleteItem'],
+  emits: ['selectItem', 'deleteItem', 'removeFromReport'],
   setup(props, { emit }) {
     const viewDetails = ref(false)
     const openSummary = ref(props.detailView)
     const sharingDialog = ref(false)
     const deleteDialog = ref(false)
+    const assessStore = useAssessStore()
 
     const item_important = computed(() =>
       'important' in props.story ? props.story.important : false
@@ -217,7 +232,7 @@ export default {
     const story_in_report = computed(() => props.story.in_reports_count > 0)
     const news_item_length = computed(() => props.story.news_items.length)
     const news_item_summary_text = computed(() =>
-      openSummary.value ? 'Close' : 'Open'
+      openSummary.value ? 'Close' : 'Details'
     )
     const minButtonWidth = computed(() => {
       const longestText = `${
@@ -243,11 +258,11 @@ export default {
     }
 
     const markAsRead = () => {
-      readNewsItemAggregate(props.story.id)
+      assessStore.readNewsItemAggregate(props.story.id)
     }
 
     const markAsImportant = () => {
-      importantNewsItemAggregate(props.story.id)
+      assessStore.importantNewsItemAggregate(props.story.id)
     }
 
     const deleteNewsItem = () => {
@@ -255,9 +270,9 @@ export default {
       emit('deleteItem', props.story.id)
     }
 
-    const showRelated = (event) => {
-      console.log('not yet implemented')
-      console.debug(event)
+    const removeFromReport = () => {
+      console.debug('remove from report')
+      emit('removeFromReport')
     }
 
     const getDescription = computed(() => {
@@ -286,7 +301,7 @@ export default {
       markAsRead,
       markAsImportant,
       deleteNewsItem,
-      showRelated
+      removeFromReport
     }
   }
 }

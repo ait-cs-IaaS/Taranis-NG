@@ -16,8 +16,6 @@ class PublisherPreset(BaseModel):
     publisher_id = db.Column(db.String, db.ForeignKey("publisher.id"))
     publisher = db.relationship("Publisher", back_populates="presets")
 
-    use_for_notifications = db.Column(db.Boolean)
-
     parameter_values = db.relationship("ParameterValue", secondary="publisher_preset_parameter_value", cascade="all")
 
     def __init__(
@@ -26,7 +24,6 @@ class PublisherPreset(BaseModel):
         description,
         publisher_id,
         parameter_values,
-        use_for_notifications=False,
         id=None,
     ):
         self.id = id or str(uuid.uuid4())
@@ -34,11 +31,6 @@ class PublisherPreset(BaseModel):
         self.description = description
         self.publisher_id = publisher_id
         self.parameter_values = parameter_values
-        self.use_for_notifications = use_for_notifications
-
-    @classmethod
-    def find_for_notifications(cls):
-        return cls.query.filter_by(use_for_notifications=True).first()
 
     @classmethod
     def get_all(cls):
@@ -74,6 +66,9 @@ class PublisherPreset(BaseModel):
     @classmethod
     def update(cls, preset_id, data):
         preset = cls.get(preset_id)
+        if not preset:
+            logger.error(f"Could not find preset with id {preset_id}")
+            return None
         updated_preset = cls.from_dict(data)
         preset.name = updated_preset.name
         preset.description = updated_preset.description
@@ -84,6 +79,7 @@ class PublisherPreset(BaseModel):
             else:
                 preset.parameter_values.append(update_pv)
         db.session.commit()
+        return preset.id
 
     def to_dict(self) -> dict[str, Any]:
         data = super().to_dict()

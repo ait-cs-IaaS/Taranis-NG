@@ -3,7 +3,7 @@
     <DataTable
       :items="sources"
       :add-button="true"
-      :header-filter="['tag', 'state', 'name', 'description', 'FEED_URL']"
+      :header-filter="['tag', 'state', 'name', 'FEED_URL']"
       sort-by-item="id"
       :action-column="true"
       @delete-item="deleteItem"
@@ -14,6 +14,28 @@
     >
       <template #titlebar>
         <ImportExport @import="importData" @export="exportData"></ImportExport>
+        <v-btn
+          color="blue-grey"
+          dark
+          class="ml-4"
+          prepend-icon="mdi-run"
+          @click="collectAllSources"
+        >
+          Collect Sources
+        </v-btn>
+      </template>
+      <template #actionColumn="source">
+        <v-tooltip left>
+          <template #activator="{ props }">
+            <v-icon
+              v-bind="props"
+              color="secondary"
+              icon="mdi-run"
+              @click.stop="collectSource(source.item)"
+            />
+          </template>
+          <span>Collect Source</span>
+        </v-tooltip>
       </template>
     </DataTable>
     <EditConfig
@@ -34,7 +56,9 @@ import {
   createOSINTSource,
   updateOSINTSource,
   exportOSINTSources,
-  importOSINTSources
+  importOSINTSources,
+  collectOSINTSSource,
+  collectAllOSINTSSources
 } from '@/api/config'
 import {
   notifySuccess,
@@ -59,7 +83,7 @@ export default {
     const configStore = useConfigStore()
     const mainStore = useMainStore()
 
-    const { collectors, osint_sources } = storeToRefs(configStore)
+    const { collectors, osint_sources, word_lists } = storeToRefs(configStore)
 
     const sources = ref([])
     const parameters = ref({})
@@ -80,8 +104,8 @@ export default {
         {
           name: 'last_collected',
           label: 'Last Collected',
-          type: 'text',
-          disabled: true
+          disabled: true,
+          type: 'date'
         },
         {
           name: 'name',
@@ -113,8 +137,21 @@ export default {
         ].concat(base)
       }
       if (parameters.value[formData.value.collector_id]) {
-        return base.concat(parameters.value[formData.value.collector_id])
+        base = base.concat(parameters.value[formData.value.collector_id])
       }
+      base = base.concat([
+        {
+          name: 'word_lists',
+          label: 'Word Lists',
+          type: 'table',
+          headers: [
+            { title: 'Name', key: 'name' },
+            { title: 'Description', key: 'description' },
+            { title: 'ID', key: 'id' }
+          ],
+          items: word_lists.value.items
+        }
+      ])
       return base
     })
 
@@ -141,6 +178,7 @@ export default {
           }
         })
       })
+      configStore.loadWordLists()
     }
 
     onMounted(() => {
@@ -225,8 +263,28 @@ export default {
       exportOSINTSources(queryString)
     }
 
-    const selectionChange = (selected) => {
-      selected.value = selected.map((item) => item.id)
+    const selectionChange = (new_selection) => {
+      selected.value = new_selection
+    }
+
+    const collectAllSources = () => {
+      collectAllOSINTSSources()
+        .then(() => {
+          notifySuccess('Successfully collected all sources')
+        })
+        .catch(() => {
+          notifyFailure('Failed to collect all sources')
+        })
+    }
+
+    const collectSource = (source) => {
+      collectOSINTSSource(source.id)
+        .then(() => {
+          notifySuccess(`Successfully collected ${source.name}`)
+        })
+        .catch(() => {
+          notifyFailure(`Failed to collect ${source.name}`)
+        })
     }
 
     return {
@@ -247,6 +305,8 @@ export default {
       updateItem,
       importData,
       exportData,
+      collectSource,
+      collectAllSources,
       selectionChange
     }
   }
