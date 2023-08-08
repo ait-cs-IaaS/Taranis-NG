@@ -14,6 +14,7 @@ class WordlistBot(BaseBot):
             return
         try:
             source_group = parameters.get("SOURCE_GROUP", None)
+            source = parameters.get("SOURCE")
 
             if not source_group:
                 return "No source group provided"
@@ -21,6 +22,9 @@ class WordlistBot(BaseBot):
             limit = (datetime.datetime.now() - datetime.timedelta(days=7)).isoformat(timespec="seconds")
 
             filter_dict = {"timestamp": limit, "group": source_group}
+
+            if source:
+                filter_dict["source"] = source
 
             word_list_entries = self.core_api.get_words_by_source_group(source_group)
 
