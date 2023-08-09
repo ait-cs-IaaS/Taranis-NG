@@ -124,6 +124,7 @@ services:
       NGINX_WORKERS: "4"
       NGINX_CONNECTIONS: "16"
       VITE_TARANIS_NG_URL: "${TARANIS_NG_HTTPS_URI:-taranis}"
+      VITE_TARANIS_NG_SENTRY_DSN: "${VITE_TARANIS_NG_SENTRY_DSN:-}"
     logging:
       driver: "json-file"
       options:
