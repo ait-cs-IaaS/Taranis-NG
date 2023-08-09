@@ -37,9 +37,7 @@ if (sentryDsn) {
       }),
       new Sentry.Replay()
     ],
-
-    // We recommend adjusting this value in production, or using tracesSampler
-    // for finer control
+    environment: import.meta.env.DEV ? 'development' : 'production',
     tracesSampleRate: 1.0
   })
 }
