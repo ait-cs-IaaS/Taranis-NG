@@ -134,6 +134,10 @@ export function updateBot(bot) {
   return ApiService.put(`/config/bots/${bot.id}`, bot)
 }
 
+export function executeBotTask(bot_id) {
+  return ApiService.post(`/config/bots/${bot_id}/execute`)
+}
+
 export function getAllACLEntries(filter_data) {
   const filter = ApiService.getQueryStringFromNestedObject(filter_data)
   return ApiService.get(`/config/acls?${filter}`)
@@ -238,57 +242,12 @@ export function exportWordList(filter_data) {
   )
 }
 
-export function getAllNodes(filter_data) {
-  const filter = ApiService.getQueryStringFromNestedObject(filter_data)
-  return ApiService.get(`/config/nodes?${filter}`)
-}
-
-export function triggerNode() {
-  return ApiService.post('/config/workers/refresh')
-}
-
 export function getAllSchedule() {
   return ApiService.get('/config/workers/schedule')
 }
 
 export function getAllWorkers() {
   return ApiService.get('/config/workers')
-}
-
-export function updateNode(node) {
-  if (node.type === 'bot') {
-    return ApiService.put(`/config/bots-nodes/${node.id}`, node)
-  }
-  if (node.type === 'presenter') {
-    return ApiService.put(`/config/presenters-nodes/${node.id}`, node)
-  }
-  if (node.type === 'publisher') {
-    return ApiService.put(`/config/publishers-nodes/${node.id}`, node)
-  }
-}
-
-export function createNode(node) {
-  if (node.type === 'bot') {
-    return ApiService.post('/config/bots-nodes', node)
-  }
-  if (node.type === 'presenter') {
-    return ApiService.post('/config/presenters-nodes', node)
-  }
-  if (node.type === 'publisher') {
-    return ApiService.post('/config/publishers-nodes', node)
-  }
-}
-
-export function deleteNode(node) {
-  if (node.type === 'bot') {
-    return ApiService.delete(`/config/bots-nodes/${node.id}`, node)
-  }
-  if (node.type === 'presenter') {
-    return ApiService.delete(`/config/presenters-nodes/${node.id}`, node)
-  }
-  if (node.type === 'publisher') {
-    return ApiService.delete(`/config/publishers-nodes/${node.id}`, node)
-  }
 }
 
 export function getAllOSINTSources(filter_data) {

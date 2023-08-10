@@ -16,6 +16,7 @@ export const useMainStore = defineStore(
     const itemCountFiltered = ref(0)
     const drawerVisible = ref(true)
     const coreAPIURL = ref('/api')
+    const sentryDSN = ref('')
     const buildDate = ref(new Date().toISOString())
     const notification = ref({ message: '', type: '', show: false })
 
@@ -26,8 +27,9 @@ export const useMainStore = defineStore(
 
     const updateFromLocalConfig = async () => {
       const config = await getLocalConfig()
-      coreAPIURL.value = config.CORE_API ?? '/api'
       buildDate.value = config.BUILD_DATE ?? new Date().toISOString()
+      coreAPIURL.value = config.TARANIS_NG_CORE_API ?? '/api'
+      sentryDSN.value = config.TARANIS_NG_SENTRY_DSN ?? ''
     }
 
     // Actions
@@ -57,6 +59,7 @@ export const useMainStore = defineStore(
       itemCountFiltered,
       coreAPIURL,
       buildDate,
+      sentryDSN,
       notification,
       getItemCount,
       updateFromLocalConfig,
