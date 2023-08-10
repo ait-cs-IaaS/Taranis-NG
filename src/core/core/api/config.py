@@ -301,13 +301,22 @@ class WordList(Resource):
 class WordListImport(Resource):
     @auth_required("CONFIG_WORD_LIST_UPDATE")
     def put(self, word_list_id):
-        word_list.WordList.update(word_list_id, request.json)
+        word_list.WordList.import_word_list(word_list_id, request.json)
 
 
 class WordListExport(Resource):
     @auth_required("CONFIG_WORD_LIST_UPDATE")
-    def put(self, word_list_id):
-        word_list.WordList.update(word_list_id, request.json)
+    def get(self):
+        source_ids = request.args.getlist("ids")
+        data = word_list.WordList.export(source_ids)
+        if data is None:
+            return "Unable to export", 400
+        return send_file(
+            io.BytesIO(data),
+            download_name="word_list_export.json",
+            mimetype="application/json",
+            as_attachment=True,
+        )
 
 
 class WordListGather(Resource):
@@ -610,8 +619,8 @@ def initialize(api: Api):
 
     namespace.add_resource(WordLists, "/word-lists")
     namespace.add_resource(WordList, "/word-lists/<int:word_list_id>")
-    namespace.add_resource(WordListImport, "/import-word-list")
-    namespace.add_resource(WordListExport, "/export-word-list")
+    namespace.add_resource(WordListImport, "/import-word-lists")
+    namespace.add_resource(WordListExport, "/export-word-lists")
     namespace.add_resource(WordListGather, "/gather-word-list-entries/<int:word_list_id>")
 
     namespace.add_resource(RefreshWorkers, "/workers/refresh")

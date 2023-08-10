@@ -13,23 +13,26 @@ import * as Sentry from '@sentry/vue'
 
 export const app = createApp(App)
 app.use(DatePicker)
-
 app.use(i18n)
 
-const coreAPIURL =
-  typeof import.meta.env.VITE_TARANIS_NG_CORE_API === 'undefined'
-    ? '/api'
-    : import.meta.env.VITE_TARANIS_NG_CORE_API
+const pinia = createPinia()
+pinia.use(piniaPluginPersistedstate)
+
+app.use(router)
+app.use(pinia)
+app.use(vuetify)
+
+import { useMainStore } from './stores/MainStore'
+const mainStore = useMainStore()
+const { coreAPIURL, sentryDSN } = mainStore
 
 ApiService.init(coreAPIURL)
 app.provide('$coreAPIURL', coreAPIURL)
 
-const sentryDsn = import.meta.env.VITE_TARANIS_NG_SENTRY_DSN
-
-if (sentryDsn) {
+if (sentryDSN) {
   Sentry.init({
     app,
-    dsn: sentryDsn,
+    dsn: sentryDSN,
     autoSessionTracking: true,
     integrations: [
       new Sentry.BrowserTracing({
@@ -42,10 +45,4 @@ if (sentryDsn) {
   })
 }
 
-const pinia = createPinia()
-pinia.use(piniaPluginPersistedstate)
-
-app.use(router)
-app.use(pinia)
-app.use(vuetify)
 app.mount('#app')
