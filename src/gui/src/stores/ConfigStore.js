@@ -7,8 +7,6 @@ import {
 import {
   getAllACLEntries,
   getAllAttributes,
-  getAllBots,
-  getAllCollectors,
   getAllExternalUsers,
   getAllOrganizations,
   getAllOSINTSourceGroups,
@@ -16,15 +14,14 @@ import {
   getAllPermissions,
   getAllProductTypes,
   getAllPublisherPresets,
-  getAllPresenters,
-  getAllPublishers,
   getAllReportTypes,
   getAllRoles,
   getAllUsers,
   getAllWordLists,
   getAllParameters,
   getAllSchedule,
-  getAllWorkers
+  getAllWorkers,
+  getAllWorkerTypes
 } from '@/api/config'
 import { getAllUserProductTypes } from '@/api/user'
 
@@ -32,8 +29,6 @@ export const useConfigStore = defineStore('config', {
   state: () => ({
     acls: { total_count: 0, items: [] },
     attributes: { total_count: 0, items: [] },
-    bots: { total_count: 0, items: [] },
-    collectors: { total_count: 0, items: [] },
     organizations: { total_count: 0, items: [] },
     osint_sources: { total_count: 0, items: [] },
     osint_source_groups: { total_count: 0, items: [] },
@@ -41,14 +36,13 @@ export const useConfigStore = defineStore('config', {
     permissions: { total_count: 0, items: [] },
     product_types: { total_count: 0, items: [] },
     publisher_presets: { total_count: 0, items: [] },
-    presenters: { total_count: 0, items: [] },
-    publishers: { total_count: 0, items: [] },
     report_item_types_config: { total_count: 0, items: [] },
     roles: { total_count: 0, items: [] },
     users: { total_count: 0, items: [] },
     word_lists: { total_count: 0, items: [] },
     schedule: [],
-    workers: []
+    workers: [],
+    worker_types: { total_count: 0, items: [] }
   }),
   getters: {
     getUserByID: (state) => (user_id) => {
@@ -167,37 +161,10 @@ export const useConfigStore = defineStore('config', {
           notifyFailure(getMessageFromError(error))
         })
     },
-    loadCollectors(data) {
-      return getAllCollectors(data)
+    loadWorkerTypes(data) {
+      return getAllWorkerTypes(data)
         .then((response) => {
-          this.collectors = response.data
-        })
-        .catch((error) => {
-          notifyFailure(getMessageFromError(error))
-        })
-    },
-    loadBots(data) {
-      return getAllBots(data)
-        .then((response) => {
-          this.bots = response.data
-        })
-        .catch((error) => {
-          notifyFailure(getMessageFromError(error))
-        })
-    },
-    loadPresenters(data) {
-      return getAllPresenters(data)
-        .then((response) => {
-          this.presenters = response.data
-        })
-        .catch((error) => {
-          notifyFailure(getMessageFromError(error))
-        })
-    },
-    loadPublishers(data) {
-      return getAllPublishers(data)
-        .then((response) => {
-          this.publishers = response.data
+          this.worker_types = response.data
         })
         .catch((error) => {
           notifyFailure(getMessageFromError(error))

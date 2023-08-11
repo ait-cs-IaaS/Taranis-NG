@@ -106,24 +106,9 @@ export function deleteRole(role) {
   return ApiService.delete(`/config/roles/${role.id}`)
 }
 
-export function getAllCollectors(filter_data) {
+export function getAllWorkerTypes(filter_data) {
   const filter = ApiService.getQueryStringFromNestedObject(filter_data)
-  return ApiService.get(`/config/collectors?${filter}`)
-}
-
-export function getAllBots(filter_data) {
-  const filter = ApiService.getQueryStringFromNestedObject(filter_data)
-  return ApiService.get(`/config/bots?${filter}`)
-}
-
-export function getAllPresenters(filter_data) {
-  const filter = ApiService.getQueryStringFromNestedObject(filter_data)
-  return ApiService.get(`/config/presenters?${filter}`)
-}
-
-export function getAllPublishers(filter_data) {
-  const filter = ApiService.getQueryStringFromNestedObject(filter_data)
-  return ApiService.get(`/config/publishers?${filter}`)
+  return ApiService.get(`/config/worker-types?${filter}`)
 }
 
 export function getAllParameters() {

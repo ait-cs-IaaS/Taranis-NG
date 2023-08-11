@@ -78,7 +78,11 @@
               <b>{{ d(coreBuildDate, 'long') }}</b>
             </v-col>
             <v-col cols="2" offset="1">
-              <b>{{ coreGitInfo }}</b>
+              <b>Branch: {{ coreGitInfo.branch }}</b>
+            </v-col>
+            <v-col cols="2" offset="1">
+              <b v-if="coreGitInfo.tag">Tag: {{ coreGitInfo.branch }}</b>
+              <b v-else>HEAD: {{ coreGitInfo.HEAD }}</b>
             </v-col>
             <v-divider inset></v-divider>
             <v-col cols="2"> GUI Build Time </v-col>
@@ -86,7 +90,11 @@
               <b>{{ d(buildDate, 'long') }}</b>
             </v-col>
             <v-col cols="2" offset="1">
-              <b>{{ gitInfo }}</b>
+              <b>Branch: {{ gitInfo.branch }}</b>
+            </v-col>
+            <v-col cols="2" offset="1">
+              <b v-if="gitInfo.tag">Tag: {{ gitInfo.branch }}</b>
+              <b v-else>HEAD: {{ gitInfo.HEAD }}</b>
             </v-col>
           </v-row>
         </template>
@@ -127,7 +135,7 @@ export default {
     getCoreBuildInfo().then(
       (response) => {
         coreBuildDate.value = response.data.build_date
-        coreGitInfo.value = response.data.git_info
+        coreGitInfo.value = response.data
       },
       (error) => {
         notifyFailure(error)

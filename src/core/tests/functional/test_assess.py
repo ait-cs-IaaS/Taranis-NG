@@ -16,7 +16,7 @@ def fake_source(app, request):
                     "parameter": "FEED_URL",
                 },
             ],
-            "collector": {"type": "RSS_COLLECTOR"},
+            "collector_type": "RSS_COLLECTOR",
         }
 
         OSINTSource.add(ossi)

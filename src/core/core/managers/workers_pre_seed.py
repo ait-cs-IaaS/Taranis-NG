@@ -374,7 +374,7 @@ parameters = [
 ]
 
 
-collectors = [
+workers = [
     {
         "description": "Collector for gathering data from RSS feeds",
         "name": "RSS Collector",
@@ -452,76 +452,60 @@ collectors = [
         ],
         "type": "MANUAL_COLLECTOR",
     },
-]
-
-bots = [
     {
         "type": "ANALYST_BOT",
         "name": "Analyst Bot",
-        "parameter_values": [
-            {
-                "value": "",
-                "parameter": "REGULAR_EXPRESSION",
-            },
-            {
-                "value": "",
-                "parameter": "ATTRIBUTE_NAME",
-            },
-            {
-                "value": "",
-                "parameter": "SOURCE_GROUP",
-            },
+        "parameters": [
+            "REGULAR_EXPRESSION",
+            "ATTRIBUTE_NAME",
+            "SOURCE_GROUP",
         ],
         "description": "Bot for news items analysis",
     },
     {
         "type": "GROUPING_BOT",
         "name": "Grouping Bot",
-        "parameter_values": [
-            {"value": "", "parameter": "SOURCE_GROUP"},
-            {"value": "", "parameter": "REGULAR_EXPRESSION"},
+        "parameters": [
+            "SOURCE_GROUP",
+            "REGULAR_EXPRESSION",
         ],
         "description": "Bot for grouping news items into aggregates",
     },
     {
         "type": "NLP_BOT",
         "name": "NLP Bot",
-        "parameter_values": [{"value": "default", "parameter": "SOURCE_GROUP"}],
+        "parameters": ["SOURCE_GROUP"],
         "description": "Bot for naturale language processing of news items",
     },
     {
         "type": "TAGGING_BOT",
         "name": "Tagging Bot",
-        "parameter_values": [
-            {"value": "", "parameter": "SOURCE_GROUP"},
-            {"value": "", "parameter": "KEYWORDS"},
+        "parameters": [
+            "SOURCE_GROUP",
+            "KEYWORDS",
         ],
         "description": "Bot for tagging news items",
     },
     {
         "type": "STORY_BOT",
         "name": "Story Clustering Bot",
-        "parameter_values": [
-            {"value": "", "parameter": "SOURCE_GROUP"},
+        "parameters": [
+            "SOURCE_GROUP",
         ],
         "description": "Bot for Story Clustering",
     },
     {
         "type": "SUMMARY_BOT",
         "name": "Summary generation Bot",
-        "parameter_values": [{"value": "default", "parameter": "SOURCE_GROUP"}],
+        "parameters": ["SOURCE_GROUP"],
         "description": "Bot for summarizing news items aggregates",
     },
     {
         "type": "WORDLIST_BOT",
         "name": "Wordlist Bot",
-        "parameter_values": [{"value": "default", "parameter": "SOURCE_GROUP"}],
+        "parameters": ["SOURCE_GROUP"],
         "description": "Bot for tagging news items by wordlist",
     },
-]
-
-
-presenters = [
     {
         "type": "PDF_PRESENTER",
         "description": "Presenter for generating PDF documents",
@@ -546,9 +530,6 @@ presenters = [
         "description": "Presenter for generating MISP platform",
         "parameters": ["MISP_TEMPLATE_PATH"],
     },
-]
-
-publishers = [
     {
         "type": "FTP_PUBLISHER",
         "name": "FTP Publisher",

@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from enum import Enum, auto
 from functools import wraps
 from flask import request
 from typing import Any
@@ -17,12 +16,6 @@ from core.auth.keycloak_authenticator import KeycloakAuthenticator
 from core.auth.openid_authenticator import OpenIDAuthenticator
 from core.auth.test_authenticator import TestAuthenticator
 from core.auth.database_authenticator import DatabaseAuthenticator
-from core.model.collectors_node import CollectorsNode
-from core.model.news_item import NewsItem
-from core.model.osint_source import OSINTSourceGroup
-from core.model.product_type import ProductType
-from core.model.remote import RemoteAccess
-from core.model.report_item import ReportItem
 from core.model.token_blacklist import TokenBlacklist
 from core.model.user import User
 from core.config import Config
@@ -154,6 +147,8 @@ def api_key_required(fn):
 
 
 def access_key_required(fn):
+    from core.model.remote import RemoteAccess
+
     @wraps(fn)
     def wrapper(*args, **kwargs):
         error = ({"error": "not authorized"}, 401)

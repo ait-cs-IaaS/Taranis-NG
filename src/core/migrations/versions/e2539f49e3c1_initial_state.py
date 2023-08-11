@@ -97,32 +97,12 @@ def upgrade():
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
-        "bots_node",
-        sa.Column("id", sa.String(length=64), nullable=False),
-        sa.Column("name", sa.String(), nullable=False),
-        sa.Column("description", sa.String(), nullable=True),
-        sa.Column("api_url", sa.String(), nullable=False),
-        sa.Column("api_key", sa.String(), nullable=False),
-        sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("name"),
-    )
-    op.create_table(
         "collector",
         sa.Column("id", sa.String(length=64), nullable=False),
         sa.Column("name", sa.String(), nullable=False),
         sa.Column("description", sa.String(), nullable=True),
         sa.Column("type", sa.String(), nullable=False),
         sa.PrimaryKeyConstraint("id"),
-    )
-    op.create_table(
-        "collectors_node",
-        sa.Column("id", sa.String(), nullable=False),
-        sa.Column("name", sa.String(), nullable=False),
-        sa.Column("description", sa.String(), nullable=True),
-        sa.Column("api_url", sa.String(), nullable=False),
-        sa.Column("api_key", sa.String(), nullable=False),
-        sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("name"),
     )
     op.create_table(
         "osint_source_group",
@@ -271,14 +251,6 @@ def upgrade():
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
-        "collector_parameter",
-        sa.Column("collector_id", sa.String(), nullable=False),
-        sa.Column("parameter_id", sa.String(), nullable=False),
-        sa.ForeignKeyConstraint(["collector_id"], ["collector.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["parameter_id"], ["parameter.key"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("collector_id", "parameter_id"),
-    )
-    op.create_table(
         "hotkey",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("key_code", sa.Integer(), nullable=True),
@@ -328,16 +300,12 @@ def upgrade():
         sa.Column("id", sa.String(length=64), nullable=False),
         sa.Column("name", sa.String(), nullable=False),
         sa.Column("description", sa.String(), nullable=True),
-        sa.Column("collector_id", sa.String(), nullable=True),
+        sa.Column("collector_type", sa.String(), nullable=True),
         sa.Column("modified", sa.DateTime(), nullable=True),
         sa.Column("last_collected", sa.DateTime(), nullable=True),
         sa.Column("last_attempted", sa.DateTime(), nullable=True),
         sa.Column("state", sa.SmallInteger(), nullable=True),
         sa.Column("last_error_message", sa.String(), nullable=True),
-        sa.ForeignKeyConstraint(
-            ["collector_id"],
-            ["collector.id"],
-        ),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
@@ -1024,7 +992,6 @@ def downgrade():
     op.drop_table("osint_source_group")
     op.drop_table("collectors_node")
     op.drop_table("collector")
-    op.drop_table("bots_node")
     op.drop_table("bot")
     op.drop_table("attribute")
     op.drop_table("address")

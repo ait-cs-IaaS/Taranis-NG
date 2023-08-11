@@ -151,15 +151,9 @@ class NewsItem(BaseModel):
 
         query = query.outerjoin(
             ACLEntry,
-            or_(
-                and_(
-                    NewsItemData.osint_source_id == ACLEntry.item_id,
-                    ACLEntry.item_type == ItemType.OSINT_SOURCE,
-                ),
-                and_(
-                    OSINTSource.collector_id == ACLEntry.item_id,
-                    ACLEntry.item_type == ItemType.COLLECTOR,
-                ),
+            and_(
+                NewsItemData.osint_source_id == ACLEntry.item_id,
+                ACLEntry.item_type == ItemType.OSINT_SOURCE,
             ),
         )
 
@@ -251,15 +245,9 @@ class NewsItem(BaseModel):
 
         query = query.outerjoin(
             ACLEntry,
-            or_(
-                and_(
-                    NewsItemData.osint_source_id == ACLEntry.item_id,
-                    ACLEntry.item_type == ItemType.OSINT_SOURCE,
-                ),
-                and_(
-                    OSINTSource.collector_id == ACLEntry.item_id,
-                    ACLEntry.item_type == ItemType.COLLECTOR,
-                ),
+            and_(
+                NewsItemData.osint_source_id == ACLEntry.item_id,
+                ACLEntry.item_type == ItemType.OSINT_SOURCE,
             ),
         )
 
@@ -533,15 +521,9 @@ class NewsItemAggregate(BaseModel):
 
         query = query.outerjoin(
             ACLEntry,
-            or_(
-                and_(
-                    NewsItemData.osint_source_id == ACLEntry.item_id,
-                    ACLEntry.item_type == ItemType.OSINT_SOURCE,
-                ),
-                and_(
-                    OSINTSource.collector_id == ACLEntry.item_id,
-                    ACLEntry.item_type == ItemType.COLLECTOR,
-                ),
+            and_(
+                NewsItemData.osint_source_id == ACLEntry.item_id,
+                ACLEntry.item_type == ItemType.OSINT_SOURCE,
             ),
         )
         query = ACLEntry.apply_query(query, user, True, False, False)

@@ -1,9 +1,9 @@
 <template>
   <div>
     <DataTable
-      v-model:items="collectors.items"
+      v-model:items="worker_types.items"
       :add-button="false"
-      :header-filter="['name', 'description']"
+      :header-filter="['name', 'description', 'type']"
       sort-by-item="name"
       :action-column="true"
       @edit-item="editItem"
@@ -44,7 +44,7 @@ import { notifySuccess, notifyFailure } from '@/utils/helpers'
 import { storeToRefs } from 'pinia'
 
 export default {
-  name: 'CollectorsView',
+  name: 'WorkerTypesView',
   components: {
     DataTable,
     EditConfig
@@ -54,10 +54,8 @@ export default {
     const configStore = useConfigStore()
 
     // data
-    const { collectors } = storeToRefs(configStore)
+    const { worker_types } = storeToRefs(configStore)
     const formData = ref({})
-    const parameters = ref({})
-    const bot_types = ref([])
 
     // computed
     const formFormat = computed(() => {
@@ -87,29 +85,21 @@ export default {
           disabled: true
         }
       ]
-      if (parameters.value[formData.value.type]) {
-        return base.concat(parameters.value[formData.value.type])
+      for (const parameter in formData.value.parameters) {
+        return base.concat({
+          name: parameter,
+          label: parameter,
+          type: 'text'
+        })
       }
       return base
     })
 
     // methods
     const updateData = () => {
-      configStore.loadCollectors().then(() => {
-        mainStore.itemCountTotal = collectors.value.total_count
-        mainStore.itemCountFiltered = collectors.value.items.length
-        collectors.value.items.forEach((item) => {
-          parameters.value[item.type] = Object.keys(item[item.type]).map(
-            (key) => {
-              return {
-                name: key,
-                label: key,
-                parent: item.type,
-                type: 'text'
-              }
-            }
-          )
-        })
+      configStore.loadWorkerTypes().then(() => {
+        mainStore.itemCountTotal = worker_types.value.total_count
+        mainStore.itemCountFiltered = worker_types.value.items.length
       })
     }
 
@@ -149,10 +139,8 @@ export default {
 
     return {
       // data
-      collectors,
+      worker_types,
       formData,
-      parameters,
-      bot_types,
 
       // computed
       formFormat,

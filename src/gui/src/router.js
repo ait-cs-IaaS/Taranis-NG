@@ -279,22 +279,10 @@ export const router = createRouter({
       }
     },
     {
-      path: '/config/bots',
-      name: 'bots',
+      path: '/config/workertypes',
+      name: 'worker_types',
       components: {
-        default: () => import('@/views/admin/BotsView.vue'),
-        nav: () => import('@/views/nav/ConfigNav.vue')
-      },
-      meta: {
-        requiresAuth: true,
-        requiresPerm: [Permissions.CONFIG_BOT_PRESET_ACCESS]
-      }
-    },
-    {
-      path: '/config/collectors',
-      name: 'collectors',
-      components: {
-        default: () => import('@/views/admin/CollectorsView.vue'),
+        default: () => import('@/views/admin/WorkerTypesView.vue'),
         nav: () => import('@/views/nav/ConfigNav.vue')
       },
       meta: {

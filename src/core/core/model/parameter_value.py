@@ -13,7 +13,7 @@ class ParameterValue(BaseModel):
     parameter_key = db.Column(db.String(), db.ForeignKey("parameter.key"))
     parameter = db.relationship("Parameter")
 
-    def __init__(self, value, parameter):
+    def __init__(self, parameter, value=""):
         self.id = None
         self.value = value
         self.parameter_key = parameter
@@ -30,6 +30,10 @@ class ParameterValue(BaseModel):
         return {"parameter": self.parameter_key, "value": self.value}
 
     @classmethod
+    def from_parameter_list(cls, parameters: list[str]) -> list["ParameterValue"]:
+        return [cls(parameter) for parameter in parameters]
+
+    @classmethod
     def find_param_value(cls, p_values: list["ParameterValue"], key: str) -> "ParameterValue":
         # Helper function to find parameter value based on key
-        return next((pv for pv in p_values if pv.parameter.key == key), None)
+        return next((pv for pv in p_values if pv.parameter.key == key))
