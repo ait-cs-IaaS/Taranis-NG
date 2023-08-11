@@ -12,6 +12,7 @@ build/
 .pytest_cache/
 celerybeat-schedule
 .hypothesis
+git_info.json
 
 # temporary files of editors
 .DS_Store

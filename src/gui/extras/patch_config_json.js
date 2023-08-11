@@ -2,9 +2,12 @@ const fs = require('fs')
 const path = require('path')
 
 const configPath = path.join(__dirname, '../dist/config.json')
-const gitInfoPath = path.join(__dirname, '../dist/git_info.json')
 const configJson = require(configPath)
-const gitInfo = require(gitInfoPath)
 configJson.BUILD_DATE = new Date().toISOString()
-configJson.GIT_INFO = gitInfo
+
+const gitInfo = process.env.GIT_INFO
+if (gitInfo && gitInfo.trim() !== '') {
+  configJson.GIT_INFO = JSON.parse(gitInfo)
+}
+
 fs.writeFileSync(configPath, JSON.stringify(configJson, null, 2))
