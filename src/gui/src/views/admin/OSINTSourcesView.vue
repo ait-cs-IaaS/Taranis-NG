@@ -83,7 +83,7 @@ export default {
     const configStore = useConfigStore()
     const mainStore = useMainStore()
 
-    const { collectors, osint_sources, word_lists } = storeToRefs(configStore)
+    const { worker_types, osint_sources, word_lists } = storeToRefs(configStore)
 
     const sources = ref([])
     const parameters = ref({})
@@ -161,8 +161,8 @@ export default {
         mainStore.itemCountFiltered = osint_sources.value.items.length
         mainStore.itemCountTotal = osint_sources.value.total_count
       })
-      configStore.loadCollectors().then(() => {
-        collector_options.value = collectors.value.items.map((collector) => {
+      configStore.loadWorkerTypes().then(() => {
+        collector_options.value = worker_types.value.items.map((collector) => {
           parameters.value[collector.id] = collector.parameters.map(
             (parameter) => {
               return {

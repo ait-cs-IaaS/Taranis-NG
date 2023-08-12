@@ -343,9 +343,6 @@ class NewsItemVote(BaseModel):
     news_item_id = db.Column(db.Integer, db.ForeignKey("news_item.id"))
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
 
-    remote_node_id = db.Column(db.Integer, db.ForeignKey("remote_node.id"), nullable=True)
-    remote_user = db.Column(db.String())
-
     def __init__(self, news_item_id, user_id):
         self.id = None
         self.news_item_id = news_item_id

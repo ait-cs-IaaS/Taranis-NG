@@ -59,7 +59,7 @@ export default {
 
     // computed
     const formFormat = computed(() => {
-      const base = [
+      let base = [
         {
           name: 'id',
           label: 'ID',
@@ -86,7 +86,7 @@ export default {
         }
       ]
       for (const parameter in formData.value.parameters) {
-        return base.concat({
+        base = base.concat({
           name: parameter,
           label: parameter,
           type: 'text'

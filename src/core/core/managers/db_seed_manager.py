@@ -260,69 +260,6 @@ def pre_seed_permissions():
     )
 
     Permission.add(
-        "CONFIG_REMOTE_NODE_ACCESS",
-        "Config remote nodes access",
-        "Access to remote nodes configuration",
-    )
-    Permission.add(
-        "CONFIG_REMOTE_NODE_CREATE",
-        "Config remote node create",
-        "Create remote node configuration",
-    )
-    Permission.add(
-        "CONFIG_REMOTE_NODE_UPDATE",
-        "Config remote node update",
-        "Update remote node configuration",
-    )
-    Permission.add(
-        "CONFIG_REMOTE_NODE_DELETE",
-        "Config remote node delete",
-        "Delete remote node configuration",
-    )
-
-    Permission.add(
-        "CONFIG_PRESENTERS_NODE_ACCESS",
-        "Config presenters nodes access",
-        "Access to presenters nodes configuration",
-    )
-    Permission.add(
-        "CONFIG_PRESENTERS_NODE_CREATE",
-        "Config presenters node create",
-        "Create presenters node configuration",
-    )
-    Permission.add(
-        "CONFIG_PRESENTERS_NODE_UPDATE",
-        "Config presenters node update",
-        "Update presenters node configuration",
-    )
-    Permission.add(
-        "CONFIG_PRESENTERS_NODE_DELETE",
-        "Config presenters node delete",
-        "Delete presenters node configuration",
-    )
-
-    Permission.add(
-        "CONFIG_PUBLISHERS_NODE_ACCESS",
-        "Config publishers nodes access",
-        "Access to publishers nodes configuration",
-    )
-    Permission.add(
-        "CONFIG_PUBLISHERS_NODE_CREATE",
-        "Config publishers node create",
-        "Create publishers node configuration",
-    )
-    Permission.add(
-        "CONFIG_PUBLISHERS_NODE_UPDATE",
-        "Config publishers node update",
-        "Update publishers node configuration",
-    )
-    Permission.add(
-        "CONFIG_PUBLISHERS_NODE_DELETE",
-        "Config publishers node delete",
-        "Delete publishers node configuration",
-    )
-
-    Permission.add(
         "CONFIG_PUBLISHER_PRESET_ACCESS",
         "Config publisher presets access",
         "Access to publisher presets configuration",
@@ -344,48 +281,6 @@ def pre_seed_permissions():
     )
 
     Permission.add(
-        "CONFIG_BOTS_NODE_ACCESS",
-        "Config bots nodes access",
-        "Access to bots nodes configuration",
-    )
-    Permission.add(
-        "CONFIG_BOTS_NODE_CREATE",
-        "Config bots node create",
-        "Create bots node configuration",
-    )
-    Permission.add(
-        "CONFIG_BOTS_NODE_UPDATE",
-        "Config bots node update",
-        "Update bots node configuration",
-    )
-    Permission.add(
-        "CONFIG_BOTS_NODE_DELETE",
-        "Config bots node delete",
-        "Delete bots node configuration",
-    )
-
-    Permission.add(
-        "CONFIG_PUBLISHERS_NODE_ACCESS",
-        "Config publishers nodes access",
-        "Access to publishers nodes configuration",
-    )
-    Permission.add(
-        "CONFIG_PUBLISHERS_NODE_CREATE",
-        "Config publishers node create",
-        "Create publishers node configuration",
-    )
-    Permission.add(
-        "CONFIG_PUBLISHERS_NODE_UPDATE",
-        "Config publishers node update",
-        "Update publishers node configuration",
-    )
-    Permission.add(
-        "CONFIG_PUBLISHERS_NODE_DELETE",
-        "Config publishers node delete",
-        "Delete publishers node configuration",
-    )
-
-    Permission.add(
         "CONFIG_PUBLISHER_PRESET_ACCESS",
         "Config publisher presets access",
         "Access to publisher presets configuration",
@@ -404,27 +299,6 @@ def pre_seed_permissions():
         "CONFIG_PUBLISHER_PRESET_DELETE",
         "Config publisher preset delete",
         "Delete publisher preset configuration",
-    )
-
-    Permission.add(
-        "CONFIG_PRESENTERS_NODE_ACCESS",
-        "Config presenters nodes access",
-        "Access to presenters nodes configuration",
-    )
-    Permission.add(
-        "CONFIG_PRESENTERS_NODE_CREATE",
-        "Config presenters node create",
-        "Create presenters node configuration",
-    )
-    Permission.add(
-        "CONFIG_PRESENTERS_NODE_UPDATE",
-        "Config presenters node update",
-        "Update presenters node configuration",
-    )
-    Permission.add(
-        "CONFIG_PRESENTERS_NODE_DELETE",
-        "Config presenters node delete",
-        "Delete presenters node configuration",
     )
 
     Permission.add("MY_ASSETS_ACCESS", "My Assets access", "Access to My Assets module")

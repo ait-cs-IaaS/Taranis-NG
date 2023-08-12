@@ -200,7 +200,7 @@ class OSINTSource(BaseModel):
         for source in data:
             for parameter in source["parameter_values"]:
                 parameter["parameter"] = parameter["parameter"]["key"]
-            source["collector_type"] = source["collector"]["type"]
+            source["collector_type"] = source.pop("collector")["type"]
         return data
 
     @classmethod

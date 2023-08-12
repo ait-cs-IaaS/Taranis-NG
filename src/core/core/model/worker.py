@@ -65,11 +65,19 @@ class WORKER_TYPES(StrEnum):
     MISP_PUBLISHER = auto()
 
 
+class WORKER_CATEGORY(StrEnum):
+    COLLECTOR = auto()
+    BOT = auto()
+    PRESENTER = auto()
+    PUBLISHER = auto()
+
+
 class Worker(BaseModel):
     id = db.Column(db.String(64), primary_key=True)
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())
     type = db.Column(db.Enum(WORKER_TYPES), nullable=False)
+    category = db.Column(db.Enum(WORKER_CATEGORY), nullable=False)
     parameters = db.relationship("ParameterValue", secondary="worker_parameter_value", cascade="all")
 
     def __init__(self, name, description, type, parameters):
@@ -77,6 +85,7 @@ class Worker(BaseModel):
         self.name = name
         self.description = description
         self.type = type
+        self.category = self.type.split("_")[1]
         self.parameters = parameters
 
     @classmethod
@@ -100,16 +109,22 @@ class Worker(BaseModel):
             raise ValueError
 
     @classmethod
-    def get_by_filter(cls, search):
+    def get_by_filter(cls, filter_args):
         query = cls.query
 
-        if search:
+        if search := filter_args.get("search"):
             query = query.filter(
                 or_(
                     Worker.name.ilike(f"%{search}%"),
                     Worker.description.ilike(f"%{search}%"),
                 )
             )
+
+        if category := filter_args.get("category"):
+            query = query.filter(Worker.category == category)
+
+        if type := filter_args.get("type"):
+            query = query.filter(Worker.type == type)
 
         return query.order_by(db.asc(Worker.name)).all(), query.count()
 
@@ -118,8 +133,8 @@ class Worker(BaseModel):
         return cls.query.filter_by(type=type).first()
 
     @classmethod
-    def get_all_json(cls, search):
-        workers, count = cls.get_by_filter(search)
+    def get_all_json(cls, filter_args):
+        workers, count = cls.get_by_filter(filter_args)
         items = [worker.to_worker_info_dict() for worker in workers]
         return {"total_count": count, "items": items}
 

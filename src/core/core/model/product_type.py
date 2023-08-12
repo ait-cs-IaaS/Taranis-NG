@@ -10,25 +10,22 @@ from core.model.product import Product
 from core.model.base_model import BaseModel
 from core.model.acl_entry import ACLEntry, ItemType
 from core.model.parameter_value import ParameterValue
+from core.model.worker import PRESENTER_TYPES
 
 
 class ProductType(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(64), unique=True, nullable=False)
     description = db.Column(db.String(), nullable=False)
-
-    created = db.Column(db.DateTime, default=datetime.datetime.utcnow)
-
-    presenter_id = db.Column(db.String, db.ForeignKey("presenter.id"))
-    presenter = db.relationship("Presenter")
+    presenter_type = db.Column(db.Enum(PRESENTER_TYPES))
 
     parameter_values = db.relationship("ParameterValue", secondary="product_type_parameter_value", cascade="all")
 
-    def __init__(self, title, description, presenter_id, parameter_values, id=None):
+    def __init__(self, title, description, presenter_type, parameter_values, id=None):
         self.id = id
         self.title = title
         self.description = description
-        self.presenter_id = presenter_id
+        self.presenter_type = presenter_type
         self.parameter_values = parameter_values
 
     @classmethod

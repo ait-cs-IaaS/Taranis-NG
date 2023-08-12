@@ -129,26 +129,6 @@ def upgrade():
         sa.UniqueConstraint("name"),
     )
     op.create_table(
-        "presenters_node",
-        sa.Column("id", sa.String(length=64), nullable=False),
-        sa.Column("name", sa.String(), nullable=False),
-        sa.Column("description", sa.String(), nullable=True),
-        sa.Column("api_url", sa.String(), nullable=False),
-        sa.Column("api_key", sa.String(), nullable=False),
-        sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("name"),
-    )
-    op.create_table(
-        "publishers_node",
-        sa.Column("id", sa.String(length=64), nullable=False),
-        sa.Column("name", sa.String(), nullable=False),
-        sa.Column("description", sa.String(), nullable=True),
-        sa.Column("api_url", sa.String(), nullable=False),
-        sa.Column("api_key", sa.String(), nullable=False),
-        sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("name"),
-    )
-    op.create_table(
         "remote_access",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("name", sa.String(), nullable=False),
@@ -316,32 +296,6 @@ def upgrade():
         sa.ForeignKeyConstraint(
             ["parameter_key"],
             ["parameter.key"],
-        ),
-        sa.PrimaryKeyConstraint("id"),
-    )
-    op.create_table(
-        "presenter",
-        sa.Column("id", sa.String(length=64), nullable=False),
-        sa.Column("name", sa.String(), nullable=False),
-        sa.Column("description", sa.String(), nullable=True),
-        sa.Column("type", sa.String(), nullable=False),
-        sa.Column("node_id", sa.String(), nullable=True),
-        sa.ForeignKeyConstraint(
-            ["node_id"],
-            ["presenters_node.id"],
-        ),
-        sa.PrimaryKeyConstraint("id"),
-    )
-    op.create_table(
-        "publisher",
-        sa.Column("id", sa.String(length=64), nullable=False),
-        sa.Column("name", sa.String(), nullable=False),
-        sa.Column("description", sa.String(), nullable=True),
-        sa.Column("type", sa.String(), nullable=False),
-        sa.Column("node_id", sa.String(), nullable=True),
-        sa.ForeignKeyConstraint(
-            ["node_id"],
-            ["publishers_node.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
     )
@@ -967,8 +921,6 @@ def downgrade():
     op.drop_table("role_permission")
     op.drop_table("remote_node")
     op.drop_table("remote_access_report_item_type")
-    op.drop_table("publisher")
-    op.drop_table("presenter")
     op.drop_table("parameter_value")
     op.drop_table("osint_source")
     op.drop_table("organization")
@@ -985,14 +937,9 @@ def downgrade():
     op.drop_table("role")
     op.drop_table("report_item_type")
     op.drop_table("remote_access")
-    op.drop_table("publishers_node")
-    op.drop_table("presenters_node")
     op.drop_table("permission")
     op.drop_table("parameter")
     op.drop_table("osint_source_group")
-    op.drop_table("collectors_node")
-    op.drop_table("collector")
-    op.drop_table("bot")
     op.drop_table("attribute")
     op.drop_table("address")
     op.drop_table("acl_entry")

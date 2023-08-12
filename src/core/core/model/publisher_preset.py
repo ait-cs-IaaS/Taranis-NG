@@ -4,8 +4,8 @@ import uuid
 from core.managers.log_manager import logger
 from core.managers.db_manager import db
 from core.model.base_model import BaseModel
-from core.model.publishers_node import PublishersNode
 from core.model.parameter_value import ParameterValue
+from core.model.worker import PUBLISHER_TYPES
 
 
 class PublisherPreset(BaseModel):
@@ -13,24 +13,20 @@ class PublisherPreset(BaseModel):
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())
 
-    publisher_id = db.Column(db.String, db.ForeignKey("publisher.id"))
-    publisher = db.relationship("Publisher", back_populates="presets")
-
+    publisher_type = db.Column(db.Enum(PUBLISHER_TYPES))
     parameter_values = db.relationship("ParameterValue", secondary="publisher_preset_parameter_value", cascade="all")
 
     def __init__(
         self,
         name,
         description,
-        publisher_id,
-        parameter_values,
+        publisher_type,
         id=None,
     ):
         self.id = id or str(uuid.uuid4())
         self.name = name
         self.description = description
-        self.publisher_id = publisher_id
-        self.parameter_values = parameter_values
+        self.publisher_type = publisher_type
 
     @classmethod
     def get_all(cls):
@@ -58,8 +54,7 @@ class PublisherPreset(BaseModel):
 
     @classmethod
     def get_all_for_publisher_json(cls, parameters):
-        node = PublishersNode.get_by_api_key(parameters.api_key)
-        for publisher in node.publishers:
+        for publisher in cls.publisher.query.all():
             if publisher.type == parameters.publisher_type:
                 return [preset.to_dict() for preset in publisher.sources]
 

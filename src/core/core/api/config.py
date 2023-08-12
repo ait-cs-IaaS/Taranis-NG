@@ -14,9 +14,7 @@ from core.model import (
     attribute,
     bot,
     parameter,
-    presenter,
     product_type,
-    publisher,
     publisher_preset,
     organization,
     osint_source,
@@ -382,13 +380,13 @@ class OSINTSourceGroup(Resource):
 class Presenters(Resource):
     def get(self):
         search = request.args.get(key="search", default=None)
-        return presenter.Presenter.get_all_json(search)
+        return worker.Worker.get_all_json({"search": search, "category": "presenter"})
 
 
 class Publishers(Resource):
     def get(self):
         search = request.args.get(key="search", default=None)
-        return publisher.Publisher.get_all_json(search)
+        return worker.Worker.get_all_json({"search": search, "category": "publisher"})
 
 
 class PublisherPresets(Resource):
