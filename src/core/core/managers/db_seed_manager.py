@@ -44,12 +44,8 @@ def pre_seed_source_groups():
 
 
 def pre_seed_workers():
-    from core.managers.workers_pre_seed import parameters, workers
+    from core.managers.workers_pre_seed import workers
     from core.model.worker import Worker
-    from core.model.parameter import Parameter
-
-    for p in parameters:
-        Parameter.add(p)
 
     for w in workers:
         Worker.add(w)
@@ -236,27 +232,6 @@ def pre_seed_permissions():
         "CONFIG_OSINT_SOURCE_GROUP_DELETE",
         "Config OSINT source group delete",
         "Delete OSINT source group configuration",
-    )
-
-    Permission.add(
-        "CONFIG_REMOTE_ACCESS_ACCESS",
-        "Config remote access access",
-        "Access to remote access configuration",
-    )
-    Permission.add(
-        "CONFIG_REMOTE_ACCESS_CREATE",
-        "Config remote access create",
-        "Create remote access configuration",
-    )
-    Permission.add(
-        "CONFIG_REMOTE_ACCESS_UPDATE",
-        "Config remote access update",
-        "Update remote access configuration",
-    )
-    Permission.add(
-        "CONFIG_REMOTE_ACCESS_DELETE",
-        "Config remote access delete",
-        "Delete remote access configuration",
     )
 
     Permission.add(

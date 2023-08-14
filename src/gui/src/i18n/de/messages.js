@@ -411,7 +411,6 @@ export const messages_de = {
     removed_error:
       'Berichtselement wird verwendet und konnte nicht gelöscht werden',
     select: 'Wählen Sie Berichtselemente aus',
-    select_remote: 'Wählen Sie Berichtselemente von Remote-Knoten aus',
     add: 'Hinzufügen',
     attributes: 'Attribute',
     import_csv: 'CSV importieren',

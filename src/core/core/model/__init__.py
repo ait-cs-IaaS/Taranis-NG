@@ -18,7 +18,6 @@ __all__ = [
     "word_list",
     "asset",
     "bot",
-    "remote",
     "token_blacklist",
     "worker",
 ]

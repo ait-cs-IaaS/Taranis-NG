@@ -117,6 +117,7 @@
 import { watch } from 'vue'
 import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { flattenObject } from '@/utils/helpers'
 
 export default {
   name: 'EditConfig',
@@ -154,32 +155,6 @@ export default {
           header.type === 'number' ? 0 : `new${header.value}`
       })
       formData.value[name].push(newRow)
-    }
-
-    const flattenObject = (obj, parent) => {
-      let result = []
-      let flat_obj = {}
-      for (const key in obj) {
-        if (typeof obj[key] === 'object') {
-          result = result.concat(flattenObject(obj[key], key))
-        } else {
-          flat_obj = {
-            name: key,
-            type: typeof obj[key] === 'number' ? 'number' : 'text',
-            label: key
-          }
-          if (parent) {
-            flat_obj.parent = parent
-          }
-          if (key === 'id') {
-            flat_obj.disabled = true
-            result.unshift(flat_obj)
-            continue
-          }
-          result.push(flat_obj)
-        }
-      }
-      return result
     }
 
     const format = computed(() => {

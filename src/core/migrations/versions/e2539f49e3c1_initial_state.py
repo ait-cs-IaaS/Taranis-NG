@@ -113,35 +113,12 @@ def upgrade():
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
-        "parameter",
-        sa.Column("key", sa.String(), nullable=False),
-        sa.Column("name", sa.String(), nullable=False),
-        sa.Column("description", sa.String(), nullable=True),
-        sa.Column("type", sa.Enum("STRING", "NUMBER", "BOOLEAN", "LIST", name="parametertype"), nullable=True),
-        sa.PrimaryKeyConstraint("key"),
-    )
-    op.create_table(
         "permission",
         sa.Column("id", sa.String(), nullable=False),
         sa.Column("name", sa.String(), nullable=False),
         sa.Column("description", sa.String(), nullable=True),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("name"),
-    )
-    op.create_table(
-        "remote_access",
-        sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("name", sa.String(), nullable=False),
-        sa.Column("description", sa.String(), nullable=True),
-        sa.Column("enabled", sa.Boolean(), nullable=True),
-        sa.Column("connected", sa.Boolean(), nullable=True),
-        sa.Column("access_key", sa.String(), nullable=True),
-        sa.Column("event_id", sa.String(length=64), nullable=True),
-        sa.Column("last_synced_news_items", sa.DateTime(), nullable=True),
-        sa.Column("last_synced_report_items", sa.DateTime(), nullable=True),
-        sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("access_key"),
-        sa.UniqueConstraint("event_id"),
     )
     op.create_table(
         "report_item_type",
@@ -292,48 +269,8 @@ def upgrade():
         "parameter_value",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("value", sa.String(), nullable=False),
-        sa.Column("parameter_key", sa.String(), nullable=True),
-        sa.ForeignKeyConstraint(
-            ["parameter_key"],
-            ["parameter.key"],
-        ),
+        sa.Column("parameter", sa.String(), nullable=False),
         sa.PrimaryKeyConstraint("id"),
-    )
-    op.create_table(
-        "remote_access_report_item_type",
-        sa.Column("remote_access_id", sa.Integer(), nullable=False),
-        sa.Column("report_item_type_id", sa.Integer(), nullable=False),
-        sa.ForeignKeyConstraint(
-            ["remote_access_id"],
-            ["remote_access.id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["report_item_type_id"],
-            ["report_item_type.id"],
-        ),
-        sa.PrimaryKeyConstraint("remote_access_id", "report_item_type_id"),
-    )
-    op.create_table(
-        "remote_node",
-        sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("name", sa.String(), nullable=False),
-        sa.Column("description", sa.String(), nullable=True),
-        sa.Column("enabled", sa.Boolean(), nullable=True),
-        sa.Column("remote_url", sa.String(), nullable=True),
-        sa.Column("events_url", sa.String(), nullable=True),
-        sa.Column("access_key", sa.String(), nullable=True),
-        sa.Column("sync_news_items", sa.Boolean(), nullable=True),
-        sa.Column("osint_source_group_id", sa.String(), nullable=True),
-        sa.Column("sync_report_items", sa.Boolean(), nullable=True),
-        sa.Column("event_id", sa.String(length=64), nullable=True),
-        sa.Column("last_synced_news_items", sa.DateTime(), nullable=True),
-        sa.Column("last_synced_report_items", sa.DateTime(), nullable=True),
-        sa.ForeignKeyConstraint(
-            ["osint_source_group_id"],
-            ["osint_source_group.id"],
-        ),
-        sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("event_id"),
     )
     op.create_table(
         "role_permission",
@@ -426,12 +363,6 @@ def upgrade():
         sa.Column("binary_mime_type", sa.String(), nullable=True),
         sa.Column("binary_data", sa.LargeBinary(), nullable=True),
         sa.Column("created", sa.DateTime(), nullable=True),
-        sa.Column("remote_node_id", sa.Integer(), nullable=True),
-        sa.Column("remote_user", sa.String(), nullable=True),
-        sa.ForeignKeyConstraint(
-            ["remote_node_id"],
-            ["remote_node.id"],
-        ),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
@@ -549,20 +480,6 @@ def upgrade():
             ["publisher.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
-    )
-    op.create_table(
-        "remote_access_osint_source",
-        sa.Column("remote_access_id", sa.Integer(), nullable=False),
-        sa.Column("osint_source_id", sa.String(), nullable=False),
-        sa.ForeignKeyConstraint(
-            ["osint_source_id"],
-            ["osint_source.id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["remote_access_id"],
-            ["remote_access.id"],
-        ),
-        sa.PrimaryKeyConstraint("remote_access_id", "osint_source_id"),
     )
     op.create_table(
         "user",
@@ -715,7 +632,6 @@ def upgrade():
         sa.Column("last_updated", sa.DateTime(), nullable=True),
         sa.Column("completed", sa.Boolean(), nullable=True),
         sa.Column("user_id", sa.Integer(), nullable=True),
-        sa.Column("remote_user", sa.String(), nullable=True),
         sa.Column("report_item_type_id", sa.Integer(), nullable=True),
         sa.ForeignKeyConstraint(
             ["report_item_type_id"],
@@ -789,15 +705,9 @@ def upgrade():
         sa.Column("dislike", sa.Boolean(), nullable=True),
         sa.Column("news_item_id", sa.Integer(), nullable=True),
         sa.Column("user_id", sa.Integer(), nullable=True),
-        sa.Column("remote_node_id", sa.Integer(), nullable=True),
-        sa.Column("remote_user", sa.String(), nullable=True),
         sa.ForeignKeyConstraint(
             ["news_item_id"],
             ["news_item.id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["remote_node_id"],
-            ["remote_node.id"],
         ),
         sa.ForeignKeyConstraint(
             ["user_id"],
@@ -863,26 +773,11 @@ def upgrade():
         ),
         sa.PrimaryKeyConstraint("report_item_id", "news_item_aggregate_id"),
     )
-    op.create_table(
-        "report_item_remote_report_item",
-        sa.Column("report_item_id", sa.Integer(), nullable=False),
-        sa.Column("remote_report_item_id", sa.Integer(), nullable=False),
-        sa.ForeignKeyConstraint(
-            ["remote_report_item_id"],
-            ["report_item.id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["report_item_id"],
-            ["report_item.id"],
-        ),
-        sa.PrimaryKeyConstraint("report_item_id", "remote_report_item_id"),
-    )
     # ### end Alembic commands ###
 
 
 def downgrade():
     # ### commands auto generated by Alembic - please adjust! ###
-    op.drop_table("report_item_remote_report_item")
     op.drop_table("report_item_news_item_aggregate")
     op.drop_table("report_item_cpe")
     op.drop_table("report_item_attribute")
@@ -902,7 +797,6 @@ def downgrade():
     op.drop_table("asset")
     op.drop_table("acl_entry_user")
     op.drop_table("user")
-    op.drop_table("remote_access_osint_source")
     op.drop_table("publisher_preset")
     op.drop_table("publisher_parameter")
     op.drop_table("product_type")
@@ -919,8 +813,6 @@ def downgrade():
     op.drop_table("asset_group")
     op.drop_table("word_list_entry")
     op.drop_table("role_permission")
-    op.drop_table("remote_node")
-    op.drop_table("remote_access_report_item_type")
     op.drop_table("parameter_value")
     op.drop_table("osint_source")
     op.drop_table("organization")
@@ -936,9 +828,7 @@ def downgrade():
     op.drop_table("tag_cloud")
     op.drop_table("role")
     op.drop_table("report_item_type")
-    op.drop_table("remote_access")
     op.drop_table("permission")
-    op.drop_table("parameter")
     op.drop_table("osint_source_group")
     op.drop_table("attribute")
     op.drop_table("address")

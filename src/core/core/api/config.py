@@ -13,7 +13,6 @@ from core.model import (
     acl_entry,
     attribute,
     bot,
-    parameter,
     product_type,
     publisher_preset,
     organization,
@@ -230,19 +229,15 @@ class User(Resource):
             return user.User.update(user_id, request.json), 200
         except Exception:
             logger.exception()
-            logger.store_data_error_activity(get_user_from_jwt(), "Could not update user")
-            return "Could not update user", 400
+            return {"error": "Could not update user"}, 400
 
     @auth_required("CONFIG_USER_DELETE")
     def delete(self, user_id):
         try:
-            original_user = user.User.find_by_id(user_id)
             return user.User.delete(user_id), 200
-
-        except Exception as ex:
-            logger.exception(ex)
-            logger.store_data_error_activity(get_user_from_jwt(), "Could not delete user")
-            return "Could not delete user", 400
+        except Exception:
+            logger.exception()
+            return {"error": "Could not delete user"}, 400
 
 
 class Bots(Resource):
@@ -260,11 +255,6 @@ class Bots(Resource):
 class BotExecute(Resource):
     def post(self, bot_id):
         return queue_manager.execute_bot_task(bot_id)
-
-
-class Parameters(Resource):
-    def get(self):
-        return parameter.Parameter.get_all_json()
 
 
 class QueueSchedule(Resource):
@@ -350,9 +340,11 @@ class OSINTSourcesImport(Resource):
         if file := request.files.get("file"):
             sources = osint_source.OSINTSource.import_osint_sources(file)
             if sources is None:
-                return "Unable to import", 400
+                return {"error": "Unable to import"}, 400
             return {"sources": [source.id for source in sources], "count": len(sources), "message": "Successfully imported sources"}
-        return "No file provided", 400
+        print(request.files)
+        print(request.args)
+        return {"error": "No file provided"}, 400
 
 
 class OSINTSourceGroups(Resource):
@@ -477,7 +469,8 @@ class WorkerTypes(Resource):
     @auth_required("CONFIG_WORKER_ACCESS")
     def get(self):
         search = request.args.get(key="search", default=None)
-        return worker.Worker.get_all_json(search)
+        filter_args = {"search": search}
+        return worker.Worker.get_all_json(filter_args)
 
 
 def initialize(api: Api):
@@ -502,7 +495,6 @@ def initialize(api: Api):
     namespace.add_resource(OSINTSourceGroups, "/osint-source-groups")
     namespace.add_resource(OSINTSourcesExport, "/export-osint-sources")
     namespace.add_resource(OSINTSourcesImport, "/import-osint-sources")
-    namespace.add_resource(Parameters, "/parameters")
     namespace.add_resource(Permissions, "/permissions")
     namespace.add_resource(Presenters, "/presenters")
     namespace.add_resource(ProductType, "/product-types/<int:type_id>")

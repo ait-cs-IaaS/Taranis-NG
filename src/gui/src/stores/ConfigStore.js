@@ -47,6 +47,26 @@ export const useConfigStore = defineStore('config', {
   getters: {
     getUserByID: (state) => (user_id) => {
       return state.users.items.find((user) => user.id === user_id) || null
+    },
+    collector_types: (state) => {
+      return state.worker_types.items.filter((worker_type) =>
+        worker_type.type.endsWith('collector')
+      )
+    },
+    bot_types: (state) => {
+      return state.worker_types.items.filter((worker_type) =>
+        worker_type.type.endsWith('bot')
+      )
+    },
+    publisher_types: (state) => {
+      return state.worker_types.items.filter((worker_type) =>
+        worker_type.type.endsWith('publisher')
+      )
+    },
+    presenter_types: (state) => {
+      return state.worker_types.items.filter((worker_type) =>
+        worker_type.type.endsWith('presenter')
+      )
     }
   },
   actions: {

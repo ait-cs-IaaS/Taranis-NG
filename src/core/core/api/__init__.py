@@ -10,7 +10,6 @@ from core.api import (
     isalive,
     publish,
     publishers,
-    remote,
     user,
     worker,
 )
@@ -27,7 +26,6 @@ __all__ = [
     "isalive",
     "publish",
     "publishers",
-    "remote",
     "user",
     "worker",
 ]

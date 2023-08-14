@@ -3,37 +3,37 @@ from core.managers.log_manager import logger
 
 from core.managers.db_manager import db
 from core.model.base_model import BaseModel
-from core.model.parameter import Parameter
 
 
 class ParameterValue(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
+    parameter = db.Column(db.String(), nullable=False)
     value = db.Column(db.String(), nullable=False, default="")
 
-    parameter_key = db.Column(db.String(), db.ForeignKey("parameter.key"))
-    parameter = db.relationship("Parameter")
-
-    def __init__(self, parameter, value=""):
-        self.id = None
+    def __init__(self, parameter, value="", id=None):
+        self.id = id
+        self.parameter = parameter
         self.value = value
-        self.parameter_key = parameter
 
-    def to_dict(self) -> dict[str, Any]:
-        data = super().to_dict()
-        data["parameter"] = Parameter.find_by_key(data.pop("parameter_key")).to_dict()
-        return data
+    def to_dict(self) -> dict[int, Any]:
+        return {self.parameter: self.value}
 
-    def to_simple_dict(self) -> dict[str, Any]:
-        return {self.parameter_key: self.value}
+    @classmethod
+    def get_or_create(cls, data: dict[str, Any]) -> "ParameterValue":
+        if "id" in data:
+            return cls.get(data["id"])
+        if "parameter" in data and "value" in data:
+            return cls.from_dict(data)
+        return cls.from_dict({"parameter": list(data.keys())[0], "value": list(data.values())[0]})
 
-    def to_export_dict(self) -> dict[str, Any]:
-        return {"parameter": self.parameter_key, "value": self.value}
+    @classmethod
+    def get_or_create_from_list(cls, parameters: dict[str, Any] | list[str] | list[dict[str, Any]]) -> list["ParameterValue"]:
+        if parameters and isinstance(parameters, list):
+            if isinstance(parameters[0], dict):
+                return [cls.get_or_create(parameter) for parameter in parameters]  # type: ignore
+            return cls.from_parameter_list(parameters)  # type: ignore
+        return [cls.get_or_create({"parameter": key, "value": val}) for key, val in parameters.items()]  # type: ignore
 
     @classmethod
     def from_parameter_list(cls, parameters: list[str]) -> list["ParameterValue"]:
-        return [cls(parameter) for parameter in parameters]
-
-    @classmethod
-    def find_param_value(cls, p_values: list["ParameterValue"], key: str) -> "ParameterValue":
-        # Helper function to find parameter value based on key
-        return next((pv for pv in p_values if pv.parameter.key == key))
+        return [cls(parameter=parameter) for parameter in parameters]

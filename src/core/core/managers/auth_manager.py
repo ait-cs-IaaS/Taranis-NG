@@ -146,33 +146,6 @@ def api_key_required(fn):
     return wrapper
 
 
-def access_key_required(fn):
-    from core.model.remote import RemoteAccess
-
-    @wraps(fn)
-    def wrapper(*args, **kwargs):
-        error = ({"error": "not authorized"}, 401)
-
-        auth_header = request.headers.get("Authorization", None)
-        if not auth_header:
-            logger.store_auth_error_activity("Missing Authorization header for remote access")
-            return error
-
-        if not auth_header.startswith("Bearer"):
-            logger.store_auth_error_activity("Missing Authorization Bearer for remote access")
-            return error
-
-        # does it match some of our remote peer's access keys?
-        if not RemoteAccess.exists_by_access_key(auth_header.replace("Bearer ", "")):
-            logger.store_auth_error_activity("Incorrect access key: " + auth_header.replace("Bearer ", "") + " for remote access")
-            return error
-
-        # allow
-        return fn(*args, **kwargs)
-
-    return wrapper
-
-
 def get_access_key():
     return request.headers["Authorization"].replace("Bearer ", "")
 

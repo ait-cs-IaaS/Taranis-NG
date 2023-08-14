@@ -109,7 +109,7 @@ class Worker(BaseModel):
             raise ValueError
 
     @classmethod
-    def get_by_filter(cls, filter_args):
+    def get_by_filter(cls, filter_args: dict):
         query = cls.query
 
         if search := filter_args.get("search"):
@@ -133,7 +133,7 @@ class Worker(BaseModel):
         return cls.query.filter_by(type=type).first()
 
     @classmethod
-    def get_all_json(cls, filter_args):
+    def get_all_json(cls, filter_args: dict):
         workers, count = cls.get_by_filter(filter_args)
         items = [worker.to_worker_info_dict() for worker in workers]
         return {"total_count": count, "items": items}
@@ -144,7 +144,7 @@ class Worker(BaseModel):
             "name": self.name,
             "description": self.description,
             "type": self.type,
-            "parameters": {parameter.parameter.key: parameter.value for parameter in self.parameters},
+            "parameters": {parameter.parameter: parameter.value for parameter in self.parameters},
         }
 
     def to_dict(self) -> dict[str, Any]:
@@ -155,9 +155,13 @@ class Worker(BaseModel):
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Worker":
         if parameters := data.pop("parameters", None):
-            data["parameters"] = ParameterValue.from_parameter_list(parameters)
+            data["parameters"] = ParameterValue.get_or_create_from_list(parameters)
 
         return cls(**data)
+
+    @classmethod
+    def get_parameters(cls, worker_type):
+        return cls.query.filter(cls.type == worker_type).first().parameters
 
 
 class WorkerParameterValue(BaseModel):

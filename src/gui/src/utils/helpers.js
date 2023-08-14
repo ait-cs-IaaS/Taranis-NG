@@ -83,41 +83,30 @@ export function objectFromFormat(format) {
   return newObject
 }
 
-export function parseParameterValues(data) {
-  const sources = []
-
-  data.forEach((source) => {
-    const rootLevel = source
-
-    source.parameter_values.forEach((parameter) => {
-      rootLevel[parameter.parameter.key] = parameter.value
-    })
-    sources.push(rootLevel)
-  })
-
-  return sources
-}
-
-export function parseSubmittedParameterValues(unparsed_sources, data) {
-  const result = unparsed_sources.find((item) => item.id === data.id)
-
-  result.parameter_values.forEach((parameter) => {
-    parameter.value = data[parameter.parameter.key]
-  })
-
-  return result
-}
-
-export function createParameterValues(parameters, data) {
-  data.parameter_values = parameters.map((param) => {
-    const value = {
-      parameter: param,
-      value: data[param] || ''
+export function flattenObject(obj, parent) {
+  let result = []
+  let flat_obj = {}
+  for (const key in obj) {
+    if (typeof obj[key] === 'object') {
+      result = result.concat(flattenObject(obj[key], key))
+    } else {
+      flat_obj = {
+        name: key,
+        type: typeof obj[key] === 'number' ? 'number' : 'text',
+        label: key
+      }
+      if (parent) {
+        flat_obj.parent = parent
+      }
+      if (key === 'id') {
+        flat_obj.disabled = true
+        result.unshift(flat_obj)
+        continue
+      }
+      result.push(flat_obj)
     }
-    delete data[param]
-    return value
-  })
-  return data
+  }
+  return result
 }
 
 export function tagIconFromType(tag_type) {

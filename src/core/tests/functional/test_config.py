@@ -1,48 +1,34 @@
-class TestConfigApi(object):
+import os
+import json
+from tests.functional.helpers import BaseTest
+from werkzeug.datastructures import FileStorage
+
+
+class TestConfigApi(BaseTest):
     base_uri = "/api/v1/config"
 
-    def assert_get_ok(self, client, uri, auth_header):
-        response = client.get(f"{self.base_uri}/{uri}", headers=auth_header)
-        assert response
-        assert response.content_type == "application/json"
-        assert response.data
-        assert response.status_code == 200
-        return response
+    def test_import_osint_sources(self, client, auth_header, cleanup_sources):
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        file_path = os.path.join(dir_path, "osint_sources_test_data_v1.json")
+        with open(file_path, "rb") as f:
+            file_storage = FileStorage(stream=f, filename="osint_sources_test_data_v1.json", content_type="application/json")
+            data = {"file": file_storage}
+            response = self.assert_post_data_ok(client, "import-osint-sources", data, auth_header)
+            assert response.json["count"] == 6
+            assert response.json["message"] == "Successfully imported sources"
 
-    def assert_get_failed(self, client, uri):
-        response = client.get(f"{self.base_uri}/{uri}")
-        assert response
-        assert response.content_type == "application/json"
-        assert response.get_json()["error"] == "not authorized"
-        assert response.status_code == 401
-        return response
+    def test_export_osint_sources(self, client, auth_header, cleanup_sources):
+        response = self.assert_get_ok(client, "export-osint-sources", auth_header)
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        file_path = os.path.join(dir_path, "osint_sources_test_data_v2.json")
+        with open(file_path, "rb") as f:
+            assert response.json == json.load(f)
 
-    def test_attributes_get(self, client, auth_header):
-        response = self.assert_get_ok(client, "attributes", auth_header)
+    # def test_get_osint_sources(self, client, auth_header):
+    #     response = self.assert_get_ok(client, "/osint-sources", auth_header)
+    #     totoal_count = response.get_json()["total_count"]
+    #     osint_sources = response.get_json()["items"]
 
-        # assert response.json == attr_data
-
-    def test_attribute_get(self, client, auth_header):
-        response = self.assert_get_ok(client, "attributes/1", auth_header)
-        # assert response.json == attr_data[0]
-
-    def test_attribute_enums_get(self, client, auth_header):
-        response = self.assert_get_ok(client, "attributes/1/enums", auth_header)
-
-        # assert response.json == attr_enum_data
-
-    def test_report_item_types_config_get(self, client, auth_header):
-        response = self.assert_get_ok(client, "report-item-types", auth_header)
-
-        # assert response.json == report_item_types_config_data
-
-    def test_product_types_get(self, client, auth_header):
-        response = self.assert_get_ok(client, "product-types", auth_header)
-        items = response.json["items"]
-        assert items == []
-        # assert response.json == product_types_data
-
-    def test_permissions_get(self, client, auth_header):
-        response = self.assert_get_ok(client, "permissions", auth_header)
-
-        # assert response.json == permissions_data
+    #     assert totoal_count > 0
+    #     assert len(osint_sources) > 0
+    #     print(f"Total count: {totoal_count} - osint_sources: {osint_sources}")

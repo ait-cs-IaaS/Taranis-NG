@@ -97,10 +97,10 @@ class User(BaseModel):
         return item
 
     @classmethod
-    def update(cls, user_id, data) -> tuple[str, int]:
+    def update(cls, user_id, data) -> tuple[dict[str, Any], int]:
         user = cls.get(user_id)
         if not user:
-            return f"User {user_id} not found", 404
+            return {"error": f"User {user_id} not found"}, 404
         data.pop("id")
         data.pop("tag")
         organization = Organization.get(data.pop("organization"))
@@ -117,7 +117,7 @@ class User(BaseModel):
         user.roles = roles
         user.permissions = permissions
         db.session.commit()
-        return f"User {user_id} updated", 200
+        return {"message": f"User {user_id} updated", "id": user_id}, 200
 
     def get_permissions(self):
         all_permissions = {permission.id for permission in self.permissions if permission}
