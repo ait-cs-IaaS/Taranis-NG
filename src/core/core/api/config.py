@@ -279,10 +279,9 @@ class OSINTSources(Resource):
 
     @auth_required("CONFIG_OSINT_SOURCE_CREATE")
     def post(self):
-        source = osint_source.OSINTSource.add(request.json)
-        if not source:
-            return "OSINT source could not be created", 400
-        return {"id": source.id, "message": "OSINT source created successfully"}, 201
+        if source := osint_source.OSINTSource.add(request.json):
+            return {"id": source.id, "message": "OSINT source created successfully"}, 201
+        return "OSINT source could not be created", 400
 
 
 class OSINTSource(Resource):
@@ -342,8 +341,6 @@ class OSINTSourcesImport(Resource):
             if sources is None:
                 return {"error": "Unable to import"}, 400
             return {"sources": [source.id for source in sources], "count": len(sources), "message": "Successfully imported sources"}
-        print(request.files)
-        print(request.args)
         return {"error": "No file provided"}, 400
 
 
@@ -434,8 +431,12 @@ class WordList(Resource):
 
 class WordListImport(Resource):
     @auth_required("CONFIG_WORD_LIST_UPDATE")
-    def put(self, word_list_id):
-        word_list.WordList.import_word_list(word_list_id, request.json)
+    def post(self):
+        if file := request.files.get("file"):
+            if wls := word_list.WordList.import_word_lists(file):
+                return {"word_lists": [wl.id for wl in wls], "count": len(wls), "message": "Successfully imported word lists"}
+            return {"error": "Unable to import"}, 400
+        return {"error": "No file provided"}, 400
 
 
 class WordListExport(Resource):

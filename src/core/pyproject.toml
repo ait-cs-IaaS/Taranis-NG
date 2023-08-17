@@ -44,7 +44,7 @@ include-package-data = true
 where = ["core", "."]
 
 [project.optional-dependencies]
-dev = ["black", "pytest", "pytest-celery", "sqlalchemy-stubs", "schemathesis"]
+dev = ["black", "flake8", "pytest", "pytest-celery", "sqlalchemy-stubs", "schemathesis", "build", "wheel", "setuptools"]
 
 [project.urls]
 "Source Code" = "https://github.com/ait-cs-IaaS/Taranis-NG"

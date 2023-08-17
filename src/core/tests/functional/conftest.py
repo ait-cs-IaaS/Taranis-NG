@@ -1,7 +1,7 @@
 import pytest
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def fake_source(app, request):
     with app.app_context():
         from core.model.osint_source import OSINTSource
@@ -99,5 +99,17 @@ def cleanup_sources(app, request):
         def teardown():
             with app.app_context():
                 [OSINTSource.delete(source.id) for source in OSINTSource.get_all()]
+
+        request.addfinalizer(teardown)
+
+
+@pytest.fixture(scope="session")
+def cleanup_word_lists(app, request):
+    with app.app_context():
+        from core.model.word_list import WordList
+
+        def teardown():
+            with app.app_context():
+                [WordList.delete(source.id) for source in WordList.get_all()]
 
         request.addfinalizer(teardown)

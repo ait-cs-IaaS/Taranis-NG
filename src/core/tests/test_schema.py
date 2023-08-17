@@ -62,13 +62,6 @@ def test_assess_no_auth(case, auth_header_no_permissions, caplog):
 #     case.validate_response(response)
 
 
-# @schema.parametrize(endpoint="^/api/v1/config")
-# @settings(suppress_health_check=(HealthCheck.function_scoped_fixture,))
-# def test_config(case, auth_header):
-#     response = case.call_wsgi(headers=auth_header)
-#     case.validate_response(response)
-
-
 # @schema.parametrize(endpoint="^/api/v1/worker")
 # @settings(suppress_health_check=(HealthCheck.function_scoped_fixture,))
 # def test_worker(case, api_header):

@@ -30,7 +30,7 @@ class WordList(BaseModel):
         self.description = description
         self.usage = usage
         self.link = link
-        self.entries = [WordListEntry.get(entry) for entry in entries] if entries else []
+        self.entries = WordListEntry.add_multiple(entries) if entries else []
 
     @classmethod
     def find_by_name(cls, name: str) -> "WordList":
@@ -153,13 +153,13 @@ class WordList(BaseModel):
         return json.dumps(export_data).encode("utf-8")
 
     @classmethod
-    def import_word_lists(cls, file):
+    def import_word_lists(cls, file) -> list | None:
         file_data = file.read()
         json_data = json.loads(file_data.decode("utf8"))
         if json_data["version"] == 1:
             data = json_data["data"]
         else:
-            raise ValueError("Unsupported version")
+            return None
         return cls.add_multiple(data)
 
 
