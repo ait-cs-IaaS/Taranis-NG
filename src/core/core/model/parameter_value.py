@@ -1,19 +1,33 @@
 from typing import Any
 from core.managers.log_manager import logger
+from enum import StrEnum, auto
 
 from core.managers.db_manager import db
 from core.model.base_model import BaseModel
 
 
+class PARAMETER_TYPES(StrEnum):
+    TEXT = auto()
+    TEXTAREA = auto()
+    NUMBER = auto()
+    SWITCH = auto()
+    CHECKBOX = auto()
+    SELECT = auto()
+    LIST = auto()
+    DATE = auto()
+
+
 class ParameterValue(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
-    parameter = db.Column(db.String(), nullable=False)
-    value = db.Column(db.String(), nullable=False, default="")
+    parameter = db.Column(db.String, nullable=False)
+    value = db.Column(db.String, nullable=False, default="")
+    type = db.Column(db.Enum(PARAMETER_TYPES), nullable=False, default="text")
 
-    def __init__(self, parameter, value="", id=None):
+    def __init__(self, parameter, value="", type="text", id=None):
         self.id = id
         self.parameter = parameter
         self.value = value
+        self.type = type
 
     def to_dict(self) -> dict[int, Any]:
         return {self.parameter: self.value}

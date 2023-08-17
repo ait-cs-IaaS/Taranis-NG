@@ -13,7 +13,7 @@ class COLLECTOR_TYPES(StrEnum):
     EMAIL_COLLECTOR = auto()
     TWITTER_COLLECTOR = auto()
     WEB_COLLECTOR = auto()
-    MANUAL_COLLECTOR = auto()
+    SELENIUM_WEB_COLLECTOR = auto()
 
 
 class BOT_TYPES(StrEnum):
@@ -46,7 +46,7 @@ class WORKER_TYPES(StrEnum):
     EMAIL_COLLECTOR = auto()
     TWITTER_COLLECTOR = auto()
     WEB_COLLECTOR = auto()
-    MANUAL_COLLECTOR = auto()
+    SELENIUM_WEB_COLLECTOR = auto()
     ANALYST_BOT = auto()
     GROUPING_BOT = auto()
     NLP_BOT = auto()
@@ -85,7 +85,7 @@ class Worker(BaseModel):
         self.name = name
         self.description = description
         self.type = type
-        self.category = self.type.split("_")[1]
+        self.category = self.type.split("_")[-1]
         self.parameters = parameters
 
     @classmethod
@@ -162,6 +162,41 @@ class Worker(BaseModel):
     @classmethod
     def get_parameters(cls, worker_type):
         return cls.query.filter(cls.type == worker_type).first().parameters
+
+    @classmethod
+    def get_parameter_items(cls, parameter):
+        from core.model.osint_source import OSINTSourceGroup, OSINTSource
+
+        if parameter == "SOURCE_GROUP":
+            return [group.id for group in OSINTSourceGroup.get_all()]
+        elif parameter == "SOURCE":
+            return [source.id for source in OSINTSource.get_all()]
+
+    @classmethod
+    def get_parameter_headers(cls, parameter):
+        return [{"title": "ID", "key": "id"}, {"title": "Name", "key": "name"}, {"title": "Description", "key": "description"}]
+
+    @classmethod
+    def get_parameter_map(cls):
+        if workers := cls.get_all():
+            return {worker.type: cls._generate_parameters_data(worker) for worker in workers}
+        return {}
+
+    @classmethod
+    def _generate_parameters_data(cls, worker):
+        return [cls._construct_parameter_data(parameter) for parameter in worker.parameters]
+
+    @classmethod
+    def _construct_parameter_data(cls, parameter):
+        data = {"name": parameter.parameter, "label": parameter.parameter, "parent": "parameter_values", "type": parameter.type}
+
+        if parameter.type in ["select", "table", "checkbox"]:
+            data["items"] = cls.get_parameter_items(parameter.parameter)
+
+        if parameter.type == "table":
+            data["headers"] = cls.get_parameter_headers(parameter.parameter)
+
+        return data
 
 
 class WorkerParameterValue(BaseModel):

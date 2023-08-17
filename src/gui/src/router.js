@@ -191,7 +191,19 @@ export const router = createRouter({
       },
       meta: {
         requiresAuth: true,
-        requiresPerm: [Permissions.CONFIG_NODE_ACCESS]
+        requiresPerm: [Permissions.CONFIG_WORKER_ACCESS]
+      }
+    },
+    {
+      path: '/config/bots',
+      name: 'bots',
+      components: {
+        default: () => import('@/views/admin/BotsView.vue'),
+        nav: () => import('@/views/nav/ConfigNav.vue')
+      },
+      meta: {
+        requiresAuth: true,
+        requiresPerm: [Permissions.CONFIG_BOT_ACCESS]
       }
     },
     {
@@ -287,7 +299,7 @@ export const router = createRouter({
       },
       meta: {
         requiresAuth: true,
-        requiresPerm: [Permissions.CONFIG_BOT_PRESET_ACCESS]
+        requiresPerm: [Permissions.CONFIG_BOT_ACCESS]
       }
     },
     {

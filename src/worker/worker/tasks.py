@@ -31,10 +31,10 @@ def collect(source_id: str):
         logger.error(f"Source with id {source_id} not found")
         return f"Source with id {source_id} not found"
 
-    if source["type"] == "RSS_COLLECTOR":
+    if source["collector_type"] == "rss_collector":
         err = collectors.RSSCollector().collect(source)
     else:
-        return f"Collector {source['type']} not implemented"
+        return f"Collector {source['collector_type']} not implemented"
 
     if err:
         core_api.update_osintsource_status(source_id, {"error": err})

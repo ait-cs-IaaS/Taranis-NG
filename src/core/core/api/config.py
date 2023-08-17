@@ -216,7 +216,7 @@ class Users(Resource):
     def post(self):
         try:
             new_user = user.User.add(request.json)
-            return {"message": "User created", "id": new_user.id}, 201
+            return {"message": f"User {new_user.username} created", "id": new_user.id}, 201
         except Exception:
             logger.exception()
             return "Could not create user", 400
@@ -247,9 +247,12 @@ class Bots(Resource):
 
     def put(self, bot_id):
         if updated_bot := bot.Bot.update(bot_id, request.json):
-            return f"Successfully upated {updated_bot.id}", 200
-        else:
-            return "Error updateing", 500
+            logger.debug(f"Successfully updated {updated_bot}")
+            return {"message": f"Successfully upated {updated_bot.name}", "id": f"{updated_bot.id}"}, 200
+        return {"error": f"Error updateing {bot_id}"}, 500
+
+    def post(self):
+        return bot.Bot.add(request.json), 201
 
 
 class BotExecute(Resource):

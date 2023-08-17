@@ -44,11 +44,15 @@ def pre_seed_source_groups():
 
 
 def pre_seed_workers():
-    from core.managers.workers_pre_seed import workers
+    from core.managers.workers_pre_seed import workers, bots
     from core.model.worker import Worker
+    from core.model.bot import Bot
 
     for w in workers:
         Worker.add(w)
+
+    for b in bots:
+        Bot.add(b)
 
 
 def pre_seed_permissions():
@@ -256,6 +260,27 @@ def pre_seed_permissions():
     )
 
     Permission.add(
+        "CONFIG_BOT_ACCESS",
+        "Config bots access",
+        "Access to bots configuration",
+    )
+    Permission.add(
+        "CONFIG_BOT_CREATE",
+        "Config bot create",
+        "Create bot configuration",
+    )
+    Permission.add(
+        "CONFIG_BOT_UPDATE",
+        "Config bot update",
+        "Update bot configuration",
+    )
+    Permission.add(
+        "CONFIG_BOT_DELETE",
+        "Config bot delete",
+        "Delete bot configuration",
+    )
+
+    Permission.add(
         "CONFIG_PUBLISHER_PRESET_ACCESS",
         "Config publisher presets access",
         "Access to publisher presets configuration",
@@ -286,11 +311,6 @@ def pre_seed_permissions():
         "MY_ASSETS_CONFIG",
         "My Assets config",
         "Configuration of access and groups in My Assets module",
-    )
-    Permission.add(
-        "CONFIG_NODE_ACCESS",
-        "Config nodes access",
-        "Access to all nodes from configuration",
     )
     Permission.add(
         "CONFIG_WORKER_ACCESS",

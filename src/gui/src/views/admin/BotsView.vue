@@ -1,41 +1,41 @@
 <template>
   <div>
     <DataTable
-      :items="publisher_presets.items"
+      v-model:items="bots.items"
       :add-button="true"
-      :header-filter="['tag', 'id', 'name', 'description']"
+      :header-filter="['tag', 'name', 'description', 'type']"
       sort-by-item="id"
       :action-column="true"
+      tag-icon="mdi-robot"
       @delete-item="deleteItem"
       @edit-item="editItem"
       @add-item="addItem"
+      @selection-change="selectionChange"
       @update-items="updateData"
-    />
+    >
+    </DataTable>
+    {{ formData }} <br />
+    {{ parameters }}
     <EditConfig
       v-if="formData && Object.keys(formData).length > 0"
-      :form-format="formFormat"
       :config-data="formData"
+      :form-format="formFormat"
       @submit="handleSubmit"
     ></EditConfig>
   </div>
 </template>
-
 <script>
-import { defineComponent, ref, computed, onMounted } from 'vue'
 import DataTable from '@/components/common/DataTable.vue'
 import EditConfig from '@/components/config/EditConfig.vue'
-import {
-  deletePublisherPreset,
-  createPublisherPreset,
-  updatePublisherPreset
-} from '@/api/config'
+import { createBot, deleteBot, updateBot } from '@/api/config'
+import { ref, computed, onMounted } from 'vue'
 import { notifySuccess, objectFromFormat, notifyFailure } from '@/utils/helpers'
 import { useConfigStore } from '@/stores/ConfigStore'
 import { useMainStore } from '@/stores/MainStore'
 import { storeToRefs } from 'pinia'
 
-export default defineComponent({
-  name: 'PublisherPresetsView',
+export default {
+  name: 'BotsView',
   components: {
     DataTable,
     EditConfig
@@ -43,16 +43,17 @@ export default defineComponent({
   setup() {
     const configStore = useConfigStore()
     const mainStore = useMainStore()
-
-    const { publisher_presets, publisher_types } = storeToRefs(configStore)
-
-    const publishersList = ref([])
+    const { bots, bot_types } = storeToRefs(configStore)
+    const selected = ref([])
     const formData = ref({})
-    const parameters = ref({})
     const edit = ref(false)
+    const bot_options = ref([])
+    const parameters = ref({})
+
+    const showForm = ref(false)
 
     const formFormat = computed(() => {
-      const base = [
+      let base = [
         {
           name: 'id',
           label: 'ID',
@@ -68,43 +69,42 @@ export default defineComponent({
         {
           name: 'description',
           label: 'Description',
-          type: 'textarea',
-          rules: [(v) => !!v || 'Required']
+          type: 'textarea'
         },
         {
-          name: 'publisher_id',
+          name: 'type',
           label: 'Type',
           type: 'list',
-          rules: [(v) => !!v || 'Required'],
-          items: publishersList.value,
-          disabled: edit.value
+          items: bot_options.value
         }
       ]
-      if (parameters.value[formData.value.publisher_id]) {
-        return base.concat(parameters.value[formData.value.publisher_id])
+
+      if (parameters.value[formData.value.type]) {
+        base = base.concat(parameters.value[formData.value.type])
       }
+
       return base
     })
 
     const updateData = () => {
-      configStore.loadPublisherPresets().then(() => {
-        mainStore.itemCountTotal = publisher_presets.value.total_count
-        mainStore.itemCountFiltered = publisher_presets.value.items.length
+      configStore.loadBots().then(() => {
+        mainStore.itemCountTotal = bots.value.total_count
+        mainStore.itemCountFiltered = bots.value.items.length
       })
       configStore.loadWorkerTypes().then(() => {
-        publishersList.value = publisher_types.value.map((publisher) => {
-          parameters.value[publisher.type] = Object.keys(
-            publisher.parameters
-          ).map((key) => ({
-            name: key,
-            label: key,
-            parent: 'parameter_values',
-            type: 'text'
-          }))
+        bot_options.value = bot_types.value.map((bot) => {
+          parameters.value[bot.type] = Object.keys(bot.parameters).map(
+            (key) => ({
+              name: key,
+              label: key,
+              parent: 'parameter_values',
+              type: 'text'
+            })
+          )
 
           return {
-            value: publisher.type,
-            title: publisher.name
+            value: bot.type,
+            title: bot.name
           }
         })
       })
@@ -112,40 +112,40 @@ export default defineComponent({
 
     const addItem = () => {
       formData.value = objectFromFormat(formFormat.value)
-      formData.value.parameter_values = {}
       edit.value = false
+      showForm.value = true
     }
 
     const editItem = (item) => {
       formData.value = item
       edit.value = true
+      showForm.value = true
     }
 
     const handleSubmit = (submittedData) => {
-      delete submittedData.tag
-      console.debug('submittedData', submittedData)
       if (edit.value) {
+        console.debug(`Update: ${submittedData}`)
         updateItem(submittedData)
       } else {
+        console.debug(`Create: ${submittedData}`)
         createItem(submittedData)
       }
+      showForm.value = false
     }
 
     const deleteItem = (item) => {
-      if (!item.default) {
-        deletePublisherPreset(item)
-          .then(() => {
-            notifySuccess(`Successfully deleted ${item.name}`)
-            updateData()
-          })
-          .catch(() => {
-            notifyFailure(`Failed to delete ${item.name}`)
-          })
-      }
+      deleteBot(item)
+        .then(() => {
+          notifySuccess(`Successfully deleted ${item.name}`)
+          updateData()
+        })
+        .catch(() => {
+          notifyFailure(`Failed to delete ${item.name}`)
+        })
     }
 
     const createItem = (item) => {
-      createPublisherPreset(item)
+      createBot(item)
         .then(() => {
           notifySuccess(`Successfully created ${item.name}`)
           updateData()
@@ -156,7 +156,7 @@ export default defineComponent({
     }
 
     const updateItem = (item) => {
-      updatePublisherPreset(item)
+      updateBot(item)
         .then(() => {
           notifySuccess(`Successfully updated ${item.name}`)
           updateData()
@@ -166,25 +166,31 @@ export default defineComponent({
         })
     }
 
+    const selectionChange = (new_selection) => {
+      selected.value = new_selection
+    }
+
     onMounted(() => {
       updateData()
     })
 
     return {
-      publisher_presets,
-      publishersList,
+      bots,
+      bot_options,
+      selected,
       formData,
-      parameters,
       edit,
       formFormat,
+      showForm,
       addItem,
       editItem,
       handleSubmit,
+      updateData,
       deleteItem,
       createItem,
       updateItem,
-      updateData
+      selectionChange
     }
   }
-})
+}
 </script>

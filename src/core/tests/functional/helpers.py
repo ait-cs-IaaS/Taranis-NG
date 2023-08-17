@@ -18,8 +18,12 @@ class BaseTest:
         response = client.get(f"{self.base_uri}/{uri}", headers=auth_header)
         return self.assert_file_ok(response)
 
-    def assert_put_ok(self, client, uri, auth_header):
-        response = client.put(f"{self.base_uri}/{uri}", headers=auth_header)
+    def assert_put_ok(self, client, uri, json_data, auth_header):
+        response = client.put(f"{self.base_uri}/{uri}", json=json_data, headers=auth_header)
+        return self.assert_json_ok(response)
+
+    def assert_delete_ok(self, client, uri, auth_header):
+        response = client.delete(f"{self.base_uri}/{uri}", headers=auth_header)
         return self.assert_json_ok(response)
 
     def assert_file_ok(self, response):
@@ -32,7 +36,7 @@ class BaseTest:
         assert response
         assert response.content_type == content_type
         assert response.data
-        assert response.status_code == 200
+        assert 200 <= response.status_code < 300
         return response
 
     def assert_get_failed(self, client, uri):

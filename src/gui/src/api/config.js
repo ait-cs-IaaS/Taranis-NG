@@ -115,8 +115,20 @@ export function getAllParameters() {
   return ApiService.get('/config/parameters')
 }
 
+export function getAllBots(bot) {
+  return ApiService.get('/config/bots', bot)
+}
+
+export function createBot(bot) {
+  return ApiService.post('/config/bots', bot)
+}
+
 export function updateBot(bot) {
   return ApiService.put(`/config/bots/${bot.id}`, bot)
+}
+
+export function deleteBot(bot) {
+  return ApiService.delete(`/config/bots/${bot.id}`)
 }
 
 export function executeBotTask(bot_id) {

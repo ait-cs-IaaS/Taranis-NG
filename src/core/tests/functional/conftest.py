@@ -113,3 +113,16 @@ def cleanup_word_lists(app, request):
                 [WordList.delete(source.id) for source in WordList.get_all()]
 
         request.addfinalizer(teardown)
+
+
+@pytest.fixture(scope="session")
+def cleanup_user(app, request):
+    with app.app_context():
+        from core.model.user import User
+
+        def teardown():
+            with app.app_context():
+                if User.get(42):
+                    User.delete(42)
+
+        request.addfinalizer(teardown)

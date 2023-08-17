@@ -47,12 +47,12 @@
           :type="item.type"
         />
         <v-select
-          v-if="item.type === 'select' && item.options"
+          v-if="item.type === 'select' && item.items"
           v-model="formData[item.name]"
           :label="item.label"
           :rules="item.rules"
           :disabled="item['disabled']"
-          :items="item.options"
+          :items="item.items"
         />
         <v-switch
           v-if="item.type === 'switch'"

@@ -7,6 +7,7 @@ import {
 import {
   getAllACLEntries,
   getAllAttributes,
+  getAllBots,
   getAllExternalUsers,
   getAllOrganizations,
   getAllOSINTSourceGroups,
@@ -30,6 +31,7 @@ export const useConfigStore = defineStore('config', {
   state: () => ({
     acls: { total_count: 0, items: [] },
     attributes: { total_count: 0, items: [] },
+    bots: { total_count: 0, items: [] },
     organizations: { total_count: 0, items: [] },
     osint_sources: { total_count: 0, items: [] },
     osint_source_groups: { total_count: 0, items: [] },
@@ -76,6 +78,15 @@ export const useConfigStore = defineStore('config', {
       return getAllAttributes(data)
         .then((response) => {
           this.attributes = response.data
+        })
+        .catch((error) => {
+          notifyFailure(getMessageFromError(error))
+        })
+    },
+    loadBots(data) {
+      return getAllBots(data)
+        .then((response) => {
+          this.bots = response.data
         })
         .catch((error) => {
           notifyFailure(getMessageFromError(error))

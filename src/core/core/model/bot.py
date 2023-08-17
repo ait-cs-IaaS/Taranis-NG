@@ -6,30 +6,24 @@ from core.managers.db_manager import db
 from core.managers.log_manager import logger
 from core.model.base_model import BaseModel
 from core.model.parameter_value import ParameterValue
+from core.model.worker import BOT_TYPES, Worker
 
 
 class Bot(BaseModel):
     id = db.Column(db.String(64), primary_key=True)
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())
-    type = db.Column(db.String(64), nullable=False)
-    parameter_values = db.relationship("ParameterValue", secondary="bot_parameter_value", cascade="all")
+    type = db.Column(db.Enum(BOT_TYPES))
+    parameter_values = db.relationship("ParameterValue", secondary="bot_parameter_value", cascade="all, delete")
 
-    def __init__(self, name, description, type, parameter_values):
-        self.id = str(uuid.uuid4())
+    def __init__(self, name, type, description=None, parameter_values=None, id=None):
+        self.id = id or str(uuid.uuid4())
         self.name = name
         self.description = description
         self.type = type
-        self.parameter_values = parameter_values
-
-    def to_bot_info_dict(self) -> dict[str, Any]:
-        return {
-            "id": self.id,
-            "name": self.name,
-            "description": self.description,
-            "type": self.type,
-            self.type: {parameter_value.parameter.key: parameter_value.value for parameter_value in self.parameter_values},
-        }
+        self.parameter_values = (
+            ParameterValue.get_or_create_from_list(parameters=parameter_values) if parameter_values else Worker.get_parameters(type)
+        )
 
     @classmethod
     def update(cls, bot_id, data) -> "Bot | None":
@@ -38,11 +32,10 @@ class Bot(BaseModel):
             return None
 
         try:
-            bot.name = data.get("name", bot.name)
-            bot.description = data.get("description", bot.description)
-
-            cls.update_parameters(bot, data)
-
+            updated_bot = cls.from_dict(data)
+            bot.name = updated_bot.name
+            bot.description = updated_bot.description
+            bot.parameter_values = updated_bot.parameter_values
             db.session.commit()
             return bot
         except Exception:
@@ -50,24 +43,11 @@ class Bot(BaseModel):
             return None
 
     @classmethod
-    def update_parameters(cls, bot, data):
-        if p_values := data.get("parameter_values"):
-            for updated_value in p_values:
-                if pv := ParameterValue.find_param_value(bot.parameter_values, updated_value["parameter"]):
-                    pv.value = updated_value["value"]
-        elif bot_type_params := data.get(bot.type):
-            for key, value in bot_type_params.items():
-                if pv := ParameterValue.find_param_value(bot.parameter_values, key):
-                    pv.value = value
-
-    @classmethod
-    def add(cls, data) -> tuple[str, int]:
-        if cls.filter_by_type(data["type"]):
-            return f"Bot with type {data['type']} already exists", 409
+    def add(cls, data) -> tuple[dict, int]:
         bot = cls.from_dict(data)
         db.session.add(bot)
         db.session.commit()
-        return f"Bot {bot.name} added", 201
+        return {"message": f"Bot {bot.name} added", "id": f"{bot.id}"}, 201
 
     @classmethod
     def get_first(cls):
@@ -89,7 +69,7 @@ class Bot(BaseModel):
             query = query.filter(
                 or_(
                     Bot.name.ilike(f"%{search}%"),
-                    Bot.description.ilike(f"%{search}%"),
+                    Bot.description.ilike(f"%{search}%"),  # type: ignore
                 )
             )
 
@@ -98,20 +78,13 @@ class Bot(BaseModel):
     @classmethod
     def get_all_json(cls, search):
         bots, count = cls.get_by_filter(search)
-        items = [bot.to_bot_info_dict() for bot in bots]
+        items = [bot.to_dict() for bot in bots]
         return {"total_count": count, "items": items}
 
     def to_dict(self) -> dict[str, Any]:
         data = super().to_dict()
-        data["parameter_values"] = [pv.to_dict() for pv in self.parameter_values]
+        data["parameter_values"] = {parameter_value.parameter: parameter_value.value for parameter_value in self.parameter_values}
         return data
-
-    @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "Bot":
-        if parameter_values := data.pop("parameter_values", None):
-            data["parameter_values"] = [ParameterValue(**pv) for pv in parameter_values]
-
-        return cls(**data)
 
 
 class BotParameterValue(BaseModel):

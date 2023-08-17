@@ -87,8 +87,6 @@ export const messages_en = {
     newsitems: 'News Items',
     products: 'Products',
     publications: 'Publications',
-    favourites: 'Favourites',
-    configuration: 'Configuration',
     osint_sources: 'OSINTSources',
     osint_source_groups: 'Source Groups',
     publisher_presets: 'Publisher Presets',
@@ -99,6 +97,7 @@ export const messages_en = {
     roles: 'Roles',
     acls: 'ACL',
     users: 'Users',
+    bots: 'Bots',
     worker_types: 'Worker Types',
     user: 'User',
     workers: 'Workers',
@@ -106,7 +105,6 @@ export const messages_en = {
     organizations: 'Organizations',
     word_lists: 'Word Lists',
     asset_groups: 'Asset Groups',
-    local: 'Local',
     dashboard: 'Dashboard'
   },
 

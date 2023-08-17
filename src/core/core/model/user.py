@@ -24,7 +24,7 @@ class User(BaseModel):
     permissions = db.relationship(Permission, secondary="user_permission", cascade="all, delete")
 
     profile_id = db.Column(db.Integer, db.ForeignKey("user_profile.id", ondelete="CASCADE"))
-    profile = db.relationship("UserProfile", cascade="all, delete")
+    profile = db.relationship("UserProfile", cascade="all, delete", back_populates="user")
 
     def __init__(self, username, name, organization, roles, permissions, password=None, id=None):
         self.id = id
@@ -35,7 +35,7 @@ class User(BaseModel):
         self.organization = Organization.get(organization)
         self.roles = [Role.get(role) for role in roles]
         self.permissions = [Permission.get(permission) for permission in permissions]
-        self.profile = UserProfile(True, False, [], "en")
+        self.profile = UserProfile(id=id)
 
     @classmethod
     def find_by_name(cls, username: str):
@@ -103,19 +103,21 @@ class User(BaseModel):
             return {"error": f"User {user_id} not found"}, 404
         data.pop("id", None)
         data.pop("tag", None)
-        organization = Organization.get(data.pop("organization"))
-        profile = UserProfile.get(data.pop("profile_id"))
-        roles = [Role.get(role_id) for role_id in data.pop("roles")]
-        permissions = [Permission.get(permission_id) for permission_id in data.pop("permissions")]
-        logger.debug(f"roles: {roles}")
-        user.username = data["username"]
-        user.name = data["name"]
-        if password := data.get("password"):
-            user.password = generate_password_hash(password)
-        user.organization = organization
-        user.profile = profile
-        user.roles = roles
-        user.permissions = permissions
+        if update_organization := data.pop("organization", None):
+            user.organization = Organization.get(update_organization)
+        if update_profile := data.pop("profile_id", None):
+            user.profile = UserProfile.get(update_profile)
+        if update_roles := data.pop("roles", None):
+            user.roles = [Role.get(role_id) for role_id in update_roles]
+        if update_permissions := data.pop("permissions", None):
+            user.permissions = [Permission.get(permission_id) for permission_id in update_permissions]
+        if update_password := data.pop("password", None):
+            user.password = generate_password_hash(update_password)
+        if update_name := data.pop("name", None):
+            user.name = update_name
+        if update_username := data.pop("username", None):
+            user.username = update_username
+
         db.session.commit()
         return {"message": f"User {user_id} updated", "id": user_id}, 200
 
@@ -185,15 +187,6 @@ class User(BaseModel):
         db.session.commit()
         return f"User {user_id} updated", 200
 
-    @classmethod
-    def delete_external(cls, user, id):
-        existing_user = cls.query.get(id)
-        if user.organization != existing_user.organization:
-            return f"User {id} could not be deleted", 400
-        db.session.delete(existing_user)
-        db.session.commit()
-        return f"User {id} deleted", 200
-
 
 class UserRole(BaseModel):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id", ondelete="CASCADE"), primary_key=True)
@@ -213,12 +206,13 @@ class UserProfile(BaseModel):
 
     hotkeys = db.relationship("Hotkey", cascade="all, delete-orphan")
     language = db.Column(db.String(2), default="en")
+    user = db.relationship("User", back_populates="profile")
 
-    def __init__(self, spellcheck, dark_theme, hotkeys, language="en"):
-        self.id = None
+    def __init__(self, spellcheck=True, dark_theme=False, hotkeys=None, language="en", id=None):
+        self.id = id
         self.spellcheck = spellcheck
         self.dark_theme = dark_theme
-        self.hotkeys = hotkeys
+        self.hotkeys = hotkeys or []
         self.language = language
 
     @classmethod

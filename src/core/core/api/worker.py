@@ -64,7 +64,7 @@ class Sources(Resource):
     def get(self, source_id: str):
         try:
             if source := OSINTSource.get(source_id):
-                return source.to_collector_dict(), 200
+                return source.to_dict(), 200
             return {"error": f"Source with id {source_id} not found"}, 404
         except Exception:
             logger.log_debug_trace()
@@ -121,9 +121,9 @@ class BotInfo(Resource):
         # TODO: This is a hack to get the bot info by it's Type, not ID
         # depending on how the worker is triggered we might not have the bot I
         if result := Bot.get(bot_id):
-            return result.to_bot_info_dict(), 200
+            return result.to_dict(), 200
         if result := Bot.filter_by_type(bot_id):
-            return result.to_bot_info_dict(), 200
+            return result.to_dict(), 200
         return {"error": f"Bot with id {bot_id} not found"}, 404
 
     @api_key_required
