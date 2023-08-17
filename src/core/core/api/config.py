@@ -257,6 +257,12 @@ class BotExecute(Resource):
         return queue_manager.execute_bot_task(bot_id)
 
 
+class QueueStatus(Resource):
+    @auth_required("CONFIG_WORKER_ACCESS")
+    def get(self):
+        return queue_manager.queue_manager.get_queue_status()
+
+
 class QueueSchedule(Resource):
     @auth_required("CONFIG_WORKER_ACCESS")
     def get(self):
@@ -503,6 +509,7 @@ def initialize(api: Api):
     namespace.add_resource(PublisherPreset, "/publishers-presets/<string:preset_id>")
     namespace.add_resource(PublisherPresets, "/publishers-presets")
     namespace.add_resource(Publishers, "/publishers")
+    namespace.add_resource(QueueStatus, "/workers/queue-status")
     namespace.add_resource(QueueSchedule, "/workers/schedule")
     namespace.add_resource(ReportItemType, "/report-item-types/<int:type_id>")
     namespace.add_resource(ReportItemTypesConfig, "/report-item-types")

@@ -64,6 +64,11 @@ class QueueManager:
         self.celery.send_task(*args, **kwargs)
         return {"message": "Task scheduled"}, 200
 
+    def get_queue_status(self) -> tuple[dict, int]:
+        if not self.celery:
+            return {"status": "Could not reach rabbitmq", "url": ""}, 500
+        return {"status": "🚀 Up and running 🏃", "url": f"{queue_manager.celery.broker_connection().as_uri()}"}, 200
+
 
 def initialize(app: Flask):
     global queue_manager

@@ -227,6 +227,10 @@ export function exportWordList(filter_data) {
   )
 }
 
+export function getQueueStatus() {
+  return ApiService.get('/config/workers/queue-status')
+}
+
 export function getAllSchedule() {
   return ApiService.get('/config/workers/schedule')
 }
