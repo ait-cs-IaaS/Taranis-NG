@@ -14,16 +14,14 @@ class Bot(BaseModel):
     name = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())
     type = db.Column(db.Enum(BOT_TYPES))
-    parameter_values = db.relationship("ParameterValue", secondary="bot_parameter_value", cascade="all, delete")
+    parameters = db.relationship("ParameterValue", secondary="bot_parameter_value", cascade="all, delete")
 
-    def __init__(self, name, type, description=None, parameter_values=None, id=None):
+    def __init__(self, name, type, description=None, parameters=None, id=None):
         self.id = id or str(uuid.uuid4())
         self.name = name
         self.description = description
         self.type = type
-        self.parameter_values = (
-            ParameterValue.get_or_create_from_list(parameters=parameter_values) if parameter_values else Worker.get_parameters(type)
-        )
+        self.parameters = ParameterValue.get_or_create_from_list(parameters=parameters) if parameters else Worker.get_parameters(type)
 
     @classmethod
     def update(cls, bot_id, data) -> "Bot | None":
@@ -35,7 +33,7 @@ class Bot(BaseModel):
             updated_bot = cls.from_dict(data)
             bot.name = updated_bot.name
             bot.description = updated_bot.description
-            bot.parameter_values = updated_bot.parameter_values
+            bot.parameters = updated_bot.parameters
             db.session.commit()
             return bot
         except Exception:
@@ -83,7 +81,7 @@ class Bot(BaseModel):
 
     def to_dict(self) -> dict[str, Any]:
         data = super().to_dict()
-        data["parameter_values"] = {parameter_value.parameter: parameter_value.value for parameter_value in self.parameter_values}
+        data["parameters"] = {parameter.parameter: parameter.value for parameter in self.parameters}
         return data
 
 

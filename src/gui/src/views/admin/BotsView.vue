@@ -14,8 +14,6 @@
       @update-items="updateData"
     >
     </DataTable>
-    {{ formData }} <br />
-    {{ parameters }}
     <EditConfig
       v-if="formData && Object.keys(formData).length > 0"
       :config-data="formData"
@@ -29,7 +27,12 @@ import DataTable from '@/components/common/DataTable.vue'
 import EditConfig from '@/components/config/EditConfig.vue'
 import { createBot, deleteBot, updateBot } from '@/api/config'
 import { ref, computed, onMounted } from 'vue'
-import { notifySuccess, objectFromFormat, notifyFailure } from '@/utils/helpers'
+import {
+  notifySuccess,
+  notifyFailure,
+  baseFormat,
+  objectFromFormat
+} from '@/utils/helpers'
 import { useConfigStore } from '@/stores/ConfigStore'
 import { useMainStore } from '@/stores/MainStore'
 import { storeToRefs } from 'pinia'
@@ -43,47 +46,27 @@ export default {
   setup() {
     const configStore = useConfigStore()
     const mainStore = useMainStore()
-    const { bots, bot_types } = storeToRefs(configStore)
+    const { bots, bot_types, parameters } = storeToRefs(configStore)
     const selected = ref([])
     const formData = ref({})
     const edit = ref(false)
     const bot_options = ref([])
-    const parameters = ref({})
-
     const showForm = ref(false)
 
     const formFormat = computed(() => {
-      let base = [
-        {
-          name: 'id',
-          label: 'ID',
-          type: 'text',
-          disabled: true
-        },
-        {
-          name: 'name',
-          label: 'Name',
-          type: 'text',
-          rules: [(v) => !!v || 'Required']
-        },
-        {
-          name: 'description',
-          label: 'Description',
-          type: 'textarea'
-        },
+      const additionalFormat = [
         {
           name: 'type',
           label: 'Type',
-          type: 'list',
+          type: 'select',
           items: bot_options.value
         }
       ]
-
-      if (parameters.value[formData.value.type]) {
-        base = base.concat(parameters.value[formData.value.type])
-      }
-
-      return base
+      return [
+        ...baseFormat,
+        ...additionalFormat,
+        ...parameters.value[formData.value.type]
+      ]
     })
 
     const updateData = () => {
@@ -93,21 +76,13 @@ export default {
       })
       configStore.loadWorkerTypes().then(() => {
         bot_options.value = bot_types.value.map((bot) => {
-          parameters.value[bot.type] = Object.keys(bot.parameters).map(
-            (key) => ({
-              name: key,
-              label: key,
-              parent: 'parameter_values',
-              type: 'text'
-            })
-          )
-
           return {
             value: bot.type,
             title: bot.name
           }
         })
       })
+      configStore.loadParameters()
     }
 
     const addItem = () => {
@@ -176,7 +151,6 @@ export default {
 
     return {
       bots,
-      bot_options,
       selected,
       formData,
       edit,

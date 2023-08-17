@@ -35,7 +35,7 @@ export const useConfigStore = defineStore('config', {
     organizations: { total_count: 0, items: [] },
     osint_sources: { total_count: 0, items: [] },
     osint_source_groups: { total_count: 0, items: [] },
-    parameters: { total_count: 0, items: [] },
+    parameters: [],
     permissions: { total_count: 0, items: [] },
     product_types: { total_count: 0, items: [] },
     publisher_presets: { total_count: 0, items: [] },

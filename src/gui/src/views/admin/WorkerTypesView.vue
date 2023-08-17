@@ -40,7 +40,7 @@ import { updateBot, executeBotTask } from '@/api/config'
 import { ref, computed, onMounted } from 'vue'
 import { useConfigStore } from '@/stores/ConfigStore'
 import { useMainStore } from '@/stores/MainStore'
-import { notifySuccess, notifyFailure } from '@/utils/helpers'
+import { notifySuccess, notifyFailure, baseFormat } from '@/utils/helpers'
 import { storeToRefs } from 'pinia'
 
 export default {
@@ -54,30 +54,12 @@ export default {
     const configStore = useConfigStore()
 
     // data
-    const { worker_types } = storeToRefs(configStore)
+    const { worker_types, parameters } = storeToRefs(configStore)
     const formData = ref({})
 
     // computed
     const formFormat = computed(() => {
-      let base = [
-        {
-          name: 'id',
-          label: 'ID',
-          type: 'text',
-          disabled: true
-        },
-        {
-          name: 'name',
-          label: 'Name',
-          type: 'text',
-          rules: [(v) => !!v || 'Required']
-        },
-        {
-          name: 'description',
-          label: 'Description',
-          type: 'textarea',
-          rules: [(v) => !!v || 'Required']
-        },
+      const additionalFormat = [
         {
           name: 'type',
           label: 'Type',
@@ -85,14 +67,11 @@ export default {
           disabled: true
         }
       ]
-      for (const parameter in formData.value.parameters) {
-        base = base.concat({
-          name: parameter,
-          label: parameter,
-          type: 'text'
-        })
-      }
-      return base
+      return [
+        ...baseFormat,
+        ...additionalFormat,
+        ...parameters.value[formData.value.type]
+      ]
     })
 
     // methods
@@ -101,6 +80,7 @@ export default {
         mainStore.itemCountTotal = worker_types.value.total_count
         mainStore.itemCountFiltered = worker_types.value.items.length
       })
+      configStore.loadParameters()
     }
 
     const editItem = (item) => {
@@ -144,6 +124,7 @@ export default {
 
       // computed
       formFormat,
+      parameters,
 
       // methods
       updateData,

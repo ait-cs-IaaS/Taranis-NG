@@ -133,6 +133,12 @@ class ProductType(Resource):
         return product_type.ProductType.delete(type_id)
 
 
+class Parameters(Resource):
+    @auth_required("CONFIG_ACCESS")
+    def get(self):
+        return worker.Worker.get_parameter_map(), 200
+
+
 class Permissions(Resource):
     @auth_required("CONFIG_ACCESS")
     def get(self):
@@ -505,6 +511,7 @@ def initialize(api: Api):
     namespace.add_resource(OSINTSourceGroups, "/osint-source-groups")
     namespace.add_resource(OSINTSourcesExport, "/export-osint-sources")
     namespace.add_resource(OSINTSourcesImport, "/import-osint-sources")
+    namespace.add_resource(Parameters, "/parameters")
     namespace.add_resource(Permissions, "/permissions")
     namespace.add_resource(Presenters, "/presenters")
     namespace.add_resource(ProductType, "/product-types/<int:type_id>")

@@ -60,7 +60,7 @@ workers = [
         "parameters": [
             {"parameter": "REGULAR_EXPRESSION"},
             {"parameter": "ATTRIBUTE_NAME"},
-            {"parameter": "SOURCE_GROUP", "type": "switch"},
+            {"parameter": "SOURCE_GROUP", "type": "select"},
             {"parameter": "RUN_AFTER_COLLECTOR", "type": "switch"},
             {"parameter": "REFRESH_INTERVAL", "type": "number"},
         ],
@@ -71,7 +71,7 @@ workers = [
         "name": "Grouping Bot",
         "parameters": [
             {"parameter": "REGULAR_EXPRESSION"},
-            {"parameter": "SOURCE_GROUP", "type": "switch"},
+            {"parameter": "SOURCE_GROUP", "type": "select"},
             {"parameter": "RUN_AFTER_COLLECTOR", "type": "switch"},
             {"parameter": "REFRESH_INTERVAL", "type": "number"},
         ],
@@ -81,7 +81,7 @@ workers = [
         "type": "NLP_BOT",
         "name": "NLP Bot",
         "parameters": [
-            {"parameter": "SOURCE_GROUP", "type": "switch"},
+            {"parameter": "SOURCE_GROUP", "type": "select"},
             {"parameter": "RUN_AFTER_COLLECTOR", "type": "switch"},
             {"parameter": "REFRESH_INTERVAL", "type": "number"},
         ],
@@ -92,7 +92,7 @@ workers = [
         "name": "Tagging Bot",
         "parameters": [
             {"parameter": "KEYWORDS"},
-            {"parameter": "SOURCE_GROUP", "type": "switch"},
+            {"parameter": "SOURCE_GROUP", "type": "select"},
             {"parameter": "RUN_AFTER_COLLECTOR", "type": "switch"},
             {"parameter": "REFRESH_INTERVAL", "type": "number"},
         ],
@@ -102,7 +102,7 @@ workers = [
         "type": "STORY_BOT",
         "name": "Story Clustering Bot",
         "parameters": [
-            {"parameter": "SOURCE_GROUP", "type": "switch"},
+            {"parameter": "SOURCE_GROUP", "type": "select"},
             {"parameter": "RUN_AFTER_COLLECTOR", "type": "switch"},
             {"parameter": "REFRESH_INTERVAL", "type": "number"},
         ],
@@ -112,7 +112,7 @@ workers = [
         "type": "SUMMARY_BOT",
         "name": "Summary generation Bot",
         "parameters": [
-            {"parameter": "SOURCE_GROUP", "type": "switch"},
+            {"parameter": "SOURCE_GROUP", "type": "select"},
             {"parameter": "RUN_AFTER_COLLECTOR", "type": "switch"},
             {"parameter": "REFRESH_INTERVAL", "type": "number"},
         ],
@@ -122,7 +122,7 @@ workers = [
         "type": "WORDLIST_BOT",
         "name": "Wordlist Bot",
         "parameters": [
-            {"parameter": "SOURCE_GROUP", "type": "switch"},
+            {"parameter": "SOURCE_GROUP", "type": "select"},
             {"parameter": "RUN_AFTER_COLLECTOR", "type": "switch"},
             {"parameter": "REFRESH_INTERVAL", "type": "number"},
         ],

@@ -86,7 +86,7 @@ class Worker(BaseModel):
         self.description = description
         self.type = type
         self.category = self.type.split("_")[-1]
-        self.parameters = parameters
+        self.parameters = ParameterValue.get_or_create_from_list(parameters)
 
     @classmethod
     def add(cls, data) -> tuple[dict[str, str], int]:
@@ -153,13 +153,6 @@ class Worker(BaseModel):
         return data
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "Worker":
-        if parameters := data.pop("parameters", None):
-            data["parameters"] = ParameterValue.get_or_create_from_list(parameters)
-
-        return cls(**data)
-
-    @classmethod
     def get_parameters(cls, worker_type):
         return cls.query.filter(cls.type == worker_type).first().parameters
 
@@ -188,7 +181,7 @@ class Worker(BaseModel):
 
     @classmethod
     def _construct_parameter_data(cls, parameter):
-        data = {"name": parameter.parameter, "label": parameter.parameter, "parent": "parameter_values", "type": parameter.type}
+        data = {"name": parameter.parameter, "label": parameter.parameter, "parent": "parameters", "type": parameter.type}
 
         if parameter.type in ["select", "table", "checkbox"]:
             data["items"] = cls.get_parameter_items(parameter.parameter)

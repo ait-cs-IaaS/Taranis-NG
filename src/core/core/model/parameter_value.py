@@ -36,7 +36,7 @@ class ParameterValue(BaseModel):
     def get_or_create(cls, data: dict[str, Any]) -> "ParameterValue":
         if "id" in data:
             return cls.get(data["id"])
-        if "parameter" in data and "value" in data:
+        if "parameter" in data:
             return cls.from_dict(data)
         return cls.from_dict({"parameter": list(data.keys())[0], "value": list(data.values())[0]})
 

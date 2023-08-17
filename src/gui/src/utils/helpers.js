@@ -185,3 +185,23 @@ export function getMessageFromError(error) {
   }
   return error.message
 }
+
+export const baseFormat = [
+  {
+    name: 'id',
+    label: 'ID',
+    type: 'text',
+    disabled: true
+  },
+  {
+    name: 'name',
+    label: 'Name',
+    type: 'text',
+    rules: [(v) => !!v || 'Required']
+  },
+  {
+    name: 'description',
+    label: 'Description',
+    type: 'textarea'
+  }
+]
