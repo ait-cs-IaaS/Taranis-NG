@@ -40,7 +40,7 @@ class QueueManager:
     def schedule_word_list_gathering(self):
         from core.model.word_list import WordList
 
-        word_lists = WordList.get_all()
+        word_lists = WordList.get_all_empty()
         for word_list in word_lists:
             self.celery.send_task("worker.tasks.gather_word_list", args=[word_list.id])
 
@@ -76,7 +76,7 @@ def initialize(app: Flask):
     logger.info(f"QueueManager initialized: {queue_manager.celery.broker_connection().as_uri()}")
     try:
         stats = queue_manager.celery.control.inspect().stats()
-        logger.info(f"QueueManager stats: {stats}")
+        logger.info(f"QueueManager stats: {stats[next(iter(stats))]['total']}")
         if stats:
             queue_manager.post_init()
     except Exception as e:
