@@ -338,7 +338,7 @@ class NewsItemVote(BaseModel):
     like = db.Column(db.Boolean)
     dislike = db.Column(db.Boolean)
     news_item_id = db.Column(db.Integer, db.ForeignKey("news_item.id"))
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id", ondelete="CASCADE"), nullable=True)
 
     def __init__(self, news_item_id, user_id):
         self.id = None
@@ -912,7 +912,7 @@ class NewsItemAggregateNewsItemAttribute(BaseModel):
 
 
 class ReportItemNewsItemAggregate(BaseModel):
-    report_item_id = db.Column(db.Integer, db.ForeignKey("report_item.id"), primary_key=True)
+    report_item_id = db.Column(db.Integer, db.ForeignKey("report_item.id", ondelete="CASCADE"), primary_key=True)
     news_item_aggregate_id = db.Column(db.Integer, db.ForeignKey("news_item_aggregate.id"), primary_key=True)
 
     @classmethod
