@@ -47,20 +47,6 @@ class TestAssessApi(BaseTest):
         """
         self.assert_get_failed(client, "osint-sources-list")
 
-    def test_get_ManualOSINTSources_auth(self, client, auth_header):
-        """
-        This test queries the ManualOSINTSources authenticated.
-        It expects a valid data and a valid status-code
-        """
-        self.assert_get_ok(client, "manual-osint-sources", auth_header)
-
-    def test_get_ManualOSINTSources_unauth(self, client):
-        """
-        This test queries the ManualOSINTSources UNauthenticated.
-        It expects "not authorized"
-        """
-        self.assert_get_failed(client, "manual-osint-sources")
-
     # def test_post_AddNewsItem_auth(self, client, news_item_aggregates, auth_header):
     #     """
     #     This test queries the AddNewsItem authenticated.

@@ -6,6 +6,7 @@
       :header-filter="['tag', 'id', 'name', 'description']"
       sort-by-item="id"
       :action-column="true"
+      tag-icon="mdi-office-building"
       @delete-item="deleteItem"
       @edit-item="editItem"
       @add-item="addItem"

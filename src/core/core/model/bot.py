@@ -52,8 +52,8 @@ class Bot(BaseModel):
         return cls.query.first()
 
     @classmethod
-    def filter_by_type(cls, type) -> "Bot | None":
-        return cls.query.filter_by(type=type).first()
+    def filter_by_type(cls, type: str) -> "Bot | None":
+        return cls.query.filter_by(type=type.lower()).first()
 
     @classmethod
     def get_all_by_type(cls, type):

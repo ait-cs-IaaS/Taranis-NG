@@ -25,7 +25,6 @@ class Organization(BaseModel):
         data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
         data["address"] = self.address.to_dict() if self.address else None
         data.pop("address_id")
-        data["tag"] = "mdi-office-building"
         return data
 
     @classmethod
@@ -59,10 +58,10 @@ class Organization(BaseModel):
         return cls(address=address, **data)
 
     @classmethod
-    def update(cls, organization_id, data) -> tuple[str, int]:
+    def update(cls, organization_id, data) -> tuple[dict, int]:
         organization = cls.query.get(organization_id)
         if organization is None:
-            return f"Organization with id {organization_id} not found", 404
+            return {"error": f"Organization {organization_id} not found"}, 404
 
         if address_data := data.pop("address", None):
             address_update_message, status_code = organization.address.update(address_data)
@@ -74,4 +73,4 @@ class Organization(BaseModel):
                 setattr(organization, key, value)
 
         db.session.commit()
-        return f"Successfully updated {organization.id}", 200
+        return {"message": f"Successfully updated {organization.name}", "id": f"{organization.id}"}, 200

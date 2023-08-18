@@ -6,12 +6,12 @@ import worker.bots
 from requests.exceptions import ConnectionError
 
 bots = {
-    "ANALYST_BOT": worker.bots.AnalystBot(),
-    "GROUPING_BOT": worker.bots.GroupingBot(),
-    "NLP_BOT": worker.bots.NLPBot(),
-    "TAGGING_BOT": worker.bots.TaggingBot(),
-    "WORDLIST_BOT": worker.bots.WordlistBot(),
-    "WORDLIST_UPDATER_BOT": worker.bots.WordlistUpdaterBot(),
+    "analyst_bot": worker.bots.AnalystBot(),
+    "grouping_bot": worker.bots.GroupingBot(),
+    "nlp_bot": worker.bots.NLPBot(),
+    "tagging_bot": worker.bots.TaggingBot(),
+    "wordlist_bot": worker.bots.WordlistBot(),
+    "wordlist_updater_bot": worker.bots.WordlistUpdaterBot(),
 }
 
 
@@ -60,7 +60,7 @@ def execute_bot(bot_id: str, filter: dict | None = None):
     if not bot:
         return f"Bot {bot_type} not implemented"
 
-    bot_params = bot_config.get(bot_type)
+    bot_params = bot_config.get("parameters")
     if not bot_params:
         logger.error(f"Bot with id {bot_id} has no params")
         return
@@ -84,5 +84,5 @@ def gather_word_list(word_list_id: int):
     if not word_list:
         logger.error(f"Word list with id {word_list_id} not found")
         return
-    bots["WORDLIST_UPDATER_BOT"].execute(word_list)
+    bots["wordlist_updater_bot"].execute(word_list)
     return "Word list updated"

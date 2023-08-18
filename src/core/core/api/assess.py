@@ -29,12 +29,6 @@ class OSINTSourcesList(Resource):
         return osint_source.OSINTSource.get_all_with_type()
 
 
-class ManualOSINTSources(Resource):
-    @auth_required(["ASSESS_ACCESS"])
-    def get(self):
-        return osint_source.OSINTSource.get_all_by_type("MANUAL_COLLECTOR")
-
-
 class NewsItems(Resource):
     @auth_required("ASSESS_ACCESS")
     def get(self):
@@ -217,7 +211,6 @@ def initialize(api):
     namespace.add_resource(OSINTSourceGroupsAssess, "/osint-source-groups")
     namespace.add_resource(OSINTSourceGroupsList, "/osint-source-group-list")
     namespace.add_resource(OSINTSourcesList, "/osint-sources-list")
-    namespace.add_resource(ManualOSINTSources, "/manual-osint-sources")
     namespace.add_resource(
         NewsItemAggregates,
         "/news-item-aggregates",

@@ -75,14 +75,13 @@ def initialize(app: Flask):
     queue_manager = QueueManager(app)
     logger.info(f"QueueManager initialized: {queue_manager.celery.broker_connection().as_uri()}")
     try:
-        stats = queue_manager.celery.control.inspect().stats()
-        logger.info(f"QueueManager stats: {stats[next(iter(stats))]['total']}")
-        if stats:
-            queue_manager.post_init()
-    except Exception as e:
-        logger.critical(f"QueueManager error: {str(e)}")
-        queue_manager.celery = None  # type: ignore
-        return
+        with queue_manager.celery.connection() as conn:
+            logger.debug(conn)
+            conn.ensure_connection(max_retries=3)
+        queue_manager.post_init()
+    except Exception:
+        logger.error("Could not reach rabbitmq")
+        logger.exception()
 
 
 def collect_osint_source(source_id: str):
