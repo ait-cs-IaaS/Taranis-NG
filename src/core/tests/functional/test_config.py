@@ -80,20 +80,50 @@ class TestUserConfigApi(BaseTest):
         assert response.json["message"] == "User testuser created"
 
     def test_modify_user(self, client, auth_header, cleanup_user):
+        user_id = cleanup_user["id"]
         user_data = {
             "username": "testuser",
             "name": "Testy McTestFace",
         }
-        response = self.assert_put_ok(client, uri="users/42", json_data=user_data, auth_header=auth_header)
-        assert response.json[0]["message"] == "User 42 updated"
+        response = self.assert_put_ok(client, uri=f"users/{user_id}", json_data=user_data, auth_header=auth_header)
+        assert response.json[0]["message"] == f"User {user_id} updated"
 
     def test_get_user(self, client, auth_header, cleanup_user):
+        user_id = cleanup_user["id"]
         response = self.assert_get_ok(client, "users?search=testuser", auth_header)
         assert response.json["total_count"] == 1
         assert response.json["items"][0]["username"] == "testuser"
         assert response.json["items"][0]["name"] == "Testy McTestFace"
+        assert response.json["items"][0]["id"] == user_id
         assert "password" not in response.json["items"][0]
 
     def test_delete_user(self, client, auth_header, cleanup_user):
-        response = self.assert_delete_ok(client, uri="users/42", auth_header=auth_header)
-        assert response.json[0]["message"] == "User 42 deleted"
+        user_id = cleanup_user["id"]
+        response = self.assert_delete_ok(client, uri=f"users/{user_id}", auth_header=auth_header)
+        assert response.json[0]["message"] == f"User {user_id} deleted"
+
+    def test_create_role(self, client, auth_header, cleanup_role):
+        response = self.assert_post_ok(client, uri="roles", json_data=cleanup_role, auth_header=auth_header)
+        assert response.json["message"] == "Role created"
+        assert "id" in response.json
+
+    def test_modify_role(self, client, auth_header, cleanup_role):
+        role_data = {
+            "description": "Roly McRoleFace",
+        }
+        role_id = cleanup_role["id"]
+        response = self.assert_put_ok(client, uri=f"roles/{role_id}", json_data=role_data, auth_header=auth_header)
+        assert response.json["id"] == f"{role_id}"
+
+    def test_get_roles(self, client, auth_header, cleanup_role):
+        role_id = cleanup_role["id"]
+        response = self.assert_get_ok(client, uri="roles?search=testrole", auth_header=auth_header)
+        assert response.json["total_count"] == 1
+        assert response.json["items"][0]["name"] == "testrole"
+        assert response.json["items"][0]["description"] == "Roly McRoleFace"
+        assert response.json["items"][0]["id"] == role_id
+
+    def test_delete_role(self, client, auth_header, cleanup_role):
+        role_id = cleanup_role["id"]
+        response = self.assert_delete_ok(client, uri=f"roles/{role_id}", auth_header=auth_header)
+        assert response.json["message"] == f"Role {role_id} deleted"

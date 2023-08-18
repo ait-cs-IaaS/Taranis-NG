@@ -139,3 +139,26 @@ def cleanup_user(app, request):
         request.addfinalizer(teardown)
 
         yield user_data
+
+
+@pytest.fixture(scope="session")
+def cleanup_role(app, request):
+    with app.app_context():
+        from core.model.role import Role
+
+        role_data = {
+            "id": 42,
+            "name": "testrole",
+            "description": "Test Role",
+            "permissions": ["ANALYZE_ACCESS", "ANALYZE_CREATE", "ANALYZE_DELETE"],
+        }
+
+        def teardown():
+            with app.app_context():
+                if Role.get(42):
+                    print("Deleting test user 42")
+                    Role.delete(42)
+
+        request.addfinalizer(teardown)
+
+        yield role_data

@@ -161,7 +161,7 @@ class Roles(Resource):
 class Role(Resource):
     @auth_required("CONFIG_ROLE_UPDATE")
     def put(self, role_id):
-        role.Role.update(role_id, request.json)
+        return role.Role.update(role_id, request.json)
 
     @auth_required("CONFIG_ROLE_DELETE")
     def delete(self, role_id):
