@@ -3,6 +3,7 @@ import subprocess
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
+
 class CeleryRestartHandler(FileSystemEventHandler):
     def __init__(self):
         self.celery_process = None
@@ -20,8 +21,9 @@ class CeleryRestartHandler(FileSystemEventHandler):
             return
         self.restart_celery()
 
+
 if __name__ == "__main__":
-    path = '.'  # Watch the current directory, modify if necessary
+    path = "."  # Watch the current directory, modify if necessary
     event_handler = CeleryRestartHandler()
     observer = Observer()
     observer.schedule(event_handler, path, recursive=True)
@@ -36,4 +38,3 @@ if __name__ == "__main__":
         event_handler.celery_process.wait()
 
     observer.join()
-
