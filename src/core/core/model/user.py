@@ -24,7 +24,7 @@ class User(BaseModel):
     permissions = db.relationship(Permission, secondary="user_permission", cascade="all, delete")
 
     profile_id = db.Column(db.Integer, db.ForeignKey("user_profile.id", ondelete="CASCADE"))
-    profile = db.relationship("UserProfile", cascade="all, delete", back_populates="user")
+    profile = db.relationship("UserProfile", cascade="all, delete")
 
     def __init__(self, username, name, organization, roles, permissions, password=None, id=None):
         self.id = id
@@ -143,6 +143,12 @@ class User(BaseModel):
         db.session.commit()
         return user.profile.to_dict(), 200
 
+    @classmethod
+    def delete(cls, id: int) -> tuple[dict[str, Any], int]:
+        result = super().delete(id)
+        UserProfile.delete(id)
+        return result
+
     ##
     # External User Management - TODO: Check if this is still needed
     ##
@@ -206,7 +212,6 @@ class UserProfile(BaseModel):
 
     hotkeys = db.relationship("Hotkey", cascade="all, delete-orphan")
     language = db.Column(db.String(2), default="en")
-    user = db.relationship("User", back_populates="profile")
 
     def __init__(self, spellcheck=True, dark_theme=False, hotkeys=None, language="en", id=None):
         self.id = id
@@ -235,7 +240,7 @@ class Hotkey(BaseModel):
     key = db.Column(db.String)
     alias = db.Column(db.String)
 
-    user_profile_id = db.Column(db.Integer, db.ForeignKey("user_profile.id"))
+    user_profile_id = db.Column(db.Integer, db.ForeignKey("user_profile.id", ondelete="CASCADE"))
 
     def __init__(self, key_code, key, alias, id=None):
         self.id = id

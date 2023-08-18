@@ -173,7 +173,7 @@ class ReportItemAddAttachment(Resource):
         return data
 
 
-class ReportItemRemoveAttachment(Resource):
+class ReportItemAttachment(Resource):
     @auth_required("ANALYZE_UPDATE")
     @validate_id("report_item_id")
     @validate_id("attribute_id")
@@ -185,8 +185,6 @@ class ReportItemRemoveAttachment(Resource):
         sse_manager.report_item_updated(data)
         return data
 
-
-class ReportItemDownloadAttachment(Resource):
     @auth_required("ANALYZE_ACCESS")
     @validate_id("report_item_id")
     @validate_id("attribute_id")
@@ -223,11 +221,7 @@ def initialize(api: Api):
         "/report-items/<int:report_item_id>/file-attributes",
     )
     namespace.add_resource(
-        ReportItemRemoveAttachment,
+        ReportItemAttachment,
         "/report-items/<int:report_item_id>/file-attributes/<int:attribute_id>",
-    )
-    namespace.add_resource(
-        ReportItemDownloadAttachment,
-        "/report-items/<int:report_item_id>/file-attributes/<int:attribute_id>/file",
     )
     api.add_namespace(namespace)

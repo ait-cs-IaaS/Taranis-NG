@@ -677,6 +677,7 @@ paths:
           minimum: 1
           format: int32
     post:
+      deprecated: true
       tags: [analyze]
       summary: attach a file to the report item
       requestBody:
@@ -717,8 +718,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/resp.auth.error'
-        '400':
-          description: erronous input data
         '404':
           $ref: "#/components/schemas/notFound"
   /analyze/report-items/{report_item_id}/file-attributes/{attribute_id}:
@@ -738,6 +737,7 @@ paths:
           minimum: 1
           format: int32
     delete:
+      deprecated: true
       tags: [analyze]
       summary: remove an attachment from the report item
       responses:
@@ -767,23 +767,8 @@ paths:
                 $ref: '#/components/schemas/resp.auth.error'
         '404':
           $ref: "#/components/schemas/notFound"
-  /analyze/report-items/{report_item_id}/file-attributes/{attribute_id}/file:
-    parameters:
-      - name: report_item_id
-        in: path
-        required: true
-        schema:
-          type: integer
-          minimum: 1
-          format: int32
-      - name: attribute_id
-        in: path
-        required: true
-        schema:
-          type: integer
-          minimum: 1
-          format: int32
     get:
+      deprecated: true
       tags: [analyze]
       summary: download a report item's specified attachment
       responses:

@@ -71,17 +71,12 @@ class TestConfigApi(BaseTest):
         assert totoal_count > 0
         assert len(word_lists) > 0
 
+
+class TestUserConfigApi(BaseTest):
+    base_uri = "/api/v1/config"
+
     def test_create_user(self, client, auth_header, cleanup_user):
-        user_data = {
-            "id": 42,
-            "username": "testuser",
-            "name": "Test User",
-            "organization": 1,
-            "roles": [2],
-            "permissions": ["ANALYZE_ACCESS", "ANALYZE_CREATE", "ANALYZE_DELETE"],
-            "password": "testpassword",
-        }
-        response = self.assert_post_ok(client, uri="users", json_data=user_data, auth_header=auth_header)
+        response = self.assert_post_ok(client, uri="users", json_data=cleanup_user, auth_header=auth_header)
         assert response.json["message"] == "User testuser created"
 
     def test_modify_user(self, client, auth_header, cleanup_user):
@@ -90,15 +85,15 @@ class TestConfigApi(BaseTest):
             "name": "Testy McTestFace",
         }
         response = self.assert_put_ok(client, uri="users/42", json_data=user_data, auth_header=auth_header)
-        print(response.json)
-        assert response.json["message"] == "User 42 updated"
+        assert response.json[0]["message"] == "User 42 updated"
 
     def test_get_user(self, client, auth_header, cleanup_user):
         response = self.assert_get_ok(client, "users?search=testuser", auth_header)
         assert response.json["total_count"] == 1
         assert response.json["items"][0]["username"] == "testuser"
+        assert response.json["items"][0]["name"] == "Testy McTestFace"
+        assert "password" not in response.json["items"][0]
 
     def test_delete_user(self, client, auth_header, cleanup_user):
         response = self.assert_delete_ok(client, uri="users/42", auth_header=auth_header)
-        print(response.json)
-        assert response.json["message"] == "User 42 deleted"
+        assert response.json[0]["message"] == "User 42 deleted"

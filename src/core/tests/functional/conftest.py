@@ -120,9 +120,22 @@ def cleanup_user(app, request):
     with app.app_context():
         from core.model.user import User
 
+        user_data = {
+            "id": 42,
+            "username": "testuser",
+            "name": "Test User",
+            "organization": 1,
+            "roles": [2],
+            "permissions": ["ANALYZE_ACCESS", "ANALYZE_CREATE", "ANALYZE_DELETE"],
+            "password": "testpassword",
+        }
+
         def teardown():
             with app.app_context():
                 if User.get(42):
+                    print("Deleting test user 42")
                     User.delete(42)
 
         request.addfinalizer(teardown)
+
+        yield user_data

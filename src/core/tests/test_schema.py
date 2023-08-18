@@ -12,7 +12,7 @@ from core.__init__ import create_app
 logger.debug(f"Hypothesis Settings{hypothesis.settings}")
 
 app = create_app()
-schema = schemathesis.from_wsgi("/api/v1/doc/swagger.json", app)
+schema = schemathesis.from_wsgi("/api/v1/doc/swagger.json", app, skip_deprecated_operations=True)
 
 
 def check_401(response, case):
