@@ -3,7 +3,7 @@
     <DataTable
       :items="sources"
       :add-button="true"
-      :header-filter="['tag', 'state', 'name', 'FEED_URL']"
+      :header-filter="['tag', 'state', 'name']"
       sort-by-item="id"
       :action-column="true"
       @delete-item="deleteItem"

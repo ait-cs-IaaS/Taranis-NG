@@ -195,6 +195,24 @@ workers = [
 
 
 bots = [
-    {"name": "NLP BOT", "description": "Bot for naturale language processing of news items", "type": "NLP_BOT"},
-    {"name": "Wordlist Bot", "description": "Bot for tagging news items by wordlist", "type": "WORDLIST_BOT"},
+    {
+        "name": "NLP BOT",
+        "description": "Bot for naturale language processing of news items",
+        "type": "NLP_BOT",
+        "parameters": [
+            {"parameter": "SOURCE_GROUP", "type": "select"},
+            {"parameter": "RUN_AFTER_COLLECTOR", "type": "switch", "value": "true"},
+            {"parameter": "REFRESH_INTERVAL", "type": "number"},
+        ],
+    },
+    {
+        "name": "Wordlist Bot",
+        "description": "Bot for tagging news items by wordlist",
+        "type": "WORDLIST_BOT",
+        "parameters": [
+            {"parameter": "SOURCE_GROUP", "type": "select"},
+            {"parameter": "RUN_AFTER_COLLECTOR", "type": "switch", "value": "true"},
+            {"parameter": "REFRESH_INTERVAL", "type": "number"},
+        ],
+    },
 ]

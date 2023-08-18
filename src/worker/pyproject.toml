@@ -48,7 +48,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["black", "pytest", "pytest-celery"]
+dev = ["black", "pytest", "pytest-celery", "watchdog"]
 
 [project.urls]
 "Source Code" = "https://github.com/ait-cs-IaaS/Taranis-NG"

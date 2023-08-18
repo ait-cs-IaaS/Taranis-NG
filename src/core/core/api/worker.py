@@ -131,6 +131,12 @@ class BotInfo(Resource):
         return Bot.update(bot_id, request.json)
 
 
+class PostCollectionBots(Resource):
+    @api_key_required
+    def get(self):
+        return Bot.get_post_collection()
+
+
 class WordListBySourceGroup(Resource):
     @api_key_required
     def get(self, source_group: str):
@@ -169,6 +175,7 @@ def initialize(api: Api):
     worker_namespace.add_resource(BotsInfo, "/bots")
     worker_namespace.add_resource(Tags, "/tags")
     worker_namespace.add_resource(BotInfo, "/bots/<string:bot_id>")
+    worker_namespace.add_resource(PostCollectionBots, "/post-collection-bots")
     worker_namespace.add_resource(NewsItemsAggregates, "/news-item-aggregates")
     worker_namespace.add_resource(WordListBySourceGroup, "/word-lists-by-source-group/<string:source_group>")
     worker_namespace.add_resource(WordListByID, "/word-list/<int:word_list_id>")

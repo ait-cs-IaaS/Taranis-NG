@@ -1,5 +1,6 @@
 from typing import Any
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
+from sqlalchemy.orm import joinedload
 import uuid
 
 from core.managers.db_manager import db
@@ -53,7 +54,10 @@ class Bot(BaseModel):
 
     @classmethod
     def filter_by_type(cls, type: str) -> "Bot | None":
-        return cls.query.filter_by(type=type.lower()).first()
+        filter_type = type.lower()
+        if filter_type not in [types.value for types in BOT_TYPES]:
+            return None
+        return cls.query.filter_by(type=filter_type).first()
 
     @classmethod
     def get_all_by_type(cls, type):
@@ -78,6 +82,19 @@ class Bot(BaseModel):
         bots, count = cls.get_by_filter(search)
         items = [bot.to_dict() for bot in bots]
         return {"total_count": count, "items": items}
+
+    @classmethod
+    def get_post_collection(cls):
+        # This should return all bots where the parameter with the KEY RUN_AFTER_COLLECTOR has the value True
+        bots = (
+            cls.query.join(BotParameterValue, Bot.id == BotParameterValue.bot_id)
+            .join(ParameterValue, BotParameterValue.parameter_value_id == ParameterValue.id)
+            .filter(and_(ParameterValue.parameter == "RUN_AFTER_COLLECTOR", ParameterValue.value == "true"))
+            .options(joinedload(Bot.parameters))
+            .all()
+        )
+
+        return [bot.to_dict() for bot in bots]
 
     def to_dict(self) -> dict[str, Any]:
         data = super().to_dict()
