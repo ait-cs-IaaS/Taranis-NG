@@ -19,6 +19,37 @@
             :disabled="item['disabled']"
             :type="item.type"
           />
+          <v-text-field
+            v-if="item.type === 'date' && formData[item.parent][item.name]"
+            :model-value="d(formData[item.parent][item.name], 'long')"
+            :disabled="item['disabled']"
+            :label="item.label"
+            :bg-color="item.color"
+          />
+          <v-textarea
+            v-if="item.type === 'textarea'"
+            v-model="formData[item.parent][item.name]"
+            :label="item.label"
+            :rules="item.rules"
+            :disabled="item['disabled']"
+            :type="item.type"
+          />
+          <v-select
+            v-if="item.type === 'select' && item.items"
+            v-model="formData[item.parent][item.name]"
+            :label="item.label"
+            :rules="item.rules"
+            :disabled="item['disabled']"
+            :items="item.items"
+          />
+          <v-switch
+            v-if="item.type === 'switch'"
+            v-model="formData[item.parent][item.name]"
+            :label="item.label"
+            :disabled="item['disabled']"
+            true-value="true"
+            false-value="false"
+          />
         </v-col>
         <v-col v-else cols="12">
           <v-text-field
@@ -30,59 +61,64 @@
             :type="item.type"
             :bg-color="item.color"
           />
+          <v-text-field
+            v-if="item.type === 'date' && formData[item.name]"
+            :model-value="d(formData[item.name], 'long')"
+            :disabled="item['disabled']"
+            :label="item.label"
+            :bg-color="item.color"
+          />
+          <v-textarea
+            v-if="item.type === 'textarea'"
+            v-model="formData[item.name]"
+            :label="item.label"
+            :rules="item.rules"
+            :disabled="item['disabled']"
+            :type="item.type"
+          />
+          <v-select
+            v-if="item.type === 'select' && item.items"
+            v-model="formData[item.name]"
+            :label="item.label"
+            :rules="item.rules"
+            :disabled="item['disabled']"
+            :items="item.items"
+          />
+          <v-switch
+            v-if="item.type === 'switch'"
+            v-model="formData[item.name]"
+            :label="item.label"
+            :disabled="item['disabled']"
+            true-value="true"
+            false-value="false"
+          />
+          <v-list
+            v-if="item.type === 'list'"
+            width="100%"
+            :items="formData[item.name]"
+            :label="item.label"
+            variant="outlined"
+            density="compact"
+            :disabled="true"
+          />
+          <v-row
+            v-if="item.type === 'checkbox' && item.items !== undefined"
+            no-gutters
+          >
+            <v-col
+              v-for="checkbox in item.items"
+              :key="checkbox.label"
+              cols="3"
+            >
+              <v-checkbox
+                v-model="formData[item.name]"
+                :label="checkbox.label"
+                :value="checkbox.value"
+              />
+            </v-col>
+          </v-row>
         </v-col>
-        <v-text-field
-          v-if="item.type === 'date' && formData[item.name]"
-          :model-value="d(formData[item.name], 'long')"
-          :disabled="item['disabled']"
-          :label="item.label"
-          :bg-color="item.color"
-        />
-        <v-textarea
-          v-if="item.type === 'textarea'"
-          v-model="formData[item.name]"
-          :label="item.label"
-          :rules="item.rules"
-          :disabled="item['disabled']"
-          :type="item.type"
-        />
-        <v-select
-          v-if="item.type === 'select' && item.items"
-          v-model="formData[item.name]"
-          :label="item.label"
-          :rules="item.rules"
-          :disabled="item['disabled']"
-          :items="item.items"
-        />
-        <v-switch
-          v-if="item.type === 'switch'"
-          v-model="formData[item.name]"
-          :label="item.label"
-          :disabled="item['disabled']"
-          true-value="true"
-          false-value="false"
-        />
-        <v-list
-          v-if="item.type === 'list'"
-          width="100%"
-          :items="formData[item.name]"
-          :label="item.label"
-          variant="outlined"
-          density="compact"
-          :disabled="true"
-        />
-        <v-row
-          v-if="item.type === 'checkbox' && item.items !== undefined"
-          no-gutters
-        >
-          <v-col v-for="checkbox in item.items" :key="checkbox.label" cols="3">
-            <v-checkbox
-              v-model="formData[item.name]"
-              :label="checkbox.label"
-              :value="checkbox.value"
-            />
-          </v-col>
-        </v-row>
+
         <v-col
           v-if="item.type === 'table' && item.items !== undefined"
           cols="12"

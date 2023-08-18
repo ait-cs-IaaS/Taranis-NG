@@ -127,3 +127,9 @@ class TestUserConfigApi(BaseTest):
         role_id = cleanup_role["id"]
         response = self.assert_delete_ok(client, uri=f"roles/{role_id}", auth_header=auth_header)
         assert response.json["message"] == f"Role {role_id} deleted"
+
+    # TODO: Add tests Organization API
+
+
+class TestBotConfigApi(BaseTest):
+    pass

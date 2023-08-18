@@ -144,6 +144,7 @@ class Worker(BaseModel):
             "name": self.name,
             "description": self.description,
             "type": self.type,
+            "category": self.category,
             "parameters": {parameter.parameter: parameter.value for parameter in self.parameters},
         }
 
