@@ -70,7 +70,7 @@
           <span class="caption">There are <b>0</b> archived items.</span>
         </template>
       </dash-board-card>
-      <dash-board-card link-to="#" link-text="Build Info" cols="12">
+      <dash-board-card link-text="Build Info" cols="12">
         <template #content>
           <v-row no-gutters>
             <v-col cols="2"> Core Build Time </v-col>

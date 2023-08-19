@@ -59,28 +59,51 @@ export function objectFromFormat(format) {
     if (item === undefined || item.disabled) {
       return
     }
-    if (item.type === 'checkbox') {
+    if (item.type === 'switch') {
       newObject[item.name] = false
     } else if (
       item.type === 'text' ||
       item.type === 'textarea' ||
       item.type === 'select'
     ) {
-      if (item.parent) {
-        if (!newObject[item.parent]) {
-          newObject[item.parent] = {}
-        }
-        newObject[item.parent][item.name] = ''
-      } else {
-        newObject[item.name] = ''
-      }
+      newObject[item.name] = ''
     } else if (item.type === 'number') {
       newObject[item.name] = 0
-    } else if (item.type === 'table') {
+    } else if (item.type === 'table' || item.type === 'checkbox') {
       newObject[item.name] = []
     }
   })
-  return newObject
+  return flattenFormData(newObject, format)
+}
+
+export function flattenFormData(data, format) {
+  const flattened = {}
+  format.forEach((item) => {
+    const key = item.parent ? `${item.parent}.${item.name}` : item.name
+    if (item.parent) {
+      if (!data[item.parent]) {
+        data[item.parent] = {}
+      }
+      flattened[key] = data[item.parent][item.name]
+    } else {
+      flattened[key] = data[item.name]
+    }
+  })
+  return flattened
+}
+
+// Reconstruct the data based on format
+export function reconstructFormData(flattened, format) {
+  const data = {}
+  format.forEach((item) => {
+    if (item.parent) {
+      data[item.parent] = data[item.parent] || {}
+      data[item.parent][item.name] = flattened[`${item.parent}.${item.name}`]
+    } else {
+      data[item.name] = flattened[item.name]
+    }
+  })
+  return data
 }
 
 export function flattenObject(obj, parent) {
@@ -196,8 +219,7 @@ export const baseFormat = [
   {
     name: 'name',
     label: 'Name',
-    type: 'text',
-    rules: [(v) => !!v || 'Required']
+    type: 'text'
   },
   {
     name: 'description',

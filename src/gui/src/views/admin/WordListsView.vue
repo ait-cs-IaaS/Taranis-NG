@@ -140,12 +140,12 @@ export default {
 
     const handleSubmit = (submittedData) => {
       delete submittedData.entries
-      console.log(submittedData)
       if (edit.value) {
         updateItem(submittedData)
       } else {
         createItem(submittedData)
       }
+      showForm.value = false
     }
 
     const deleteItem = (item) => {
@@ -183,6 +183,7 @@ export default {
 
     const importData = (data) => {
       importWordList(data)
+      updateData()
     }
 
     const exportData = () => {

@@ -30,7 +30,7 @@ class WordList(BaseModel):
         self.id = id
         self.name = name
         self.description = description
-        self.usage = usage
+        self.update_usage(usage)
         self.link = link
         self.entries = WordListEntry.add_multiple(entries) if entries else []
 
@@ -54,6 +54,12 @@ class WordList(BaseModel):
         self.usage = 0
         for usage in usage_list:
             self.add_usage(WordListUsage[usage])
+
+    def update_usage(self, usage: list[str] | int):
+        if type(usage) == list:
+            self.from_usage_list(usage)
+        elif type(usage) == int and self.is_valid_usage(usage):
+            self.usage = usage
 
     @classmethod
     def is_valid_usage(cls, usage: int) -> bool:
@@ -136,18 +142,27 @@ class WordList(BaseModel):
         word_list = cls.get(word_list_id)
         if word_list is None:
             return {"error": "WordList not found"}, 404
-        word_list.entries = [WordListEntry.from_dict(entry) for entry in data.pop("entries", [])]
-        usage = data.pop("usage", [])
-        if type(usage) == list:
-            word_list.from_usage_list(usage)
-        elif type(usage) == int and cls.is_valid_usage(usage):
-            word_list.usage = usage
 
-        for key, value in data.items():
-            if hasattr(word_list, key) and key != "id":
-                setattr(word_list, key, value)
+        update_word_list = cls.from_dict(data)
+        word_list.name = update_word_list.name
+        if update_word_list.description:
+            word_list.description = update_word_list.description
+        if update_word_list.link:
+            word_list.link = update_word_list.link
+        if update_word_list.entries:
+            word_list.entries = update_word_list.entries
+        if update_word_list.usage:
+            word_list.usage = update_word_list.usage
+
         db.session.commit()
         return {"message": "Word list updated"}, 200
+
+    @classmethod
+    def add(cls, data) -> "WordList":
+        item = cls.from_dict(data)
+        db.session.add(item)
+        db.session.commit()
+        return item
 
     @classmethod
     def export(cls, source_ids=None):

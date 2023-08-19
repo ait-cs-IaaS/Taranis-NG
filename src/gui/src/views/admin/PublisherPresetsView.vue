@@ -12,9 +12,10 @@
       @update-items="updateData"
     />
     <EditConfig
-      v-if="formData && Object.keys(formData).length > 0"
-      :form-format="formFormat"
+      v-if="showForm"
       :config-data="formData"
+      :form-format="formFormat"
+      :parameters="parameters"
       @submit="handleSubmit"
     ></EditConfig>
   </div>
@@ -29,7 +30,7 @@ import {
   createPublisherPreset,
   updatePublisherPreset
 } from '@/api/config'
-import { notifySuccess, objectFromFormat, notifyFailure } from '@/utils/helpers'
+import { notifySuccess, notifyFailure, baseFormat } from '@/utils/helpers'
 import { useConfigStore } from '@/stores/ConfigStore'
 import { useMainStore } from '@/stores/MainStore'
 import { storeToRefs } from 'pinia'
@@ -44,46 +45,24 @@ export default defineComponent({
     const configStore = useConfigStore()
     const mainStore = useMainStore()
 
-    const { publisher_presets, publisher_types } = storeToRefs(configStore)
+    const { publisher_presets, publisher_types, parameters } =
+      storeToRefs(configStore)
 
     const publishersList = ref([])
     const formData = ref({})
-    const parameters = ref({})
     const edit = ref(false)
+    const showForm = ref(false)
 
     const formFormat = computed(() => {
-      const base = [
+      const additionalFormat = [
         {
-          name: 'id',
-          label: 'ID',
-          type: 'text',
-          disabled: true
-        },
-        {
-          name: 'name',
-          label: 'Name',
-          type: 'text',
-          rules: [(v) => !!v || 'Required']
-        },
-        {
-          name: 'description',
-          label: 'Description',
-          type: 'textarea',
-          rules: [(v) => !!v || 'Required']
-        },
-        {
-          name: 'publisher_id',
+          name: 'type',
           label: 'Type',
-          type: 'list',
-          rules: [(v) => !!v || 'Required'],
-          items: publishersList.value,
-          disabled: edit.value
+          type: 'select',
+          items: publishersList.value
         }
       ]
-      if (parameters.value[formData.value.publisher_id]) {
-        return base.concat(parameters.value[formData.value.publisher_id])
-      }
-      return base
+      return [...baseFormat, ...additionalFormat]
     })
 
     const updateData = () => {
@@ -93,42 +72,35 @@ export default defineComponent({
       })
       configStore.loadWorkerTypes().then(() => {
         publishersList.value = publisher_types.value.map((publisher) => {
-          parameters.value[publisher.type] = Object.keys(
-            publisher.parameters
-          ).map((key) => ({
-            name: key,
-            label: key,
-            parent: 'parameter_values',
-            type: 'text'
-          }))
-
           return {
             value: publisher.type,
             title: publisher.name
           }
         })
       })
+      configStore.loadParameters()
     }
 
     const addItem = () => {
-      formData.value = objectFromFormat(formFormat.value)
-      formData.value.parameter_values = {}
+      formData.value = {}
       edit.value = false
+      showForm.value = true
     }
 
     const editItem = (item) => {
       formData.value = item
-      edit.value = true
+      edit.value = false
+      showForm.value = true
     }
 
     const handleSubmit = (submittedData) => {
       delete submittedData.tag
-      console.debug('submittedData', submittedData)
       if (edit.value) {
         updateItem(submittedData)
       } else {
         createItem(submittedData)
       }
+      showForm.value = false
     }
 
     const deleteItem = (item) => {
@@ -177,6 +149,7 @@ export default defineComponent({
       parameters,
       edit,
       formFormat,
+      showForm,
       addItem,
       editItem,
       handleSubmit,

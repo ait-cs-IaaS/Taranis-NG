@@ -260,6 +260,9 @@ class Bots(Resource):
     def post(self):
         return bot.Bot.add(request.json), 201
 
+    def delete(self, bot_id):
+        return bot.Bot.delete(bot_id)
+
 
 class BotExecute(Resource):
     def post(self, bot_id):

@@ -9,25 +9,13 @@
       @edit-item="editItem"
       @update-items="updateData"
     >
-      <template #actionColumn="source">
-        <v-tooltip left>
-          <template #activator="{ props }">
-            <v-icon
-              v-bind="props"
-              color="secondary"
-              icon="mdi-run"
-              @click.stop="executeBot(source.item)"
-            />
-          </template>
-          <span>Execute Bot</span>
-        </v-tooltip>
-      </template>
     </DataTable>
     <!-- // TODO: https://github.com/SortableJS/vue.draggable.next for reordering -->
     <EditConfig
       v-if="formData && Object.keys(formData).length > 0"
       :config-data="formData"
       :form-format="formFormat"
+      :parameters="parameters"
       @submit="handleSubmit"
     ></EditConfig>
   </div>
@@ -36,7 +24,7 @@
 <script>
 import DataTable from '@/components/common/DataTable.vue'
 import EditConfig from '@/components/config/EditConfig.vue'
-import { updateBot, executeBotTask } from '@/api/config'
+import { updateBot } from '@/api/config'
 import { ref, computed, onMounted } from 'vue'
 import { useConfigStore } from '@/stores/ConfigStore'
 import { useMainStore } from '@/stores/MainStore'
@@ -67,11 +55,7 @@ export default {
           disabled: true
         }
       ]
-      return [
-        ...baseFormat,
-        ...additionalFormat,
-        ...parameters.value[formData.value.type]
-      ]
+      return [...baseFormat, ...additionalFormat]
     })
 
     // methods
@@ -103,16 +87,6 @@ export default {
         })
     }
 
-    const executeBot = (item) => {
-      executeBotTask(item.id)
-        .then(() => {
-          notifySuccess(`Successfully executed ${item.id}`)
-        })
-        .catch(() => {
-          notifyFailure(`Failed to execute ${item.id}`)
-        })
-    }
-
     onMounted(() => {
       updateData()
     })
@@ -130,8 +104,7 @@ export default {
       updateData,
       editItem,
       handleSubmit,
-      updateItem,
-      executeBot
+      updateItem
     }
   }
 }

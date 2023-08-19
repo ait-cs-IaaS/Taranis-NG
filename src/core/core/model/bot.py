@@ -103,5 +103,5 @@ class Bot(BaseModel):
 
 
 class BotParameterValue(BaseModel):
-    bot_id = db.Column(db.String, db.ForeignKey("bot.id"), primary_key=True)
+    bot_id = db.Column(db.String, db.ForeignKey("bot.id", ondelete="CASCADE"), primary_key=True)
     parameter_value_id = db.Column(db.Integer, db.ForeignKey("parameter_value.id"), primary_key=True)

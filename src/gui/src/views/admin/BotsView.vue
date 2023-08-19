@@ -13,11 +13,25 @@
       @selection-change="selectionChange"
       @update-items="updateData"
     >
+      <template #actionColumn="bot">
+        <v-tooltip left>
+          <template #activator="{ props }">
+            <v-icon
+              v-bind="props"
+              color="secondary"
+              icon="mdi-run"
+              @click.stop="executeBot(bot.item)"
+            />
+          </template>
+          <span>Execute Bot</span>
+        </v-tooltip>
+      </template>
     </DataTable>
     <EditConfig
-      v-if="formData && Object.keys(formData).length > 0"
+      v-if="showForm"
       :config-data="formData"
       :form-format="formFormat"
+      :parameters="parameters"
       @submit="handleSubmit"
     ></EditConfig>
   </div>
@@ -25,14 +39,9 @@
 <script>
 import DataTable from '@/components/common/DataTable.vue'
 import EditConfig from '@/components/config/EditConfig.vue'
-import { createBot, deleteBot, updateBot } from '@/api/config'
+import { createBot, deleteBot, updateBot, executeBotTask } from '@/api/config'
 import { ref, computed, onMounted } from 'vue'
-import {
-  notifySuccess,
-  notifyFailure,
-  baseFormat,
-  objectFromFormat
-} from '@/utils/helpers'
+import { notifySuccess, notifyFailure, baseFormat } from '@/utils/helpers'
 import { useConfigStore } from '@/stores/ConfigStore'
 import { useMainStore } from '@/stores/MainStore'
 import { storeToRefs } from 'pinia'
@@ -62,11 +71,7 @@ export default {
           items: bot_options.value
         }
       ]
-      return [
-        ...baseFormat,
-        ...additionalFormat,
-        ...parameters.value[formData.value.type]
-      ]
+      return [...baseFormat, ...additionalFormat]
     })
 
     const updateData = () => {
@@ -86,7 +91,7 @@ export default {
     }
 
     const addItem = () => {
-      formData.value = objectFromFormat(formFormat.value)
+      formData.value = {}
       edit.value = false
       showForm.value = true
     }
@@ -99,10 +104,8 @@ export default {
 
     const handleSubmit = (submittedData) => {
       if (edit.value) {
-        console.debug(`Update: ${submittedData}`)
         updateItem(submittedData)
       } else {
-        console.debug(`Create: ${submittedData}`)
         createItem(submittedData)
       }
       showForm.value = false
@@ -145,6 +148,16 @@ export default {
       selected.value = new_selection
     }
 
+    const executeBot = (item) => {
+      executeBotTask(item.id)
+        .then(() => {
+          notifySuccess(`Successfully executed ${item.id}`)
+        })
+        .catch(() => {
+          notifyFailure(`Failed to execute ${item.id}`)
+        })
+    }
+
     onMounted(() => {
       updateData()
     })
@@ -156,6 +169,7 @@ export default {
       edit,
       formFormat,
       showForm,
+      parameters,
       addItem,
       editItem,
       handleSubmit,
@@ -163,7 +177,8 @@ export default {
       deleteItem,
       createItem,
       updateItem,
-      selectionChange
+      selectionChange,
+      executeBot
     }
   }
 }
