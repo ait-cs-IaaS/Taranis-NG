@@ -3,11 +3,18 @@
     <v-toolbar density="compact">
       <v-toolbar-title>{{ container_title }}</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-switch v-model="verticalView" label="Side-by-side"></v-switch>
+      <v-switch
+        v-model="verticalView"
+        label="Side-by-side"
+        hide-details
+        color="success"
+      ></v-switch>
       <v-switch
         v-if="edit"
         v-model="report_item.completed"
+        hide-details
         label="Completed"
+        color="success"
       ></v-switch>
       <v-btn
         prepend-icon="mdi-content-save"
