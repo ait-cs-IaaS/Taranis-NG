@@ -39,7 +39,7 @@ EXPOSE 80
 ENV PATH="/app/.venv/bin:$PATH"
 ENV PYTHONPATH=/app
 ARG git_info
-ENV GIT_INFO=${git_info:-{}}
+ENV GIT_INFO=${git_info:-'{}'}
 RUN echo BUILD_DATE=$(date --iso-8601=minutes) > .env
 
 VOLUME ["/data"]

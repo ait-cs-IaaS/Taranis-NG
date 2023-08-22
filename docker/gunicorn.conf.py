@@ -12,7 +12,7 @@ bind = os.getenv("BIND", f"{host}:{port}")
 use_loglevel = os.getenv("LOG_LEVEL", "info")
 wsgi_app = os.getenv("APP_MODULE", "run:app")
 use_reload = False
-post_worker_init = "run.post_worker_init"
+post_worker_init = "core.post_worker_init"
 
 if os.getenv("DEBUG", "false").lower() == "true":
     use_loglevel = "debug"
