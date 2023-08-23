@@ -501,9 +501,11 @@ class NewsItemAggregate(BaseModel):
 
     @classmethod
     def _add_paging_to_query(cls, filter_args: dict, query):
-        offset = filter_args.get("offset", 0)
-        limit = filter_args.get("limit", 20)
-        return query.offset(offset).limit(limit)
+        if offset := filter_args.get("offset"):
+            query = query.offset(offset)
+        if limit := filter_args.get("limit"):
+            query = query.limit(limit)
+        return query
 
     @classmethod
     def _add_ACL_check(cls, query, user: User):
@@ -604,14 +606,11 @@ class NewsItemAggregate(BaseModel):
         if "vote" in data:
             aggregate.vote(data["vote"], user.id)
 
-        for news_item in aggregate.news_items:
-            if news_item.allowed_with_acl(user, False, False, True):
-                if "read" in data:
-                    news_item.read = not aggregate.read
+        if "important" in data:
+            aggregate.important = data["important"]
 
-                if "important" in data:
-                    all_important = all(news_item.important is not False for news_item in aggregate.news_items)
-                    news_item.important = not all_important
+        if "read" in data:
+            aggregate.read = data["read"]
 
         if "title" in data:
             aggregate.title = data["title"]
@@ -628,6 +627,35 @@ class NewsItemAggregate(BaseModel):
         db.session.commit()
 
         return {"message": "success"}, 200
+
+    def vote(self, vote_data, user_id):
+        logger.debug(f"Voting {vote_data} for {self.id}")
+        if vote := NewsItemVote.find_by_user(self.id, user_id):
+            if vote_data > 0:
+                self.update_like_vote(vote)
+            else:
+                self.update_dislike_vote(vote)
+        else:
+            vote = self.create_new_vote(vote, user_id)
+
+        db.session.commit()
+
+    def create_new_vote(self, vote, user_id):
+        vote = NewsItemVote(self.id, user_id)
+        db.session.add(vote)
+        return vote
+
+    def update_like_vote(self, vote):
+        self.likes += 1
+        self.relevance += 1
+        vote.like = not vote.like
+        db.session.commit()
+
+    def update_dislike_vote(self, vote):
+        self.dislikes += 1
+        self.relevance -= 1
+        vote.dislike = not vote.dislike
+        db.session.commit()
 
     @classmethod
     def delete_by_id(cls, aggregate_id, user):
@@ -684,8 +712,18 @@ class NewsItemAggregate(BaseModel):
             return {"error": "update failed"}, 500
 
     @classmethod
-    def group_aggregate(cls, aggregate_ids: list, user: User | None = None):
+    def group_multiple_aggregate(cls, aggregate_id_list: list[list[int]]):
+        results = []
+        for aggregate_ids in aggregate_id_list:
+            results.append(cls.group_aggregate(aggregate_ids))
+        if any(result[1] == 500 for result in results):
+            return {"error": "grouping failed"}, 500
+        return {"message": "success"}, 200
+
+    @classmethod
+    def group_aggregate(cls, aggregate_ids: list[int], user: User | None = None):
         try:
+            logger.debug(f"Grouping: f{aggregate_ids}")
             if len(aggregate_ids) < 2 or any(type(a_id) is not int for a_id in aggregate_ids):
                 return {"error": "at least two aggregate ids needed"}, 404
             first_aggregate = NewsItemAggregate.get(aggregate_ids.pop(0))
@@ -736,13 +774,10 @@ class NewsItemAggregate(BaseModel):
     @classmethod
     def update_aggregates(cls, aggregates: set):
         try:
-            logger.debug("UPDATE AGGREGATES")
-            logger.debug(aggregates)
             for aggregate in aggregates:
                 if len(aggregate.news_items) == 0:
                     NewsItemAggregateSearchIndex.remove(aggregate)
                     NewsItemTag.remove_by_aggregate(aggregate)
-                    logger.debug(f"Trying to delete: {aggregate}")
                     db.session.delete(aggregate)
                 else:
                     NewsItemAggregateSearchIndex.prepare(aggregate)
@@ -796,34 +831,6 @@ class NewsItemAggregate(BaseModel):
         aggregate.summary = summary
         db.session.commit()
         return {"message": "success"}, 200
-
-    def vote(self, vote_data, user_id) -> "NewsItemVote":
-        logger.debug(f"Voting {vote_data} for {self.id}")
-        if vote := NewsItemVote.find_by_user(self.id, user_id):
-            if vote_data > 0:
-                self.update_like_vote(vote)
-            else:
-                self.update_dislike_vote(vote)
-        else:
-            vote = self.create_new_vote(vote, user_id)
-
-        self.news_item_data.updated = datetime.now()
-        return vote
-
-    def create_new_vote(self, vote, user_id):
-        vote = NewsItemVote(self.id, user_id)
-        db.session.add(vote)
-        return vote
-
-    def update_like_vote(self, vote):
-        self.likes -= 1
-        self.relevance -= 1
-        vote.like = ~vote.like
-
-    def update_dislike_vote(self, vote):
-        self.dislikes -= 1
-        self.relevance += 1
-        vote.dislike = ~vote.dislike
 
     def to_dict(self) -> dict[str, Any]:
         data = super().to_dict()
