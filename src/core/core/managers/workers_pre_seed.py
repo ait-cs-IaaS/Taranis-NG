@@ -123,6 +123,7 @@ workers = [
         "name": "Wordlist Bot",
         "parameters": [
             {"parameter": "SOURCE_GROUP", "type": "select"},
+            {"parameter": "WORD_LISTS", "type": "table"},
             {"parameter": "RUN_AFTER_COLLECTOR", "type": "switch"},
             {"parameter": "REFRESH_INTERVAL", "type": "number"},
         ],
@@ -210,6 +211,7 @@ bots = [
         "description": "Bot for tagging news items by wordlist",
         "type": "WORDLIST_BOT",
         "parameters": [
+            {"parameter": "WORD_LISTS", "type": "table"},
             {"parameter": "SOURCE_GROUP", "type": "select"},
             {"parameter": "RUN_AFTER_COLLECTOR", "type": "switch", "value": "true"},
             {"parameter": "REFRESH_INTERVAL", "type": "number"},
