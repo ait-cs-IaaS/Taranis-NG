@@ -18,7 +18,7 @@ class AttributeGroupItem(BaseModel):
     min_occurrence = db.Column(db.Integer, default=1)
     max_occurrence = db.Column(db.Integer, default=1)
 
-    attribute_group_id = db.Column(db.Integer, db.ForeignKey("attribute_group.id"))
+    attribute_group_id = db.Column(db.Integer, db.ForeignKey("attribute_group.id", ondelete="CASCADE"))
     attribute_group = db.relationship("AttributeGroup")
 
     attribute_id = db.Column(db.Integer, db.ForeignKey("attribute.id"))
