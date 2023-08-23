@@ -1,16 +1,20 @@
 <template>
-  <p :class="news_item_summary_class">
+  <span :class="news_item_summary_class">
     <v-tooltip v-if="isSummarized" top>
       <template #activator="{ props }">
         <v-icon v-bind="props">mdi-text-short</v-icon>
       </template>
       <span>This text is Summarized</span>
     </v-tooltip>
-    {{ content }}
-  </p>
+    <span v-dompurify-html="highlight_text"></span>
+  </span>
 </template>
 
 <script>
+import { ref, computed } from 'vue'
+import { useFilterStore } from '@/stores/FilterStore'
+import { storeToRefs } from 'pinia'
+
 export default {
   name: 'SummarizedContent',
   props: {
@@ -27,15 +31,36 @@ export default {
       default: false
     }
   },
-  data: () => ({
-    colorStart: Math.floor(Math.random() * 9)
-  }),
-  computed: {
-    news_item_summary_class() {
-      return this.open ? 'news-item-summary-no-clip' : 'news-item-summary'
+  setup(props) {
+    const filterStore = useFilterStore()
+    const { newsItemsFilter } = storeToRefs(filterStore)
+    const colorStart = ref(Math.floor(Math.random() * 9))
+
+    const news_item_summary_class = computed(() => {
+      return props.open ? 'news-item-summary-no-clip' : 'news-item-summary'
+    })
+
+    function removeRegexSpecialChars(string) {
+      return string.replace(/[.*+?^${}()<>|[\]\\]/g, '')
     }
-  },
-  methods: {}
+    const highlight_text = computed(() => {
+      const term = removeRegexSpecialChars(newsItemsFilter.value.search)
+      if (!term) return props.content
+      console.debug('highlight text with term: ', term)
+      let results = props.content
+      results = results.replace(
+        new RegExp(term, 'gi'),
+        (match) => `<mark>${match}</mark>`
+      )
+      return results
+    })
+
+    return {
+      colorStart,
+      news_item_summary_class,
+      highlight_text
+    }
+  }
 }
 </script>
 
