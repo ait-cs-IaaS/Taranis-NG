@@ -6,14 +6,13 @@
       </template>
       <span>This text is Summarized</span>
     </v-tooltip>
-    <span v-dompurify-html="highlight_text"></span>
+    <span v-dompurify-html="highlighted"></span>
   </span>
 </template>
 
 <script>
 import { ref, computed } from 'vue'
-import { useFilterStore } from '@/stores/FilterStore'
-import { storeToRefs } from 'pinia'
+import { highlight_text } from '@/utils/helpers'
 
 export default {
   name: 'SummarizedContent',
@@ -32,33 +31,20 @@ export default {
     }
   },
   setup(props) {
-    const filterStore = useFilterStore()
-    const { newsItemsFilter } = storeToRefs(filterStore)
     const colorStart = ref(Math.floor(Math.random() * 9))
 
     const news_item_summary_class = computed(() => {
       return props.open ? 'news-item-summary-no-clip' : 'news-item-summary'
     })
 
-    function removeRegexSpecialChars(string) {
-      return string.replace(/[.*+?^${}()<>|[\]\\]/g, '')
-    }
-    const highlight_text = computed(() => {
-      const term = removeRegexSpecialChars(newsItemsFilter.value.search)
-      if (!term) return props.content
-      console.debug('highlight text with term: ', term)
-      let results = props.content
-      results = results.replace(
-        new RegExp(term, 'gi'),
-        (match) => `<mark>${match}</mark>`
-      )
-      return results
+    const highlighted = computed(() => {
+      return highlight_text(props.content)
     })
 
     return {
       colorStart,
       news_item_summary_class,
-      highlight_text
+      highlighted
     }
   }
 }
