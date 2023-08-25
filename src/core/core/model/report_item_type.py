@@ -42,6 +42,12 @@ class AttributeGroupItem(BaseModel):
         data["attribute"] = self.attribute.to_dict()
         return data
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "ReportItemType":
+        data.pop("attribute_group_id", None)
+        data.pop("attribute", None)
+        return cls(**data)
+
     def to_dict_with_group(self):
         data = self.to_dict()
         data["attribute_group"] = self.attribute_group.to_dict()
@@ -77,15 +83,15 @@ class AttributeGroup(BaseModel):
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "AttributeGroup":
-        attribute_group_items = [
-            AttributeGroupItem.from_dict(attribute_group_item) for attribute_group_item in data.pop("attribute_group_items")
-        ]
+        attribute_group_items = [AttributeGroupItem.from_dict(attribute_group_item) for attribute_group_item in
+                                 data.pop("attribute_group_items")]
         data.pop("report_item_type_id", None)
         return cls(attribute_group_items=attribute_group_items, **data)
 
     def to_dict(self):
         data = super().to_dict()
-        data["attribute_group_items"] = [attribute_group_item.to_dict() for attribute_group_item in self.attribute_group_items]
+        data["attribute_group_items"] = [attribute_group_item.to_dict() for attribute_group_item in
+                                         self.attribute_group_items]
         return data
 
     @staticmethod
@@ -152,7 +158,8 @@ class ReportItemType(BaseModel):
 
     @classmethod
     def allowed_with_acl(cls, report_item_type_id, user, see, access, modify):
-        query = db.session.query(ReportItemType.id).distinct().group_by(ReportItemType.id).filter(ReportItemType.id == report_item_type_id)
+        query = db.session.query(ReportItemType.id).distinct().group_by(ReportItemType.id).filter(
+            ReportItemType.id == report_item_type_id)
 
         query = query.outerjoin(
             ACLEntry,
@@ -200,7 +207,8 @@ class ReportItemType(BaseModel):
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "ReportItemType":
         logger.debug(data)
-        attribute_groups = [AttributeGroup.from_dict(attribute_group) for attribute_group in data.pop("attribute_groups")]
+        attribute_groups = [AttributeGroup.from_dict(attribute_group) for attribute_group in
+                            data.pop("attribute_groups")]
         return cls(attribute_groups=attribute_groups, **data)
 
     def to_dict(self):
@@ -215,7 +223,8 @@ class ReportItemType(BaseModel):
             return "Report Type not found", 404
         report_type.title = data["title"]
         report_type.description = data["description"]
-        report_type.attribute_groups = [AttributeGroup.from_dict(attribute_group) for attribute_group in data["attribute_groups"]]
+        report_type.attribute_groups = [AttributeGroup.from_dict(attribute_group) for attribute_group in
+                                        data["attribute_groups"]]
         for attribute_group in report_type.attribute_groups:
             attribute_group.report_item_type = report_type
         db.session.commit()
