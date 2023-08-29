@@ -148,7 +148,8 @@ export default {
       title: '',
       description: '',
       min_occurrence: 0,
-      max_occurrence: 1
+      max_occurrence: 1,
+      attribute: []
     })
     const default_attribute = ref({
       index: attribute_contents.value.length,
@@ -156,7 +157,8 @@ export default {
       title: '',
       description: '',
       min_occurrence: 0,
-      max_occurrence: 1
+      max_occurrence: 1,
+      attribute: []
     })
 
     const headers = computed(() => [
