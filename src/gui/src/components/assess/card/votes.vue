@@ -5,31 +5,34 @@
       size="small"
       class="item-action-btn"
       variant="tonal"
-      @click.stop="upvote()"
+      @click.stop="vote('like')"
     >
-      <span>{{ likes }}</span>
-      <v-icon right color="awake-green-color"
-        >mdi-arrow-up-circle-outline</v-icon
-      >
+      <span>{{ story.likes }}</span>
+      <v-icon
+        right
+        color="awake-green-color"
+        icon="mdi-arrow-up-circle-outline"
+      />
     </v-btn>
     <v-btn
       v-ripple="false"
       size="small"
       class="item-action-btn"
       variant="tonal"
-      @click.stop="downvote()"
+      @click.stop="vote('dislike')"
     >
-      <span>{{ dislikes }}</span>
-      <v-icon right color="awake-red-color"
-        >mdi-arrow-down-circle-outline</v-icon
-      >
+      <span>{{ story.dislikes }}</span>
+      <v-icon
+        right
+        color="awake-red-color"
+        icon="mdi-arrow-down-circle-outline"
+      />
     </v-btn>
   </v-btn-toggle>
 </template>
 
 <script>
-import { ref } from 'vue'
-import { voteNewsItemAggregate } from '@/api/assess'
+import { useAssessStore } from '@/stores/AssessStore'
 
 export default {
   name: 'StoryVotes',
@@ -40,24 +43,14 @@ export default {
     }
   },
   setup(props) {
-    const likes = ref(props.story.likes)
-    const dislikes = ref(props.story.dislikes)
+    const assessStore = useAssessStore()
 
-    const upvote = () => {
-      likes.value += 1
-      voteNewsItemAggregate(props.story.id, 1)
-    }
-
-    const downvote = () => {
-      dislikes.value += 1
-      voteNewsItemAggregate(props.story.id, -1)
+    const vote = (vote) => {
+      assessStore.voteOnNewsItemAggregate(props.story.id, vote)
     }
 
     return {
-      likes,
-      dislikes,
-      upvote,
-      downvote
+      vote
     }
   }
 }

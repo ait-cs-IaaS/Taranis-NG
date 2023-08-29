@@ -26,11 +26,14 @@ def flask_migrate_subprocess(migrate_command):
     [logger.debug(line) for line in result.stderr.decode().split("\n") if line]
 
 
-def initialize(app):
+def initialize(app, first_worker):
     db.init_app(app)
     migrate.init_app(app, db)
 
     if "db" in sys.argv:  # called via flask db
+        return
+
+    if not first_worker:
         return
 
     if is_db_empty():
@@ -41,6 +44,7 @@ def initialize(app):
     else:
         logger.debug("Migrate existing Database")
         flask_migrate_subprocess("upgrade")  # upgrade(migrate.directory, "head")
+        db.create_all()
 
 
 @event.listens_for(Engine, "connect")

@@ -20,9 +20,10 @@
         align-self="center"
       >
         <v-icon v-if="story_in_report" class="mr-2 my-auto"> mdi-share </v-icon>
-        <h2 :class="news_item_title_class">
-          {{ story.title }}
-        </h2>
+        <h2
+          v-dompurify-html="highlighted_title"
+          :class="news_item_title_class"
+        ></h2>
       </v-col>
 
       <v-col
@@ -185,7 +186,9 @@
         :key="item.id"
         :news-item="item"
         :detail-view="detailView"
+        :story="story"
         class="mt-3"
+        @refresh="emitRefresh()"
       />
     </v-col>
   </v-row>
@@ -198,18 +201,18 @@ import StoryMetaInfo from '@/components/assess/card/StoryMetaInfo.vue'
 import votes from '@/components/assess/card/votes.vue'
 import SummarizedContent from '@/components/assess/card/SummarizedContent.vue'
 import CardNewsItem from '@/components/assess/CardNewsItem.vue'
-import { deleteNewsItemAggregate } from '@/api/assess'
 import { ref, computed } from 'vue'
 import { useAssessStore } from '@/stores/AssessStore'
+import { highlight_text } from '@/utils/helpers'
 
 export default {
   name: 'CardStory',
   components: {
+    votes,
     CardNewsItem,
     PopupDeleteItem,
     PopupShareItems,
     StoryMetaInfo,
-    votes,
     SummarizedContent
   },
   props: {
@@ -221,7 +224,7 @@ export default {
     detailView: { type: Boolean, default: false },
     reportView: { type: Boolean, default: false }
   },
-  emits: ['selectItem', 'deleteItem', 'removeFromReport'],
+  emits: ['selectItem', 'deleteItem', 'refresh'],
   setup(props, { emit }) {
     const viewDetails = ref(false)
     const openSummary = ref(props.detailView)
@@ -234,7 +237,9 @@ export default {
     )
 
     const story_in_report = computed(() => props.story.in_reports_count > 0)
-    const news_item_length = computed(() => props.story.news_items.length)
+    const news_item_length = computed(() =>
+      props.story.news_items ? props.story.news_items.length : 0
+    )
     const news_item_title_class = computed(() => {
       return openSummary.value || props.detailView
         ? 'news-item-title-no-clip'
@@ -258,6 +263,10 @@ export default {
       return props.story.summary !== undefined && props.story.summary !== ''
     })
 
+    const highlighted_title = computed(() => {
+      return highlight_text(props.story.title)
+    })
+
     const openCard = () => {
       openSummary.value = !openSummary.value
     }
@@ -275,13 +284,11 @@ export default {
     }
 
     const deleteNewsItem = () => {
-      deleteNewsItemAggregate(props.story.id)
-      emit('deleteItem', props.story.id)
+      emit('deleteItem')
     }
 
-    const removeFromReport = () => {
-      console.debug('remove from report')
-      emit('removeFromReport')
+    const emitRefresh = () => {
+      emit('refresh')
     }
 
     const getDescription = computed(() => {
@@ -302,6 +309,7 @@ export default {
       news_item_length,
       news_item_title_class,
       news_item_summary_text,
+      highlighted_title,
       minButtonWidth,
       story_in_reports,
       is_summarized,
@@ -311,7 +319,7 @@ export default {
       markAsRead,
       markAsImportant,
       deleteNewsItem,
-      removeFromReport
+      emitRefresh
     }
   }
 }

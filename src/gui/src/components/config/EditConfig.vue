@@ -7,7 +7,6 @@
       @submit.prevent="handleSubmit"
     >
       <v-card-title class="bg-grey-lighten-2 mb-5">
-        <v-btn type="submit" color="success"> Submit </v-btn>
         <span v-if="title" class="ml-5"> {{ title }}</span>
         <slot name="titlebar"></slot>
       </v-card-title>
@@ -76,16 +75,13 @@
           </v-col>
         </v-row>
 
-        <v-col
-          v-if="item.type === 'table' && item.items !== undefined"
-          cols="12"
-          class="mt-1 mb-2"
-        >
+        <v-col v-if="item.type === 'table'" cols="12" class="mt-1 mb-2">
           <v-data-table
             v-model="formData[item.flatKey]"
             :headers="item.headers"
             :show-select="!item['disabled']"
-            :items="item.items"
+            :group-by="item.groupBy"
+            :items="item.items || formData[item.flatKey]"
           >
             <template #top>
               <v-row justify="space-between">
@@ -99,10 +95,14 @@
                 </v-col>
               </v-row>
             </template>
-            <template v-if="item.items.length < 10" #bottom />
+            <template
+              v-if="typeof item.items !== 'undefined' && item.items.length < 10"
+              #bottom
+            />
           </v-data-table>
         </v-col>
       </v-row>
+      <v-btn block type="submit" color="success"> Submit </v-btn>
     </v-form>
   </v-card>
 </template>
@@ -170,6 +170,9 @@ export default {
 
     const selectedParameters = computed(() => {
       if (!formData.value.type || !props.parameters) {
+        return []
+      }
+      if (!props.parameters[formData.value.type]) {
         return []
       }
       return props.parameters[formData.value.type]

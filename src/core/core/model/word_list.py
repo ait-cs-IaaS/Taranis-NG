@@ -94,10 +94,10 @@ class WordList(BaseModel):
         return cls.query.filter_by(entries=None).order_by(db.asc(WordList.name)).all()
 
     @classmethod
-    def get_by_filter(cls, filter_data, user, acl_check):
+    def get_by_filter(cls, filter_data, user=None, acl_check=False):
         query = cls.query.distinct().group_by(WordList.id)
 
-        if acl_check:
+        if acl_check and user:
             query = query.outerjoin(
                 ACLEntry,
                 and_(
@@ -183,7 +183,8 @@ class WordList(BaseModel):
 
     @classmethod
     def parse_csv(cls, content) -> list:
-        cr = csv.reader(content.splitlines(), delimiter=";", lineterminator="\n")
+        dialect = csv.Sniffer().sniff(content)
+        cr = csv.reader(content.splitlines(), dialect)
         headers = [header.lower() for header in next(cr)]
         if len(headers) != 3:
             raise ValueError("Invalid CSV file")

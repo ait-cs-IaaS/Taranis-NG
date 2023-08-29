@@ -8,6 +8,8 @@ on:
     branches:
     - master
     - awake
+    tags:
+    - "**"
 
 permissions:
   packages: write

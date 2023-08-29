@@ -9,7 +9,8 @@
         <card-story
           :story="item"
           :selected="newsItemsSelection.includes(item.id)"
-          @delete-item="removeAndDeleteNewsItem(item.id)"
+          @delete-item="deleteNewsItem(item.id)"
+          @refresh="refresh(item.id)"
           @select-item="selectNewsItem(item.id)"
         />
       </template>
@@ -65,8 +66,12 @@ export default defineComponent({
       return newsItemsSelection.value.length > 0
     })
 
-    const removeAndDeleteNewsItem = () => {
-      updateNewsItems()
+    const refresh = (id) => {
+      assessStore.updateNewsItemByID(id)
+    }
+
+    const deleteNewsItem = (id) => {
+      assessStore.removeNewsItemByID(id)
     }
 
     const displayMore = ({ done }) => {
@@ -110,10 +115,11 @@ export default defineComponent({
       newsItemsSelection,
       moreToLoad,
       activeSelection,
-      removeAndDeleteNewsItem,
+      refresh,
       nextPage,
       resetFilter,
       selectNewsItem,
+      deleteNewsItem,
       displayMore
     }
   }

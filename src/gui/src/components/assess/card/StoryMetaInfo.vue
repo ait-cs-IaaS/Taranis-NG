@@ -20,13 +20,12 @@
             />
           </v-col>
         </v-row>
-        <v-row>
+        <v-row v-if="story.tags && !reportView">
           <v-col style="max-width: 110px" class="py-0">
             <strong>Tags:</strong>
           </v-col>
           <v-col class="py-0">
             <tag-list
-              v-if="story.tags"
               :tags="story.tags"
               :truncate="!detailView"
               :limit="tagLimit"
@@ -89,8 +88,10 @@ export default {
 
     const published_dates = computed(() => {
       const pub_dates = props.story.news_items
-        .map((item) => item.news_item_data.published)
-        .sort()
+        ? props.story.news_items
+            .map((item) => item.news_item_data.published)
+            .sort()
+        : []
 
       if (pub_dates.length === 0) {
         console.warn('No published dates found for story', props.story.title)

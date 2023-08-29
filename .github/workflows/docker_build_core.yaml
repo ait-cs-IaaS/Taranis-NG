@@ -3,14 +3,14 @@ name: Core Docker image
 on:
   push:
     paths:
-      - "src/core/**"
-      - "docker/Dockerfile.core"
-      - "docker/gunicorn.conf.py"
+    - 'src/core/**'
+    - 'docker/Dockerfile.core'
+    - 'docker/gunicorn.conf.py'
     branches:
-      - master
-      - awake
+    - master
+    - awake
     tags:
-      - "**"
+    - "**"
 
 permissions:
   packages: write
@@ -25,12 +25,24 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: "3.11"
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/pip
+          key: ${{ hashFiles('src/core/pyproject.toml') }}
+
+      - name: Install dependencies
+        working-directory: src/core
+        run: pip install -e .[dev]
+
       - name: test
         working-directory: src/core
         run: |
           pip install -e .[dev]
           echo "Starting Pytest"
-          pytest --ignore tests/test_schema.py
+          pytest
 
   build_wheel:
     name: build wheel
@@ -48,14 +60,14 @@ jobs:
           python -m build
       - name: Release
         uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/v')
         with:
           files: |
             src/core/dist/taranis_ng_core-*.whl
             src/core/dist/taranis_ng_core-*.tar.gz
       - name: Release to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/v')
         with:
           password: ${{ secrets.PYPI_API_TOKEN_CORE }}
           packages-dir: src/core/dist/
