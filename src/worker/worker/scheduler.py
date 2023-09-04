@@ -22,7 +22,7 @@ class RESTScheduler(Scheduler):
         super().__init__(*args, **kwargs)
         self.core_api = CoreApi()
         self.last_checked = datetime.now(timezone.utc)
-        self.max_interval = 5
+        self.max_interval = 60
 
     def update_schedule_from_core(self):
         if not (core_schedule := self.core_api.get_schedule()):
