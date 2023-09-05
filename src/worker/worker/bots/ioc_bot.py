@@ -42,6 +42,7 @@ class IOCBot(BaseBot):
 
     def extract_ioc(self, text: str):
         iocs = find_iocs(text)
+        result = {}
         extract_keys = [
             "bitcoin_addresses",
             "cves",
@@ -58,7 +59,9 @@ class IOCBot(BaseBot):
             "registry_key_paths",
             "tlp_labels",
         ]
-        result = {ioc_fanger.fang(str(iocs[key])): {"tag_type": key} for key in extract_keys if key in iocs}
-
+        for key in extract_keys:
+            if key in iocs:
+                for ioc in iocs[key]:
+                    result[ioc_fanger.fang(str(ioc))] = {"tag_type": key}
         logger.debug(result)
         return result
