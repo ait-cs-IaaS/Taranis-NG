@@ -949,6 +949,13 @@ def pre_seed_wordlists():
                 "link": "https://raw.githubusercontent.com/ait-cs-IaaS/cve2wordlist/master/output/austrian_municipalities.json",
             }
         )
+        WordList.add(
+            {
+                "name": "Common Cyber Security Terms",
+                "description": "List of common cyber security terms",
+                "link": "https://raw.githubusercontent.com/ait-cs-IaaS/cve2wordlist/master/output/common.json",
+            }
+        )
 
 
 def pre_seed_default_user():
