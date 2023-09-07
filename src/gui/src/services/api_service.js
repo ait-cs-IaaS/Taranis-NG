@@ -35,14 +35,12 @@ export class ApiService {
     }
     return Object.entries(filterObject)
       .filter(([, val]) => val != null)
-      .map(function ([key, val]) {
+      .map(([key, val]) => {
         if (Array.isArray(val)) {
-          return val
-            .map((v) => `${key}=${ApiService.encodeAmpersand(v)}`)
-            .join('&')
+          return val.map((v) => `${key}=${this.encodeAmpersand(v)}`).join('&')
         }
         if (typeof val === 'object') {
-          return ApiService.getQueryStringFromObject(val)
+          return this.getQueryStringFromObject(val)
         }
         return `${key}=${val}`
       })
