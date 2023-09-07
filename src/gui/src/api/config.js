@@ -187,22 +187,6 @@ export function deleteUser(user) {
   return apiService.delete(`/config/users/${user.id}`)
 }
 
-export function getAllExternalUsers(filter) {
-  return apiService.get(`/config/external-users?search=${filter.search}`)
-}
-
-export function createExternalUser(user) {
-  return apiService.post('/config/external-users', user)
-}
-
-export function updateExternalUser(user) {
-  return apiService.put(`/config/external-users/${user.id}`, user)
-}
-
-export function deleteExternalUser(user) {
-  return apiService.delete(`/config/external-users/${user.id}`)
-}
-
 export function getAllWordLists(filter_data) {
   const filter = apiService.getQueryStringFromNestedObject(filter_data)
   return apiService.get(`/config/word-lists?${filter}`)
