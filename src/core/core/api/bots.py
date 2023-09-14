@@ -80,6 +80,15 @@ class UpdateNewsItemTags(Resource):
         return {"error": "No data provided"}, 400
 
 
+class UpdateTags(Resource):
+    @api_key_required
+    def put(self):
+        if data := request.json:
+            for aggregate_id, tags in data.items():
+                news_item.NewsItemAggregate.update_tags(aggregate_id, tags)
+        return {"error": "No data provided"}, 400
+
+
 class UpdateNewsItemsAggregateSummary(Resource):
     @api_key_required
     def put(self, aggregate_id):
@@ -115,6 +124,7 @@ def initialize(api: Api):
         UpdateNewsItemTags,
         "/aggregate/<string:aggregate_id>/tags",
     )
+    namespace.add_resource(UpdateTags, "/aggregate/tags")
     namespace.add_resource(
         UpdateNewsItemData,
         "/news-item-data/<string:news_item_data_id>",

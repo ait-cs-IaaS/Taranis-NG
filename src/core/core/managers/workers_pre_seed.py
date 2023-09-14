@@ -60,7 +60,7 @@ workers = [
         "parameters": [
             {"parameter": "REGULAR_EXPRESSION"},
             {"parameter": "ATTRIBUTE_NAME"},
-            {"parameter": "SOURCE_GROUP", "type": "select"},
+            {"parameter": "ITEM_FILTER"},
             {"parameter": "RUN_AFTER_COLLECTOR", "type": "switch"},
             {"parameter": "REFRESH_INTERVAL", "type": "number"},
         ],
@@ -71,7 +71,7 @@ workers = [
         "name": "Grouping Bot",
         "parameters": [
             {"parameter": "REGULAR_EXPRESSION"},
-            {"parameter": "SOURCE_GROUP", "type": "select"},
+            {"parameter": "ITEM_FILTER"},
             {"parameter": "RUN_AFTER_COLLECTOR", "type": "switch"},
             {"parameter": "REFRESH_INTERVAL", "type": "number"},
         ],
@@ -81,7 +81,7 @@ workers = [
         "type": "NLP_BOT",
         "name": "NLP Bot",
         "parameters": [
-            {"parameter": "SOURCE_GROUP", "type": "select"},
+            {"parameter": "ITEM_FILTER"},
             {"parameter": "RUN_AFTER_COLLECTOR", "type": "switch"},
             {"parameter": "REFRESH_INTERVAL", "type": "number"},
         ],
@@ -91,7 +91,7 @@ workers = [
         "type": "IOC_BOT",
         "name": "IOC Bot",
         "parameters": [
-            {"parameter": "SOURCE_GROUP", "type": "select"},
+            {"parameter": "ITEM_FILTER"},
             {"parameter": "RUN_AFTER_COLLECTOR", "type": "switch"},
             {"parameter": "REFRESH_INTERVAL", "type": "number"},
         ],
@@ -102,7 +102,7 @@ workers = [
         "name": "Tagging Bot",
         "parameters": [
             {"parameter": "KEYWORDS"},
-            {"parameter": "SOURCE_GROUP", "type": "select"},
+            {"parameter": "ITEM_FILTER"},
             {"parameter": "RUN_AFTER_COLLECTOR", "type": "switch"},
             {"parameter": "REFRESH_INTERVAL", "type": "number"},
         ],
@@ -112,7 +112,7 @@ workers = [
         "type": "STORY_BOT",
         "name": "Story Clustering Bot",
         "parameters": [
-            {"parameter": "SOURCE_GROUP", "type": "select"},
+            {"parameter": "ITEM_FILTER"},
             {"parameter": "RUN_AFTER_COLLECTOR", "type": "switch"},
             {"parameter": "REFRESH_INTERVAL", "type": "number"},
         ],
@@ -122,7 +122,7 @@ workers = [
         "type": "SUMMARY_BOT",
         "name": "Summary generation Bot",
         "parameters": [
-            {"parameter": "SOURCE_GROUP", "type": "select"},
+            {"parameter": "ITEM_FILTER"},
             {"parameter": "RUN_AFTER_COLLECTOR", "type": "switch"},
             {"parameter": "REFRESH_INTERVAL", "type": "number"},
         ],
@@ -132,7 +132,7 @@ workers = [
         "type": "WORDLIST_BOT",
         "name": "Wordlist Bot",
         "parameters": [
-            {"parameter": "SOURCE_GROUP", "type": "select"},
+            {"parameter": "ITEM_FILTER"},
             {"parameter": "TAGGING_WORDLISTS", "type": "table"},
             {"parameter": "RUN_AFTER_COLLECTOR", "type": "switch"},
             {"parameter": "REFRESH_INTERVAL", "type": "number"},
@@ -211,7 +211,7 @@ bots = [
         "description": "Bot for tagging news items by wordlist",
         "type": "WORDLIST_BOT",
         "parameters": [
-            {"parameter": "SOURCE_GROUP", "type": "select"},
+            {"parameter": "ITEM_FILTER"},
             {"parameter": "RUN_AFTER_COLLECTOR", "type": "switch", "value": "true"},
             {"parameter": "REFRESH_INTERVAL", "type": "number"},
         ],
@@ -221,7 +221,7 @@ bots = [
         "description": "Bot for Tagging news items",
         "type": "IOC_BOT",
         "parameters": [
-            {"parameter": "SOURCE_GROUP", "type": "select"},
+            {"parameter": "ITEM_FILTER"},
             {"parameter": "RUN_AFTER_COLLECTOR", "type": "switch", "value": "true"},
             {"parameter": "REFRESH_INTERVAL", "type": "number"},
         ],
@@ -230,6 +230,11 @@ bots = [
         "name": "Story BOT",
         "description": "Bot for story clustering",
         "type": "STORY_BOT",
+    },
+    {
+        "name": "NLP Tagging BOT",
+        "description": "Bot for Tagging Items via NLP",
+        "type": "NLP_BOT",
     },
 ]
 

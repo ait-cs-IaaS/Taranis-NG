@@ -15,7 +15,7 @@
         </v-col>
 
         <v-col cols="12" class="pt-1">
-          <v-select
+          <v-autocomplete
             v-model="newsItemsFilter.group"
             :items="getOSINTSourceGroupsList"
             item-title="title"
@@ -24,12 +24,13 @@
             :hide-details="true"
             variant="solo"
             clearable
+            multiple
             density="compact"
-          ></v-select>
+          />
         </v-col>
 
         <v-col cols="12" class="pt-2">
-          <v-select
+          <v-autocomplete
             v-model="newsItemsFilter.source"
             :items="getOSINTSourcesList"
             item-title="title"
@@ -38,8 +39,9 @@
             :hide-details="true"
             variant="solo"
             clearable
+            multiple
             density="compact"
-          ></v-select>
+          />
         </v-col>
       </v-row>
 

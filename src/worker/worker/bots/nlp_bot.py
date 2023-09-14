@@ -1,6 +1,5 @@
 from .base_bot import BaseBot
 from worker.log import logger
-import datetime
 import spacy
 import spacy.cli
 import py3langid
@@ -8,8 +7,6 @@ from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
 from polyfuzz import PolyFuzz
 from polyfuzz.models import TFIDF
-from sentence_transformers import SentenceTransformer
-from keybert import KeyBERT
 from pandas import DataFrame
 import numpy
 import nltk
@@ -27,7 +24,6 @@ class NLPBot(BaseBot):
         self.ner_model = spacy.load("xx_ent_wiki_sm")
         torch.set_num_threads(1)  # https://github.com/pytorch/pytorch/issues/36191
         self.polyfuzz_model = PolyFuzz(TFIDF(model_id="TF-IDF", clean_string=False, n_gram_range=(3, 3), min_similarity=0))  # type: ignore
-        self.keybert_model = KeyBERT(model=SentenceTransformer("basel/ATTACK-BERT"))  # type: ignore
         self.wordnet_lemmatizer = WordNetLemmatizer()
         nltk.download("wordnet")
         nltk.download("stopwords")
@@ -50,15 +46,7 @@ class NLPBot(BaseBot):
         if not parameters:
             return
         try:
-            source_group = parameters.get("SOURCE_GROUP")
-            source = parameters.get("SOURCE")
-
-            limit = (datetime.datetime.now() - datetime.timedelta(days=7)).isoformat()
-            filter_dict = {"timestamp": limit}
-            if source_group:
-                filter_dict["source_group"] = source_group
-            if source:
-                filter_dict["source"] = source
+            filter_dict = self.get_filter_dict(parameters)
 
             data = self.core_api.get_news_items_aggregate(filter_dict)
             if not data:
@@ -67,9 +55,14 @@ class NLPBot(BaseBot):
 
             all_keywords = {k: v for news_item in data for k, v in news_item["tags"].items()}
 
+            update_result = {}
+
+            logger.debug(f"All Keywords: {all_keywords}")
             for aggregate in data:
                 current_keywords = self.extract_keywords(aggregate, all_keywords)
-                self.core_api.update_news_item_tags(aggregate["id"], current_keywords)
+                all_keywords |= current_keywords
+                update_result[aggregate["id"]] = current_keywords
+            self.core_api.update_tags(update_result)
 
         except Exception:
             logger.log_debug_trace(f"Error running Bot: {self.type}")
@@ -92,7 +85,6 @@ class NLPBot(BaseBot):
                 self.language = language
 
         current_keywords.update(self.extract_ner(aggregate_content[: self.extraction_text_limit]))
-        current_keywords.update(self.generateKeywords(aggregate_content[: self.extraction_text_limit]))
         current_keywords.update(self.lemmatize(current_keywords))
 
         from_list, to_list = self.polyfuzz(list(all_keywords.keys()), list(current_keywords.keys()))
@@ -119,16 +111,6 @@ class NLPBot(BaseBot):
                 result[baseform]["sub_forms"].append(keyword)
         return result
 
-    def generateKeywords(self, text: str) -> dict:
-        keywords = self.keybert_model.extract_keywords(
-            docs=text, keyphrase_ngram_range=(1, 1), use_mmr=True, top_n=10, diversity=0.5, stop_words="english"
-        )
-        return {
-            str(keyword).lower(): {"tag_type": "CySec", "sub_forms": []}
-            for keyword, distance in keywords
-            if 16 > len(keyword) > 2 and distance > 0.2 and self.not_in_stopwords(keyword)  # type: ignore
-        }
-
     def detect_language(self, text) -> str:
         return py3langid.classify(text)[0]
 
@@ -154,12 +136,10 @@ class NLPBot(BaseBot):
     def update_keywords_from_polyfuzz(self, values_from, values_to, all_keywords: dict, current_keywords: dict) -> dict:
         for i, matching_value in enumerate(values_from):
             matching_entry = all_keywords[matching_value]
-            if matching_value in current_keywords:  # "Securities"
-                # { "cybering", "cyberk1ller"} += { "cybering", "cyberoo", "CYBÄR"}
+            if matching_value in current_keywords:
                 current_keywords[matching_value]["sub_forms"] += matching_entry["sub_forms"]
-                # { "cybering", "cyberk1ller", "cyberoo", "CYBÄR"}
             if values_to[i] in current_keywords:
                 matching_entry["sub_forms"] += [values_to[i]]
-                current_keywords[values_to[i]] = matching_entry  # Security
+                current_keywords[values_to[i]] = matching_entry
 
-        return current_keywords  # ["Cyber": { "cybering", "cyberk1ller", "cyberoo", "CYBÄR"}, "Security": {"Securities"}, "whatever"]
+        return current_keywords

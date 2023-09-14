@@ -16,8 +16,8 @@ import { useFilterStore } from './FilterStore'
 export const useAssessStore = defineStore('assess', {
   state: () => ({
     selection: [],
-    osint_sources: [],
-    osint_source_groups: [],
+    osint_sources: { total_count: 0, items: [] },
+    osint_source_groups: { total_count: 0, items: [] },
     newsItems: { total_count: 0, items: [] },
     newsItemsSelection: [],
     max_item: null
@@ -137,10 +137,16 @@ export const useAssessStore = defineStore('assess', {
       }
     },
     async updateOSINTSources() {
+      if (this.osint_sources.items.length > 0) {
+        return
+      }
       const response = await getOSINTSourcesList()
       this.osint_sources = response.data
     },
     async updateOSINTSourceGroupsList() {
+      if (this.osint_source_groups.items.length > 0) {
+        return
+      }
       const response = await getOSINTSourceGroupsList()
       this.osint_source_groups = response.data
     },
@@ -196,5 +202,6 @@ export const useAssessStore = defineStore('assess', {
         }
       }
     }
-  }
+  },
+  persist: true
 })

@@ -433,10 +433,10 @@ class NewsItemAggregate(BaseModel):
             query = query.join(OSINTSourceGroupOSINTSource, OSINTSourceGroupOSINTSource.osint_source_id == OSINTSource.id)
 
         if group := filter_args.get("group"):
-            query = query.filter(OSINTSourceGroupOSINTSource.osint_source_group_id == group)
+            query = query.filter(OSINTSourceGroupOSINTSource.osint_source_group_id.in_(group))
 
         if source := filter_args.get("source"):
-            query = query.filter(OSINTSource.id == source)
+            query = query.filter(OSINTSource.id.in_(source))
 
         if search := filter_args.get("search"):
             search = search.strip()
@@ -752,6 +752,30 @@ class NewsItemAggregate(BaseModel):
         except Exception:
             logger.log_debug_trace("Update News Item Tags Failed")
             return {"error": "update failed"}, 500
+
+    @classmethod
+    def check_tags_by_source(cls, source_id: int) -> tuple[dict, int]:
+        try:
+            query = cls._add_filters_to_query({"source": source_id}, cls.query)
+            items = query.all()
+
+            if not items:
+                return {"error": "no items found"}, 404
+
+            common_tags = {tag.name for tag in items[0].tags}
+
+            for item in items[1:]:
+                item_tags = {tag.name for tag in item.tags}
+                common_tags.intersection_update(item_tags)
+
+                if not common_tags:
+                    break
+
+            return {"common_tags": list(common_tags)}, 200
+
+        except Exception:
+            logger.log_debug_trace("Get News Item Tags Failed")
+            return {"error": "get failed"}, 500
 
     @classmethod
     def group_multiple_aggregate(cls, aggregate_id_list: list[list[int]]):

@@ -926,13 +926,7 @@ def pre_seed_wordlists():
                 "name": "CVE Vendors",
                 "description": "List of vendors that are known to be affected by a CVE.",
                 "link": "https://raw.githubusercontent.com/ait-cs-IaaS/wordlists/master/output/vendors.json",
-            }
-        )
-        WordList.add(
-            {
-                "name": "CVE Products",
-                "description": "List of products that are known to be affected by a CVE.",
-                "link": "https://raw.githubusercontent.com/ait-cs-IaaS/wordlists/master/output/products.json",
+                "usage": 4,
             }
         )
         WordList.add(
@@ -940,6 +934,7 @@ def pre_seed_wordlists():
                 "name": "Countries",
                 "description": "List of Countries",
                 "link": "https://raw.githubusercontent.com/ait-cs-IaaS/wordlists/master/output/countries.json",
+                "usage": 4,
             }
         )
         WordList.add(
@@ -954,6 +949,7 @@ def pre_seed_wordlists():
                 "name": "Common Cyber Security Terms",
                 "description": "List of common cyber security terms",
                 "link": "https://raw.githubusercontent.com/ait-cs-IaaS/wordlists/master/output/common.json",
+                "usage": 4,
             }
         )
         WordList.add(
@@ -961,6 +957,7 @@ def pre_seed_wordlists():
                 "name": "APT Groups",
                 "description": "List of Advanced Persistent Threat Groups",
                 "link": "https://raw.githubusercontent.com/ait-cs-IaaS/wordlists/master/output/apt.json",
+                "usage": 4,
             }
         )
 
