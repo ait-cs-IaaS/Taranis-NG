@@ -135,7 +135,7 @@ class CoreApi:
     def update_tags(self, tags) -> dict | None:
         try:
             if tags:
-                return self.api_put(url="/api/v1/bots/tags", json_data=tags)
+                return self.api_put(url="/api/v1/worker/tags", json_data=tags)
         except Exception:
             logger.log_debug_trace("update_tags failed")
             return None

@@ -138,6 +138,20 @@ class Tags(Resource):
             return {tag.name: tag.to_dict() for tag in tags}, 200
         return {"error": "No tags found"}, 404
 
+    @api_key_required
+    def put(self):
+        if not (data := request.json):
+            return {"error": "No data provided"}, 400
+        logger.debug(f"Updating tags: {len(data)}")
+        errors = {}
+        for aggregate_id, tags in data.items():
+            _, status = NewsItemAggregate.update_tags(aggregate_id, tags)
+            if status != 200:
+                errors[aggregate_id] = status
+        if errors:
+            return {"message": "Some tags failed to update", "errors": errors}, 207
+        return {"message": "Tags updated"}, 200
+
 
 class DropTags(Resource):
     @api_key_required

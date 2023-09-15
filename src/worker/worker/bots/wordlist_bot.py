@@ -26,6 +26,7 @@ class WordlistBot(BaseBot):
                 return "No data found"
 
             found_tags = self._find_tags_for_aggregates(data, word_list_entries, override_existing_tags, ignore_case)
+            logger.debug(found_tags)
             self.core_api.update_tags(found_tags)
 
         except Exception as error:
@@ -43,9 +44,10 @@ class WordlistBot(BaseBot):
 
     def _find_tags_for_aggregates(self, data, word_list_entries, override_existing_tags, ignore_case):
         found_tags = {}
+        logger.info(f"Extracting tags from news items: {len(data)}")
         for i, aggregate in enumerate(data):
             if i % (len(data) // 10) == 0:
-                logger.info(f"Extracting tags from news items: {i}/{len(data)}")
+                logger.debug(f"Extracting tags from news items: {i}/{len(data)}")
             if findings := self._find_tags(aggregate, word_list_entries, override_existing_tags, ignore_case):
                 found_tags[aggregate["id"]] = findings
         return found_tags

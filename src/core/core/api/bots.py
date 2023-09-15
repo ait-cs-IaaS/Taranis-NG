@@ -80,15 +80,6 @@ class UpdateNewsItemTags(Resource):
         return {"error": "No data provided"}, 400
 
 
-class UpdateTags(Resource):
-    @api_key_required
-    def put(self):
-        if data := request.json:
-            for aggregate_id, tags in data.items():
-                news_item.NewsItemAggregate.update_tags(aggregate_id, tags)
-        return {"error": "No data provided"}, 400
-
-
 class UpdateNewsItemsAggregateSummary(Resource):
     @api_key_required
     def put(self, aggregate_id):
@@ -112,7 +103,9 @@ class BotInfo(Resource):
         return bot.Bot.get_by_filter(bot_id)
 
     def put(self, bot_id):
-        return bot.Bot.update(bot_id, request.json)
+        if bot_result := bot.Bot.update(bot_id, request.json):
+            return {"message": f"Bot {bot_result['name']} updated", "id": bot_result["id"]}, 200
+        return {"message": f"Bot {bot_id} not found"}, 404
 
 
 def initialize(api: Api):
@@ -124,7 +117,6 @@ def initialize(api: Api):
         UpdateNewsItemTags,
         "/aggregate/<string:aggregate_id>/tags",
     )
-    namespace.add_resource(UpdateTags, "/aggregate/tags")
     namespace.add_resource(
         UpdateNewsItemData,
         "/news-item-data/<string:news_item_data_id>",

@@ -111,9 +111,6 @@ class Logger(TaranisLogger):
         self.log_info(log_text)
 
 
-logger = Logger(module=Config.MODULE_ID, colored=Config.COLORED_LOGS, debug=Config.DEBUG, gunicorn=False, syslog_address=None)
-
-
 class IgnoreHeartbeatTickFilter(logging.Filter):
     def filter(self, record: logging.LogRecord) -> bool:
         return "heartbeat_tick" not in record.getMessage()
@@ -126,3 +123,6 @@ def setup_loggers(logger, *args, **kwargs):
         logger.setLevel(logging.DEBUG)
     ampq_logger = logging.getLogger("amqp.connection.Connection.heartbeat_tick")
     ampq_logger.addFilter(IgnoreHeartbeatTickFilter())
+
+
+logger = Logger(module=Config.MODULE_ID, colored=Config.COLORED_LOGS, debug=Config.DEBUG, gunicorn=False, syslog_address=None)

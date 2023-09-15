@@ -44,7 +44,7 @@ class Settings(BaseSettings):
             "broker_connection_retry": False,  # To suppress deprecation warning
             "beat_scheduler": "worker.scheduler:RESTScheduler",
             "enable_utc": True,
-            # "worker_hijack_root_logger": False,
+            "worker_hijack_root_logger": False,
         }
 
 

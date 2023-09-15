@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from typing import Any
 from sqlalchemy import orm, and_, or_, func
 from enum import StrEnum, auto
+from collections import Counter
 
 from core.managers.db_manager import db
 from core.model.base_model import BaseModel
@@ -430,10 +431,11 @@ class NewsItemAggregate(BaseModel):
             query = query.join(NewsItem, NewsItem.news_item_aggregate_id == NewsItemAggregate.id)
             query = query.join(NewsItemData, NewsItem.news_item_data_id == NewsItemData.id)
             query = query.outerjoin(OSINTSource, NewsItemData.osint_source_id == OSINTSource.id)
-            query = query.join(OSINTSourceGroupOSINTSource, OSINTSourceGroupOSINTSource.osint_source_id == OSINTSource.id)
+            query = query.outerjoin(OSINTSourceGroupOSINTSource, OSINTSource.id == OSINTSourceGroupOSINTSource.osint_source_id)
+            query = query.outerjoin(OSINTSourceGroup, OSINTSourceGroupOSINTSource.osint_source_group_id == OSINTSourceGroup.id)
 
         if group := filter_args.get("group"):
-            query = query.filter(OSINTSourceGroupOSINTSource.osint_source_group_id.in_(group))
+            query = query.filter(OSINTSourceGroup.id.in_(group))
 
         if source := filter_args.get("source"):
             query = query.filter(OSINTSource.id.in_(source))
@@ -556,16 +558,36 @@ class NewsItemAggregate(BaseModel):
         return paged_query.all(), query.count()
 
     @classmethod
+    def get_date_counts(cls, news_items: list[dict[str, Any]]) -> Counter:
+        return Counter(datetime.fromisoformat(news_item["news_item_data"]["published"]).strftime("%d-%m") for news_item in news_items)
+
+    @classmethod
+    def get_max_item_count(cls, news_items: list[dict[str, Any]]) -> int:
+        date_counts = cls.get_date_counts(news_items)
+        return max(date_counts.values(), default=0)
+
+    @classmethod
+    def get_item_dict(cls, news_item_aggregate: Any, user: Any) -> dict[str, Any]:
+        item = news_item_aggregate.to_dict()
+        item["in_reports_count"] = ReportItemNewsItemAggregate.count(news_item_aggregate.id)
+        item["user_vote"] = NewsItemVote.get_user_vote(news_item_aggregate.id, user.id, "AGGREGATE")
+        return item
+
+    @classmethod
     def get_by_filter_json(cls, filter_args, user):
         news_item_aggregates, count = cls.get_by_filter(filter_args=filter_args, user=user)
         items = []
+        max_item_count = 0
+
         for news_item_aggregate in news_item_aggregates:
-            item = news_item_aggregate.to_dict()
-            item["in_reports_count"] = ReportItemNewsItemAggregate.count(news_item_aggregate.id)
-            item["user_vote"] = NewsItemVote.get_user_vote(news_item_aggregate.id, user.id, "AGGREGATE")
+            item = cls.get_item_dict(news_item_aggregate, user)
+
+            current_max_item = cls.get_max_item_count(item["news_items"])
+            max_item_count = max(max_item_count, current_max_item)
+
             items.append(item)
 
-        return {"total_count": count, "items": items}
+        return {"total_count": count, "items": items, "max_item": max_item_count}
 
     @classmethod
     def get_for_worker(cls, filter_args: dict):

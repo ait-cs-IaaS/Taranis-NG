@@ -270,7 +270,7 @@ class OSINTSourceParameterValue(BaseModel):
 
 
 class OSINTSourceGroup(BaseModel):
-    id = db.Column(db.String(64), primary_key=True)
+    id: Any = db.Column(db.String(64), primary_key=True)
     name: Any = db.Column(db.String(), nullable=False)
     description: Any = db.Column(db.String())
     default: Any = db.Column(db.Boolean(), default=False)

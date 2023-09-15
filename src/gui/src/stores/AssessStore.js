@@ -20,7 +20,8 @@ export const useAssessStore = defineStore('assess', {
     osint_source_groups: { total_count: 0, items: [] },
     newsItems: { total_count: 0, items: [] },
     newsItemsSelection: [],
-    max_item: null
+    max_item: 0,
+    loading: false
   }),
   getters: {
     getSelection() {
@@ -45,12 +46,38 @@ export const useAssessStore = defineStore('assess', {
   },
   actions: {
     async updateNewsItems() {
+      console.debug('updateNewsItems')
       try {
         const filter = useFilterStore()
         const response = await getNewsItemsAggregates(filter.newsItemsFilter)
-        this.newsItems = response.data
-        this.updateMaxItem()
+        this.newsItems.items = response.data.items
+        this.newsItems.total_count = response.data.total_count
+        this.max_item = response.data.max_item
       } catch (error) {
+        notifyFailure(error.message)
+      }
+    },
+    async appendNewsItems() {
+      console.debug('appendNewsItems')
+      try {
+        this.loading = true
+        // filter should be a copy of the original filter
+        const filter = { ...useFilterStore().newsItemsFilter }
+        filter.offset = this.newsItems.items.length
+        const response = await getNewsItemsAggregates(filter)
+        const existingItemIds = new Set(
+          this.newsItems.items.map((item) => item.id)
+        )
+        const uniqueNewItems = response.data.items.filter(
+          (item) => !existingItemIds.has(item.id)
+        )
+
+        this.newsItems.items = [...this.newsItems.items, ...uniqueNewItems]
+        this.newsItems.total_count = response.data.total_count
+        this.max_item = response.data.max_item
+        this.loading = false
+      } catch (error) {
+        console.error(error)
         notifyFailure(error.message)
       }
     },
@@ -150,25 +177,6 @@ export const useAssessStore = defineStore('assess', {
       const response = await getOSINTSourceGroupsList()
       this.osint_source_groups = response.data
     },
-    updateMaxItem() {
-      const countsArray = this.newsItems.items.map((item) =>
-        Math.max(
-          ...Object.values(
-            item.news_items.reduce((acc, item) => {
-              const day = new Date(
-                item.news_item_data.published
-              ).toLocaleDateString(undefined, {
-                day: '2-digit',
-                month: '2-digit'
-              })
-              acc[day] = (acc[day] || 0) + 1
-              return acc
-            }, {})
-          )
-        )
-      )
-      this.max_item = Math.max(...countsArray)
-    },
     selectNewsItem(id) {
       this.newsItemsSelection = xorConcat(this.newsItemsSelection, id)
     },
@@ -203,5 +211,7 @@ export const useAssessStore = defineStore('assess', {
       }
     }
   },
-  persist: true
+  persist: {
+    paths: ['osint_sources', 'osint_source_groups']
+  }
 })
