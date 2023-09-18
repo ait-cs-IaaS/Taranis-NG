@@ -4468,10 +4468,12 @@ components:
       properties:
         version:
           type: integer
-        data:
+        sources:
           type: array
           items:
             $ref: '#/components/schemas/osint_source.export'
+        groups:
+          type: array
 
     collector.new:
       allOf:

@@ -227,14 +227,14 @@ bots = [
         ],
     },
     {
-        "name": "Story BOT",
-        "description": "Bot for story clustering",
-        "type": "STORY_BOT",
-    },
-    {
         "name": "NLP Tagging BOT",
         "description": "Bot for Tagging Items via NLP",
         "type": "NLP_BOT",
+    },
+    {
+        "name": "Story BOT",
+        "description": "Bot for story clustering",
+        "type": "STORY_BOT",
     },
 ]
 

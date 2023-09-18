@@ -477,9 +477,7 @@ class NewsItemAggregate(BaseModel):
         if tags := filter_args.get("tags"):
             for tag in tags:
                 alias = orm.aliased(NewsItemTag)
-                query = query.join(alias, NewsItemAggregate.id == alias.n_i_a_id).filter(
-                    or_(alias.name == tag, alias.sub_forms.contains(tag))
-                )
+                query = query.join(alias, NewsItemAggregate.id == alias.n_i_a_id).filter(or_(alias.name == tag, alias.tag_type == tag))
 
         filter_range = filter_args.get("range", "").lower()
         if filter_range and filter_range in ["day", "week", "month"]:
@@ -765,7 +763,7 @@ class NewsItemAggregate(BaseModel):
             for tag_name, new_tag in new_tags.items():
                 if tag_name in [tag.name for tag in n_i_a.tags]:
                     continue
-                if existing_tag := NewsItemTag.find_by_name_or_subform(tag_name):
+                if existing_tag := NewsItemTag.find_by_name(tag_name):
                     new_tag.name = existing_tag.name
                     new_tag.tag_type = existing_tag.tag_type
                 n_i_a.tags.append(new_tag)
@@ -1015,14 +1013,6 @@ class NewsItemTag(BaseModel):
         self.id = None
         self.name = name
         self.tag_type = tag_type
-        if sub_forms:
-            if type(sub_forms) == list:
-                self.sub_forms = ",".join([s.replace(",", "") for s in sub_forms])
-            elif type(sub_forms) == str:
-                self.sub_forms = sub_forms
-            else:
-                self.sub_forms = ""
-                logger.debug(f"wrong type for sub_forms {type(sub_forms)}")
 
     @classmethod
     def delete_all_tags(cls):
@@ -1074,12 +1064,6 @@ class NewsItemTag(BaseModel):
             db.session.delete(tag)
         db.session.commit()
 
-    def get_forms(self) -> list[str]:
-        tags = [self.name]
-        if self.sub_forms:
-            tags.append(self.sub_forms.split(","))
-        return tags
-
     def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
@@ -1094,8 +1078,8 @@ class NewsItemTag(BaseModel):
         }
 
     @classmethod
-    def find_by_name_or_subform(cls, tag_name: str) -> "NewsItemTag | None":
-        return cls.query.filter(or_(cls.name.ilike(tag_name), cls.sub_forms.ilike(f"%{tag_name}%"))).first()
+    def find_by_name(cls, tag_name: str) -> "NewsItemTag | None":
+        return cls.query.filter(cls.name.ilike(tag_name)).first()
 
     @classmethod
     def find_largest_tag_clusters(cls, days: int = 7, limit: int = 12, min_count: int = 2):
@@ -1147,9 +1131,8 @@ class NewsItemTag(BaseModel):
             for name, tag in tags.items():
                 tag_name = name
                 tag_type = tag.get("tag_type", "misc")
-                sub_forms = tag.get("sub_forms", None)
-                new_tags[tag_name] = NewsItemTag(name=tag_name, tag_type=tag_type, sub_forms=sub_forms)
+                new_tags[tag_name] = NewsItemTag(name=tag_name, tag_type=tag_type)
         else:
             for tag_name in tags:
-                new_tags[tag_name] = NewsItemTag(name=tag_name, tag_type="misc", sub_forms=None)
+                new_tags[tag_name] = NewsItemTag(name=tag_name, tag_type="misc")
         return new_tags

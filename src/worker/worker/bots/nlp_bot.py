@@ -60,7 +60,7 @@ class NLPBot(BaseBot):
         current_keywords = {}
         for ent in sentence.get_labels():
             tag = ent.data_point.text
-            if len(tag) > 2 and ent.score > 0.966:
+            if len(tag) > 2 and ent.score > 0.98:
                 tag_type = all_keywords[tag]["tag_type"] if tag in all_keywords else ent.value
                 current_keywords[tag] = {"tag_type": tag_type}
 

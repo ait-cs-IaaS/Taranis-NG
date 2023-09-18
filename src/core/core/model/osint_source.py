@@ -235,7 +235,7 @@ class OSINTSource(BaseModel):
             item = cls.from_dict(data)
             db.session.add(item)
             OSINTSourceGroup.add_source_to_default(item)
-            index_to_id_mapping[idx] = item.id
+            index_to_id_mapping[idx or item.id] = item.id
 
         for group in groups:
             group["osint_sources"] = [index_to_id_mapping.get(idx) for idx in group["osint_sources"] if idx]

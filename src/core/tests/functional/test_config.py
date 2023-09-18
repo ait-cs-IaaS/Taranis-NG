@@ -25,7 +25,7 @@ class TestSourcesConfigApi(BaseTest):
             test_data = json.load(f)
             test_result = response.json
             for source in test_data["data"]:
-                assert source in test_result["data"]
+                assert source in test_result["sources"]
 
     def test_create_source(self, client, auth_header, cleanup_sources):
         response = self.assert_post_ok(client, uri="osint-sources", json_data=cleanup_sources, auth_header=auth_header)
