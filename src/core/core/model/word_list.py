@@ -184,7 +184,15 @@ class WordList(BaseModel):
     @classmethod
     def parse_json(cls, content) -> list | None:
         file_content = json.loads(content)
-        return file_content["data"] if file_content["version"] == 1 else None
+        return cls.load_json_content(content=file_content)
+
+    @classmethod
+    def load_json_content(cls, content) -> list:
+        if content.get("version") != 1:
+            raise ValueError("Invalid JSON file")
+        if not content.get("data"):
+            raise ValueError("No data found")
+        return content["data"]
 
     @classmethod
     def update_word_list(cls, content, content_type, word_list_id: int) -> "WordList | None":
@@ -195,7 +203,7 @@ class WordList(BaseModel):
         if content_type == "text/csv":
             data = cls.parse_csv(content)
         elif content_type == "application/json":
-            data = content["data"][0]["entries"]
+            data = cls.load_json_content(content=content)[0]["entries"]
         else:
             return None
 

@@ -960,6 +960,30 @@ def pre_seed_wordlists():
                 "usage": 4,
             }
         )
+        WordList.add(
+            {
+                "name": "Länder",
+                "description": "Liste aller Länder",
+                "link": "https://raw.githubusercontent.com/ait-cs-IaaS/wordlists/master/output/countries_german.json",
+                "usage": 4,
+            }
+        )
+        WordList.add(
+            {
+                "name": "Internationale Organisationen",
+                "description": "Wichtigsten internationalen Organisationen",
+                "link": "https://raw.githubusercontent.com/ait-cs-IaaS/wordlists/master/output/ngos_german.json",
+                "usage": 4,
+            }
+        )
+        WordList.add(
+            {
+                "name": "Unternehmen Österreich",
+                "description": "Größten Unternehmen in Österreich",
+                "link": "https://raw.githubusercontent.com/ait-cs-IaaS/wordlists/master/output/companies_austria.json",
+                "usage": 4,
+            }
+        )
 
 
 def pre_seed_default_user():

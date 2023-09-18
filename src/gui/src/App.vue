@@ -47,7 +47,7 @@ export default defineComponent({
             authStore.refresh()
             // reconnectSSE() # TODO: Implement see Issue #102
           }
-        }, timeToRefresh)
+        }, timeToRefresh.value)
       }
     })
 

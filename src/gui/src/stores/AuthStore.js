@@ -22,7 +22,7 @@ export const useAuthStore = defineStore('authenticator', {
     timeToRefresh: (state) => state.exp * 1000 - Date.now() - 300 * 1000,
     expirationDate: (state) => new Date(state.exp * 1000),
     needTokenRefresh: (state) =>
-      new Date() > state.exp * 1000 - Date.now() - 300 * 1000
+      new Date() > new Date(state.exp * 1000 - 300 * 1000)
   },
   actions: {
     async login(userData) {

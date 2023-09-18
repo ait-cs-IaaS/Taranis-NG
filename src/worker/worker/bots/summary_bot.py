@@ -10,7 +10,7 @@ from transformers import (
 )
 
 
-class NLPBot(BaseBot):
+class SummaryBot(BaseBot):
     type = "SUMMARY_BOT"
     name = "Summary generation Bot"
     description = "Bot for naturale language processing of news items"

@@ -819,6 +819,8 @@ class NewsItemAggregate(BaseModel):
                 aggregate = NewsItemAggregate.get(item)
                 if not aggregate:
                     continue
+                # append tags if not already present
+                first_aggregate.tags = list(set(first_aggregate.tags + aggregate.tags))
                 for news_item in aggregate.news_items[:]:
                     if user is None or news_item.allowed_with_acl(user, False, False, True):
                         first_aggregate.news_items.append(news_item)

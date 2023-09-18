@@ -8,6 +8,7 @@ core_api = CoreApi()
 
 collectors = {
     "rss_collector": worker.collectors.RSSCollector(),
+    "simple_web_collector": worker.collectors.SimpleWebCollector(),
 }
 
 
