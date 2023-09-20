@@ -16,7 +16,7 @@ class NLPBot(BaseBot):
         logger.debug("Setup NER Model...")
         # self.ner_english = Classifier.load("flair/ner-english-fast")
         # self.ner_german = Classifier.load("flair/ner-german")
-        self.ner_multi = Classifier.load("flair/ner-multi-fast")
+        self.ner_multi = Classifier.load("flair/ner-multi")
         torch.set_num_threads(1)  # https://github.com/pytorch/pytorch/issues/36191
         self.extraction_text_limit = 5000
 

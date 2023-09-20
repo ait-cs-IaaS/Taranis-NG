@@ -120,7 +120,7 @@ class BotsInfo(Resource):
 class NewsItemsAggregates(Resource):
     @api_key_required
     def get(self):
-        filter_keys = ["search", "in_report", "timestamp", "sort"]
+        filter_keys = ["search", "in_report", "timestamp", "sort", "range"]
         filter_args: dict[str, str | int | list] = {k: v for k, v in request.args.items() if k in filter_keys}
         filter_list_keys = ["source", "group"]
         for key in filter_list_keys:
@@ -142,7 +142,6 @@ class Tags(Resource):
     def put(self):
         if not (data := request.json):
             return {"error": "No data provided"}, 400
-        logger.debug(f"Updating tags: {len(data)}")
         errors = {}
         for aggregate_id, tags in data.items():
             _, status = NewsItemAggregate.update_tags(aggregate_id, tags)

@@ -1,14 +1,20 @@
 <template>
-  <v-card-subtitle>
+  <v-card-title>
     <span>
       <v-icon :icon="tagIcon" />
       {{ tagText }}
     </span>
     <span class="ml-5"> Cluster size: {{ cluster.size }}</span>
     <v-divider class="mt-2 mb-2" />
-  </v-card-subtitle>
+  </v-card-title>
   <v-card-text>
-    {{ cluster }}
+    <div v-for="item in cluster.tags" :key="item.id">
+      <router-link :to="'/assess?tags=' + item.name">
+        {{ item.name }}
+      </router-link>
+      <v-icon class="mr-2"> mdi-chevron-right </v-icon>
+      <span class="ml-5"> {{ item.size }} </span>
+    </div>
   </v-card-text>
 </template>
 
@@ -22,7 +28,7 @@ export default {
     cluster: { type: Object, required: true }
   },
   setup(props) {
-    const tagType = ref(props.cluster.tag_type)
+    const tagType = ref(props.cluster.name)
 
     const tagIcon = computed(() => {
       return tagIconFromType(tagType.value)

@@ -478,18 +478,21 @@ class NewsItemAggregate(BaseModel):
                 alias = orm.aliased(NewsItemTag)
                 query = query.join(alias, NewsItemAggregate.id == alias.n_i_a_id).filter(or_(alias.name == tag, alias.tag_type == tag))
 
-        filter_range = filter_args.get("range", "").lower()
-        if filter_range and filter_range in ["day", "week", "month"]:
+        if filter_range := filter_args.get("range", "").lower():
             date_limit = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+            if filter_range in ["day", "week", "month"]:
+                if filter_range == "day":
+                    date_limit -= timedelta(days=1)
 
-            if filter_range == "day":
-                date_limit -= timedelta(days=1)
+                elif filter_range == "week":
+                    date_limit -= timedelta(days=date_limit.weekday())
 
-            elif filter_range == "week":
-                date_limit -= timedelta(days=date_limit.weekday())
+                elif filter_range == "month":
+                    date_limit = date_limit.replace(day=1)
 
-            elif filter_range == "month":
-                date_limit = date_limit.replace(day=1)
+            elif filter_range.startswith("last") and filter_range[4:].isdigit():
+                days = int(filter_range[4:])
+                date_limit -= timedelta(days=days)
 
             query = query.filter(NewsItemAggregate.created >= date_limit)
 
@@ -817,6 +820,8 @@ class NewsItemAggregate(BaseModel):
                 if not aggregate:
                     continue
                 # append tags if not already present
+                logger.debug(f"Grouping Tags {first_aggregate.tags} - {aggregate.tags}")
+                logger.debug(f"Deduplicated Tags - {list(set(first_aggregate.tags + aggregate.tags))}")
                 first_aggregate.tags = list(set(first_aggregate.tags + aggregate.tags))
                 for news_item in aggregate.news_items[:]:
                     if user is None or news_item.allowed_with_acl(user, False, False, True):
@@ -1004,11 +1009,10 @@ class NewsItemTag(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     name: Any = db.Column(db.String(255))
     tag_type: Any = db.Column(db.String(255))
-    sub_forms: Any = db.Column(db.Text)
     n_i_a_id = db.Column(db.ForeignKey(NewsItemAggregate.id))
     n_i_a = db.relationship(NewsItemAggregate, backref=orm.backref("tags", cascade="all, delete-orphan"))
 
-    def __init__(self, name, tag_type, sub_forms=None):
+    def __init__(self, name, tag_type):
         self.id = None
         self.name = name
         self.tag_type = tag_type
@@ -1064,11 +1068,7 @@ class NewsItemTag(BaseModel):
         db.session.commit()
 
     def to_dict(self) -> dict[str, Any]:
-        return {
-            "name": self.name,
-            "tag_type": self.tag_type,
-            "sub_forms": self.sub_forms.split(",") if self.sub_forms else [],
-        }
+        return {"name": self.name, "tag_type": self.tag_type}
 
     def to_small_dict(self) -> dict[str, Any]:
         return {
@@ -1124,9 +1124,34 @@ class NewsItemTag(BaseModel):
         return results
 
     @classmethod
-    def get_tag_types(cls) -> list[str]:
-        query = cls.query.with_entities(cls.tag_type).distinct().order_by(cls.tag_type).all()
-        return [row[0] for row in query]
+    def get_n_biggest_tags_by_type(cls, tag_type: str, n: int) -> dict[str, dict]:
+        query = (
+            cls.query.with_entities(cls.name, func.count(cls.name).label("name_count"))
+            .filter(cls.tag_type == tag_type)
+            .group_by(cls.name)
+            .order_by(db.desc("name_count"))
+            .limit(n)
+            .all()
+        )
+        return {row[0]: {"name": row[0], "size": row[1]} for row in query}
+
+    @classmethod
+    def get_tag_types(cls) -> list[tuple[str, int]]:
+        query = (
+            cls.query.with_entities(cls.tag_type, func.count(cls.name).label("type_count"))
+            .group_by(cls.tag_type)
+            .order_by(db.desc("type_count"))
+            .all()
+        )
+        return [(row[0], row[1]) for row in query]
+
+    @classmethod
+    def get_largest_tag_types(cls) -> dict:
+        tag_types_with_count = cls.get_tag_types()
+        return {
+            tag_type: {"size": count, "name": tag_type, "tags": cls.get_n_biggest_tags_by_type(tag_type, 5)}
+            for tag_type, count in tag_types_with_count
+        }
 
     @classmethod
     def parse_tags(cls, tags: list | dict) -> dict[str, "NewsItemTag"]:

@@ -32,9 +32,7 @@ class TrendingClusters(Resource):
     @jwt_required()
     def get(self):
         try:
-            days = int(request.args.get("days", 7))
-            limit = int(request.args.get("limit", 12))
-            return NewsItemTag.get_tag_types()
+            return NewsItemTag.get_largest_tag_types()
             # return NewsItemTag.find_largest_tag_clusters(days, limit)
         except Exception:
             logger.log_debug_trace()

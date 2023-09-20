@@ -14,6 +14,7 @@ class COLLECTOR_TYPES(StrEnum):
     TWITTER_COLLECTOR = auto()
     WEB_COLLECTOR = auto()
     SELENIUM_WEB_COLLECTOR = auto()
+    SIMPLE_WEB_COLLECTOR = auto()
 
 
 class BOT_TYPES(StrEnum):
@@ -48,6 +49,7 @@ class WORKER_TYPES(StrEnum):
     TWITTER_COLLECTOR = auto()
     WEB_COLLECTOR = auto()
     SELENIUM_WEB_COLLECTOR = auto()
+    SIMPLE_WEB_COLLECTOR = auto()
     ANALYST_BOT = auto()
     GROUPING_BOT = auto()
     NLP_BOT = auto()
