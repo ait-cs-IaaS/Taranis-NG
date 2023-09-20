@@ -26,6 +26,16 @@ workers = [
         "type": "EMAIL_COLLECTOR",
     },
     {
+        "description": "Collector for gathering data from a web site via python requests",
+        "name": "Simple Web Collector",
+        "parameters": [
+            "WEB_URL",
+            "USER_AGENT",
+            "PROXY_SERVER",
+        ],
+        "type": "SIMPLE_WEB_COLLECTOR",
+    },
+    {
         "description": "Collector for gathering data from web page",
         "name": "Selenium Web Collector",
         "parameters": [

@@ -366,8 +366,7 @@ class NewsItemVote(BaseModel):
 
     @classmethod
     def get_user_vote(cls, item_id, user_id, item_type):
-        vote = cls.get_by_filter(item_id, user_id, item_type)
-        if vote:
+        if vote := cls.get_by_filter(item_id, user_id, item_type):
             return {"like": vote.like, "dislike": vote.dislike}
         return {"like": False, "dislike": False}
 
@@ -1123,6 +1122,11 @@ class NewsItemTag(BaseModel):
                 }
             )
         return results
+
+    @classmethod
+    def get_tag_types(cls) -> list[str]:
+        query = cls.query.with_entities(cls.tag_type).distinct().order_by(cls.tag_type).all()
+        return [row[0] for row in query]
 
     @classmethod
     def parse_tags(cls, tags: list | dict) -> dict[str, "NewsItemTag"]:

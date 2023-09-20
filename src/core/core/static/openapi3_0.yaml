@@ -3174,7 +3174,7 @@ paths:
                 $ref: '#/components/schemas/resp.auth.error'
         '404':
           $ref: "#/components/schemas/notFound"
-  /trending-clusters:
+  /dashboard/trending-clusters:
     get:
       tags: [trending-clusters]
       description: get trending clusters
@@ -3198,7 +3198,7 @@ paths:
           $ref: "#/components/schemas/notFound"
         '500':
           description: Internal server error
-  /dashboard-data:
+  /dashboard:
     get:
       tags: [dashboard-data]
       description: get dashboard data

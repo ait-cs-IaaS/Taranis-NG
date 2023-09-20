@@ -14,7 +14,9 @@ class NLPBot(BaseBot):
     def __init__(self):
         super().__init__()
         logger.debug("Setup NER Model...")
-        self.ner_model = Classifier.load("flair/ner-multi")
+        # self.ner_english = Classifier.load("flair/ner-english-fast")
+        # self.ner_german = Classifier.load("flair/ner-german")
+        self.ner_multi = Classifier.load("flair/ner-multi-fast")
         torch.set_num_threads(1)  # https://github.com/pytorch/pytorch/issues/36191
         self.extraction_text_limit = 5000
 
@@ -34,7 +36,12 @@ class NLPBot(BaseBot):
             update_result = {}
 
             logger.debug(f"All Keywords: {all_keywords}")
-            for aggregate in data:
+            for i, aggregate in enumerate(data):
+                if i % max(len(data) // 10, 1) == 0:
+                    logger.debug(f"Extracting tags from news items: {i}/{len(data)}")
+                    self.core_api.update_tags(update_result)
+                    update_result = {}
+
                 current_keywords = self.extract_keywords(aggregate, all_keywords)
                 all_keywords |= current_keywords
                 update_result[aggregate["id"]] = current_keywords
@@ -47,20 +54,37 @@ class NLPBot(BaseBot):
         current_keywords = aggregate.get("tags", {})
         # drop "name" from current_keywords
         current_keywords = {k: v for k, v in current_keywords.items() if k != "name"}
-        aggregate_content = " ".join(news_item["news_item_data"]["content"] for news_item in aggregate["news_items"])
-        current_keywords |= self.extract_ner(aggregate_content[: self.extraction_text_limit], all_keywords)
-
-        logger.debug(current_keywords)
+        aggregate_content = "\n".join(news_item["news_item_data"]["content"] for news_item in aggregate["news_items"])
+        lines = self.get_first_and_last_10_lines(aggregate_content)
+        ner_model = self.get_ner_model(aggregate_content)
+        for line in lines:
+            current_keywords |= self.extract_ner(line, all_keywords, ner_model)
+        # current_keywords |= self.extract_ner(aggregate_content[: self.extraction_text_limit], all_keywords)
         return current_keywords
 
-    def extract_ner(self, text: str, all_keywords) -> dict:
-        ner_model = self.ner_model
+    def get_ner_model(self, text: str) -> Classifier:
+        return self.ner_multi
+        # language = self.detect_language(text)
+        # if language == "en":
+        #     return self.ner_english
+        # elif language == "de":
+        #     return self.ner_german
+        # else:
+        #     return self.ner_multi
+
+    def get_first_and_last_10_lines(self, content: str) -> list:
+        lines = [line for line in content.split("\n") if line]
+        if len(lines) <= 20:
+            return lines[:10] + lines[10:]
+        return lines[:10] + lines[-10:]
+
+    def extract_ner(self, text: str, all_keywords, ner_model) -> dict:
         sentence = Sentence(text)
         ner_model.predict(sentence)
         current_keywords = {}
         for ent in sentence.get_labels():
             tag = ent.data_point.text
-            if len(tag) > 2 and ent.score > 0.98:
+            if len(tag) > 2 and ent.score > 0.97:
                 tag_type = all_keywords[tag]["tag_type"] if tag in all_keywords else ent.value
                 current_keywords[tag] = {"tag_type": tag_type}
 

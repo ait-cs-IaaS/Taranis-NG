@@ -3,6 +3,7 @@ import sys
 import socket
 import logging
 import traceback
+import datetime
 from celery.signals import after_setup_logger
 
 from worker.config import Config
@@ -90,7 +91,7 @@ class TaranisLogFormatter(logging.Formatter):
         bold_red = "\x1b[31;1m"
         reset = "\x1b[0m"
         self.module = module
-        self.format_string = f"[{self.module}] [%(levelname)s] - %(message)s"
+        self.format_string = "[%(asctime)s] [%(levelname)s] - %(message)s"
         self.FORMATS = {
             logging.DEBUG: grey + self.format_string + reset,
             logging.INFO: blue + self.format_string + reset,
@@ -98,6 +99,9 @@ class TaranisLogFormatter(logging.Formatter):
             logging.ERROR: red + self.format_string + reset,
             logging.CRITICAL: bold_red + self.format_string + reset,
         }
+
+    def formatTime(self, record, datefmt=None):
+        return datetime.datetime.now().isoformat()
 
     def format(self, record):
         log_fmt = self.FORMATS.get(record.levelno)
