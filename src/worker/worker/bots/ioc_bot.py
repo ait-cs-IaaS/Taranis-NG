@@ -27,7 +27,7 @@ class IOCBot(BaseBot):
 
             for i, aggregate in enumerate(data):
                 if i % max(len(data) // 10, 1) == 0:
-                    logger.debug(f"Extracting IOCs from news items: {i}/{len(data)}")
+                    logger.debug(f"Extracting IOCs from {aggregate['id']}: {i}/{len(data)}")
                 aggregate_content = " ".join(news_item["news_item_data"]["content"] for news_item in aggregate["news_items"])
                 if iocs := self.extract_ioc(aggregate_content):
                     extracted_keywords[aggregate["id"]] = iocs

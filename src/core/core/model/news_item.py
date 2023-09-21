@@ -820,9 +820,7 @@ class NewsItemAggregate(BaseModel):
                 if not aggregate:
                     continue
                 # append tags if not already present
-                logger.debug(f"Grouping Tags {first_aggregate.tags} - {aggregate.tags}")
-                logger.debug(f"Deduplicated Tags - {list(set(first_aggregate.tags + aggregate.tags))}")
-                first_aggregate.tags = list(set(first_aggregate.tags + aggregate.tags))
+                first_aggregate.tags = list({tag.name: tag for tag in first_aggregate.tags + aggregate.tags}.values())
                 for news_item in aggregate.news_items[:]:
                     if user is None or news_item.allowed_with_acl(user, False, False, True):
                         first_aggregate.news_items.append(news_item)

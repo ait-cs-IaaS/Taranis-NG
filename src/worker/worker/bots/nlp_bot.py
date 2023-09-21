@@ -35,10 +35,9 @@ class NLPBot(BaseBot):
 
             update_result = {}
 
-            logger.debug(f"All Keywords: {all_keywords}")
             for i, aggregate in enumerate(data):
                 if i % max(len(data) // 10, 1) == 0:
-                    logger.debug(f"Extracting tags from news items: {i}/{len(data)}")
+                    logger.debug(f"Extracting NER from {aggregate['id']}: {i}/{len(data)}")
                     self.core_api.update_tags(update_result)
                     update_result = {}
 
@@ -55,11 +54,10 @@ class NLPBot(BaseBot):
         # drop "name" from current_keywords
         current_keywords = {k: v for k, v in current_keywords.items() if k != "name"}
         aggregate_content = "\n".join(news_item["news_item_data"]["content"] for news_item in aggregate["news_items"])
-        lines = self.get_first_and_last_10_lines(aggregate_content)
+        lines = self.get_first_and_last_20_lines(aggregate_content)
         ner_model = self.get_ner_model(aggregate_content)
         for line in lines:
             current_keywords |= self.extract_ner(line, all_keywords, ner_model)
-        # current_keywords |= self.extract_ner(aggregate_content[: self.extraction_text_limit], all_keywords)
         return current_keywords
 
     def get_ner_model(self, text: str) -> Classifier:
@@ -72,11 +70,11 @@ class NLPBot(BaseBot):
         # else:
         #     return self.ner_multi
 
-    def get_first_and_last_10_lines(self, content: str) -> list:
+    def get_first_and_last_20_lines(self, content: str) -> list:
         lines = [line for line in content.split("\n") if line]
-        if len(lines) <= 20:
-            return lines[:10] + lines[10:]
-        return lines[:10] + lines[-10:]
+        if len(lines) <= 40:
+            return lines[:20] + lines[20:]
+        return lines[:20] + lines[-20:]
 
     def extract_ner(self, text: str, all_keywords, ner_model) -> dict:
         sentence = Sentence(text)

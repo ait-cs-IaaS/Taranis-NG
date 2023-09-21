@@ -924,6 +924,14 @@ def pre_seed_wordlists():
         )
         WordList.add(
             {
+                "name": "CVE Products",
+                "description": "List of products that are known to be affected by a CVE.",
+                "link": "https://raw.githubusercontent.com/ait-cs-IaaS/wordlists/master/output/products.json",
+                "usage": 4,
+            }
+        )
+        WordList.add(
+            {
                 "name": "Countries",
                 "description": "List of Countries",
                 "link": "https://raw.githubusercontent.com/ait-cs-IaaS/wordlists/master/output/countries.json",

@@ -47,7 +47,7 @@ class WordlistBot(BaseBot):
         logger.info(f"Extracting tags from news items: {len(data)}")
         for i, aggregate in enumerate(data):
             if i % max(len(data) // 10, 1) == 0:
-                logger.debug(f"Extracting tags from news items: {i}/{len(data)}")
+                logger.debug(f"Extracting words from {aggregate['id']}: {i}/{len(data)}")
             if findings := self._find_tags(aggregate, word_list_entries, override_existing_tags, ignore_case):
                 found_tags[aggregate["id"]] = findings
         return found_tags
