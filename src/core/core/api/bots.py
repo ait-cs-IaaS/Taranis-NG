@@ -110,7 +110,7 @@ class BotInfo(Resource):
 
 def initialize(api: Api):
     namespace = Namespace("bots", description="Bots related operations", path="/api/v1/bots")
-    namespace.add_resource(BotsInfo, "/")
+    namespace.add_resource(BotsInfo, "/", "")
     namespace.add_resource(BotInfo, "/<string:bot_id>")
     namespace.add_resource(NewsItemData, "/news-item-data")
     namespace.add_resource(

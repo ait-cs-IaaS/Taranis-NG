@@ -69,7 +69,7 @@ class BuildInfo(Resource):
 
 def initialize(api: Api):
     namespace = Namespace("dashboard", description="Dashboard related operations", path="/api/v1/dashboard")
-    namespace.add_resource(Dashboard, "/")
+    namespace.add_resource(Dashboard, "/", "")
     namespace.add_resource(Tagcloud, "/tagcloud")
     namespace.add_resource(TrendingClusters, "/trending-clusters")
     namespace.add_resource(StoryClusters, "/story-clusters")
