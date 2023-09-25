@@ -2222,7 +2222,7 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: '#/components/schemas/product_type.presentation'
+                      $ref: '#/components/schemas/product_type'
         '401':
           description: authorization error
           content:
@@ -2238,7 +2238,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/product_type.new'
+              $ref: '#/components/schemas/product_type'
       responses:
         '200':
           description: success
@@ -2264,7 +2264,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/product_type.new'
+              $ref: '#/components/schemas/product_type'
       responses:
         '200':
           description: success
@@ -3751,14 +3751,6 @@ components:
         id:
           type: integer
 
-    product_type.new:
-      allOf:
-        - $ref: '#/components/schemas/product_type'
-        - type: object
-          properties:
-            parameters:
-              $ref: '#/components/schemas/parameter_value.new'
-
     product_type:
       type: object
       properties:
@@ -3774,10 +3766,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/parameter_value'
-    product_type.presentation:
-      allOf:
-        - $ref: '#/components/schemas/product_type'
-        - $ref: '#/components/schemas/presentation'
 
     publisher_preset.new:
       allOf:
