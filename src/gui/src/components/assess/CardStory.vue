@@ -179,18 +179,20 @@
       </v-col>
     </v-row>
   </v-card>
-  <v-row v-if="openSummary" dense class="ma-0 py-0 px-5">
-    <v-col cols="11" offset="1">
-      <card-news-item
-        v-for="item in story.news_items"
-        :key="item.id"
-        :news-item="item"
-        :detail-view="detailView"
-        :story="story"
-        class="mt-3"
-        @refresh="emitRefresh()"
-      />
-    </v-col>
+  <v-row v-if="openSummary" dense class="ma-0 py-0 px-2">
+    <div class="news-item-container">
+      <div class="mx-5 my-5">
+        <card-news-item
+          v-for="item in story.news_items"
+          :key="item.id"
+          :news-item="item"
+          :detail-view="detailView"
+          :story="story"
+          class="mt-3"
+          @refresh="emitRefresh()"
+        />
+      </div>
+    </div>
   </v-row>
 </template>
 
@@ -220,17 +222,19 @@ export default {
       type: Object,
       required: true
     },
-    selected: { type: Boolean, default: false },
     detailView: { type: Boolean, default: false },
     reportView: { type: Boolean, default: false }
   },
-  emits: ['selectItem', 'deleteItem', 'refresh', 'remove-from-report'],
+  emits: ['deleteItem', 'refresh', 'remove-from-report'],
   setup(props, { emit }) {
     const viewDetails = ref(false)
     const openSummary = ref(props.detailView)
     const sharingDialog = ref(false)
     const deleteDialog = ref(false)
     const assessStore = useAssessStore()
+    const selected = computed(() =>
+      assessStore.storySelection.includes(props.story.id)
+    )
 
     const item_important = computed(() =>
       'important' in props.story ? props.story.important : false
@@ -272,7 +276,7 @@ export default {
     }
 
     const toggleSelection = () => {
-      emit('selectItem', props.story.id)
+      assessStore.selectStory(props.story.id)
     }
 
     const markAsRead = () => {
@@ -302,6 +306,7 @@ export default {
     return {
       viewDetails,
       openSummary,
+      selected,
       sharingDialog,
       deleteDialog,
       item_important,
@@ -326,6 +331,17 @@ export default {
 </script>
 
 <style scoped>
+.selected {
+  background-color: lighten(#7468e8, 30);
+  border: 2px solid #7468e8;
+  margin: -2px;
+}
+
+.news-item-container {
+  background-color: #f0f0f0;
+  border: 2px dotted #999999;
+}
+
 .news-item-title {
   overflow: hidden;
   text-overflow: ellipsis;

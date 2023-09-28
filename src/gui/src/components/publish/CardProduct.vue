@@ -9,7 +9,7 @@
         variant="flat"
         @click="saveProduct"
       >
-        {{ $t('product.publish') }}
+        {{ $t('button.create') }}
       </v-btn>
     </v-toolbar>
     <v-card-text>
@@ -41,11 +41,6 @@
         </v-row>
         <v-row no-gutters>
           <v-col cols="12">
-            {{ product.report_items }}
-          </v-col>
-        </v-row>
-        <v-row no-gutters>
-          <v-col cols="12">
             <v-select
               v-model="preset.selected"
               :items="publisher_presets"
@@ -55,6 +50,16 @@
               multiple
             >
             </v-select>
+          </v-col>
+        </v-row>
+        <v-row no-gutters>
+          <v-col cols="12">
+            <v-autocomplete
+              v-model="product.report_items"
+              :items="reportItems"
+              :label="$t('nav_menu.report_items')"
+              multiple
+            />
           </v-col>
         </v-row>
         <v-row no-gutters class="pt-4">
@@ -75,6 +80,8 @@ import { ref, computed, onMounted } from 'vue'
 import { createProduct, updateProduct } from '@/api/publish'
 import { useI18n } from 'vue-i18n'
 import { useConfigStore } from '@/stores/ConfigStore'
+import { useAnalyzeStore } from '@/stores/AnalyzeStore'
+
 import { notifyFailure, notifySuccess } from '@/utils/helpers'
 import { useRouter } from 'vue-router'
 
@@ -90,13 +97,16 @@ export default {
   emits: ['productcreated'],
   setup(props, { emit }) {
     const { t } = useI18n()
-    const store = useConfigStore()
-    const { loadProductTypes, loadPublisherPresets } = store
+    const configStore = useConfigStore()
+    const analyzeStore = useAnalyzeStore()
+
+    const reportItems = computed(() => analyzeStore.getReportItemsList)
+
     const product_types = computed(() => {
-      return store.product_types.items
+      return configStore.product_types.items
     })
     const publisher_presets = computed(() => {
-      return store.publisher_presets.items
+      return configStore.publisher_presets.items
     })
     const product = ref(props.productProp)
     const preset = ref({ selected: null, name: 'Preset' })
@@ -129,14 +139,14 @@ export default {
     }
 
     const previewProduct = () => {
-      // this.$router.push('/product/' + product.value.id)
       notifyFailure('Not implemented yet')
       console.debug('TODO: IMPLEMENT')
     }
 
     onMounted(() => {
-      loadProductTypes()
-      loadPublisherPresets()
+      configStore.loadProductTypes()
+      configStore.loadPublisherPresets()
+      analyzeStore.loadReportItems()
     })
 
     return {
@@ -146,6 +156,7 @@ export default {
       container_title,
       product_types,
       publisher_presets,
+      reportItems,
       saveProduct,
       previewProduct
     }

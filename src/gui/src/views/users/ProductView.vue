@@ -1,13 +1,14 @@
 <template>
   <v-container fluid style="min-height: 100vh">
-    <card-product :product-prop="product" />
+    <card-product v-if="readyToRender" :product-prop="product" />
   </v-container>
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
+import { ref, onBeforeMount } from 'vue'
 import { getProduct } from '@/api/publish'
 import CardProduct from '@/components/publish/CardProduct.vue'
+import { useRoute } from 'vue-router'
 
 export default {
   name: 'ProductView',
@@ -15,33 +16,38 @@ export default {
     CardProduct
   },
   setup() {
-    const defaultProduct = {
+    const route = useRoute()
+    const defaultProduct = ref({
       id: null,
-      uuid: null,
-      title: ''
-    }
+      title: '',
+      product_type_id: null,
+      report_items: []
+    })
+    const product = ref(defaultProduct.value)
 
-    const product = ref({})
     const edit = ref(true)
+    const readyToRender = ref(false)
 
     const loadProducts = async () => {
-      if (this.$route.params.id && this.$route.params.id !== '0') {
-        const response = await getProduct(this.$route.params.id)
-        product.value = response.data
-      } else {
-        edit.value = false
-        product.value = defaultProduct
+      console.debug('Loading product', route.params.id)
+      if (route.params.id && route.params.id !== '0') {
+        const response = await getProduct(route.params.id)
+        return response.data
       }
+      edit.value = false
+      return defaultProduct.value
     }
 
-    onMounted(() => {
-      loadProducts()
+    const reportCreated = () => {
+      edit.value = true
+    }
+
+    onBeforeMount(async () => {
+      product.value = await loadProducts()
+      readyToRender.value = true
     })
 
-    return {
-      product,
-      edit
-    }
+    return { product, edit, readyToRender, reportCreated }
   }
 }
 </script>

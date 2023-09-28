@@ -109,21 +109,6 @@ class NewsItemData(BaseModel):
 
         return "Attributes updated", 200
 
-    @classmethod
-    def get_for_sync(cls, last_synced, osint_sources):
-        osint_source_ids = {osint_source.id for osint_source in osint_sources}
-        last_sync_time = datetime.now()
-
-        query = cls.query.filter(
-            NewsItemData.updated >= last_synced,
-            NewsItemData.updated <= last_sync_time,
-            NewsItemData.osint_source_id.in_(osint_source_ids),
-        )
-
-        news_items = query.all()
-        items = [news_item.to_dict() for news_item in news_items]
-        return items, last_sync_time
-
 
 class NewsItem(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
@@ -807,8 +792,31 @@ class NewsItemAggregate(BaseModel):
         return {"message": "success"}, 200
 
     @classmethod
+    def move_items_to_aggregate(cls, aggregate_id: int, news_item_ids: list[int], user: User | None = None):
+        try:
+            aggregate = cls.get(aggregate_id)
+            if not aggregate:
+                return {"error": "not_found"}, 404
+            for item in news_item_ids:
+                news_item = NewsItem.get(item)
+                if not news_item:
+                    continue
+                if user is None or news_item.allowed_with_acl(user, False, False, True):
+                    aggregate.news_items.append(news_item)
+                    aggregate.relevance += news_item.relevance + 1
+                    aggregate.add(aggregate)
+                    NewsItemAggregate.update_status(aggregate.id)
+            db.session.commit()
+            cls.update_aggregates(aggregate)
+            return {"message": "success"}, 200
+        except Exception:
+            logger.log_debug_trace("Grouping News Item Aggregates Failed")
+            return {"error": "grouping failed"}, 500
+
+    @classmethod
     def group_aggregate(cls, aggregate_ids: list[int], user: User | None = None):
         try:
+            logger.debug(f"grouping: {aggregate_ids}")
             if len(aggregate_ids) < 2 or any(type(a_id) is not int for a_id in aggregate_ids):
                 return {"error": "at least two aggregate ids needed"}, 404
             first_aggregate = NewsItemAggregate.get(aggregate_ids.pop(0))

@@ -217,8 +217,8 @@ class WordListUpdate(Resource):
 
 
 def initialize(api: Api):
-    worker_namespace = Namespace("Worker", description="Publish Subscribe Worker Endpoints", path="/api/v1/worker")
-    beat_namespace = Namespace("Beat", description="Publish Subscribe Beat Endpoints", path="/api/v1/beat")
+    worker_namespace = Namespace("Worker", description="Publish Subscribe Worker Endpoints")
+    beat_namespace = Namespace("Beat", description="Publish Subscribe Beat Endpoints")
     beat_namespace.add_resource(
         QueueSchedule,
         "/schedule",
@@ -250,5 +250,5 @@ def initialize(api: Api):
     worker_namespace.add_resource(WordListByID, "/word-list/<int:word_list_id>")
     worker_namespace.add_resource(WordListUpdate, "/word-list/<int:word_list_id>/update")
 
-    api.add_namespace(beat_namespace)
-    api.add_namespace(worker_namespace)
+    api.add_namespace(beat_namespace, path="/beat")
+    api.add_namespace(worker_namespace, path="/worker")

@@ -212,14 +212,11 @@ class DownloadAttachment(Resource):
 
 
 def initialize(api):
-    namespace = Namespace("Assess", description="Assess related operations", path="/api/v1/assess")
+    namespace = Namespace("Assess", description="Assess related operations")
     namespace.add_resource(OSINTSourceGroupsAssess, "/osint-source-groups")
     namespace.add_resource(OSINTSourceGroupsList, "/osint-source-group-list")
     namespace.add_resource(OSINTSourcesList, "/osint-sources-list")
-    namespace.add_resource(
-        NewsItemAggregates,
-        "/news-item-aggregates",
-    )
+    namespace.add_resource(NewsItemAggregates, "/news-item-aggregates", "/stories")
     namespace.add_resource(
         NewsItems,
         "/news-items",
@@ -229,10 +226,10 @@ def initialize(api):
 
     namespace.add_resource(NewsItem, "/news-items/<int:item_id>")
     namespace.add_resource(NewsItemAggregate, "/news-item-aggregates/<int:aggregate_id>")
-    namespace.add_resource(GroupAction, "/news-item-aggregates/group")
-    namespace.add_resource(UnGroupAction, "/news-item-aggregates/ungroup")
+    namespace.add_resource(GroupAction, "/news-item-aggregates/group", "/stories/group")
+    namespace.add_resource(UnGroupAction, "/news-item-aggregates/ungroup", "stories/ungroup")
     namespace.add_resource(
         DownloadAttachment,
         "/news-item-data/<string:item_data_id>/attributes/<int:attribute_id>/file",
     )
-    api.add_namespace(namespace)
+    api.add_namespace(namespace, path="/assess")
