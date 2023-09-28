@@ -15633,7 +15633,7 @@
 									}
 								],
 								"url": {
-									"raw": "{{baseUrl}}/config/permissions?search=<string>",
+									"raw": "{{baseUrl}}/config/permissions",
 									"host": [
 										"{{baseUrl}}"
 									],
@@ -15644,7 +15644,8 @@
 									"query": [
 										{
 											"key": "search",
-											"value": "<string>"
+											"value": "",
+											"disabled": true
 										}
 									]
 								},
@@ -15792,7 +15793,7 @@
 									}
 								],
 								"url": {
-									"raw": "{{baseUrl}}/config/roles?search=<string>",
+									"raw": "{{baseUrl}}/config/roles?search=user",
 									"host": [
 										"{{baseUrl}}"
 									],
@@ -15803,7 +15804,7 @@
 									"query": [
 										{
 											"key": "search",
-											"value": "<string>"
+											"value": "user"
 										}
 									]
 								},
@@ -15951,7 +15952,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"id\": \"<string>\",\n  \"name\": \"<string>\",\n  \"description\": \"<string>\",\n  \"permissions\": [\n    \"<integer>\",\n    \"<integer>\"\n  ]\n}",
+									"raw": "{\n  \"name\": \"testrole\",\n  \"description\": \"this is a test role\",\n  \"permissions\": [\n    \"ANALYZE_ACCESS\",\n    \"ASSESS_ACCESS\"\n  ]\n}",
 									"options": {
 										"raw": {
 											"headerFamily": "json",
@@ -16128,7 +16129,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"id\": \"<string>\",\n  \"name\": \"<string>\",\n  \"description\": \"<string>\",\n  \"permissions\": [\n    \"<integer>\",\n    \"<integer>\"\n  ]\n}",
+									"raw": "{\n  \"name\": \"testrole\",\n  \"description\": \"this is a test role description update\",\n  \"permissions\": [\n    \"ANALYZE_ACCESS\",\n    \"ASSESS_ACCESS\"\n  ]\n}",
 									"options": {
 										"raw": {
 											"headerFamily": "json",
@@ -16149,7 +16150,7 @@
 									"variable": [
 										{
 											"key": "role_id",
-											"value": "<integer>"
+											"value": "3"
 										}
 									]
 								},

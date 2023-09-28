@@ -2539,7 +2539,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/organization.new'
+              $ref: '#/components/schemas/organization'
       responses:
         '200':
           description: success
@@ -2565,7 +2565,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/organization.new'
+              $ref: '#/components/schemas/organization'
       responses:
         '200':
           description: success
@@ -3651,7 +3651,7 @@ components:
         - type: object
           properties:
             id:
-              type: string
+              type: int
             name:
               type: string
             description:
@@ -3659,20 +3659,12 @@ components:
             permissions:
               type: array
               items:
-                type: integer
+                type: string
     role.id:
       type: object
       properties:
         id:
-          type: string
-
-    organization.new:
-      allOf:
-        - $ref: '#/components/schemas/organization'
-        - type: object
-          properties:
-            address:
-              $ref: '#/components/schemas/address.new'
+          type: int
 
     organization:
       type: object
