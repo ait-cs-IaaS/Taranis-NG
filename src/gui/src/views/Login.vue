@@ -18,8 +18,8 @@
         <v-row no-gutters justify="center" align-content="center">
           <v-col cols="12" sm="6">
             <v-text-field
-              class="mx-2"
               v-model="username"
+              class="mx-2"
               :placeholder="$t('login.username')"
               name="username"
               prepend-icon="mdi-account-outline"
@@ -31,8 +31,8 @@
           </v-col>
           <v-col cols="12" sm="6">
             <v-text-field
-              class="mx-2"
               v-model="password"
+              class="mx-2"
               :placeholder="$t('login.password')"
               name="password"
               prepend-icon="mdi-lock-outline"

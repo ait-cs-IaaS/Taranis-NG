@@ -1169,16 +1169,36 @@ class NewsItemTag(BaseModel):
         return results
 
     @classmethod
-    def get_n_biggest_tags_by_type(cls, tag_type: str, n: int) -> dict[str, dict]:
+    def get_n_biggest_tags_by_type(cls, tag_type: str, n: int, offset: int = 0) -> dict[str, dict]:
         query = (
             cls.query.with_entities(cls.name, func.count(cls.name).label("name_count"))
             .filter(cls.tag_type == tag_type)
             .group_by(cls.name)
             .order_by(db.desc("name_count"))
+            .offset(offset)
             .limit(n)
             .all()
         )
         return {row[0]: {"name": row[0], "size": row[1]} for row in query}
+
+    @classmethod
+    def get_cluster_by_filter(cls, filter):
+        query = cls.query.with_entities(cls.name, func.count(cls.name).label("name_count"))
+        if tag_type := filter.get("tag_type"):
+            query = query.filter(cls.tag_type == tag_type).group_by(cls.name).order_by(db.desc("name_count"))
+
+        count = query.count()
+
+        if search := filter.get("search"):
+            query = query.filter(cls.name.ilike(f"%{search}%"))
+        if offset := filter.get("offset"):
+            query = query.offset(offset)
+        if limit := filter.get("limit"):
+            query = query.limit(limit)
+
+        items = {row[0]: {"name": row[0], "size": row[1]} for row in query.all()}
+
+        return {"total_count": count, "items": list(items.values())}
 
     @classmethod
     def get_tag_types(cls) -> list[tuple[str, int]]:

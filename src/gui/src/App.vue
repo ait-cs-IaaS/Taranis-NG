@@ -64,6 +64,18 @@ export default defineComponent({
 <style lang="scss">
 @import '@/styles/awake.scss';
 
+.v-application {
+  font-size: 14px;
+  letter-spacing: normal;
+  h2 {
+    font-size: 1.3rem;
+  }
+  p {
+    font-size: 0.95rem;
+    font-weight: 300;
+  }
+}
+
 mark {
   background-color: $primary;
   color: white;

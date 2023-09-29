@@ -247,7 +247,7 @@ export default {
     const showStory = computed(() => {
       return (
         props.story.news_items.length > 0 &&
-        props.story.news_items[0].news_item_data.content !== ''
+        'news_item_data' in props.story.news_items[0]
       )
     })
 

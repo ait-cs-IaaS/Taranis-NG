@@ -1,53 +1,63 @@
 <template>
   <v-bottom-navigation density="compact">
     <v-row no-gutters>
-      <v-col v-if="storySelection.length > 0" class="story-bg toolbar">
-        <div>
-          <v-btn
-            v-for="button in storyButtons"
-            :key="button.label"
-            :ripple="false"
-            size="small"
-            class="text-lowercase"
-            @click.stop="actionClicked(button.action)"
-          >
-            <v-icon :icon="button.icon" />
-            {{ button.label }}
-          </v-btn>
-        </div>
-        <div class="mr-4">
-          <v-btn size="small" class="text-lowercase" @click.stop="deselect">
-            <v-icon icon="mdi-selection-remove" />
-            deselect
-          </v-btn>
-          <span>
-            Stories selected: <strong>{{ storySelection.length }}</strong>
-          </span>
-        </div>
+      <v-col
+        v-if="storySelection.length > 0"
+        :cols="startCols"
+        class="story-bg toolbar-start"
+      >
+        <v-btn
+          v-for="button in storyButtons"
+          :key="button.label"
+          :ripple="false"
+          size="small"
+          @click.stop="actionClicked(button.action)"
+        >
+          <v-icon :icon="button.icon" />
+          {{ button.label }}
+        </v-btn>
       </v-col>
-      <v-col v-if="newsItemSelection.length > 0" class="news-item-bg toolbar">
-        <div>
-          <v-btn
-            v-for="button in newsItemButtons"
-            :key="button.label"
-            :ripple="false"
-            size="small"
-            class="text-lowercase"
-            @click.stop="actionClicked(button.action)"
-          >
-            <v-icon :icon="button.icon" />
-            {{ button.label }}
-          </v-btn>
-        </div>
-        <div class="mr-4">
-          <v-btn size="small" class="text-lowercase" @click.stop="deselect">
-            <v-icon icon="mdi-selection-remove" />
-            deselect
-          </v-btn>
-          <span>
-            News Items selected: <strong>{{ newsItemSelection.length }}</strong>
-          </span>
-        </div>
+      <v-col
+        v-if="storySelection.length > 0"
+        :cols="startCols / 2"
+        class="story-bg toolbar-end"
+      >
+        <v-btn size="small" @click.stop="deselect">
+          <v-icon icon="mdi-selection-remove" />
+          deselect
+        </v-btn>
+        <span class="mr-4">
+          Stories selected: <strong>{{ storySelection.length }}</strong>
+        </span>
+      </v-col>
+      <v-col
+        v-if="newsItemSelection.length > 0"
+        :cols="startCols"
+        class="news-item-bg toolbar-start"
+      >
+        <v-btn
+          v-for="button in newsItemButtons"
+          :key="button.label"
+          :ripple="false"
+          size="small"
+          @click.stop="actionClicked(button.action)"
+        >
+          <v-icon :icon="button.icon" />
+          {{ button.label }}
+        </v-btn>
+      </v-col>
+      <v-col
+        v-if="newsItemSelection.length > 0"
+        :cols="startCols / 2"
+        class="news-item-bg toolbar-end"
+      >
+        <v-btn size="small" @click.stop="deselect">
+          <v-icon icon="mdi-selection-remove" />
+          deselect
+        </v-btn>
+        <span class="mr-4">
+          News Items selected: <strong>{{ newsItemSelection.length }}</strong>
+        </span>
       </v-col>
     </v-row>
     <v-dialog v-model="sharingDialog" width="auto">
@@ -97,6 +107,16 @@ export default {
       return buttons
     })
 
+    const startCols = computed(() => {
+      if (
+        storySelection.value.length > 0 &&
+        newsItemSelection.value.length > 0
+      ) {
+        return 4
+      }
+      return 8
+    })
+
     const newsItemButtons = computed(() => {
       const buttons = [
         {
@@ -139,6 +159,7 @@ export default {
       storyButtons,
       newsItemButtons,
       newsItemSelection,
+      startCols,
       actionClicked,
       deselect
     }
@@ -147,10 +168,15 @@ export default {
 </script>
 
 <style scoped>
-.toolbar {
+.toolbar-start {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: start;
+}
+.toolbar-end {
+  display: flex;
+  align-items: center;
+  justify-content: end;
 }
 .story-bg {
   background-color: #7468e8;
