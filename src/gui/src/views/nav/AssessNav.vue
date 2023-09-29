@@ -252,7 +252,6 @@ export default {
       newsItemsFilter,
       (filter, prevFilter) => {
         console.debug('filter changed', filter, prevFilter)
-        assessStore.clearNewsItemSelection()
         updateNewsItems()
       },
       { deep: true }

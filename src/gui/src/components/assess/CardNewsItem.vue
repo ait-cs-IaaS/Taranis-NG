@@ -152,7 +152,7 @@ import {
   deleteNewsItemAggregate,
   importantNewsItemAggregate,
   readNewsItemAggregate,
-  unGroupAction
+  unGroupNewsItems
 } from '@/api/assess'
 import { ref, computed } from 'vue'
 
@@ -221,7 +221,7 @@ export default {
     }
 
     const removeFromStory = () => {
-      unGroupAction([props.newsItem.id])
+      unGroupNewsItems([props.newsItem.id])
         .then(() => {
           notifySuccess('News Item removed from Story')
           emit('refresh')

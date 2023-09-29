@@ -16,8 +16,11 @@ class CoreApi:
         return {"Authorization": f"Bearer {self.api_key}", "Content-type": "application/json"}
 
     def check_response(self, response, url):
-        if response.ok:
-            return response.json()
+        try:
+            if response.ok:
+                return response.json()
+        except Exception:
+            logger.error(f"Call to {url} failed {response.status_code}: {response.text}")
         logger.error(f"Call to {url} failed {response.status_code}: {response.text}")
         return None
 

@@ -1,5 +1,6 @@
 <template>
   <v-card
+    v-if="showStory"
     :ripple="false"
     elevation="3"
     :rounded="false"
@@ -148,6 +149,12 @@
               @click.stop="markAsImportant()"
             />
             <v-list-item
+              v-if="!reportView && news_item_length > 1"
+              title="ungroup"
+              prepend-icon="mdi-ungroup"
+              @click.stop="ungroup()"
+            />
+            <v-list-item
               title="delete"
               prepend-icon="mdi-delete-outline"
               @click.stop="deleteDialog = true"
@@ -206,6 +213,7 @@ import CardNewsItem from '@/components/assess/CardNewsItem.vue'
 import { ref, computed } from 'vue'
 import { useAssessStore } from '@/stores/AssessStore'
 import { highlight_text } from '@/utils/helpers'
+import { unGroupStories } from '@/api/assess'
 
 export default {
   name: 'CardStory',
@@ -235,6 +243,13 @@ export default {
     const selected = computed(() =>
       assessStore.storySelection.includes(props.story.id)
     )
+
+    const showStory = computed(() => {
+      return (
+        props.story.news_items.length > 0 &&
+        props.story.news_items[0].news_item_data.content !== ''
+      )
+    })
 
     const item_important = computed(() =>
       'important' in props.story ? props.story.important : false
@@ -297,16 +312,24 @@ export default {
 
     const getDescription = computed(() => {
       return openSummary.value
-        ? news_item_length.value > 1
-          ? props.story.description
-          : props.story.news_items[0].news_item_data.content
-        : props.story.summary || props.story.description
+        ? props.story.description ||
+            props.story.news_items[0].news_item_data.content
+        : props.story.summary ||
+            props.story.description ||
+            props.story.news_items[0].news_item_data.content
     })
+
+    function ungroup() {
+      unGroupStories([props.story.id]).then(() => {
+        emit('refresh')
+      })
+    }
 
     return {
       viewDetails,
       openSummary,
       selected,
+      showStory,
       sharingDialog,
       deleteDialog,
       item_important,
@@ -320,6 +343,7 @@ export default {
       is_summarized,
       getDescription,
       openCard,
+      ungroup,
       toggleSelection,
       markAsRead,
       markAsImportant,

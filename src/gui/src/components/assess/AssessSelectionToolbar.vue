@@ -57,14 +57,13 @@
 </template>
 
 <script>
-import { groupAction } from '@/api/assess'
+import { groupAction, unGroupNewsItems, unGroupStories } from '@/api/assess'
 import PopupShareItems from '@/components/popups/PopupShareItems.vue'
 import { useAssessStore } from '@/stores/AssessStore'
 
 import { notifySuccess, notifyFailure } from '@/utils/helpers'
 import { storeToRefs } from 'pinia'
 import { ref, computed } from 'vue'
-import { unGroupAction } from '@/api/assess'
 
 export default {
   name: 'AssessSelectionToolbar',
@@ -124,7 +123,9 @@ export default {
       } else if (action === 'addToReport') {
         sharingDialog.value = true
       } else if (action === 'remove') {
-        unGroupAction(newsItemSelection.value)
+        unGroupNewsItems(newsItemSelection.value)
+      } else if (action === 'unGroup') {
+        unGroupStories(storySelection.value)
       }
     }
 

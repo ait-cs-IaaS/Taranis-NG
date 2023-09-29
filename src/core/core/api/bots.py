@@ -36,7 +36,7 @@ class BotUnGroupAction(Resource):
         newsitem_ids = request.json
         if not newsitem_ids:
             return {"No aggregate ids provided"}, 400
-        response, code = news_item.NewsItemAggregate.ungroup_aggregate(newsitem_ids)
+        response, code = news_item.NewsItemAggregate.remove_news_items_from_story(newsitem_ids)
         sse_manager.news_items_updated()
         return response, code
 
