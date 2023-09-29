@@ -3,7 +3,7 @@
     :ripple="false"
     elevation="3"
     :rounded="false"
-    class="no-gutters align-self-stretch mb-3 mt-2 ml-2 mr-2"
+    class="no-gutters align-self-stretch mb-3 mt-2 mx-4 story-card"
     :class="[
       {
         selected: selected
@@ -160,7 +160,7 @@
         cols="12"
         sm="12"
         lg="6"
-        class="px-5 order-lg-3 order-md-2"
+        class="px-5 pb-5 order-lg-3 order-md-2"
         align-self="stretch"
       >
         <summarized-content
@@ -331,10 +331,16 @@ export default {
 </script>
 
 <style scoped>
-.selected {
-  background-color: lighten(#7468e8, 30);
-  border: 2px solid #7468e8;
-  margin: -2px;
+.story-card {
+  border: 2px solid white;
+  &:hover {
+    border-color: #f6f6f6;
+  }
+  &.selected {
+    background-color: lighten(#7468e8, 30);
+    border-color: #7468e8;
+    margin: -2px;
+  }
 }
 
 .news-item-container {
@@ -355,5 +361,9 @@ export default {
 .news-item-title-no-clip {
   max-height: calc(1.5em * 2);
   line-height: 1.3;
+}
+
+.item-action-btn {
+  flex: 1;
 }
 </style>
