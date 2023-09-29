@@ -4,7 +4,7 @@
 
     <router-view name="nav"></router-view>
 
-    <v-main>
+    <v-main class="d-flex">
       <router-view />
     </v-main>
 
@@ -63,4 +63,10 @@ export default defineComponent({
 
 <style lang="scss">
 @import '@/styles/awake.scss';
+
+mark {
+  background-color: $primary;
+  color: white;
+  padding: 2px 5px;
+}
 </style>
