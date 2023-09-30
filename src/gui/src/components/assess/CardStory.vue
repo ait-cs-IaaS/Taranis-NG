@@ -155,6 +155,12 @@
               @click.stop="ungroup()"
             />
             <v-list-item
+              v-if="!reportView && newsItemSelection.length > 0"
+              title="move selection"
+              prepend-icon="mdi-folder-move"
+              @click.stop="moveSelection()"
+            />
+            <v-list-item
               title="delete"
               prepend-icon="mdi-delete-outline"
               @click.stop="deleteDialog = true"
@@ -214,6 +220,7 @@ import { ref, computed } from 'vue'
 import { useAssessStore } from '@/stores/AssessStore'
 import { highlight_text } from '@/utils/helpers'
 import { unGroupStories } from '@/api/assess'
+import { storeToRefs } from 'pinia'
 
 export default {
   name: 'CardStory',
@@ -240,6 +247,7 @@ export default {
     const sharingDialog = ref(false)
     const deleteDialog = ref(false)
     const assessStore = useAssessStore()
+    const { newsItemSelection } = storeToRefs(assessStore)
     const selected = computed(() =>
       assessStore.storySelection.includes(props.story.id)
     )
@@ -325,6 +333,11 @@ export default {
       })
     }
 
+    function moveSelection() {
+      // assessStore.moveSelectionToStory(props.story.id, newsItemSelection.value)
+      console.debug('move selection to story', newsItemSelection.value)
+    }
+
     return {
       viewDetails,
       openSummary,
@@ -341,6 +354,7 @@ export default {
       minButtonWidth,
       story_in_reports,
       is_summarized,
+      newsItemSelection,
       getDescription,
       openCard,
       ungroup,
@@ -348,6 +362,7 @@ export default {
       markAsRead,
       markAsImportant,
       deleteNewsItem,
+      moveSelection,
       emitRefresh
     }
   }

@@ -5,7 +5,7 @@ import jinja2
 from .base_presenter import BasePresenter
 
 
-class TEXTPresenter(BasePresenter):
+class TextPresenter(BasePresenter):
     type = "TEXT_PRESENTER"
     name = "TEXT Presenter"
     description = "Presenter for generating text documents"
@@ -34,3 +34,4 @@ class TEXTPresenter(BasePresenter):
             return {"mime_type": "text/plain", "data": data}
         except Exception as error:
             BasePresenter.print_exception(self, error)
+            return {"error": str(error)}

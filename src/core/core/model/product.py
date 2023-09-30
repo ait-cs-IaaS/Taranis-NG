@@ -137,8 +137,9 @@ class Product(BaseModel):
     @classmethod
     def get_render(cls, product_id):
         if product := cls.get(product_id):
-            return product.render_result
-        return {"error": f"Product {product_id} not found"}, 404
+            if product.render_result:
+                return {"mime_type": product.product_type.get_mimetype(), "blob": product.render_result}
+        return None
 
     @classmethod
     def update(cls, product_id, data) -> tuple[dict, int]:

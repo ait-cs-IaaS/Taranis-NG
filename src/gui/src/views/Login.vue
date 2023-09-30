@@ -1,5 +1,5 @@
 <template>
-  <v-container class="login-screen ma-auto flex-column">
+  <v-container class="login-container flex-column">
     <div class="ma-auto" style="max-width: 900px">
       <v-row
         no-gutters
@@ -129,3 +129,9 @@ export default defineComponent({
   }
 })
 </script>
+
+<style scoped>
+.login-container {
+  margin-top: 10%;
+}
+</style>

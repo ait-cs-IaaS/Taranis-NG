@@ -41,7 +41,7 @@
       </v-btn>
     </v-toolbar>
     <v-card-text>
-      <v-row>
+      <v-row no-gutters>
         <v-col
           :cols="verticalView ? 6 : 12"
           :class="verticalView ? 'taranis-ng-vertical-view' : ''"

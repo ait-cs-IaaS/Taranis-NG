@@ -10,7 +10,7 @@ class MISPPresenter(BasePresenter):
     name = "MISP Presenter"
     description = "Presenter for generating MISP platform"
 
-    def generate(self, presenter_input):
+    def generate(self, presenter_input) -> dict[str, str]:
         try:
             head, tail = os.path.split(presenter_input.parameter_values_map["MISP_TEMPLATE_PATH"])
 
@@ -27,3 +27,4 @@ class MISPPresenter(BasePresenter):
             return {"mime_type": "application/json", "data": data}
         except Exception as error:
             BasePresenter.print_exception(self, error)
+            return {"error": str(error)}

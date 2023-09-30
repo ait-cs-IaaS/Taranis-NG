@@ -10,7 +10,7 @@ class HTMLPresenter(BasePresenter):
     name = "HTML Presenter"
     description = "Presenter for generating html documents"
 
-    def generate(self, presenter_input):
+    def generate(self, presenter_input) -> dict[str, str]:
         try:
             head, tail = os.path.split(presenter_input.parameter_values_map["HTML_TEMPLATE_PATH"])
 
@@ -27,3 +27,4 @@ class HTMLPresenter(BasePresenter):
             return {"mime_type": "text/html", "data": data}
         except Exception as error:
             BasePresenter.print_exception(self, error)
+            return {"error": str(error)}

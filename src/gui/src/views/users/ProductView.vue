@@ -1,19 +1,19 @@
 <template>
   <v-container fluid style="min-height: 100vh">
-    <card-product v-if="readyToRender" :product-prop="product" />
+    <product-item v-if="readyToRender" :product-prop="product" />
   </v-container>
 </template>
 
 <script>
 import { ref, onBeforeMount } from 'vue'
 import { getProduct } from '@/api/publish'
-import CardProduct from '@/components/publish/CardProduct.vue'
+import ProductItem from '@/components/publish/ProductItem.vue'
 import { useRoute } from 'vue-router'
 
 export default {
   name: 'ProductView',
   components: {
-    CardProduct
+    ProductItem
   },
   setup() {
     const route = useRoute()

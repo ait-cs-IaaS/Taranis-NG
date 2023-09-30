@@ -102,6 +102,27 @@ class ProductType(BaseModel):
         data["parameters"] = {parameter.parameter: parameter.value for parameter in self.parameters}
         return data
 
+    def get_template(self):
+        # get value of parameter where parameter.parameter == "TEMPLATE_PATH"
+        template_path = next((parameter.value for parameter in self.parameters if parameter.parameter == "TEMPLATE_PATH"), None)
+        if not template_path:
+            logger.error(f"Could not find template path for product type {self.title}")
+            return {"error": f"Could not find template path for product type {self.title}"}
+        return template_path
+
+    def get_mimetype(self) -> str:
+        if self.type.startswith("image"):
+            return "image/png"
+        if self.type.startswith("pdf"):
+            return "application/pdf"
+        if self.type.startswith("html"):
+            return "text/html"
+        if self.type.startswith("text"):
+            return "text/plain"
+        if self.type.startswith("misp"):
+            return "application/json"
+        return "application/octet-stream"
+
 
 class ProductTypeParameterValue(BaseModel):
     product_type_id = db.Column(db.Integer, db.ForeignKey("product_type.id", ondelete="CASCADE"), primary_key=True)

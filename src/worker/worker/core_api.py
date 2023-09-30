@@ -67,6 +67,15 @@ class CoreApi:
     def get_osint_source(self, source_id: str) -> dict | None:
         return self.api_get(f"/worker/osint-sources/{source_id}")
 
+    def get_product(self, product_id: int) -> dict | None:
+        return self.api_get(f"/worker/products/{product_id}")
+
+    def upload_rendered_product(self, product_id, product) -> dict | None:
+        url = f"{self.api_url}/worker/word-products/{product_id}"
+        headers = self.headers.copy()
+        headers["Content-type"] = product["mime_type"]
+        return self.check_response(requests.put(url=url, data=product["data"], headers=headers, verify=self.verify), url)
+
     def get_schedule(self) -> dict | None:
         try:
             return self.api_get(url="/beat/schedule")
