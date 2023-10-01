@@ -15,28 +15,24 @@
       </h1>
       <div class="block">
         <h2>End-of-Day report</h2>
-        <h2>      News       </h2>
+        <h2>      Report Items       </h2>
         {% for report_item in data.report_items %}
-        {% if report_item.attrs.cert_report_group != 'Vulnerabilities' %}
         <h3>HEADLINE</h3>
 
-        {{ report_item }}
+        {{ report_item.attributes }}
         <p />
         <a href="url">https://url/</a>
         <hr>
-        {% endif %}
         {% endfor %}
 
-        <h2> Vulnerabilities </h2>
-        {% for report_item in data.report_items %}
-        {% if report_item.attrs.cert_report_group == 'Vulnerabilities' %}
+        <h2> Stories </h2>
+        {% for story in data.news_item_aggregates %}
         <h3>HEADLINE</h3>
 
-        {{ report_item }}
+        {{ story }}
         <p />
         <a href="url">https://url/</a>
         <hr>
-        {% endif %}
         {% endfor %}
       </div>
     </div>

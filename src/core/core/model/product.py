@@ -22,7 +22,7 @@ class Product(BaseModel):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     user = db.relationship("User")
 
-    report_items = db.relationship("ReportItem", secondary="product_report_item")
+    report_items = db.relationship("ReportItem", secondary="product_report_item", cascade="all, delete")
     last_rendered = db.Column(db.DateTime)
     render_result = orm.deferred(db.Column(db.LargeBinary))
 
@@ -115,6 +115,15 @@ class Product(BaseModel):
         data.pop("render_result", None)
         return data
 
+    def to_worker_dict(self) -> dict[str, Any]:
+        return {
+            "id": self.id,
+            "type": self.product_type.type,
+            "type_id": self.product_type.id,
+            "mime_type": self.product_type.get_mimetype(),
+            "report_items": [report_item.to_detail_dict() for report_item in self.report_items if report_item],
+        }
+
     def update_render(self, render_result):
         try:
             self.last_rendered = datetime.now()
@@ -156,5 +165,5 @@ class Product(BaseModel):
 
 
 class ProductReportItem(BaseModel):
-    product_id = db.Column(db.Integer, db.ForeignKey("product.id"), primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey("product.id", ondelete="SET NULL"), primary_key=True)
     report_item_id = db.Column(db.Integer, db.ForeignKey("report_item.id", ondelete="CASCADE"), primary_key=True)

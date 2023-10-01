@@ -84,14 +84,14 @@ class BasePresenter:
 
     def generate(self, presenter_input, template) -> dict[str, str]:
         try:
-            input_data = BasePresenter.generate_input_data(presenter_input)
-
+            logger.debug(f"RENDER INPUT: {presenter_input}")
+            logger.debug(f"RENDER TEMPLATE: {template}")
             env = jinja2.Environment()
-            tmpl = env.from_string(template["data"])
+            tmpl = env.from_string(template)
 
-            output_text = tmpl.render(data=input_data)
+            output_text = tmpl.render(data=presenter_input)
 
-            return {"mime_type": template["mime_type"], "data": output_text}
+            return {"mime_type": presenter_input["mime_type"], "data": output_text}
         except Exception as error:
             BasePresenter.print_exception(self, error)
             return {"error": str(error)}

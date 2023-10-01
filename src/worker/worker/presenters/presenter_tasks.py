@@ -27,7 +27,7 @@ def get_product(product_id: int) -> tuple[dict[str, str] | None, str | None]:
     return product, None
 
 
-def get_template(presenter: str) -> tuple[dict[str, str] | None, str | None]:
+def get_template(presenter: int) -> tuple[str | None, None | str]:
     try:
         template = core_api.get_template(presenter)
     except ConnectionError as e:
@@ -40,7 +40,12 @@ def get_template(presenter: str) -> tuple[dict[str, str] | None, str | None]:
     return template, None
 
 
-def get_presenter(presenter_type: str) -> tuple[BasePresenter | None, str | None]:
+def get_presenter(product) -> tuple[BasePresenter | None, str | None]:
+    presenter_type = product.get("type")
+    if not presenter_type:
+        logger.error(f"Product {product['id']} has no presenter_type")
+        return None, f"Product {product['id']} has no presenter_type"
+
     if presenter := presenters.get(presenter_type):
         return presenter, None
 
@@ -54,16 +59,12 @@ def render_product(product_id: int):
     if err or not product:
         return err
 
-    presenter_type = product.get("type")
-    if not presenter_type:
-        logger.error(f"Product {product['id']} has no presenter_type")
-        return f"Product {product['id']} has no presenter_type"
-
-    presenter, err = get_presenter(presenter_type)
+    presenter, err = get_presenter(product)
     if err or not presenter:
         return err
 
-    template, err = get_template(presenter_type)
+    type_id: int = int(product["type_id"])
+    template, err = get_template(type_id)
     if err or not product:
         return err
 

@@ -116,6 +116,10 @@ class ProductType(BaseModel):
         full_path = get_presenter_template_path(self.get_template_path())
         return full_path if os.path.isfile(full_path) else ""
 
+    @classmethod
+    def get_by_type(cls, type) -> "ProductType":
+        return cls.query.filter_by(type=type).first()
+
     def get_mimetype(self) -> str:
         if self.type.startswith("image"):
             return "image/png"

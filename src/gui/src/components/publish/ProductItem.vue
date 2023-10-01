@@ -90,12 +90,13 @@
           :cols="6"
           class="pa-5 taranis-ng-vertical-view"
         >
-          <embed
+          <div v-html="renderedProduct"></div>
+          <!-- <embed
             v-if="renderedProduct"
             :src="renderedProduct"
             width="500"
             height="800"
-          />
+          /> -->
         </v-col>
       </v-row>
     </v-card-text>
@@ -154,16 +155,16 @@ export default {
     })
 
     const saveProduct = () => {
-      console.debug('Creating product', product.value)
-
       if (props.edit) {
         updateProduct(product.value.id, product.value)
       } else {
         createProduct(product.value)
           .then((response) => {
-            router.push('/product/' + response.data)
-            emit('productcreated', response.data)
-            notifySuccess('Product created ' + response.data)
+            const new_id = response.data.id
+            router.push('/product/' + new_id)
+            console.debug('Created product', new_id)
+            emit('productcreated', new_id)
+            notifySuccess('Product created ' + new_id)
           })
           .catch((error) => {
             console.error(error)
@@ -187,7 +188,8 @@ export default {
     function renderProduct() {
       getRenderdProduct(product.value.id)
         .then((blob) => {
-          renderedProduct.value = URL.createObjectURL(blob)
+          console.debug(blob.data)
+          renderedProduct.value = blob.data
         })
         .catch(() => {
           console.error('Failed to render product ' + product.value.id)

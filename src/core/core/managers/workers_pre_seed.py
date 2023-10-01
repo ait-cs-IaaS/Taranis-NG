@@ -280,7 +280,7 @@ products = [
         "description": "Default TEXT Presenter",
         "type": "TEXT_PRESENTER",
         "parameters": [
-            {"parameter": "TEMPLATE_PATH", "value": "text_template.html"},
+            {"parameter": "TEMPLATE_PATH", "value": "text_template.txt"},
         ],
     },
     {
@@ -288,7 +288,7 @@ products = [
         "description": "Default MISP Presenter",
         "type": "JSON_PRESENTER",
         "parameters": [
-            {"parameter": "TEMPLATE_PATH", "value": "misp_template.html"},
+            {"parameter": "TEMPLATE_PATH", "value": "misp_template.json"},
         ],
     },
     {
