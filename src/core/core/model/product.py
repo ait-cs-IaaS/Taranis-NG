@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from typing import Any
+from base64 import b64encode, b64decode
 from sqlalchemy import orm, func, or_, and_, String as SQLString
 from sqlalchemy.sql.expression import cast
 
@@ -24,7 +25,7 @@ class Product(BaseModel):
 
     report_items = db.relationship("ReportItem", secondary="product_report_item", cascade="all, delete")
     last_rendered = db.Column(db.DateTime)
-    render_result = orm.deferred(db.Column(db.LargeBinary))
+    render_result = orm.deferred(db.Column(db.Text))
 
     def __init__(self, title, product_type_id, description="", report_items=None, id=None):
         self.id = id
@@ -127,7 +128,7 @@ class Product(BaseModel):
     def update_render(self, render_result):
         try:
             self.last_rendered = datetime.now()
-            self.render_result = render_result
+            self.render_result = b64encode(render_result).decode("ascii")
             db.session.commit()
             return True
         except Exception:
@@ -147,7 +148,8 @@ class Product(BaseModel):
     def get_render(cls, product_id):
         if product := cls.get(product_id):
             if product.render_result:
-                return {"mime_type": product.product_type.get_mimetype(), "blob": product.render_result}
+                blob = b64decode(product.render_result).decode("utf-8")
+                return {"mime_type": product.product_type.get_mimetype(), "blob": blob}
         return None
 
     @classmethod

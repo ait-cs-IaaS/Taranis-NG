@@ -67,7 +67,7 @@
           append-icon="mdi-trash-can"
           @click.stop="$emit('remove-from-report')"
         >
-          <span>Remove from Report</span>
+          <span>Remove</span>
         </v-btn>
 
         <v-btn
