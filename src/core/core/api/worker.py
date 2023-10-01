@@ -1,4 +1,4 @@
-from flask import request
+from flask import request, send_file
 from flask_restx import Resource, Namespace, Api
 from werkzeug.datastructures import FileStorage
 
@@ -7,6 +7,7 @@ from core.managers.log_manager import logger
 from core.model.osint_source import OSINTSource
 from core.model.product import Product
 from core.model.queue import ScheduleEntry
+from core.model.product_type import ProductType
 from core.model.word_list import WordList
 from core.model.news_item import NewsItemAggregate, NewsItemTag
 from core.managers.sse_manager import sse_manager
@@ -72,7 +73,7 @@ class QueueSchedule(Resource):
 
 class Products(Resource):
     @api_key_required
-    def get(self, product_id: str):
+    def get(self, product_id: int):
         try:
             if prod := Product.get(product_id):
                 return prod.to_worker_dict(), 200
@@ -87,6 +88,18 @@ class Products(Resource):
                 return Product.update_render_for_id(product_id, file)
 
             return {"error": "Error reading file"}, 400
+        except Exception:
+            logger.log_debug_trace()
+
+
+class Presenters(Resource):
+    @api_key_required
+    def get(self, presenter: str):
+        try:
+            if pres := ProductType.get(presenter):
+                if tmpl := pres.get_template():
+                    return send_file(tmpl)
+            return {"error": f"Presenter with id {presenter} not found"}, 404
         except Exception:
             logger.log_debug_trace()
 
@@ -264,6 +277,10 @@ def initialize(api: Api):
     worker_ns.add_resource(
         Products,
         "/products/<int:product_id>",
+    )
+    worker_ns.add_resource(
+        Presenters,
+        "/presenters/<string:presenter>",
     )
     worker_ns.add_resource(AddNewsItems, "/news-items")
     worker_ns.add_resource(BotsInfo, "/bots")

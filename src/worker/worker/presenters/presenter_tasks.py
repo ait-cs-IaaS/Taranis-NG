@@ -8,7 +8,7 @@ core_api = CoreApi()
 
 presenters = {
     "html_presenter": worker.presenters.HTMLPresenter(),
-    "misp_presenter": worker.presenters.MISPPresenter(),
+    "json_presenter": worker.presenters.JSONPresenter(),
     "pdf_presenter": worker.presenters.PDFPresenter(),
     "text_presenter": worker.presenters.TextPresenter(),
 }
@@ -27,12 +27,20 @@ def get_product(product_id: int) -> tuple[dict[str, str] | None, str | None]:
     return product, None
 
 
-def get_presenter(product: dict[str, str]) -> tuple[BasePresenter | None, str | None]:
-    presenter_type = product.get("type")
-    if not presenter_type:
-        logger.error(f"Product {product['id']} has no presenter_type")
-        return None, f"Product {product['id']} has no presenter_type"
+def get_template(presenter: str) -> tuple[dict[str, str] | None, str | None]:
+    try:
+        template = core_api.get_template(presenter)
+    except ConnectionError as e:
+        logger.critical(e)
+        return None, str(e)
 
+    if not template:
+        logger.error(f"presenter with id {presenter} not found")
+        return None, f"presenter with id {presenter} not found"
+    return template, None
+
+
+def get_presenter(presenter_type: str) -> tuple[BasePresenter | None, str | None]:
     if presenter := presenters.get(presenter_type):
         return presenter, None
 
@@ -46,11 +54,20 @@ def render_product(product_id: int):
     if err or not product:
         return err
 
-    presenter, err = get_presenter(product)
+    presenter_type = product.get("type")
+    if not presenter_type:
+        logger.error(f"Product {product['id']} has no presenter_type")
+        return f"Product {product['id']} has no presenter_type"
+
+    presenter, err = get_presenter(presenter_type)
     if err or not presenter:
         return err
 
-    rendered_product = presenter.generate(product)
+    template, err = get_template(presenter_type)
+    if err or not product:
+        return err
+
+    rendered_product = presenter.generate(product, template)
     if not rendered_product:
         return "Error generating product"
     if "error" in rendered_product:

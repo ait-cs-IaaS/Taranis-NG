@@ -1,5 +1,3 @@
-import os
-import jinja2
 from weasyprint import HTML
 
 from .base_presenter import BasePresenter
@@ -10,22 +8,17 @@ class PDFPresenter(BasePresenter):
     name = "PDF Presenter"
     description = "Presenter for generating PDF documents"
 
-    def generate(self, presenter_input):
+    def generate(self, presenter_input, template) -> dict[str, str | bytes]:
         try:
-            head, tail = os.path.split(presenter_input.parameter_values_map["BODY_TEMPLATE_PATH"])
-
-            input_data = BasePresenter.generate_input_data(presenter_input)
-
-            env = jinja2.Environment(loader=jinja2.FileSystemLoader(head))
-
-            body = env.get_template(tail)
-            output_text = body.render(data=input_data)
+            output_text = super().generate(presenter_input, template)
 
             html = HTML(string=output_text)
 
-            data = html.write_pdf(target=None)
+            if data := html.write_pdf(target=None):
+                return {"mime_type": "application/pdf", "data": data}
 
-            return {"mime_type": "application/pdf", "data": data}
+            return {"error": "Could not generate PDF"}
+
         except Exception as error:
             BasePresenter.print_exception(self, error)
             return {"error": str(error)}

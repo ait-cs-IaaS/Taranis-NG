@@ -168,9 +168,9 @@ workers = [
         "parameters": ["TEMPLATE_PATH"],
     },
     {
-        "type": "MISP_PRESENTER",
-        "name": "MISP Presenter",
-        "description": "Presenter for generating MISP platform",
+        "type": "JSON_PRESENTER",
+        "name": "JSON Presenter",
+        "description": "Presenter for generating json documents",
         "parameters": ["TEMPLATE_PATH"],
     },
     {
@@ -286,7 +286,7 @@ products = [
     {
         "title": "Default MISP Presenter",
         "description": "Default MISP Presenter",
-        "type": "MISP_PRESENTER",
+        "type": "JSON_PRESENTER",
         "parameters": [
             {"parameter": "TEMPLATE_PATH", "value": "misp_template.html"},
         ],

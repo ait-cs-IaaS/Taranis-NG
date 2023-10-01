@@ -1,5 +1,6 @@
 from worker.log import logger
 import json
+import jinja2
 import datetime
 
 
@@ -81,5 +82,16 @@ class BasePresenter:
         logger.log_info("=== TEMPLATING FROM THE FOLLOWING INPUT ===\n" + data_json)
         return json.loads(data_json)
 
-    def generate(self, presenter_input):
-        pass
+    def generate(self, presenter_input, template) -> dict[str, str]:
+        try:
+            input_data = BasePresenter.generate_input_data(presenter_input)
+
+            env = jinja2.Environment()
+            tmpl = env.from_string(template["data"])
+
+            output_text = tmpl.render(data=input_data)
+
+            return {"mime_type": template["mime_type"], "data": output_text}
+        except Exception as error:
+            BasePresenter.print_exception(self, error)
+            return {"error": str(error)}
