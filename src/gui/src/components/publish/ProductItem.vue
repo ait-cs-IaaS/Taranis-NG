@@ -25,7 +25,12 @@
         variant="flat"
         @click="saveProduct"
       >
-        {{ $t('button.create') }}
+        <span v-if="edit">
+          {{ $t('button.save') }}
+        </span>
+        <span v-else>
+          {{ $t('button.create') }}
+        </span>
       </v-btn>
     </v-toolbar>
     <v-card-text>
@@ -90,7 +95,8 @@
           :cols="6"
           class="pa-5 taranis-ng-vertical-view"
         >
-          <div v-if="render_direct" v-html="renderedProduct" />
+          <span v-if="render_direct" v-dompurify-html="renderedProduct"></span>
+
           <vue-pdf-embed
             v-else
             :source="'data:application/pdf;base64,' + renderedProduct"
@@ -167,7 +173,7 @@ export default {
 
     const saveProduct = () => {
       if (props.edit) {
-        updateProduct(product.value.id, product.value)
+        updateProduct(product.value)
       } else {
         createProduct(product.value)
           .then((response) => {

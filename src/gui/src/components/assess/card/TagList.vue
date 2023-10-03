@@ -43,7 +43,6 @@
 <script>
 import { defineComponent } from 'vue'
 import { tagIconFromType } from '@/utils/helpers'
-import { useAssessStore } from '@/stores/AssessStore'
 import { useFilterStore } from '@/stores/FilterStore'
 
 export default defineComponent({
@@ -84,11 +83,16 @@ export default defineComponent({
 
       const colorList = [
         '#f5cab6',
-        '#ffc7a4',
         '#fef4ce',
         '#cceccd',
         '#b8d8e4',
-        '#d1c5e1'
+        '#d1c5e1',
+        '#f5c000',
+        '#f5cfff',
+        '#ffff5c',
+        '#c5f5ff',
+        '#00c5ff',
+        '#ff55cc'
       ]
       const hash = inputString.split('').reduce((acc, char) => {
         return acc + char.charCodeAt(0)
