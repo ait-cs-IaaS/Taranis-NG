@@ -204,7 +204,6 @@ news_items = [
     }
 ]
 
-
 source_include_list = {
     "id": "05cd3b9b-5480-4c31-8818-9973504d7542",
     "name": "0patch Blog",
@@ -361,6 +360,190 @@ source_empty_wordlist = {
     "last_attempted": "2023-09-22T11:43:41.859519",
     "last_error_message": None,
     "word_lists": [],
+    "parameters": {
+        "FEED_URL": ""
+    }
+}
+
+source_include_multiple_list_exclude_multiple_list = {
+    "id": "05cd3b9b-5480-4c31-8818-9973504d7542",
+    "name": "0patch Blog",
+    "description": "Security Patching Simplified To The Extreme",
+    "type": "rss_collector",
+    "state": 0,
+    "last_collected": "2023-09-22T11:43:41.859559",
+    "last_attempted": "2023-09-22T11:43:41.859519",
+    "last_error_message": None,
+    "word_lists": [
+        {
+            "id": 1,
+            "name": "includelist",
+            "description": "dummy test data",
+            "usage": [
+                "COLLECTOR_INCLUDELIST",
+                "TAGGING_BOT"
+            ],
+            "link": "",
+            "entries": [
+                {
+                    "value": "Azure Data Explorer",
+                    "category": "CVE_PRODUCT",
+                    "description": ""
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "name": "includelist2",
+            "description": "dummy test data 2",
+            "usage": [
+                "COLLECTOR_INCLUDELIST",
+                "TAGGING_BOT"
+            ],
+            "link": "",
+            "entries": [
+                {
+                    "value": "Bing",
+                    "category": "MISC",
+                    "description": ""
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "name": "excludelist",
+            "description": "dummy test data",
+            "usage": [
+                "COLLECTOR_EXCLUDELIST",
+                "TAGGING_BOT"
+            ],
+            "link": "",
+            "entries": [
+                {
+                    "value": "iPhone-Event",
+                    "category": "MISC",
+                    "description": ""
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "name": "excludelist2",
+            "description": "dummy test data",
+            "usage": [
+                "COLLECTOR_EXCLUDELIST",
+                "TAGGING_BOT"
+            ],
+            "link": "",
+            "entries": [
+                {
+                    "value": "Apple",
+                    "category": "CVE_VENDOR",
+                    "description": ""
+                }
+            ]
+        }
+    ],
+    "parameters": {
+        "FEED_URL": ""
+    }
+}
+
+source_include_multiple_list = {
+    "id": "05cd3b9b-5480-4c31-8818-9973504d7542",
+    "name": "0patch Blog",
+    "description": "Security Patching Simplified To The Extreme",
+    "type": "rss_collector",
+    "state": 0,
+    "last_collected": "2023-09-22T11:43:41.859559",
+    "last_attempted": "2023-09-22T11:43:41.859519",
+    "last_error_message": None,
+    "word_lists": [
+        {
+            "id": 1,
+            "name": "includelist",
+            "description": "dummy test data",
+            "usage": [
+                "COLLECTOR_INCLUDELIST",
+                "TAGGING_BOT"
+            ],
+            "link": "",
+            "entries": [
+                {
+                    "value": "Azure Data Explorer",
+                    "category": "CVE_PRODUCT",
+                    "description": ""
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "name": "includelist2",
+            "description": "dummy test data 2",
+            "usage": [
+                "COLLECTOR_INCLUDELIST",
+                "TAGGING_BOT"
+            ],
+            "link": "",
+            "entries": [
+                {
+                    "value": "Bing",
+                    "category": "MISC",
+                    "description": ""
+                }
+            ]
+        }
+    ],
+    "parameters": {
+        "FEED_URL": ""
+    }
+}
+
+source_exclude_multiple_list = {
+    "id": "05cd3b9b-5480-4c31-8818-9973504d7542",
+    "name": "0patch Blog",
+    "description": "Security Patching Simplified To The Extreme",
+    "type": "rss_collector",
+    "state": 0,
+    "last_collected": "2023-09-22T11:43:41.859559",
+    "last_attempted": "2023-09-22T11:43:41.859519",
+    "last_error_message": None,
+    "word_lists": [
+        {
+            "id": 1,
+            "name": "excludelist",
+            "description": "dummy test data",
+            "usage": [
+                "COLLECTOR_EXCLUDELIST",
+                "TAGGING_BOT"
+            ],
+            "link": "",
+            "entries": [
+                {
+                    "value": "iPhone-Event",
+                    "category": "MISC",
+                    "description": ""
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "name": "excludelist2",
+            "description": "dummy test data",
+            "usage": [
+                "COLLECTOR_EXCLUDELIST",
+                "TAGGING_BOT"
+            ],
+            "link": "",
+            "entries": [
+                {
+                    "value": "Apple",
+                    "category": "CVE_VENDOR",
+                    "description": ""
+                }
+            ]
+        }
+    ],
     "parameters": {
         "FEED_URL": ""
     }
