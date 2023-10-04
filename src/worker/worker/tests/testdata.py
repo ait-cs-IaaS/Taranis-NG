@@ -164,21 +164,21 @@ news_items = [
         "id": "0b1919fe-98a6-4187-ac25-7b440f1a4cef",
         "hash": "ad118e4a6674120e66ffabb4f2da9d4f9ce59b9685477ab4a16f5616557fdbfc",
         "title": "Microsoft wollte Apple die Suchmaschine Bing verkaufen",
-        "review": 'Es geht um viel Geld, wenn die großen Tech-Konzerne pokern, und Apple schien in Gesprächen bezüglich Suchmaschinen zuletzt die besten Karten gehabt zu haben',
+        "review": "Es geht um viel Geld, wenn die großen Tech-Konzerne pokern, und Apple schien in Gesprächen bezüglich Suchmaschinen zuletzt die besten Karten gehabt zu haben",
         "source": "https://www.derstandard.at/rss/web",
         "link": "https://www.derstandard.at/story/3000000189103/microsoft-wollte-apple-die-suchmaschine-bing-verkaufen?ref%3Drss",
         "published": "2023-09-30T05:00:00",
         "author": "",
         "collected": "2023-10-01T23:56:49.738398",
-        "content": 'Es war ein verregneter Tag im Jahr 2020, als sich mehrere hochrangige Vertreter von Microsoft und Apple unter Ausschluss der Öffentlichkeit zusammensetzten. Grund des Meetings war eine Idee von Microsoft, die Suchmaschine Bing an Apple zu verkaufen. Der iPhone-Konzern scheint allerdings diese Idee nie ernsthaft in Erwägung gezogen zu haben.\nIT-Business\nMicrosoft wollte Apple die Suchmaschine Bing verkaufen\nEs geht um viel Geld, wenn die großen Tech-Konzerne pokern, und Apple schien in Gesprächen bezüglich Suchmaschinen zuletzt die besten Karten gehabt zu haben',
+        "content": "Es war ein verregneter Tag im Jahr 2020, als sich mehrere hochrangige Vertreter von Microsoft und Apple unter Ausschluss der Öffentlichkeit zusammensetzten. Grund des Meetings war eine Idee von Microsoft, die Suchmaschine Bing an Apple zu verkaufen. Der iPhone-Konzern scheint allerdings diese Idee nie ernsthaft in Erwägung gezogen zu haben.\nIT-Business\nMicrosoft wollte Apple die Suchmaschine Bing verkaufen\nEs geht um viel Geld, wenn die großen Tech-Konzerne pokern, und Apple schien in Gesprächen bezüglich Suchmaschinen zuletzt die besten Karten gehabt zu haben",
         "osint_source_id": "eca31075-949d-40c7-83a3-300ed3433716",
-        "attributes": []
+        "attributes": [],
     },
     {
         "id": "544ac8f3-af17-44ba-a426-d04906f8ebcf",
         "hash": "c3a3c34282f6116eaa05d7bd3c7a1e3610e8a0f76d6e4e5366010f9506b1532a",
         "title": "Kommt noch ein Oktober-Event von Apple?",
-        "review": 'Die Gerüchteküche glaubt fest daran, dass Apple in diesem Monat noch neue Hardware vorstellen wird. Doch reicht es für eine Keynote?',
+        "review": "Die Gerüchteküche glaubt fest daran, dass Apple in diesem Monat noch neue Hardware vorstellen wird. Doch reicht es für eine Keynote?",
         "source": "https://www.heise.de/rss/heise-atom.xml",
         "link": "https://www.heise.de/news/Kommt-noch-ein-Oktober-Event-von-Apple-9321813.html?wt_mc%3Drss.red.ho.ho.atom.beitrag.beitrag",
         "published": "2023-10-02T09:09:00",
@@ -191,17 +191,17 @@ news_items = [
     {
         "id": "10a93aab-ed94-4696-a04a-2c5e6f703058",
         "hash": "104b10fdbbb52f88b1c62bafc08fbbcad322cc4c2c4dd1c9015fb823e2f597cc",
-        "title": 'Linux Mint Debian Edition (LMDE) 6 “Faye” veröffentlicht',
+        "title": "Linux Mint Debian Edition (LMDE) 6 “Faye” veröffentlicht",
         "review": 'Das Mint-Entwicklerteam hat zum 27. September 2023 die Linux-Distribution LMDE 6 "Faye" nach einer kurzen Beta-Phase zum Download freigegeben. Das Kürzel LMDE steht für "Linux Mint Debian Edition", also eine Edition, die sich nahe an Debian anlehnt . LMDE zielt … Weiterlesen',
         "source": "https://www.borncity.com/blog/feed/",
         "link": "https://www.borncity.com/blog/2023/09/30/linux-mint-debian-edition-lmde-6-faye-verffentlicht/",
         "published": "2023-09-29T22:03:00",
-        "author": 'Günter Born',
+        "author": "Günter Born",
         "collected": "2023-10-01T23:53:31.888330",
         "content": 'Das Mint-Entwicklerteam hat zum 27. September 2023 die Linux-Distribution LMDE 6 "Faye" nach einer kurzen Beta-Phase zum Download freigegeben. Das Kürzel LMDE steht für "Linux Mint Debian Edition", also eine Edition, die sich nahe an Debian anlehnt .\nAnzeige\nLMDE zielt darauf ab, Linux Mint so ähnlich wie möglich zu sein, ohne jedoch Ubuntu zu verwenden. Die Paketbasis wird daher von Debian bereitgestellt. Ziel der Entwickler ist es mit der LMDE-Edition sicherzustellen, dass Linux Mint in der Lage wäre, weiterhin die gleiche Benutzererfahrung zu bieten, für den Fall, dass Ubuntu verschwinden sollte. Mit LMDE soll auch sichergestellt werden, dass die vom Mint-Team entwickelte Software auch außerhalb von Ubuntu kompatibel ist.\nIn diesem Blog-Beitrag finden sich einige Informationen wie beispielsweise die Upgrade-Informationen zum Umstieg von LMDE 5 sowie die nachfolgenden Systemspezifikationen, die zum Betrieb von Linux Mint Debian Edition 6 benötigt werden:\n- 2 GB RAM (4 GB empfohlen für eine komfortable Nutzung).\n- 20 GB Festplattenspeicher (100 GB empfohlen).\n- 1024×768 Auflösung (bei niedrigeren Auflösungen können Sie die ALT-Taste drücken, um Fenster mit der Maus zu verschieben, wenn sie nicht auf den Bildschirm passen).\nDie Release Notes lassen sich auf dieser Webseite ansehen. Es gibt sowohl 64-Bit als auch 32-Bit-ISOs auf dieser Webseite via Torrent. Faye basiert auf Debian Bookworm und kommt als Long term support release (LTS). (via)\nCookies blockieren entzieht uns die Finanzierung: Cookie-Einstellungen',
         "osint_source_id": "c8c90206-f50c-47b3-bae0-371d67c9d82b",
         "attributes": [],
-    }
+    },
 ]
 
 source_include_list = {
@@ -218,33 +218,16 @@ source_include_list = {
             "id": 1,
             "name": "includelist",
             "description": "dummy test data",
-            "usage": [
-                "COLLECTOR_INCLUDELIST",
-                "TAGGING_BOT"
-            ],
+            "usage": ["COLLECTOR_INCLUDELIST", "TAGGING_BOT"],
             "link": "",
             "entries": [
-                {
-                    "value": "Microsoft",
-                    "category": "CVE_VENDOR",
-                    "description": ""
-                },
-                {
-                    "value": "Azure Data Explorer",
-                    "category": "CVE_PRODUCT",
-                    "description": ""
-                },
-                {
-                    "value": "SDK",
-                    "category": "CVE_PRODUCT",
-                    "description": ""
-                }
-            ]
+                {"value": "Microsoft", "category": "CVE_VENDOR", "description": ""},
+                {"value": "Azure Data Explorer", "category": "CVE_PRODUCT", "description": ""},
+                {"value": "SDK", "category": "CVE_PRODUCT", "description": ""},
+            ],
         }
     ],
-    "parameters": {
-        "FEED_URL": ""
-    }
+    "parameters": {"FEED_URL": ""},
 }
 
 source_exclude_list = {
@@ -261,28 +244,15 @@ source_exclude_list = {
             "id": 2,
             "name": "excludelist",
             "description": "dummy test data",
-            "usage": [
-                "COLLECTOR_EXCLUDELIST",
-                "TAGGING_BOT"
-            ],
+            "usage": ["COLLECTOR_EXCLUDELIST", "TAGGING_BOT"],
             "link": "",
             "entries": [
-                {
-                    "value": "Apple",
-                    "category": "CVE_VENDOR",
-                    "description": ""
-                },
-                {
-                    "value": "iPhone-Event",
-                    "category": "MISC",
-                    "description": ""
-                }
-            ]
+                {"value": "Apple", "category": "CVE_VENDOR", "description": ""},
+                {"value": "iPhone-Event", "category": "MISC", "description": ""},
+            ],
         }
     ],
-    "parameters": {
-        "FEED_URL": ""
-    }
+    "parameters": {"FEED_URL": ""},
 }
 
 source_include_list_exclude_list = {
@@ -299,55 +269,27 @@ source_include_list_exclude_list = {
             "id": 1,
             "name": "includelist",
             "description": "dummy test data",
-            "usage": [
-                "COLLECTOR_INCLUDELIST",
-                "TAGGING_BOT"
-            ],
+            "usage": ["COLLECTOR_INCLUDELIST", "TAGGING_BOT"],
             "link": "",
             "entries": [
-                {
-                    "value": "Microsoft",
-                    "category": "CVE_VENDOR",
-                    "description": ""
-                },
-                {
-                    "value": "Azure Data Explorer",
-                    "category": "CVE_PRODUCT",
-                    "description": ""
-                },
-                {
-                    "value": "SDK",
-                    "category": "CVE_PRODUCT",
-                    "description": ""
-                }
-            ]
+                {"value": "Microsoft", "category": "CVE_VENDOR", "description": ""},
+                {"value": "Azure Data Explorer", "category": "CVE_PRODUCT", "description": ""},
+                {"value": "SDK", "category": "CVE_PRODUCT", "description": ""},
+            ],
         },
         {
             "id": 2,
             "name": "excludelist",
             "description": "dummy test data",
-            "usage": [
-                "COLLECTOR_EXCLUDELIST",
-                "TAGGING_BOT"
-            ],
+            "usage": ["COLLECTOR_EXCLUDELIST", "TAGGING_BOT"],
             "link": "",
             "entries": [
-                {
-                    "value": "Apple",
-                    "category": "CVE_VENDOR",
-                    "description": ""
-                },
-                {
-                    "value": "iPhone-Event",
-                    "category": "MISC",
-                    "description": ""
-                }
-            ]
-        }
+                {"value": "Apple", "category": "CVE_VENDOR", "description": ""},
+                {"value": "iPhone-Event", "category": "MISC", "description": ""},
+            ],
+        },
     ],
-    "parameters": {
-        "FEED_URL": ""
-    }
+    "parameters": {"FEED_URL": ""},
 }
 
 source_empty_wordlist = {
@@ -360,9 +302,7 @@ source_empty_wordlist = {
     "last_attempted": "2023-09-22T11:43:41.859519",
     "last_error_message": None,
     "word_lists": [],
-    "parameters": {
-        "FEED_URL": ""
-    }
+    "parameters": {"FEED_URL": ""},
 }
 
 source_include_multiple_list_exclude_multiple_list = {
@@ -379,74 +319,36 @@ source_include_multiple_list_exclude_multiple_list = {
             "id": 1,
             "name": "includelist",
             "description": "dummy test data",
-            "usage": [
-                "COLLECTOR_INCLUDELIST",
-                "TAGGING_BOT"
-            ],
+            "usage": ["COLLECTOR_INCLUDELIST", "TAGGING_BOT"],
             "link": "",
-            "entries": [
-                {
-                    "value": "Azure Data Explorer",
-                    "category": "CVE_PRODUCT",
-                    "description": ""
-                }
-            ]
+            "entries": [{"value": "Azure Data Explorer", "category": "CVE_PRODUCT", "description": ""}],
         },
         {
             "id": 2,
             "name": "includelist2",
             "description": "dummy test data 2",
-            "usage": [
-                "COLLECTOR_INCLUDELIST",
-                "TAGGING_BOT"
-            ],
+            "usage": ["COLLECTOR_INCLUDELIST", "TAGGING_BOT"],
             "link": "",
-            "entries": [
-                {
-                    "value": "Bing",
-                    "category": "MISC",
-                    "description": ""
-                }
-            ]
+            "entries": [{"value": "Bing", "category": "MISC", "description": ""}],
         },
         {
             "id": 3,
             "name": "excludelist",
             "description": "dummy test data",
-            "usage": [
-                "COLLECTOR_EXCLUDELIST",
-                "TAGGING_BOT"
-            ],
+            "usage": ["COLLECTOR_EXCLUDELIST", "TAGGING_BOT"],
             "link": "",
-            "entries": [
-                {
-                    "value": "iPhone-Event",
-                    "category": "MISC",
-                    "description": ""
-                }
-            ]
+            "entries": [{"value": "iPhone-Event", "category": "MISC", "description": ""}],
         },
         {
             "id": 4,
             "name": "excludelist2",
             "description": "dummy test data",
-            "usage": [
-                "COLLECTOR_EXCLUDELIST",
-                "TAGGING_BOT"
-            ],
+            "usage": ["COLLECTOR_EXCLUDELIST", "TAGGING_BOT"],
             "link": "",
-            "entries": [
-                {
-                    "value": "Apple",
-                    "category": "CVE_VENDOR",
-                    "description": ""
-                }
-            ]
-        }
+            "entries": [{"value": "Apple", "category": "CVE_VENDOR", "description": ""}],
+        },
     ],
-    "parameters": {
-        "FEED_URL": ""
-    }
+    "parameters": {"FEED_URL": ""},
 }
 
 source_include_multiple_list = {
@@ -463,40 +365,20 @@ source_include_multiple_list = {
             "id": 1,
             "name": "includelist",
             "description": "dummy test data",
-            "usage": [
-                "COLLECTOR_INCLUDELIST",
-                "TAGGING_BOT"
-            ],
+            "usage": ["COLLECTOR_INCLUDELIST", "TAGGING_BOT"],
             "link": "",
-            "entries": [
-                {
-                    "value": "Azure Data Explorer",
-                    "category": "CVE_PRODUCT",
-                    "description": ""
-                }
-            ]
+            "entries": [{"value": "Azure Data Explorer", "category": "CVE_PRODUCT", "description": ""}],
         },
         {
             "id": 2,
             "name": "includelist2",
             "description": "dummy test data 2",
-            "usage": [
-                "COLLECTOR_INCLUDELIST",
-                "TAGGING_BOT"
-            ],
+            "usage": ["COLLECTOR_INCLUDELIST", "TAGGING_BOT"],
             "link": "",
-            "entries": [
-                {
-                    "value": "Bing",
-                    "category": "MISC",
-                    "description": ""
-                }
-            ]
-        }
+            "entries": [{"value": "Bing", "category": "MISC", "description": ""}],
+        },
     ],
-    "parameters": {
-        "FEED_URL": ""
-    }
+    "parameters": {"FEED_URL": ""},
 }
 
 source_exclude_multiple_list = {
@@ -513,38 +395,18 @@ source_exclude_multiple_list = {
             "id": 1,
             "name": "excludelist",
             "description": "dummy test data",
-            "usage": [
-                "COLLECTOR_EXCLUDELIST",
-                "TAGGING_BOT"
-            ],
+            "usage": ["COLLECTOR_EXCLUDELIST", "TAGGING_BOT"],
             "link": "",
-            "entries": [
-                {
-                    "value": "iPhone-Event",
-                    "category": "MISC",
-                    "description": ""
-                }
-            ]
+            "entries": [{"value": "iPhone-Event", "category": "MISC", "description": ""}],
         },
         {
             "id": 2,
             "name": "excludelist2",
             "description": "dummy test data",
-            "usage": [
-                "COLLECTOR_EXCLUDELIST",
-                "TAGGING_BOT"
-            ],
+            "usage": ["COLLECTOR_EXCLUDELIST", "TAGGING_BOT"],
             "link": "",
-            "entries": [
-                {
-                    "value": "Apple",
-                    "category": "CVE_VENDOR",
-                    "description": ""
-                }
-            ]
-        }
+            "entries": [{"value": "Apple", "category": "CVE_VENDOR", "description": ""}],
+        },
     ],
-    "parameters": {
-        "FEED_URL": ""
-    }
+    "parameters": {"FEED_URL": ""},
 }

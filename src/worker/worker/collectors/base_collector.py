@@ -26,21 +26,34 @@ class BaseCollector:
         for word_list in source["word_lists"]:
             if "COLLECTOR_INCLUDELIST" in word_list["usage"]:
                 for entry in word_list["entries"]:
-                    include_list.add(entry['value'])
+                    include_list.add(entry["value"])
 
             if "COLLECTOR_EXCLUDELIST" in word_list["usage"]:
                 for entry in word_list["entries"]:
-                    exclude_list.add(entry['value'])
+                    exclude_list.add(entry["value"])
 
-        items = [item for item in news_items if any(
-            re.search(r"\b" + re.escape(word) + r"\b",
-                      "".join(item["title"] + item["review"] + item["content"]),
-                      re.IGNORECASE) for word in include_list)] if include_list else news_items
+        items = (
+            [
+                item
+                for item in news_items
+                if any(
+                    re.search(r"\b" + re.escape(word) + r"\b", "".join(item["title"] + item["review"] + item["content"]), re.IGNORECASE)
+                    for word in include_list
+                )
+            ]
+            if include_list
+            else news_items
+        )
 
         if exclude_list:
-            items = [item for item in items if not any(
-                re.search(r"\b" + re.escape(word) + r"\b", "".join(item["title"] + item["review"] + item["content"]),
-                          re.IGNORECASE) for word in exclude_list)]
+            items = [
+                item
+                for item in items
+                if not any(
+                    re.search(r"\b" + re.escape(word) + r"\b", "".join(item["title"] + item["review"] + item["content"]), re.IGNORECASE)
+                    for word in exclude_list
+                )
+            ]
 
         return items
 
