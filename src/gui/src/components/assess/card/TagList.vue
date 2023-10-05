@@ -16,6 +16,7 @@
           density="compact"
           :variant="truncate ? 'outlined' : 'elevated'"
           elevation="0"
+          style="border: thin solid currentColor"
           @click.stop="updateTags(tag.name)"
         >
           <template #prepend>
