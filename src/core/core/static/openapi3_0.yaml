@@ -1,11 +1,11 @@
 openapi: 3.0.3
 info:
-  title: Taranis NG
+  title: Taranis
   contact:
     name: Benjamin Akhras
     email: benjamin.akhras@ait.ac.at
   description: |-
-    The Taranis NG API provides endpoints for the Taranis NG is an OSINT gathering and analysis tool.
+    The Taranis API provides endpoints for the Taranis is an OSINT gathering and analysis tool.
   license:
     name: EUPL-1.2
   version: 0.1.8
