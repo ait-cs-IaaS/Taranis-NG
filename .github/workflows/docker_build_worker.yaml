@@ -67,6 +67,7 @@ jobs:
   build_docker:
     name: build docker
     runs-on: ubuntu-22.04
+    needs: test
     steps:
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
