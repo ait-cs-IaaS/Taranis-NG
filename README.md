@@ -48,7 +48,7 @@ To use all NLP features make sure to have at least: 16 GB RAM, 4 CPU cores and 5
 Without NLP: 2 GB of RAM, 2 CPU cores and 20 GB of disk storage
 
 
-## Directory structure
+### Directory structure
 
 - src/ - Taranis AI source code:
   - [Core](src/core/) is the REST API, the central component of Taranis AI
@@ -56,7 +56,11 @@ Without NLP: 2 GB of RAM, 2 CPU cores and 20 GB of disk storage
   - [Worker](src/worker/) retrieve OSINT information from various sources (such as web, twitter, email, atom, rss, slack, and more) and create **news items**.
 - [docker/](docker/) - Support files for Docker image creation and example docker-compose file
 
-## About...
+## About
 
 This project was inspired by [Taranis3](https://github.com/NCSC-NL/taranis3), as well as by [Taranis-NG](https://github.com/SK-CERT/Taranis-NG/).
 It is released under terms of the [European Union Public Licence](https://eupl.eu/1.2/en/).
+
+## EU Funding
+
+![Co-financed by the Connecting Europe Facility of the European Union](https://ec.europa.eu/inea/sites/default/files/ceflogos/en_horizontal_cef_logo_2.png)
