@@ -283,3 +283,96 @@ def cleanup_report_item_type(app, request):
         request.addfinalizer(teardown)
 
         yield report_type_data
+
+
+@pytest.fixture(scope="session")
+def cleanup_product_types(app, request):
+    with app.app_context():
+        from core.model.product_type import ProductType
+
+        product_type_data = {
+            "id": 42,
+            "type": "pdf_presenter",
+            "title": "Test Role",
+        }
+
+        def teardown():
+            with app.app_context():
+                if ProductType.get(42):
+                    print("Deleting test product type 42")
+                    ProductType.delete(42)
+
+        request.addfinalizer(teardown)
+
+        yield product_type_data
+
+
+@pytest.fixture(scope="session")
+def cleanup_acls(app, request):
+    with app.app_context():
+        from core.model.acl_entry import ACLEntry
+
+        acl_data = {
+            "id": 42,
+            "name": "test_acl_unique",
+            "description": "Test ACL",
+            "item_type": "WORD_LIST",
+            "item_id": "acl_id",
+        }
+
+        def teardown():
+            with app.app_context():
+                if ACLEntry.get(42):
+                    print("Deleting test ACL 42")
+                    ACLEntry.delete(42)
+
+        request.addfinalizer(teardown)
+
+        yield acl_data
+
+
+@pytest.fixture(scope="session")
+def cleanup_publisher_preset(app, request):
+    with app.app_context():
+        from core.model.publisher_preset import PublisherPreset
+
+        publisher_preset_data = {
+            "id": "44",
+            "name": "test_publisher_preset",
+            "description": "Test ACL",
+            "type": "ftp_publisher",
+            "parameters": {"FTP_URL": "ftp_url_entry"},
+        }
+
+        def teardown():
+            with app.app_context():
+                if PublisherPreset.get(44):
+                    print("Deleting test publisher preset 44")
+                    PublisherPreset.delete(44)
+
+        request.addfinalizer(teardown)
+
+        yield publisher_preset_data
+
+
+@pytest.fixture(scope="session")
+def cleanup_attribute(app, request):
+    with app.app_context():
+        from core.model.attribute import Attribute
+
+        attribute_data = {
+            "id": 42,
+            "name": "Attribute name",
+            "description": "Simple attribute desc",
+            "type": "STRING",
+        }
+
+        def teardown():
+            with app.app_context():
+                if Attribute.get(42):
+                    print("Deleting test attribute 42")
+                    Attribute.delete(42)
+
+        request.addfinalizer(teardown)
+
+        yield attribute_data
