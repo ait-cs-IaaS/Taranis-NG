@@ -1,9 +1,20 @@
 from celery import shared_task
 
+from worker.config import Config
 from worker.core_api import CoreApi
-from worker.bots import bot_tasks
 from worker.collectors import collector_tasks
 from worker.presenters import presenter_tasks
+
+
+def setup_tasks():
+    if "Bots" in Config.WORKER_TYPES:
+        from worker.bots import bot_tasks  # noqa: F401
+    if "Collectors" in Config.WORKER_TYPES:
+        from worker.collectors import collector_tasks  # noqa: F401
+    if "Presenters" in Config.WORKER_TYPES:
+        from worker.presenters import presenter_tasks  # noqa: F401
+    if "Publishers" in Config.WORKER_TYPES:
+        from worker.publishers import publisher_tasks  # noqa: F401
 
 
 @shared_task(time_limit=60)
@@ -27,17 +38,17 @@ def execute_post_collection_bots(filter: dict | None = None):
     return "No post collection bots found"
 
 
+@shared_task(time_limit=30)
+def gather_word_list(word_list_id: int):
+    config = {"type": "wordlist_updater_bot", "parameters": {"WORD_LIST_ID": word_list_id}}
+    return bot_tasks.execute_by_config(config)
+
+
 @shared_task(time_limit=10)
 def cleanup_token_blacklist():
     core_api = CoreApi()
     core_api.cleanup_token_blacklist()
     return "Token blacklist cleaned up"
-
-
-@shared_task(time_limit=30)
-def gather_word_list(word_list_id: int):
-    config = {"type": "wordlist_updater_bot", "parameters": {"WORD_LIST_ID": word_list_id}}
-    return bot_tasks.execute_by_config(config)
 
 
 @shared_task(time_limit=30)

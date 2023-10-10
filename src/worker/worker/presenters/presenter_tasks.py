@@ -59,6 +59,8 @@ def render_product(product_id: int):
     if err or not product:
         return err
 
+    logger.debug(f"Rendering product {product}")
+
     presenter, err = get_presenter(product)
     if err or not presenter:
         return err
@@ -67,6 +69,8 @@ def render_product(product_id: int):
     template, err = get_template(type_id)
     if err or not product:
         return err
+
+    logger.info(f"Rendering product {product_id} with presenter {presenter}")
 
     rendered_product = presenter.generate(product, template)
     if not rendered_product:

@@ -1,3 +1,5 @@
+from celery import shared_task
+
 import worker.bots
 from worker.log import logger
 from worker.core_api import CoreApi
