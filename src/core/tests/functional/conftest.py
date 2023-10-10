@@ -334,10 +334,10 @@ def cleanup_acls(app, request):
             "description": "Test ACL",
             "item_type": "WORD_LIST",
             "item_id": "acl_id",
-            "everyone": "true",
-            "see": "false",
-            "access": "false",
-            "modify": "false",
+            "everyone": True,
+            "see": False,
+            "access": False,
+            "modify": False,
             "roles": [],
             "users": [],
         }
@@ -390,8 +390,6 @@ def cleanup_attribute(app, request):
             "default_value": "2234",
             "validator": "NONE",
             "validator_parameter": "",
-            # "attribute_enums": [],
-            # "tag": "mdi-form-textbox",
         }
 
         def teardown():
