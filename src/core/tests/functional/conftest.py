@@ -131,11 +131,25 @@ def cleanup_word_lists(app, request):
     with app.app_context():
         from core.model.word_list import WordList
 
+        word_list_data = {
+            "id": 42,
+            "name": "Test word list name",
+            "description": "Desc of word lists",
+            "usage": ["TAGGING_BOT"],
+            "link": "this.is.a.test.url.rocks",
+            "entries": [],
+        }
+
         def teardown():
             with app.app_context():
                 [WordList.delete(source.id) for source in WordList.get_all() if source.name == "Test wordlist"]
+                if WordList.get(42):
+                    print("Deleting test word list 42")
+                    WordList.delete(42)
 
         request.addfinalizer(teardown)
+
+        yield word_list_data
 
 
 @pytest.fixture(scope="session")
@@ -293,7 +307,9 @@ def cleanup_product_types(app, request):
         product_type_data = {
             "id": 42,
             "type": "pdf_presenter",
-            "title": "Test Role",
+            "parameters": {"TEMPLATE_PATH": "template path"},
+            "title": "Test Product type",
+            "description": "Product type desc",
         }
 
         def teardown():
@@ -318,6 +334,12 @@ def cleanup_acls(app, request):
             "description": "Test ACL",
             "item_type": "WORD_LIST",
             "item_id": "acl_id",
+            "everyone": "true",
+            "see": "false",
+            "access": "false",
+            "modify": "false",
+            "roles": [],
+            "users": [],
         }
 
         def teardown():
@@ -365,6 +387,11 @@ def cleanup_attribute(app, request):
             "name": "Attribute name",
             "description": "Simple attribute desc",
             "type": "STRING",
+            "default_value": "2234",
+            "validator": "NONE",
+            "validator_parameter": "",
+            # "attribute_enums": [],
+            # "tag": "mdi-form-textbox",
         }
 
         def teardown():
@@ -376,3 +403,32 @@ def cleanup_attribute(app, request):
         request.addfinalizer(teardown)
 
         yield attribute_data
+
+
+@pytest.fixture(scope="session")
+def cleanup_worker_types(app, request):
+    with app.app_context():
+        from core.model.worker import Worker
+
+        worker_types_data = {
+            "name": "Worker type",
+            "description": "Desc of worker type",
+            "type": "web_collector",
+            "parameters": {
+                "REGULAR_EXPRESSION": "Reg Exp",
+                "ITEM_FILTER": "Item Filter",
+                "RUN_AFTER_COLLECTOR": "Run After Collector",
+                "REFRESH_INTERVAL": "Refresh Interval",
+            },
+        }
+
+        # Because id is not assignable, the teardown is not possible. Any thoughts?
+        def teardown():
+            with app.app_context():
+                if Worker.get(42):
+                    print("Deleting test attribute 42")
+                    Worker.delete(42)
+
+        request.addfinalizer(teardown)
+
+        yield worker_types_data
