@@ -111,6 +111,25 @@ class QueueManager:
             return {"message": f"Generating Product {product_id} scheduled"}, 200
         return {"error": "Could not reach rabbitmq"}, 500
 
+    def get_bot_signature(self, bot_id: list, source_id: str):
+        return self.celery.signature("bot_task", args=[bot_id], kwargs={"filter": {"SOURCE": source_id}})
+
+    def post_collection_bots(self, source_id: str):
+        from core.model.bot import Bot
+
+        post_collection_bots = Bot.get_post_collection()
+
+        current_bot = self.get_bot_signature(post_collection_bots.pop(0), source_id)
+
+        try:
+            for bot_id in post_collection_bots:
+                next_bot = self.get_bot_signature(bot_id, source_id)
+                current_bot.apply_async(link=next_bot, link_error=next_bot)
+                current_bot = next_bot
+            return {"message": f"Post collection bots scheduled for source {source_id}"}, 200
+        except Exception as e:
+            return {"error": "Could schedule post collection bots", "details": str(e)}, 500
+
 
 def initialize(app: Flask, first_worker: bool):
     global queue_manager

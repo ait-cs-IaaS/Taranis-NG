@@ -224,7 +224,7 @@ class BotInfo(Resource):
 
 class PostCollectionBots(Resource):
     @api_key_required
-    def get(self):
+    def put(self):
         return Bot.get_post_collection()
 
 
