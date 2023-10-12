@@ -4,6 +4,7 @@ from werkzeug.datastructures import FileStorage
 
 from core.managers.auth_manager import api_key_required
 from core.managers.log_manager import logger
+from core.managers import queue_manager
 from core.model.osint_source import OSINTSource
 from core.model.product import Product
 from core.model.queue import ScheduleEntry
@@ -225,7 +226,12 @@ class BotInfo(Resource):
 class PostCollectionBots(Resource):
     @api_key_required
     def put(self):
-        return Bot.get_post_collection()
+        data = request.json
+        if not data:
+            return {"error": "No data provided"}, 400
+        if source_id := data.get("source_id", None):
+            return queue_manager.queue_manager.post_collection_bots(source_id=source_id)
+        return {"error": "No source_id provided"}, 400
 
 
 class WordLists(Resource):

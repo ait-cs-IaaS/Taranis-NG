@@ -1,4 +1,5 @@
 import os
+import base64
 from typing import Any
 from sqlalchemy import or_, and_
 import sqlalchemy
@@ -11,7 +12,7 @@ from core.model.base_model import BaseModel
 from core.model.acl_entry import ACLEntry, ItemType
 from core.model.parameter_value import ParameterValue
 from core.model.worker import PRESENTER_TYPES, Worker
-from core.managers.data_manager import get_presenter_template_path
+from core.managers.data_manager import get_presenter_template_path, get_presenter_templates
 
 
 class ProductType(BaseModel):
@@ -81,7 +82,7 @@ class ProductType(BaseModel):
     def get_all_json(cls, search, user, acl_check):
         product_types, count = cls.get_by_filter(search, user, acl_check)
         items = [product_type.to_dict() for product_type in product_types]
-        return {"total_count": count, "items": items}
+        return {"total_count": count, "items": items, "templates": get_presenter_templates()}
 
     @classmethod
     def update(cls, preset_id, data):
@@ -107,7 +108,7 @@ class ProductType(BaseModel):
         data["parameters"] = {parameter.parameter: parameter.value for parameter in self.parameters}
         return data
 
-    def get_template_path(self) -> str:
+    def _get_template_path(self) -> str:
         # get value of parameter where parameter.parameter == "TEMPLATE_PATH"
         template_path = next((parameter.value for parameter in self.parameters if parameter.parameter == "TEMPLATE_PATH"), None)
         if not template_path:
@@ -116,8 +117,23 @@ class ProductType(BaseModel):
         return str(template_path)
 
     def get_template(self) -> str:
-        full_path = get_presenter_template_path(self.get_template_path())
+        full_path = get_presenter_template_path(self._get_template_path())
         return full_path if os.path.isfile(full_path) else ""
+
+    def _file_to_base64(self, filepath: str) -> str:
+        try:
+            with open(filepath, "rb") as f:
+                file_content = f.read()
+            return base64.b64encode(file_content).decode("utf-8")
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return ""
+
+    def get_detail_json(self):
+        data = self.to_dict()
+        if template := self.get_template():
+            data["template"] = self._file_to_base64(template)
+        return data
 
     @classmethod
     def get_by_type(cls, type) -> "ProductType":

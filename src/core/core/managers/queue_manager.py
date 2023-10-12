@@ -100,7 +100,7 @@ class QueueManager:
         return {"error": "Could not reach rabbitmq"}, 500
 
     def execute_bot_task(self, bot_id: int):
-        if self.send_task("bot_task", args=[bot_id]):
+        if self.send_task("bot_task", kwargs={"bot_id": bot_id}):
             logger.info(f"Executing Bot {bot_id} scheduled")
             return {"message": f"Executing Bot {bot_id} scheduled", "id": bot_id}, 200
         return {"error": "Could not reach rabbitmq"}, 500
@@ -112,7 +112,7 @@ class QueueManager:
         return {"error": "Could not reach rabbitmq"}, 500
 
     def get_bot_signature(self, bot_id: list, source_id: str):
-        return self.celery.signature("bot_task", args=[bot_id], kwargs={"filter": {"SOURCE": source_id}})
+        return self.celery.signature("bot_task", kwargs={"bot_id": bot_id, "filter": {"SOURCE": source_id}})
 
     def post_collection_bots(self, source_id: str):
         from core.model.bot import Bot
