@@ -625,23 +625,6 @@ class NewsItemAggregate(BaseModel):
         return f"Added {len(news_items_data)} news items", 200
 
     @classmethod
-    def add_news_item(cls, news_item_data_json: dict) -> tuple[dict, int]:
-        try:
-            if news_item_data_json.keys() != NewsItemData.__table__.columns.keys():
-                return {"error": "Invalid news item data"}, 422
-            if NewsItemData.identical(news_item_data_json["hash"]):
-                return {"error": "News item already exists"}, 409
-            if news_item_data := NewsItemData.from_dict(news_item_data_json):
-                db.session.add(news_item_data)
-                cls.create_new(news_item_data)
-                db.session.commit()
-                return {"message": "news_item_data created", "id": news_item_data.id}, 201
-            return {"error": "Invalid news item data"}, 422
-        except Exception:
-            logger.exception(f"Add News Item Failed {news_item_data_json}")
-            return {"error": "add failed"}, 500
-
-    @classmethod
     def update(cls, id, data, user):
         aggregate = cls.get(id)
         if not aggregate:
